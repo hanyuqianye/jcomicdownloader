@@ -4,10 +4,10 @@
  */
 package jcomicdownloader;
 
+
 /**
- *
- * @author user
- */
+ * 判斷用旗標
+ * */
 public class Flag {
     public static boolean parseFlag = true;
     public static boolean allowDownloadFlag= false;
