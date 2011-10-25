@@ -9,29 +9,6 @@ import jcomicdownloader.tools.*;
 import jcomicdownloader.module.*;
 import jcomicdownloader.enums.*;
 
-/**
- * 除錯專用
- * */
-
-
-/**
- * 判斷用旗標
- * */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  *
