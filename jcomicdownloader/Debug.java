@@ -5,9 +5,8 @@
 package jcomicdownloader;
 
 /**
- *
- * @author user
- */
+ * 除錯專用
+ * */
 public class Debug {
     public static boolean debugMode = true;
     public static boolean commandDebugMode = true;
