@@ -1,0 +1,371 @@
+/*
+ ----------------------------------------------------------------------------------------------------
+ Program Name : JComicDownloader
+ Authors  : surveyorK
+ Last Modified : 2011/10/25
+ ----------------------------------------------------------------------------------------------------
+ ChangeLog:
+ 1.08: 增加對於8comic的支援，包含免費漫畫和圖庫
+----------------------------------------------------------------------------------------------------
+ */
+package jcomicdownloader.module;
+
+import jcomicdownloader.tools.*;
+import jcomicdownloader.enums.*;
+import jcomicdownloader.*;
+
+import java.io.*;
+import java.util.*;
+import java.text.*;
+
+public class ParseEC extends ParseOnlineComicSite {
+    protected int radixNumber; // use to figure out the name of pic
+    protected String volpic; // pic url: http://~/2011/111/dagui/06/
+    protected int tpf2; // pic url: http://pic"tpf2".89890.com/~
+    protected int tpf; // length of pic name: (tpf+1)*2
+    protected String jsName;
+    protected String indexName;
+    protected String indexEncodeName;
+    private String volumeNoString; // 每一集都有數字編號
+    private String itemid; // 每本漫畫的編號
+    
+    /**
+ *
+ * @author user
+ */
+    public ParseEC() {
+        siteID = Site.EIGHT_COMIC;
+        indexName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_encode_parse_", "html" );
+
+        jsName = "index_8comic.js";
+        radixNumber = 185271; // default value, not always be useful!!
+        volumeNoString = "";
+        itemid = "";
+    }
+
+    public ParseEC( String webSite, String titleName ) {
+        this();
+        this.webSite = webSite;
+        this.title = titleName;
+    }
+
+
+    @Override
+    public void setParameters() { // let all the non-set attributes get values
+        Common.debugPrintln( "開始解析各參數 :" );
+
+        Common.debugPrintln( "開始解析title和wholeTitle :" );
+        
+        Common.downloadFile( webSite, Common.tempDirectory, indexName, false, "" );
+        String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+        
+        // ex. http://www.8comic.com/love/drawing-8170.html?ch=3
+        volumeNoString = webSite.split( "/|=")[webSite.split( "/|=" ).length-1];
+        
+        if ( getWholeTitle() == null || getWholeTitle().equals(  "" ) )
+            setWholeTitle( getTitle() + volumeNoString );
+
+        Common.debugPrintln( "作品名稱(title) : " + getTitle() );
+        Common.debugPrintln( "章節名稱(wholeTitle) : " + getWholeTitle() ); 
+    }
+
+    @Override
+    public void parseComicURL() { // parse URL and save all URLs in comicURL
+        // 先取得前面的下載伺服器網址
+        String[] lines = Common.getFileStrings( Common.tempDirectory, indexName );
+        
+        int itemidIndex = 0;
+        int index = 0;
+        for ( int i = 0; i < lines.length; i ++ ) {
+            if ( lines[i].matches( "(?s).*var itemid=(?s).*" ) )
+                itemidIndex = i;
+            else if ( lines[i].matches( "(?s).*var codes=(?s).*" ) )
+                index = i;
+        }
+        itemid = lines[itemidIndex].split( ";|=" )[1];
+       
+        String[] parses = lines[index].split( "\"|\\|"); // 除了第一個和最後一個外都是解析碼
+        
+        int order = 0;
+        for ( int i = 0; i < parses.length; i ++ ) {
+            if ( parses[i].split( " " )[0].equals( volumeNoString ) ) {
+                order = i;
+                break;
+            }
+        }
+
+        String[] codes = parses[order].split( " " );
+        
+        // ex. http://img"+sid+".8comic.com/"+did+"/"+itemid+"/"+num+"/"+img+".jpg"
+        // 找出網址
+        String num = codes[0];
+        String sid = codes[1];
+        String did = codes[2];
+        String page = codes[3];
+        String code = codes[4];     
+        
+        Common.debugPrint( "開始解析這一集有幾頁 :" );
+        totalPage = Integer.valueOf( page );
+        comicURL = new String[totalPage]; 
+        Common.debugPrint( "共" + totalPage + "頁" );
+        
+        // 完全引用網頁上的javascript碼
+        String img = "";
+        for ( int p = 1; p <= totalPage; p ++ ) {
+            if ( p < 10 ) 
+                img = "00" + p;
+            else if ( p < 100 ) 
+                img = "0" + p;
+            else img = "" + p;
+            
+            int m = ( ( p - 1 ) / 10 ) % 10 + ( ( ( p - 1 ) % 10 ) * 3 );
+            img += "_" + code.substring( m, m + 3 );
+            
+            comicURL[p-1] = "http://img" + sid + ".8comic.com/" + did + "/" + 
+                         itemid + "/" + num + "/" + img + ".jpg";
+            //Common.debugPrintln( p + " " + comicURL[p-1] );
+        }
+        //System.exit(0);
+    }
+
+
+    public void showParameters() { // for debug
+        Common.debugPrintln( "----------" );
+        Common.debugPrintln( "volpic = " + volpic );
+        Common.debugPrintln( "totalPage = " + totalPage );
+        Common.debugPrintln( "tpf  = " + tpf );
+        Common.debugPrintln( "tpf2  = " + tpf2 );
+        Common.debugPrintln( "webSite = " + webSite );
+        Common.debugPrintln( "----------" );
+    }
+
+    @Override // 因為原檔就是utf8了，所以無須轉碼
+    public String getAllPageString( String urlString ) {
+        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_", "html" );
+        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_encode_", "html" );
+        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
+        Common.newEncodeBIG5File( Common.tempDirectory, indexName, indexEncodeName );
+        
+        return Common.getFileString( Common.tempDirectory, indexEncodeName ).replace( "&#22338;", "阪" );
+    }
+
+    @Override
+    public boolean isSingleVolumePage( String urlString ) {
+        if ( urlString.matches( "(?s).*love(?s).*drawing(?s).*")  ) // ex. http://www.8comic.com/love/drawing-2245.html?ch=51
+            return true;
+        else
+            return false;
+    }
+
+    @Override
+    public String getTitleOnSingleVolumePage( String urlString ) {
+        // http://www.8comic.com/love/drawing-8170.html?ch=2轉為http://www.8comic.com/html/8170.html
+        
+        String[] splitURLs = urlString.split( "://|/|-|\\?" );
+        
+        String baseURL = "http://www.8comic.com/html/";
+        String mainPageUrlString = baseURL + splitURLs[4];
+
+        return getTitleOnMainPage( mainPageUrlString, getAllPageString( mainPageUrlString ) );
+    }
+
+    @Override
+    public String getTitleOnMainPage( String urlString, String allPageString ) {
+        int beginIndex = allPageString.indexOf( "<title>" ) + 7;
+        int endIndex = allPageString.indexOf( ",", beginIndex ) - 2;
+        
+        String titleString = allPageString.substring( beginIndex, endIndex );
+
+        return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( titleString ) );
+    }
+
+    @Override
+    public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString ) {
+        // combine volumeList and urlList into combinationList, return it.
+
+        List<List<String>> combinationList = new ArrayList<List<String>>();
+        List<String> urlList = new ArrayList<String>();
+        List<String> volumeList = new ArrayList<String>();
+        
+        int beginIndex = allPageString.indexOf( "cview(" ) - 20;
+        String tempString = allPageString.substring( beginIndex, allPageString.length() - 1 ); 
+        String[] tempStrings = tempString.split( "\\d*>\\d*|\\d*<\\d*" );
+        
+        totalVolume = allPageString.split( "onclick=\"cview" ).length - 1;
+        Common.debugPrintln( "共有" + totalVolume + "集" );
+
+        int nowVolume = 0;
+        for ( int i = 0; i < tempStrings.length; i ++ ) {
+            String volumeTitle = "";
+
+            if ( tempStrings[i].matches( "(?s).*onclick=(?s).*" ) ) {
+                
+                // ex. cview('2245-49.html'
+                int b = tempStrings[i].indexOf( "cview(" ) + 7;
+                int e = tempStrings[i].indexOf( "'", b );
+                
+                // ex. 2245-49.html
+                String idAndVolume = tempStrings[i].substring( b, e );
+                
+                // 取得單集位址
+                String idString = idAndVolume.split( "-|\\." )[0];
+                String volumeNoString = idAndVolume.split( "-|\\." )[1];
+                urlList.add( getSinglePageURL( idString, volumeNoString ) );
+                
+                // 取得單集名稱
+                volumeTitle = Common.getStringRemovedIllegalChar( 
+                    Common.getTraditionalChinese( tempStrings[i+1].trim() ) );
+                volumeList.add( volumeTitle );
+                
+                if ( ++ nowVolume >= totalVolume )
+                    break;
+            }
+        }
+
+        combinationList.add( volumeList );
+        combinationList.add( urlList );
+
+        return combinationList;
+    }
+    
+    // 取得單集頁面的網址
+    public String getSinglePageURL( String idString, String volumeNoString ) {
+        
+        String baseMainURL = "http://www.8comic.com/love/drawing-";
+        String volumeString = "?ch=" + volumeNoString;
+        
+        return baseMainURL + idString + ".html" + volumeString;
+    }
+
+    @Override
+    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
+        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
+        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+    }
+    
+    @Override
+    public String[] getTempFileNames() {
+        return new String[] { indexName, indexEncodeName, jsName };
+    }
+
+    @Override
+    public void printLogo() {
+        System.out.println( " _____________________________" );
+        System.out.println( "|                          |" );
+        System.out.println( "| Run the 8comic module: |" );
+        System.out.println( "|______________________________|\n" );
+    }
+}
+
+
+class ParseECphoto extends ParseEC {
+    public ParseECphoto() {
+        siteID = Site.EIGHT_COMIC_PHOTO;
+        indexName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_photo_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_photo_encode_parse_", "html" );
+
+        jsName = "index_8comic_photo.js";
+    }
+    
+    @Override
+    public void setParameters() { // let all the non-set attributes get values
+        Common.debugPrintln( "開始解析各參數 :" );
+
+        Common.debugPrintln( "開始解析title和wholeTitle :" );
+
+        String allPageString = getAllPageString( webSite );
+        
+        if ( getWholeTitle() == null || getWholeTitle().equals(  "" ) ) {    
+            int beginIndex = allPageString.indexOf( "<title>" ) + 7;
+            int endIndex = allPageString.indexOf( "</title>", beginIndex );
+            String titleString = allPageString.substring( beginIndex, endIndex );
+
+            setWholeTitle( Common.getStringRemovedIllegalChar( titleString ) );
+        }
+
+        Common.debugPrintln( "作品名稱(title) : " + getTitle() );
+        Common.debugPrintln( "章節名稱(wholeTitle) : " + getWholeTitle() ); 
+    }
+
+    @Override
+    public void parseComicURL() { // parse URL and save all URLs in comicURL
+        // 先取得前面的下載伺服器網址
+        String allPageString = getAllPageString( webSite );
+        
+        Common.debugPrint( "開始解析這一集有幾頁 :" );
+        totalPage = allPageString.split( "\\.jpe'" ).length - 1;
+        comicURL = new String[totalPage]; 
+        Common.debugPrint( "共" + totalPage + "頁" );
+
+        String[] tokens = allPageString.split( "'|\\." );
+
+        int page = 0;
+        for ( int i = 0; i < tokens.length; i ++ ) {
+            if ( tokens[i].equals( "jpe" ) ) {
+                comicURL[page++] = "http://www.8comic.com" + tokens[i-1] + ".jpg";
+                //Common.debugPrintln( (page-1) + " " + comicURL[page-1] );
+            }
+        }
+
+        //System.exit(0);
+    }
+
+    @Override
+    public boolean isSingleVolumePage( String urlString ) {
+        if ( urlString.matches( "(?s).*\\d+-\\d+.html(?s).*")  ) // ex. http://www.8comic.com/photo/1-1.html
+            return false;
+        else
+            return true;
+    }
+
+    @Override
+    public String getTitleOnSingleVolumePage( String urlString ) {
+        return "8comic圖集";
+    }
+
+    @Override
+    public String getTitleOnMainPage( String urlString, String allPageString ) {
+        return "8comic圖集";
+    }
+
+    @Override
+    public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString ) {
+        // combine volumeList and urlList into combinationList, return it.
+
+        List<List<String>> combinationList = new ArrayList<List<String>>();
+        List<String> urlList = new ArrayList<String>();
+        List<String> volumeList = new ArrayList<String>();
+        
+        int beginIndex = allPageString.indexOf( "id=\"newphoto_dl" );
+        int endIndex = allPageString.indexOf( "id=\"newphoto_pager", beginIndex );
+        String tempString = allPageString.substring( beginIndex, endIndex ); 
+        String[] tempStrings = tempString.split( "\\d*>\\d*|\\d*<\\d*|\"" );
+        
+        totalVolume = tempString.split( "href=" ).length - 1;
+        Common.debugPrintln( "共有" + totalVolume + "個圖集" );
+
+        int nowVolume = 0;
+        for ( int i = 0; i < tempStrings.length; i ++ ) {
+            if ( tempStrings[i].matches( "(?s).*href=(?s).*" ) ) {
+                urlList.add( "http://www.8comic.com" + tempStrings[i+1] );
+            }
+            else if ( tempStrings[i].matches( "(?s).*br.*" ) ) {
+                volumeList.add( tempStrings[i+1].trim() );
+            }
+        }
+
+        combinationList.add( volumeList );
+        combinationList.add( urlList );
+
+        return combinationList;
+    }
+    
+    @Override
+    public void printLogo() {
+        System.out.println( " ____________________________________" );
+        System.out.println( "|                                 |" );
+        System.out.println( "| Run the 8comic photo module: |" );
+        System.out.println( "|_____________________________________|\n" );
+    }    
+}
