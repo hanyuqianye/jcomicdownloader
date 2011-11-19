@@ -5,6 +5,7 @@
  Last Modified : 2011/10/25
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 1.17: 修復集數名稱後面數字會消失的bug。
  1.08: 增加對於8comic的支援，包含免費漫畫和圖庫
 ----------------------------------------------------------------------------------------------------
  */
@@ -39,7 +40,7 @@ public class ParseEC extends ParseOnlineComicSite {
         indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_encode_parse_", "html" );
 
         jsName = "index_8comic.js";
-        radixNumber = 185271; // default value, not always be useful!!
+        radixNumber = 18527345; // default value, not always be useful!!
         volumeNoString = "";
         itemid = "";
     }
@@ -190,7 +191,7 @@ public class ParseEC extends ParseOnlineComicSite {
         
         int beginIndex = allPageString.indexOf( "cview(" ) - 20;
         String tempString = allPageString.substring( beginIndex, allPageString.length() - 1 ); 
-        String[] tempStrings = tempString.split( "\\d*>\\d*|\\d*<\\d*" );
+        String[] tempStrings = tempString.split( "\\s*>\\s*|\\s*<\\s*" );
         
         totalVolume = allPageString.split( "onclick=\"cview" ).length - 1;
         Common.debugPrintln( "共有" + totalVolume + "集" );
@@ -212,7 +213,6 @@ public class ParseEC extends ParseOnlineComicSite {
                 String idString = idAndVolume.split( "-|\\." )[0];
                 String volumeNoString = idAndVolume.split( "-|\\." )[1];
                 urlList.add( getSinglePageURL( idString, volumeNoString ) );
-                
                 // 取得單集名稱
                 volumeTitle = Common.getStringRemovedIllegalChar( 
                     Common.getTraditionalChinese( tempStrings[i+1].trim() ) );

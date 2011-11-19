@@ -3,10 +3,12 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v1.16
+Version  : v1.17
 Last Modified : 2011/11/9
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 1.17: 1. 按下載按鈕後會回到下載任務頁面。
+ *      2. 修復集數名稱後面數字會消失的bug。
  * 1.16: 1. 新增新增對comic.92wy.com的支援。
  *      2. 新增對EX的支援。
  *      3. 增加將下載任務置頂與置底的右鍵選單。
@@ -140,7 +142,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v1.16" );
+        super( "JComicDownloader  v1.17" );
 
         minimizeEvent();
         initTrayIcon();
@@ -1473,6 +1475,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 logFrame.redirectSystemStreams(); // start to log message
                 Run.isAlive = true;
                 stateBar.setText( "開始下載中..." );
+                tabbedPane.setSelectedIndex( TabbedPaneEnum.MISSION ); // 按下載就會回到下載任務頁面
                 Flag.parseUrlFlag = true; // 開始分析
                 parseURL( args, true, false, 0 );
                 args = null;
