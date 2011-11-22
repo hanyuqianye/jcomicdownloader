@@ -154,7 +154,8 @@ public class RunModule {
             siteID == Site.DMEDEN ||
             siteID == Site.MANGAFOX ||
             siteID == Site.XINDM ||
-            siteID == Site.WY
+            siteID == Site.WY ||
+            siteID == Site.GOOGLE_PIC
         )
             return true;
         else

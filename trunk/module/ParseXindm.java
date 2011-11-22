@@ -95,6 +95,7 @@ public class ParseXindm extends ParseOnlineComicSite {
 
         int cookieCount = 0; // 取得前兩組cookie就可以了
         cookieString = cookies[0] + "; " + cookies[1];
+        Common.debugPrintln( "取得cookies：" + cookieString );
 
         for ( int p = 1 ; p <= totalPage ; p++ ) {
             /* // 原本想用這種方法比較有彈性，但問題是最後一頁都會錯誤（500），只好放棄......

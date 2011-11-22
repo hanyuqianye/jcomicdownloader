@@ -36,4 +36,7 @@ public class Site {
     public final static int XINDM = 18; 
     public final static int EX = 19; 
     public final static int WY = 20; 
+    public final static int GOOGLE_PIC = 21;
+    public final static int BING_PIC = 22;
+    public final static int BAIDU_PIC = 23;
 }

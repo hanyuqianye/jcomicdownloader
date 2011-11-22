@@ -45,6 +45,7 @@ public class SetUp { // read setup file, and then setup
     private static int defaultFontSize; // 使用者字型大小（若沒設就直接用系統預設）
     private static String ehMemberID; // EH會員ID
     private static String ehMemberPasswordHash; // EH會員密碼Hash
+    private static int timeoutTimer; // 逾時計時器的倒數時間
     
     public static boolean assignDownloadPath;
     public static boolean autoCompress;
@@ -99,6 +100,8 @@ public class SetUp { // read setup file, and then setup
         
         ehMemberID = "0";
         ehMemberPasswordHash = "NULL";
+        
+        timeoutTimer = 100;
 
         Common.closeHttpProxy(); // 預設為關閉代理伺服器。
     }
@@ -151,6 +154,8 @@ public class SetUp { // read setup file, and then setup
                 + "\nehMemberID = " + ehMemberID
                 + "\n# EH會員密碼Hash" 
                 + "\nehMemberPasswordHash = " + ehMemberPasswordHash
+                + "\n# 快速下載模式下的逾時計時器倒數秒數" 
+                + "\ntimeoutTimer = " + timeoutTimer
                 + "\n";
 
         Common.outputFile( setString, "", setFileName );
@@ -180,6 +185,7 @@ public class SetUp { // read setup file, and then setup
         Common.debugPrintln( "defaultFontSize = " + defaultFontSize );
         Common.debugPrintln( "ehMemberID = " + ehMemberID );
         Common.debugPrintln( "ehMemberPasswordHash = " + ehMemberPasswordHash );
+        Common.debugPrintln( "timeoutTimer = " + timeoutTimer );
         Common.debugPrintln( "-----------------------" );
     }
 
@@ -203,6 +209,7 @@ public class SetUp { // read setup file, and then setup
         boolean existEhMemberID = false;
         boolean existEhMemberPasswordHash = false;
         boolean existSettingFileDirectory = false;
+        boolean existTimeoutTimer = false;
 
         for ( int i = 0 ; i < lines.length ; i++ ) {
             try {
@@ -335,6 +342,9 @@ public class SetUp { // read setup file, and then setup
                     } else if ( split[0].equals( "ehMemberPasswordHash" ) ) {
                         existEhMemberPasswordHash = true;
                         setEhMemberPasswordHash( split[1] );
+                    } else if ( split[0].equals( "timeoutTimer" ) ) {
+                        existTimeoutTimer = true;
+                        setTimeoutTimer( Integer.parseInt( split[1] ) );
                     }
                 }
             } catch ( Exception ex ) {
@@ -349,7 +359,7 @@ public class SetUp { // read setup file, and then setup
             existProxyServer && existProxyPort && 
             existDefaultFontName && existDefaultFontSize &&
             existEhMemberID && existEhMemberPasswordHash &&
-            existSettingFileDirectory ) {
+            existSettingFileDirectory && existTimeoutTimer ) {
             Common.debugPrintln( "設定檔全部讀取完畢" );
         } else {
             Common.debugPrintln( "設定檔缺乏新版參數! 套用預設值!" );
@@ -549,6 +559,13 @@ public class SetUp { // read setup file, and then setup
     }
     public static void setEhMemberPasswordHash( String hash ) {
         ehMemberPasswordHash = hash;
+    } 
+    
+    public static int getTimeoutTimer() {
+        return timeoutTimer;
+    }
+    public static void setTimeoutTimer( int timer ) {
+        timeoutTimer = timer;
     } 
     
     

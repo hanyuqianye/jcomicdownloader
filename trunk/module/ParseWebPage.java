@@ -83,6 +83,8 @@ public class ParseWebPage {
             siteID = Site.XINDM;
         else if ( webSite.matches( "(?s).*comic.92wy.com(?s).*" ) ) 
             siteID = Site.WY;
+        else if ( webSite.matches( "(?s).*google.com(?s).*" ) ) 
+            siteID = Site.GOOGLE_PIC;
         
         else
             siteID = Site.UNKNOWN;

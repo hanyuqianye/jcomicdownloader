@@ -14,4 +14,5 @@ public class Flag {
     public static boolean downloadingFlag= false;
     public static boolean parseUrlFlag = false; // 分析結束
     public static boolean downloadErrorFlag = false; // 是否發生下載錯誤
+    public static boolean timeoutFlag = false; // 連線時間是否過長而導致timeout
 }

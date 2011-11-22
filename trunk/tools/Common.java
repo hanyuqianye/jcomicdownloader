@@ -145,7 +145,7 @@ public class Common {
 
                     CommonGUI.stateBarDetailMessage += " : " + fileName;
 
-                    downloadFile( webSite[i - 1], outputDirectory, fileName, false, "" );
+                    downloadFile( webSite[i - 1], outputDirectory, fileName, false, "", false );
 
                 }
                 System.out.print( i + " " );
@@ -161,7 +161,7 @@ public class Common {
             ex.printStackTrace();
         }
 
-        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString );
+        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, false );
 
     }
 
@@ -225,9 +225,21 @@ public class Common {
 
         return cookieStrings;
     }
-
+    
+    // 普通下載模式，連線失敗會嘗試再次連線
     public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
             boolean needCookie, String cookieString ) {
+        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, false );
+    }
+    
+    // 加速下載模式，連線失敗就跳過
+    public static void downloadFileFast( String webSite, String outputDirectory, String outputFileName,
+            boolean needCookie, String cookieString ) {
+        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, true );
+    }
+
+    public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
+            boolean needCookie, String cookieString, boolean fastMode ) {
         // downlaod file by URL
 
         if ( CommonGUI.stateBarDetailMessage == null ) {
@@ -253,6 +265,9 @@ public class Common {
                 }
 
                 int responseCode = 0;
+                
+                if ( fastMode && connection.getResponseCode() != 200 )
+                    return;
 
                 tryConnect( connection );
 
@@ -276,36 +291,45 @@ public class Common {
 
                 Common.checkDirectory( outputDirectory ); // 檢查有無目標資料夾，若無則新建一個　
 
-
-
                 //OutputStream os = response.getOutputStream();
                 OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
                 InputStream is = connection.getInputStream();
 
-
                 int fileGotSize = 0;
                 Common.debugPrint( "(" + fileSize + " k) " );
+                String fileSizeString = fileSize > 0 ? "" + fileSize : " ? "; 
 
+                // 設置計時器，預防連線時間過長
+                Timer timer = new Timer();
+                // 預設(getTimeoutTimer()*100)秒會timeout
+                timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 100 ); 
+                
                 byte[] r = new byte[1024];
                 int len = 0;
-                while ( (len = is.read( r )) > 0 && Run.isAlive ) {
+                
+                // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
+                while ( ( fileSize > 1024 || !Flag.timeoutFlag || !fastMode ) && 
+                        (len = is.read( r )) > 0 && Run.isAlive ) {
+
                     os.write( r, 0, len );
                     fileGotSize += (len / 1000);
 
                     if ( Common.withGUI() ) {
                         int percent = 100;
+                        String downloadText = "";
                         if ( fileSize > 0 ) {
                             percent = (fileGotSize * 100) / fileSize;
+                            downloadText = fileSizeString + "Kb ( " + percent + "% ) ";
                         }
-                        String downloadText = fileSize + "Kb ( " + percent + "% ) ";
+                        else 
+                            downloadText = fileSizeString + " Kb ( " + fileGotSize + "Kb ) ";
 
                         ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
                                 + CommonGUI.stateBarDetailMessage
                                 + " : " + downloadText );
-
                     }
                 }
-
+                
                 is.close();
                 os.flush();
                 os.close();
@@ -313,11 +337,20 @@ public class Common {
                 if ( Common.withGUI() ) {
                     ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
                             + CommonGUI.stateBarDetailMessage
-                            + " : " + fileSize + "Kb ( 100% ) " );
+                            + " : " + fileSizeString + "Kb ( 100% ) " );
                 }
 
-
                 connection.disconnect();
+                
+                if ( fileSize < 1024 && Flag.timeoutFlag && fastMode ) {
+                    new File( outputDirectory + outputFileName ).delete();
+                    Common.debugPrintln( "刪除不完整檔案：" + outputFileName );
+                    
+                    ComicDownGUI.stateBar.setText( "下載逾時，跳過" + outputFileName );
+                }
+                    
+                timer.cancel(); // 連線結束同時也關掉計時器
+                Flag.timeoutFlag = false; // 歸回初始值
 
                 Common.debugPrintln( webSite + " downloads successful!" ); // for debug
 
@@ -1120,5 +1153,12 @@ public class Common {
             Common.processPrintln( "因讀入錯誤，將全部任務清空" );
             ComicDownGUI.stateBar.setText( "下載任務檔格式錯誤，無法讀取!!" );
         }
+    }
+}
+
+class TimeoutTask extends TimerTask {
+    public void run() {
+        Common.debugPrintln( "超過下載時限，終止此次連線!" );
+        Flag.timeoutFlag = true;
     }
 }
