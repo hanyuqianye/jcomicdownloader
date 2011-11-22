@@ -3,12 +3,25 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
+<<<<<<< .mine
+Version  : v1.19
+Last Modified : 2011/11/22
+=======
 Version  : v1.17
 Last Modified : 2011/11/9
+>>>>>>> .r66
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+<<<<<<< .mine
+ * 1.19: 1. 修正後已支援『顯示更多結果』後面的圖。
+ *      2. 修改下載機制，遇到非正常連線直接放棄，加快速度。
+ * 1.18: 1. 新增新增對google圖片搜尋的支援(僅支援前237張)。
  * 1.17: 1. 按下載按鈕後會回到下載任務頁面。
  *      2. 修復集數名稱後面數字會消失的bug。
+=======
+ * 1.17: 1. 按下載按鈕後會回到下載任務頁面。
+ *      2. 修復集數名稱後面數字會消失的bug。
+>>>>>>> .r66
  * 1.16: 1. 新增新增對comic.92wy.com的支援。
  *      2. 新增對EX的支援。
  *      3. 增加將下載任務置頂與置底的右鍵選單。
@@ -142,7 +155,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v1.17" );
+        super( "JComicDownloader  v1.19" );
 
         minimizeEvent();
         initTrayIcon();
@@ -235,7 +248,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         button[ButtonEnum.INFORMATION] = getButton( "資訊", "information.png" );
         button[ButtonEnum.EXIT] = getButton( "離開", "exit.png" );
 
-        button[ButtonEnum.ADD].setToolTipText( "解析網址列的網址，解析後可選擇欲下載集?並加入任務" );
+        button[ButtonEnum.ADD].setToolTipText( "解析網址列的網址，解析後可選擇欲下載集數並加入任務" );
         button[ButtonEnum.DOWNLOAD].setToolTipText( "若網址列有網址，則解析後加入任務並開始下載；若網址列沒有網址，則開始下載目前的任務清單" );
         button[ButtonEnum.STOP].setToolTipText( "停止下載，中斷進行中的任務" );
         button[ButtonEnum.CLEAR].setToolTipText( "清除目前的任務清單（若一次無法清空且按多次）" );
@@ -1588,10 +1601,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             public void run() {
                 //Flag.allowDownloadFlag = Run.isAlive = true;
                 
-                String picURL = "http://comicpic.92wy.com/pics/hti8qp0hbrtre6hjadmdbd7dm6vgimsgdvl2tef3qvqji2am6ookk0dpib4gqfochv3r4ks0brrss0l441nuu7k3dnr2qacvcl7hf88=";
+                String picURL = "http://www.google.com.tw/search?um=1&hl=zh-TW&gbv=2&biw=1152&bih=726&tbs=isz%3Am&tbm=isch&sa=1&q=picture&oq=picture&aq=f&aqi=&aql=&gs_sm=s&gs_upl=0l0l0l3684l0l0l0l0l0l0l0l0ll0l0";
                 Common.debugPrintln( "開始測試下載:" );
                 Common.downloadFile( picURL,
-                "", "test.jpg", false, "" );
+                "", "test1.html", false, "" );
   
             }
         } );
