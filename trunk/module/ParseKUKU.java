@@ -111,7 +111,7 @@ public class ParseKUKU extends ParseOnlineComicSite {
                         // replace %20 from white space in URL
                         String frontURL = temp[3].replaceAll( "\\s", "%20" );
                         comicURL[i] = getFixedChineseURL( baseURL + frontURL );
-                        Common.debugPrintln( i + " " + comicURL[i] );
+                        Common.debugPrintln( i + " " + comicURL[i] ); // debug
 
                         // 每解析一個網址就下載一張圖
                         singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage, i + 1, 0 );
@@ -121,6 +121,7 @@ public class ParseKUKU extends ParseOnlineComicSite {
                 }
             }
         }
+        //System.exit( 0 ); // debug
     }
 
     public void showParameters() { // for debug

@@ -3,16 +3,21 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-<<<<<<< .mine
-Version  : v1.19
-Last Modified : 2011/11/22
-=======
-Version  : v1.17
-Last Modified : 2011/11/9
->>>>>>> .r66
+Version  : v2.0
+Last Modified : 2011/11/24
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
-<<<<<<< .mine
+ * 2.01: 1. 在訊息視窗中加入支援列表的資訊。
+ *      2. 在選項視窗中加入可以預設全選集數的選項。
+ *      3. 修改下載機制，不下載青蛙圖（檔案大小10771 bytes）。
+ *      4. 修復NANA無法解析粗體字集數名稱的bug。
+ *      5. 修正Google圖片搜尋中部份非英文關鍵字沒有正確解析為資料夾名稱的bug。
+ * 2.0 : 1. 新增新增對www.nanadm.com的支援。
+ *      2. 修復Google圖片搜尋批次每張圖下載十秒後就逾時的bug。
+ *      3. 修復書籤和紀錄表格改變外觀順序後無法對應的bug。
+ *      4. 修復下載任務置頂或置底卻沒有改變下載順序的bug。
+ *      5. 修復下載表格改變外觀順序後發生錯誤的bug。（作法就是禁止改變下載表格的外觀順序......）
+
  * 1.19: 1. 修正後已支援『顯示更多結果』後面的圖。
  *      2. 修改下載機制，遇到非正常連線直接放棄，加快速度。
  * 1.18: 1. 新增新增對google圖片搜尋的支援(僅支援前237張)。
@@ -155,7 +160,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v1.19" );
+        super( "JComicDownloader  v2.01" );
 
         minimizeEvent();
         initTrayIcon();
@@ -293,8 +298,6 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         downTable = getDownloadTable();//new JTable( new DataTable());
         //downTable.setPreferredScrollableViewportSize( new Dimension( 450, 120 ) );
         downTable.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
-        downTable.setFillsViewportHeight( true );
-        downTable.setAutoCreateRowSorter( true );
 
         JScrollPane downScrollPane = new JScrollPane( downTable );
         //JPanel downPanel = new CommonGUI().getCenterPanel( downScrollPane );
@@ -511,7 +514,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         table.setPreferredScrollableViewportSize( new Dimension( 400, 170 ) );
         table.setFillsViewportHeight( true );
-        table.setAutoCreateRowSorter( true ); // allow resort
+        //table.setAutoCreateRowSorter( true ); // allow resort
         table.getSelectionModel().addListSelectionListener( new RowListener() );
         table.addMouseListener( this );
 
@@ -906,8 +909,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         String[] tempArgs = new String[1];
 
         if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.BOOKMARK ) {
+            row = bookmarkTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
             tempArgs[0] = bookmarkTableModel.getValueAt( row, BookmarkTableEnum.URL ).toString();
         } else if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.RECORD ) {
+            row = recordTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
             tempArgs[0] = recordTableModel.getValueAt( row, RecordTableEnum.URL ).toString();
         } else {
             Common.errorReport( "不可能從書籤和記錄以外的地方加入任務！" );
@@ -918,6 +923,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     private void rechoiceVolume( int row ) { // 重新選擇集數
+        row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         System.out.println( downTableModel.getRealValueAt( row, DownTableEnum.CHECKS ).toString() );
         ComicDownGUI.nowSelectedCheckStrings = Common.getSeparateStrings(
                 String.valueOf( downTableModel.getRealValueAt( row, DownTableEnum.CHECKS ) ) );
@@ -933,29 +939,44 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     private void moveMissionToRoof( int row ) { // 將第row列任務置頂
+        row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         String urlString = downTableUrlStrings[row]; // 先將此列任務另存
-        for ( int i = row - 1; i >= 0; i -- )
+
+        downTable.setValueAt( 1, row, DownTableEnum.ORDER );
+        for ( int i = row - 1; i >= 0; i -- ) {
             downTableUrlStrings[i+1] = downTableUrlStrings[i]; // row列之前的往後遞移一位
+            i = downTable.convertRowIndexToModel( i ); // 顯示的列 -> 實際的列
+            //int orderValue = Integer.parseInt( downTable.getValueAt( i, DownTableEnum.ORDER ).toString() );
+            downTable.setValueAt( i + 2, i, DownTableEnum.ORDER );
+        }
         downTableUrlStrings[0] = urlString; // 再將之前另存任務存入第一個位置
         
         int missionAmount = downTableModel.getRowCount();
         downTableModel.moveRow( row, row, 0 );
+        
     }
 
     private void moveMissionToFloor( int row ) { // 將第row列任務置底
+        row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         int missionAmount = downTableModel.getRowCount();
         String urlString = downTableUrlStrings[row]; // 先將此列任務另存
-        for ( int i = row + 1; i < missionAmount; i ++ )
+        
+        downTable.setValueAt( missionAmount, row, DownTableEnum.ORDER );
+        for ( int i = row + 1; i < missionAmount; i ++ ) {
+            i = downTable.convertRowIndexToModel( i ); // 顯示的列 -> 實際的列
             downTableUrlStrings[i-1] = downTableUrlStrings[i]; // row列之後的往前遞移一位
+            downTable.setValueAt( i, i, DownTableEnum.ORDER );
+        }
         downTableUrlStrings[missionAmount - 1] = urlString; // 再將之前另存任務存入第一個位置
 
         downTableModel.moveRow( row, row, missionAmount - 1 );
     }
 
     private void deleteMission( int row ) { // 刪除第row列任務
+        row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         String title = String.valueOf( downTableModel.getRealValueAt(
                 row, DownTableEnum.TITLE ) );
-
+        
         String message = "是否要在任務清單中刪除" + title + " ?";
 
         int choice = JOptionPane.showConfirmDialog( this, message, "提醒訊息", JOptionPane.YES_NO_OPTION );
@@ -1008,6 +1029,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     private void deleteBookmark( int row ) { // 刪除第row列書籤
+        row = bookmarkTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         String title = String.valueOf( bookmarkTableModel.getValueAt(
                 row, BookmarkTableEnum.TITLE ) );
         String message = "是否要在書籤中刪除" + title + " ?";
@@ -1020,6 +1042,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     private void deleteRecord( int row ) { // 刪除第row列記錄
+        row = recordTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         String title = String.valueOf( recordTableModel.getValueAt(
                 row, RecordTableEnum.TITLE ) );
         String message = "是否要在記錄中刪除" + title + " ?";
@@ -1032,6 +1055,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     private void addBookmark( int row ) {  // 將第row列任務加入到書籤中
+        row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         String title = "";
         String url = "";
         if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION ) { // 從任務清單加入
@@ -1055,12 +1079,15 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             String url = "";
 
             if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION ) { // 從任務清單開啟
+                row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
                 title = String.valueOf( downTableModel.getRealValueAt( row, DownTableEnum.TITLE ) );
                 url = downTableModel.getRealValueAt( row, DownTableEnum.URL ).toString();
             } else if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.BOOKMARK ) { // 從書籤清單開啟
+                row = bookmarkTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
                 title = String.valueOf( bookmarkTableModel.getValueAt( row, BookmarkTableEnum.TITLE ) );
                 url = String.valueOf( bookmarkTableModel.getValueAt( row, BookmarkTableEnum.URL ) );
             } else if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.RECORD ) { // 從記錄清單開啟
+                row = recordTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
                 title = String.valueOf( recordTableModel.getValueAt( row, RecordTableEnum.TITLE ) );
                 url = String.valueOf( recordTableModel.getValueAt( row, RecordTableEnum.URL ) );
             }
@@ -1235,9 +1262,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     // 跳出選擇集數的視窗
-    public void runChoiceFrame( boolean modifySelected, int modifyRow, String title ) {
+    public void runChoiceFrame( boolean modifySelected, int modifyRow, String title, String urlString ) {
         //SwingUtilities.invokeLater( new Runnable(){ public void run() {
-        String urlString = urlField.getText();
+        //String urlString = urlField.getText();
 
         ChoiceFrame choiceFrame;
         if ( modifySelected ) {
@@ -1357,7 +1384,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     if ( Common.urlIsUnknown ) {
                         stateBar.setText( "  無法解析此網址 !!" );
                     } else if ( Common.isMainPage ) { // args is main page
-                        runChoiceFrame( modifySelected, modifyRow, title );
+                        runChoiceFrame( modifySelected, modifyRow, title, tempArgs[0] );
 
                         if ( allowDownload ) {
                             Flag.parseUrlFlag = false; // 分析結束
@@ -1476,7 +1503,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         if ( event.getSource() == button[ButtonEnum.ADD] ) { // button of add
             logFrame.redirectSystemStreams(); // start to log message
             testDownload(); // 測試此網站的下載是否正常
-
+            
+            String urlString = urlField.getText();
             parseURL( args, false, false, 0 );
             args = null;
         }

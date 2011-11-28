@@ -161,14 +161,15 @@ public class ParseEH extends ParseOnlineComicSite {
 
                         comicURL[i] = lines[j].replaceAll( "amp;", "" );
                         Common.debugPrintln( comicURL[i] );
-
+                        
                         // 每解析一個網址就下載一張圖（隔兩秒連線一次）
                         singlePageDownload( getTitle(), null, comicURL[i], totalPage, i + 1, 2000 );
 
                         break;
                     }
                 }
-
+                //System.exit( 0 );
+                
             } else {
                 Common.debugPrint( i + " " );
             }

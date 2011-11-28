@@ -82,7 +82,9 @@ public class CommonGUI {
             InputStream is = getClass().getResourceAsStream( resourceFolder + picName );
             Image img = ImageIO.read( is ) ;
             icon = new ImageIcon( img );
-        } catch ( IOException ex ) {}
+        } catch ( Exception ex ) {
+            Common.errorReport( "找不到此資源：" + resourceFolder + picName );
+        }
 
         return icon;
     }

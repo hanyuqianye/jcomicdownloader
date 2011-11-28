@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/1
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.01: 1. 增加預設勾選全部集數的選項。 
 1.16: 勾選自動刪除就要連帶勾選自動壓縮。
 1.14: 增加可選擇字型和字體大小的選項
 1.09: 加入是否保留記錄的選項
@@ -46,6 +47,7 @@ public class OptionFrame extends JFrame {
     private JCheckBox keepDoneCheckBox;  // 是否保持已完成任務到下次開啟
     private JCheckBox keepUndoneCheckBox;  // 是否保持未完成任務到下次開啟
     private JCheckBox trayMessageCheckBox;  // 縮小到系統框後是否顯示下載完成訊息
+    private JCheckBox choiceAllVolumeCheckBox;  // 是否勾選全部集數
     private JTextField proxyServerTextField; // 輸入代理伺服器位址 ex. proxy.hinet.net
     private JTextField proxyPortTextField; // 輸入代理伺服器連接阜 ex. 80
     private JButton confirmButton;  // about confirm
@@ -71,7 +73,7 @@ public class OptionFrame extends JFrame {
         Container contentPane = getContentPane();
         contentPane.setLayout( new BorderLayout() );
 
-        setSize( 390, 710 );
+        setSize( 390, 750 );
         setResizable( false );
         setLocationRelativeTo( this );  // set the frame in middle position of screen
         setIconImage( new CommonGUI().getImage( "main_icon.png" ) );
@@ -156,11 +158,12 @@ public class OptionFrame extends JFrame {
         keepDoneCheckBox.setToolTipText( "這次已經下載完畢的任務，下次開啟時仍會出現在任務清單當中" );
 
         JPanel checkPanel = new JPanel();
-        checkPanel.setLayout( new GridLayout( 4, 1 ) );//FlowLayout( FlowLayout.CENTER, 14, 30 ) );
+        checkPanel.setLayout( new GridLayout( 5, 1 ) );//FlowLayout( FlowLayout.CENTER, 14, 30 ) );
         checkPanel.add( compressCheckBox );
         checkPanel.add( deleteCheckBox );
         checkPanel.add( keepUndoneCheckBox );
         checkPanel.add( keepDoneCheckBox );
+        checkPanel.add( new JLabel( "_______________________________________________" ) );
 
         panel.add( checkPanel );
     }
@@ -181,17 +184,23 @@ public class OptionFrame extends JFrame {
         keepRecordCheckBox = getCheckBoxBold( "保留任務記錄", SetUp.getKeepRecord() );
         keepRecordCheckBox.addItemListener( new ItemHandler() );
         keepRecordCheckBox.setToolTipText( "若紀錄過多而影響效能，請取消勾選或刪除recordList.dat" );
+        
+        choiceAllVolumeCheckBox = getCheckBox( "預設勾選全部集數", SetUp.getChoiceAllVolume() );
+        choiceAllVolumeCheckBox.addItemListener( new ItemHandler() );
+        choiceAllVolumeCheckBox.setToolTipText( "本來預設都不勾選（除了單集），但若勾選此選項，便會全部勾選" );
 
         trayMessageCheckBox = getCheckBoxBold( "縮小到系統列時顯示下載完成訊息", SetUp.getShowDoneMessageAtSystemTray() );
         trayMessageCheckBox.addItemListener( new ItemHandler() );
         trayMessageCheckBox.setToolTipText( "如果沒有勾選，縮小到系統列後就不會再有下載完畢的提示訊息" );
 
         JPanel checkPanel = new JPanel();
-        checkPanel.setLayout( new GridLayout( 4, 1 ) );//FlowLayout( FlowLayout.CENTER, 14, 20 ) );
+        checkPanel.setLayout( new GridLayout( 5, 1 ) );//FlowLayout( FlowLayout.CENTER, 14, 20 ) );
         checkPanel.add( trayMessageCheckBox );
         checkPanel.add( urlCheckBox );
         checkPanel.add( downloadCheckBox );
         checkPanel.add( keepRecordCheckBox );
+        checkPanel.add( choiceAllVolumeCheckBox );
+        
         //checkPanel.add( logCheckBox );
 
 
@@ -205,16 +214,16 @@ public class OptionFrame extends JFrame {
         proxyServerTextField.setHorizontalAlignment( JTextField.LEADING );
         proxyServerTextField.setToolTipText( "若是中華電信用戶，可輸入proxy.hinet.net" );
 
-        proxyServerPanel.add( getLabel( "設定代理伺服器位址(Host)：" ) );
+        proxyServerPanel.add( getLabel( "設定代理伺服器位址(Host)：", "若是中華電信用戶，可輸入proxy.hinet.net" ) );
         proxyServerPanel.add( proxyServerTextField );
 
-        JPanel proxyPortPanel = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
+        JPanel proxyPortPanel = new JPanel( new GridLayout( 2, 1 ) );//new FlowLayout( FlowLayout.LEFT ) );
         proxyPortTextField = new JTextField( SetUp.getProxyPort(), 4 );
         proxyPortTextField.setFont( SetUp.getDefaultFont( -1 ) );
         proxyPortTextField.setHorizontalAlignment( JTextField.LEADING );
         proxyPortTextField.setToolTipText( "若是中華電信用戶，可輸入80" );
 
-        proxyPortPanel.add( getLabel( "設定代理伺服器連接阜(Port)：" ) );
+        proxyPortPanel.add( getLabel( "設定代理伺服器連接阜(Port)：", "若是中華電信用戶，可輸入80" ) );
         proxyPortPanel.add( proxyPortTextField );
 
         JPanel proxyPanel = new JPanel( new GridLayout( 2, 1 ) );
@@ -443,6 +452,9 @@ public class OptionFrame extends JFrame {
             if ( event.getSource() == keepRecordCheckBox ) {
                 SetUp.setKeepRecord( keepRecordCheckBox.isSelected() ); // 紀錄到設定值
             }
+            if ( event.getSource() == choiceAllVolumeCheckBox ) {
+                SetUp.setChoiceAllVolume( choiceAllVolumeCheckBox.isSelected() ); // 紀錄到設定值
+            }
 
             if ( event.getSource() == logCheckBox ) {
                 if ( logCheckBox.isSelected() ) {
@@ -495,6 +507,14 @@ public class OptionFrame extends JFrame {
     private JLabel getLabel( String string ) {
         JLabel label = new JLabel( string );
         label.setFont( SetUp.getDefaultFont() );
+
+        return label;
+    }
+    
+    private JLabel getLabel( String string, String toolTipString ) {
+        JLabel label = new JLabel( string );
+        label.setFont( SetUp.getDefaultFont() );
+        label.setToolTipText( toolTipString );
 
         return label;
     }

@@ -40,6 +40,7 @@ public class SetUp { // read setup file, and then setup
     private static boolean autoAddMission; // 是否複製網址後就自動解析並詢問欲下載集數
     private static boolean keepBookmark; // 是否保留書籤
     private static boolean keepRecord; // 是否保留記錄
+    private static boolean choiceAllVolume; // 是否預設勾選全部集數
     
     private static String defaultFontName; // 使用者字型名稱（若沒設就直接用系統預設）
     private static int defaultFontSize; // 使用者字型大小（若沒設就直接用系統預設）
@@ -86,6 +87,7 @@ public class SetUp { // read setup file, and then setup
         autoAddMission = false; // 是否複製網址後就自動解析並詢問欲下載集數
         keepBookmark = true; // 是否保留書籤
         keepRecord = true; // 是否保留記錄
+        choiceAllVolume = false; // 是否預設勾選全部集數
 
         proxyServer = ""; // 預設沒有掛上代理伺服器
         proxyPort = "";
@@ -142,6 +144,8 @@ public class SetUp { // read setup file, and then setup
                 + "\nkeepBookmark = " + keepBookmark
                 + "\n# 是否保留記錄？"
                 + "\nkeepRecord = " + keepRecord
+                + "\n# 是否預設勾選全部集數？"
+                + "\nchoiceAllVolume = " + choiceAllVolume
                 + "\n# 代理伺服器位址（proxy sever address）"
                 + "\nproxyServer = " + proxyServer
                 + "\n# 代理伺服器連接阜（proxy server port）"
@@ -179,6 +183,7 @@ public class SetUp { // read setup file, and then setup
         Common.debugPrintln( "autoAddMission = " + autoAddMission );
         Common.debugPrintln( "keepBookmark = " + keepBookmark );
         Common.debugPrintln( "keepRecord = " + keepRecord );
+        Common.debugPrintln( "choiceAllVolume = " + choiceAllVolume );
         Common.debugPrintln( "proxyServer = " + proxyServer );
         Common.debugPrintln( "proxyPort = " + proxyPort );
         Common.debugPrintln( "defaultFontName = " + defaultFontName );
@@ -210,7 +215,8 @@ public class SetUp { // read setup file, and then setup
         boolean existEhMemberPasswordHash = false;
         boolean existSettingFileDirectory = false;
         boolean existTimeoutTimer = false;
-
+        boolean existChoiceAllVolume = false;
+        
         for ( int i = 0 ; i < lines.length ; i++ ) {
             try {
                 if ( lines[i].length() > 2 && !lines[i].matches( "(?s).*#(?s).*" ) ) {
@@ -330,7 +336,15 @@ public class SetUp { // read setup file, and then setup
                         } else {
                             setKeepRecord( false );
                         }
-                    } else if ( split[0].equals( "defaultFontName" ) ) {
+                    } else if ( split[0].equals( "choiceAllVolume" ) ) {
+                        existChoiceAllVolume = true;
+                        if ( split[1].matches( "(?s).*true(?s).*" ) ) {
+                            setChoiceAllVolume( true );
+                        } else {
+                            setChoiceAllVolume( false );
+                        }
+                    } 
+                    else if ( split[0].equals( "defaultFontName" ) ) {
                         existDefaultFontName = true;
                         setDefaultFontName( split[1] );
                     } else if ( split[0].equals( "defaultFontSize" ) ) {
@@ -359,7 +373,8 @@ public class SetUp { // read setup file, and then setup
             existProxyServer && existProxyPort && 
             existDefaultFontName && existDefaultFontSize &&
             existEhMemberID && existEhMemberPasswordHash &&
-            existSettingFileDirectory && existTimeoutTimer ) {
+            existSettingFileDirectory && existTimeoutTimer &&
+            existChoiceAllVolume ) {
             Common.debugPrintln( "設定檔全部讀取完畢" );
         } else {
             Common.debugPrintln( "設定檔缺乏新版參數! 套用預設值!" );
@@ -505,6 +520,15 @@ public class SetUp { // read setup file, and then setup
 
     public static boolean getKeepRecord() {
         return keepRecord;
+    }
+    
+    // 是否預設勾選全部集數
+    public static void setChoiceAllVolume( boolean newChoiceAllVolume ) {
+        choiceAllVolume = newChoiceAllVolume;
+    }
+
+    public static boolean getChoiceAllVolume() {
+        return choiceAllVolume;
     }
 
     // 設定代理伺服器

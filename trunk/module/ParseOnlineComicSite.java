@@ -115,7 +115,7 @@ abstract public class ParseOnlineComicSite {
     public String getFixedChineseURL(String url) {
         // ex. "收?的十二月" should be changed into
         //     "%E6%94%B6%E8%8E%B7%E7%9A%84%E5%8D%81%E4%BA%8C%E6%9C%88"
-
+        
         try {
             String temp = "";
 
@@ -133,7 +133,7 @@ abstract public class ParseOnlineComicSite {
             e.printStackTrace();
         }
 
-
+        url = url.replaceAll( "\\s", "%20" );
         url = fixSpecialCase(url);
 
         return url;
@@ -154,7 +154,7 @@ abstract public class ParseOnlineComicSite {
         url = url.replaceAll("%E6%95%B8%E7%9E%84", "%E6%8E%83%E7%9E%84");
         
         // 117话改為117話 ex. http://kukudm.com/comiclist/774/21545/1.htm
-        url = url.replaceAll("117%E8%AF%9D", "117%E8%A9%B1");
+        url = url.replaceAll("%E8%AF%9D", "%E8%A9%B1");
 
         return url;
     }

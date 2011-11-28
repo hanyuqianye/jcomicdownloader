@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/4
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.01: 增加是否預設集數全選的選項
 1.16: 讓EH和EX也能判斷是否已經下載。
 1.14: 修改集數選擇視窗（choiceFrame）的關閉功能，允許按右上角的『X』來關閉。
 1.11: 已經存在於資料夾的集數顯示淺色
@@ -78,8 +79,11 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
             checkStrings = getRealOrderCheckStrings( modifyRow, volumeStrings,
                     ComicDownGUI.nowSelectedCheckStrings );
         } else {
+            // 依設定選擇是否預設全選
+            String choiceString = SetUp.getChoiceAllVolume() ? "true" : "false";
+            
             for ( int i = 0 ; i < volumeStrings.length ; i++ ) {
-                checkStrings[i] = "false";
+                checkStrings[i] = choiceString;
             }
         }
 

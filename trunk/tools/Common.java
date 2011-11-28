@@ -5,7 +5,8 @@ Authors  : surveyorK
 Last Modified : 2011/11/9
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
-1.16: 新增對comic.92wy.com的支援
+2.01: 1. 修改下載機制，不下載青蛙圖（檔案大小10771 bytes）
+2.0 : 1. 加入下載快速模式，專用於google圖片下載
 1.09: 1. 加入書籤表格和紀錄表格相關的公用方法
  *    2. 以getReomvedUnnecessaryWord()拿掉多餘標題字尾
 1.08: 若下載圖檔時發現檔案只有21或22kb，則懷疑是盜連警示圖片，於一秒後重新連線一次
@@ -266,7 +267,9 @@ public class Common {
 
                 int responseCode = 0;
                 
-                if ( fastMode && connection.getResponseCode() != 200 )
+                // 快速模式不下載青蛙圖！（其檔案大小就是10771......）
+                if ( ( fastMode && connection.getResponseCode() != 200 ) ||
+                    ( fastMode && connection.getContentLength() == 10771 ) )
                     return;
 
                 tryConnect( connection );
@@ -302,16 +305,18 @@ public class Common {
                 // 設置計時器，預防連線時間過長
                 Timer timer = new Timer();
                 // 預設(getTimeoutTimer()*100)秒會timeout
-                timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 100 ); 
+                timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 ); 
                 
                 byte[] r = new byte[1024];
                 int len = 0;
                 
-                // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
-                while ( ( fileSize > 1024 || !Flag.timeoutFlag || !fastMode ) && 
-                        (len = is.read( r )) > 0 && Run.isAlive ) {
-
-                    os.write( r, 0, len );
+                while ( (len = is.read( r )) > 0 && Run.isAlive ) {
+                    // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
+                    if ( fileSize > 1024 || !Flag.timeoutFlag || !fastMode ) // 預防卡住的機制
+                        os.write( r, 0, len );
+                    else
+                        break;
+                    
                     fileGotSize += (len / 1000);
 
                     if ( Common.withGUI() ) {

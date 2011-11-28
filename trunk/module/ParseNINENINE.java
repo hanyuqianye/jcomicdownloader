@@ -206,7 +206,7 @@ public class ParseNINENINE extends ParseOnlineComicSite {
             title = allPageString.substring( beginIndex, endIndex );
         }
 
-        return Common.getTraditionalChinese( title );
+        return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
     }
 
     // 取得在string中有"幾個"符合keyword的字串
