@@ -170,7 +170,8 @@ public class ParseWY extends ParseOnlineComicSite {
         List<String> volumeList = new ArrayList<String>();
 
         int beginIndex = allPageString.indexOf( "</h5>" );
-        int endIndex = allPageString.indexOf( "</p>", beginIndex );
+        int endIndex = allPageString.lastIndexOf( "</h5>" );
+        endIndex = allPageString.indexOf( "</p>", endIndex );
         String tempString = allPageString.substring( beginIndex, endIndex );
         String[] tokens = tempString.split( "\"" );
 

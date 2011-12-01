@@ -107,7 +107,8 @@ public class ParseKUKU extends ParseOnlineComicSite {
 
                     if ( line.matches( "(?s).*document.write(?s).*" ) ) {
                         String[] temp = line.split( "'\"|\"|'" );
-
+                        
+                        System.out.println( baseURL + temp[3] );
                         // replace %20 from white space in URL
                         String frontURL = temp[3].replaceAll( "\\s", "%20" );
                         comicURL[i] = getFixedChineseURL( baseURL + frontURL );

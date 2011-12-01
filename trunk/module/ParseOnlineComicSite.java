@@ -5,7 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/10/25
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
-
+2.02: 拿掉轉網址碼的編碼修正
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -140,6 +140,7 @@ abstract public class ParseOnlineComicSite {
     }
 
     public String fixSpecialCase(String url) {
+        /* 拿掉修正似乎就沒有問題了......奇怪當初怎麼需要修正勒.....
         //  第一數（%E6%95%B8）要改成第一話（%E8%A9%B1）...不曉得是否為特例...
         url = url.replaceAll("%E6%95%B8", "%E8%A9%B1");
         // 話（%E6%95%B8）要改成?（%E8%AF%9D）...不曉得是否為特例...
@@ -154,8 +155,8 @@ abstract public class ParseOnlineComicSite {
         url = url.replaceAll("%E6%95%B8%E7%9E%84", "%E6%8E%83%E7%9E%84");
         
         // 117话改為117話 ex. http://kukudm.com/comiclist/774/21545/1.htm
-        url = url.replaceAll("%E8%AF%9D", "%E8%A9%B1");
-
+        //url = url.replaceAll("%E8%AF%9D", "%E8%A9%B1");
+        */
         return url;
     }
 
