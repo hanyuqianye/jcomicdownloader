@@ -87,6 +87,8 @@ public class ParseWebPage {
             siteID = Site.GOOGLE_PIC;
         else if ( webSite.matches( "(?s).*nanadm.com(?s).*" ) ) 
             siteID = Site.NANA;
+        else if ( webSite.matches( "(?s).*citymanga.com(?s).*" ) ) 
+            siteID = Site.CITY_MANGA;
         
         else
             siteID = Site.UNKNOWN;

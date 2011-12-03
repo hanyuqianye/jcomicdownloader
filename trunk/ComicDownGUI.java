@@ -4,10 +4,13 @@
 Program Name : JComicDownloader
 Authors  : surveyorK
 Version  : v2.02
-Last Modified : 2011/11/24
+Last Modified : 2011/12/3
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
- * 2.02: 1. 修復kuku網址轉碼部份發生錯誤的bug。
+ * 2.02: 1. 新增新增對www.citymanga.com的支援。
+ *      2. 修復kuku網址轉碼部份發生錯誤的bug。
+ *      3. 修復92wy部分集數無法讀取的bug。
+ *      4. 修復mangaFox部份集數命名重疊的bug。
  * 
  * 2.01: 1. 在訊息視窗中加入支援列表的資訊。
  *      2. 在選項視窗中加入可以預設全選集數的選項。
@@ -162,7 +165,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.01" );
+        super( "JComicDownloader  v2.02" );
 
         minimizeEvent();
         initTrayIcon();

@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.02: 修復部份集數命名重疊的bug。
 1.13: 新增對mangafox.com的支援
 ----------------------------------------------------------------------------------------------------
  */
@@ -159,11 +160,12 @@ public class ParseMangaFox extends ParseOnlineComicSite {
 
             // 取得單集名稱
             beginIndex = allPageString.indexOf( "class=\"ch\"", beginIndex );
-            beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            beginIndex = allPageString.indexOf( "title=", beginIndex );
+            beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
             //endIndex = allPageString.indexOf( "</td>", beginIndex );
             endIndex = Common.getSmallerIndexOfTwoKeyword( allPageString, beginIndex, "<span", "</td" );
             String volumeTitle = allPageString.substring(
-                    beginIndex, endIndex ).trim().replaceAll( "</a>", "" ).replaceAll( ": ", "：" );
+                    beginIndex, endIndex ).trim().replaceAll( "</a>", "" ).replaceAll( ": ", "：" ).replaceAll( "\">", " - " );
             volumeList.add( volumeTitle );
         }
 
