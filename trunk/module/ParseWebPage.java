@@ -71,7 +71,7 @@ public class ParseWebPage {
         }
         else if ( webSite.matches( "(?s).*\\.jumpcn.com.cn(?s).*" ) )
             siteID = Site.JUMPCNCN;
-        else if ( webSite.matches( "(?s).*dmeden.net(?s).*" ) )
+        else if ( webSite.matches( "(?s).*dmeden\\.(?s).*" ) )
             siteID = Site.DMEDEN;
         else if ( webSite.matches( "(?s).*\\.jumpcn.com/(?s).*" ) )
             siteID = Site.JUMPCN;
@@ -89,6 +89,8 @@ public class ParseWebPage {
             siteID = Site.NANA;
         else if ( webSite.matches( "(?s).*citymanga.com(?s).*" ) ) 
             siteID = Site.CITY_MANGA;
+        else if ( webSite.matches( "(?s).*iibq.com(?s).*" ) ) 
+            siteID = Site.IIBQ;
         
         else
             siteID = Site.UNKNOWN;

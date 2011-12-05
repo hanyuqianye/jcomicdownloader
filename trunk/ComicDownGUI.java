@@ -3,11 +3,18 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v2.02
-Last Modified : 2011/12/3
+Version  : v2.03
+Last Modified : 2011/12/6
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
- * 2.02: 1. 新增新增對www.citymanga.com的支援。
+ * 2.03: 1. 新增對www.iibq.com的支援。
+ *      2. 增加可用外部程式開啟漫畫的選項。
+ *      3. 增加下載失敗後重新嘗試次數(retryTimes)的選項
+ *      4. 修復nanadm有些第一集無法解析的bug。
+ *      5. 因應dmeden轉換位址進行解析修正（dmeden.net <-> www.dmeden.com）
+ *      6. 因應改版後的mangaFox進行解析修正
+ *      7. 修改選項視窗為多面板界面。
+ * 2.02: 1. 新增對www.citymanga.com的支援。
  *      2. 修復kuku網址轉碼部份發生錯誤的bug。
  *      3. 修復92wy部分集數無法讀取的bug。
  *      4. 修復mangaFox部份集數命名重疊的bug。
@@ -17,7 +24,7 @@ ChangeLog:
  *      3. 修改下載機制，不下載青蛙圖（檔案大小10771 bytes）。
  *      4. 修復NANA無法解析粗體字集數名稱的bug。
  *      5. 修正Google圖片搜尋中部份非英文關鍵字沒有正確解析為資料夾名稱的bug。
- * 2.0 : 1. 新增新增對www.nanadm.com的支援。
+ * 2.0 : 1. 新增對www.nanadm.com的支援。
  *      2. 修復Google圖片搜尋批次每張圖下載十秒後就逾時的bug。
  *      3. 修復書籤和紀錄表格改變外觀順序後無法對應的bug。
  *      4. 修復下載任務置頂或置底卻沒有改變下載順序的bug。
@@ -82,6 +89,8 @@ ChangeLog:
  */
 package jcomicdownloader;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jcomicdownloader.table.*;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.module.*;
@@ -127,6 +136,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private JMenuItem pasteSystemClipboardItem; // 網址列的右鍵選單項目一
     private JPopupMenu downloadTablePopup;
     private int downloadTablePopupRow; // 觸發downloadTablePopup的所在列
+    private JMenuItem tableOpenDownloadFile;  // 開啟下載檔案
     private JMenuItem tableOpenDownloadDirectoryItem;  // 開啟下載資料夾
     private JMenuItem tableAddBookmarkFromDownloadItem;  // 加入到書籤
     private JMenuItem tableRechoiceVolumeItem;  // 重新選擇集數
@@ -137,11 +147,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private JMenuItem tableMoveToFloorItem;  // 將此任務置底
     private JPopupMenu bookmarkTablePopup;
     private int bookmarkTablePopupRow; // 觸發downloadTablePopup的所在列
+    private JMenuItem tableOpenBookmarkFile;  // 開啟書籤檔案
     private JMenuItem tableOpenBookmarkDirectoryItem;  // 開啟書籤資料夾
     private JMenuItem tableAddMissionFromBookmarkItem;  // 加入到任務
     private JMenuItem tableDeleteBookmarkItem;  // 刪除書籤
     private JPopupMenu recordTablePopup;
     private int recordTablePopupRow; // 觸發downloadTablePopup的所在列
+    private JMenuItem tableOpenRecordFile;  // 開啟記錄檔案
     private JMenuItem tableOpenRecordDirectoryItem;  // 開啟記錄資料夾
     private JMenuItem tableAddBookmarkFromRecordItem;  // 加入到書籤
     private JMenuItem tableAddMissionFromRecordItem;  // 加入到任務
@@ -165,7 +177,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.02" );
+        super( "JComicDownloader  v2.03" );
 
         minimizeEvent();
         initTrayIcon();
@@ -423,7 +435,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     private void setDownloadTableJPopupMenu() {
-
+        tableOpenDownloadFile = new JMenuItem( "開啟檔案" ); // 開啟下載資料夾
+        tableOpenDownloadFile.addActionListener( this );
         tableOpenDownloadDirectoryItem = new JMenuItem( "開啟資料夾" ); // 開啟下載資料夾
         tableOpenDownloadDirectoryItem.addActionListener( this );
         tableAddBookmarkFromDownloadItem = new JMenuItem( "加入到書籤" ); // 開啟下載資料夾
@@ -444,6 +457,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         downloadTablePopup = new JPopupMenu();
         downloadTablePopup.add( tableAddBookmarkFromDownloadItem );
         downloadTablePopup.add( tableOpenDownloadDirectoryItem );
+        downloadTablePopup.add( tableOpenDownloadFile );
         downloadTablePopup.add( tableRechoiceVolumeItem );
         downloadTablePopup.add( tableDeleteMissionItem );
         downloadTablePopup.add( tableDeleteAllUnselectedMissionItem );
@@ -457,6 +471,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private void setBookmarkTableJPopupMenu() {
         tableOpenBookmarkDirectoryItem = new JMenuItem( "開啟資料夾" ); // 開啟下載資料夾
         tableOpenBookmarkDirectoryItem.addActionListener( this );
+        tableOpenBookmarkFile = new JMenuItem( "開啟檔案" ); // 開啟下載資料夾
+        tableOpenBookmarkFile.addActionListener( this );
         tableAddMissionFromBookmarkItem = new JMenuItem( "加入到下載任務" ); // 加入到下載任務
         tableAddMissionFromBookmarkItem.addActionListener( this );
         tableDeleteBookmarkItem = new JMenuItem( "刪除此書籤" );  // 刪除書籤
@@ -465,6 +481,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         bookmarkTablePopup = new JPopupMenu();
         bookmarkTablePopup.add( tableAddMissionFromBookmarkItem );
         bookmarkTablePopup.add( tableOpenBookmarkDirectoryItem );
+        bookmarkTablePopup.add( tableOpenBookmarkFile );
         bookmarkTablePopup.add( tableDeleteBookmarkItem );
 
         bookmarkTable.add( bookmarkTablePopup ); // 必須指定父元件，否則會拋出NullPointerException
@@ -473,6 +490,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private void setRecordTableJPopupMenu() {
         tableOpenRecordDirectoryItem = new JMenuItem( "開啟資料夾" ); // 開啟下載資料夾
         tableOpenRecordDirectoryItem.addActionListener( this );
+        tableOpenRecordFile = new JMenuItem( "開啟檔案" ); // 開啟下載檔案
+        tableOpenRecordFile.addActionListener( this );
         tableAddMissionFromRecordItem = new JMenuItem( "加入到下載任務" ); // 加入到下載任務
         tableAddMissionFromRecordItem.addActionListener( this );
         tableAddBookmarkFromRecordItem = new JMenuItem( "加入到書籤" ); // 開啟下載資料夾
@@ -484,6 +503,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         recordTablePopup.add( tableAddMissionFromRecordItem );
         recordTablePopup.add( tableAddBookmarkFromRecordItem );
         recordTablePopup.add( tableOpenRecordDirectoryItem );
+        recordTablePopup.add( tableOpenRecordFile );
         recordTablePopup.add( tableDeleteRecordItem );
 
         recordTable.add( recordTablePopup ); // 必須指定父元件，否則會拋出NullPointerException
@@ -498,7 +518,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 "此欄位滑鼠左鍵點兩下可開啟該列任務的下載資料夾",
                 "此欄位滑鼠左鍵點兩下可重新選取該列任務的下載集數",
                 "此欄位滑鼠左鍵點兩下可重新選取該列任務的下載集數",
-                "此欄位可顯示目前的下載進度",
+                "此欄位可顯示目前的下載進度，滑鼠左鍵點兩下以預設瀏覽程式開啟",
                 null
             };
 
@@ -546,7 +566,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             protected String[] columnToolTips = { "此欄位滑鼠左鍵點兩下可刪除該列書籤",
                 "此欄位滑鼠左鍵點兩下可開啟該列書籤的下載資料夾",
                 "此欄位滑鼠左鍵點兩下可將該列書籤加入到下載任務清單中",
-                "此欄位顯示該列漫畫加入書籤的系統時間",
+                "此欄位顯示該列漫畫加入書籤的系統時間，滑鼠左鍵點兩下以預設瀏覽程式開啟",
                 "此欄位滑鼠左鍵點兩下可自由編輯該列任務的注解"
             };
 
@@ -592,7 +612,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             protected String[] columnToolTips = { "此欄位滑鼠左鍵點兩下可刪除該列記錄",
                 "此欄位滑鼠左鍵點兩下可開啟該列記錄的下載資料夾",
                 "此欄位滑鼠左鍵點兩下可將該列漫畫加入到下載任務清單中",
-                "此欄位顯示該列漫畫在當初加入任務的系統時間"
+                "此欄位顯示該列漫畫在當初加入任務的系統時間，滑鼠左鍵點兩下以預設瀏覽程式開啟"
             };
 
             //Implement table header tool tips. 
@@ -841,6 +861,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 if ( col == DownTableEnum.TITLE ) {
                     openDownloadDirectory( row );
                 }
+                else if ( col == DownTableEnum.STATE ) {
+                    openDownloadFile( row );
+                }
 
                 // 正在下載的時候不能重選集數，也不能刪除任務
                 if ( col == DownTableEnum.VOLUMES
@@ -874,6 +897,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 // 任何時候都能開啟下載資料夾
                 if ( col == BookmarkTableEnum.TITLE ) {
                     openDownloadDirectory( row );
+                } else if ( col == BookmarkTableEnum.DATE ) {
+                    openDownloadFile( row );
                 }
 
                 // 正在下載的時候不能重選集數，也不能刪除任務
@@ -897,6 +922,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 // 任何時候都能開啟下載資料夾
                 if ( col == RecordTableEnum.TITLE ) {
                     openDownloadDirectory( row );
+                } else if ( col == RecordTableEnum.DATE ) {
+                    openDownloadFile( row );
                 }
 
                 // 正在下載的時候不能重選集數，也不能刪除任務
@@ -948,28 +975,28 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         String urlString = downTableUrlStrings[row]; // 先將此列任務另存
 
         downTable.setValueAt( 1, row, DownTableEnum.ORDER );
-        for ( int i = row - 1; i >= 0; i -- ) {
-            downTableUrlStrings[i+1] = downTableUrlStrings[i]; // row列之前的往後遞移一位
+        for ( int i = row - 1 ; i >= 0 ; i-- ) {
+            downTableUrlStrings[i + 1] = downTableUrlStrings[i]; // row列之前的往後遞移一位
             i = downTable.convertRowIndexToModel( i ); // 顯示的列 -> 實際的列
             //int orderValue = Integer.parseInt( downTable.getValueAt( i, DownTableEnum.ORDER ).toString() );
             downTable.setValueAt( i + 2, i, DownTableEnum.ORDER );
         }
         downTableUrlStrings[0] = urlString; // 再將之前另存任務存入第一個位置
-        
+
         int missionAmount = downTableModel.getRowCount();
         downTableModel.moveRow( row, row, 0 );
-        
+
     }
 
     private void moveMissionToFloor( int row ) { // 將第row列任務置底
         row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         int missionAmount = downTableModel.getRowCount();
         String urlString = downTableUrlStrings[row]; // 先將此列任務另存
-        
+
         downTable.setValueAt( missionAmount, row, DownTableEnum.ORDER );
-        for ( int i = row + 1; i < missionAmount; i ++ ) {
+        for ( int i = row + 1 ; i < missionAmount ; i++ ) {
             i = downTable.convertRowIndexToModel( i ); // 顯示的列 -> 實際的列
-            downTableUrlStrings[i-1] = downTableUrlStrings[i]; // row列之後的往前遞移一位
+            downTableUrlStrings[i - 1] = downTableUrlStrings[i]; // row列之後的往前遞移一位
             downTable.setValueAt( i, i, DownTableEnum.ORDER );
         }
         downTableUrlStrings[missionAmount - 1] = urlString; // 再將之前另存任務存入第一個位置
@@ -981,7 +1008,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         String title = String.valueOf( downTableModel.getRealValueAt(
                 row, DownTableEnum.TITLE ) );
-        
+
         String message = "是否要在任務清單中刪除" + title + " ?";
 
         int choice = JOptionPane.showConfirmDialog( this, message, "提醒訊息", JOptionPane.YES_NO_OPTION );
@@ -1076,6 +1103,74 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 ++Common.bookmarkCount,
                 title,
                 url ) );
+    }
+
+    private void openDownloadFile( int row ) {  // 開啟第row列任務的下載檔案
+        String title = "";
+        String url = "";
+
+        if ( SetUp.getOpenPicFileProgram().matches( "" ) ) {
+            JOptionPane.showMessageDialog( this,
+                    "<html>尚未設定開啟程式，請前往<font color=blue>選項 -> 瀏覽相關</font>做設定</html>",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
+
+        if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION ) { // 從任務清單開啟
+            row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
+            title = String.valueOf( downTableModel.getRealValueAt( row, DownTableEnum.TITLE ) );
+            url = downTableModel.getRealValueAt( row, DownTableEnum.URL ).toString();
+        } else if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.BOOKMARK ) { // 從書籤清單開啟
+            row = bookmarkTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
+            title = String.valueOf( bookmarkTableModel.getValueAt( row, BookmarkTableEnum.TITLE ) );
+            url = String.valueOf( bookmarkTableModel.getValueAt( row, BookmarkTableEnum.URL ) );
+        } else if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.RECORD ) { // 從記錄清單開啟
+            row = recordTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
+            title = String.valueOf( recordTableModel.getValueAt( row, RecordTableEnum.TITLE ) );
+            url = String.valueOf( recordTableModel.getValueAt( row, RecordTableEnum.URL ) );
+        }
+
+        Common.debugPrintln( "以外部程式開啟" + title + "的下載資料夾或壓縮檔" );
+
+        if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" ) ) {
+            System.out.println( "\"" + SetUp.getOpenZipFileProgram() + "\" " + SetUp.getOriginalDownloadDirectory() + title + ".zip" );
+            if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".zip" ).exists() ) {
+                runUnansiCmd( SetUp.getOpenPicFileProgram(), SetUp.getOriginalDownloadDirectory() + title + ".zip" );
+            } else {
+                runUnansiCmd( SetUp.getOpenPicFileProgram(), SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+            }
+        } else {
+            runUnansiCmd( SetUp.getOpenPicFileProgram(), SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+        }
+
+    }
+
+    // 解決非ANSI字會變成？而無法使用程式開啟的問題
+    // 出處：http://stackoverflow.com/questions/1876507/java-runtime-exec-on-windows-fails-with-unicode-in-arguments
+    private void runUnansiCmd( String program, String file ) {
+
+        String[] cmd = new String[] { program, file };
+        Map<String, String> newEnv = new HashMap<String, String>();
+        newEnv.putAll( System.getenv() );
+        String[] i18n = new String[cmd.length + 2];
+        i18n[0] = "cmd";
+        i18n[1] = "/C";
+        i18n[2] = cmd[0];
+        for ( int counter = 1 ; counter < cmd.length ; counter++ ) {
+            String envName = "JENV_" + counter;
+            i18n[counter + 2] = "%" + envName + "%";
+            newEnv.put( envName, cmd[counter] );
+        }
+        cmd = i18n;
+
+        ProcessBuilder pb = new ProcessBuilder( cmd );
+        Map<String, String> env = pb.environment();
+        env.putAll( newEnv );
+        try {
+            final Process p = pb.start();
+        } catch ( IOException ex ) {
+            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+        }
     }
 
     private void openDownloadDirectory( int row ) {  // 開啟第row列任務的下載資料夾
@@ -1417,7 +1512,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     public void actionPerformed( ActionEvent event ) {
         if ( event.getSource() == urlField ) {
         }
-        if ( event.getSource() == tableOpenDownloadDirectoryItem ) {
+        if ( event.getSource() == tableOpenDownloadFile ) {
+            openDownloadFile( downloadTablePopupRow );
+        } else if ( event.getSource() == tableOpenBookmarkFile ) {
+            openDownloadFile( bookmarkTablePopupRow );
+        } else if ( event.getSource() == tableOpenRecordFile ) {
+            openDownloadFile( recordTablePopupRow );
+        } else if ( event.getSource() == tableOpenDownloadDirectoryItem ) {
             openDownloadDirectory( downloadTablePopupRow );
         } else if ( event.getSource() == tableOpenBookmarkDirectoryItem ) {
             openDownloadDirectory( bookmarkTablePopupRow );
@@ -1508,7 +1609,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         if ( event.getSource() == button[ButtonEnum.ADD] ) { // button of add
             logFrame.redirectSystemStreams(); // start to log message
             testDownload(); // 測試此網站的下載是否正常
-            
+
             String urlString = urlField.getText();
             parseURL( args, false, false, 0 );
             args = null;
@@ -1633,12 +1734,12 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             public void run() {
                 //Flag.allowDownloadFlag = Run.isAlive = true;
-                
+
                 String picURL = "http://www.google.com.tw/search?um=1&hl=zh-TW&gbv=2&biw=1152&bih=726&tbs=isz%3Am&tbm=isch&sa=1&q=picture&oq=picture&aq=f&aqi=&aql=&gs_sm=s&gs_upl=0l0l0l3684l0l0l0l0l0l0l0l0ll0l0";
                 Common.debugPrintln( "開始測試下載:" );
                 Common.downloadFile( picURL,
-                "", "test1.html", false, "" );
-  
+                        "", "test1.html", false, "" );
+
             }
         } );
         //downThread.start();

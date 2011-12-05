@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.03: 1. 對於dmeden轉移位址後做解析修正（dmeden.net <-> www.dmeden.com）
 1.12: 1. 改成一邊解析網址一邊下載。
 1.11: 1. 新增對dmeden.net的支援。
 ----------------------------------------------------------------------------------------------------
@@ -21,6 +22,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
     private String jsName;
     protected String indexName;
     protected String indexEncodeName;
+    protected String baseURL1, baseURL2;
 
     /**
      *
@@ -31,6 +33,8 @@ public class ParseDmeden extends ParseOnlineComicSite {
         indexName = Common.getStoredFileName( Common.tempDirectory, "index_dmeden_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_dmeden_encode_parse_", "html" );
 
+        baseURL1 = "http://dmeden.net";
+        baseURL2 = "http://www.dmeden.com";
         jsName = "index_dmeden.js";
         radixNumber = 185271; // default value, not always be useful!!
     }
@@ -149,7 +153,11 @@ public class ParseDmeden extends ParseOnlineComicSite {
 
         int beginIndex = allPageString.indexOf( "href=\"/comicinfo/" ) + 6;
         int endIndex = allPageString.indexOf( "\">", beginIndex );
-        String mainUrlString = "http://dmeden.net" + allPageString.substring( beginIndex, endIndex );
+        
+        // 1:繁體　2:簡體
+        String baseURL = urlString.matches( "http://dmeden.net/(?s).*" ) ? baseURL1 : baseURL2;
+        String mainUrlString = baseURL + allPageString.substring( beginIndex, endIndex );
+        
         System.out.println( allPageString.substring( beginIndex, endIndex ) );
 
         return getTitleOnMainPage( mainUrlString, getAllPageString( mainUrlString ) );
@@ -185,12 +193,15 @@ public class ParseDmeden extends ParseOnlineComicSite {
         String[] tokens = tempString.split( "'" );
 
         int volumeCount = 0;
-        String baseURL = "http://dmeden.net/comichtml/";
+        
+        // 1:繁體　2:簡體
+        String baseURL = urlString.matches( "http://dmeden.net/(?s).*" ) ? baseURL1 : baseURL2;
+        String baseSingleURL = baseURL + "/comichtml/";
 
         for ( int i = 0 ; i < tokens.length ; i++ ) {
             if ( tokens[i].matches( "(?s).*/comic/checkview(?s).*" ) ) {
 
-                String tempUrl = "http://dmeden.net" + tokens[i];
+                String tempUrl = baseURL + tokens[i];
 
                 String[] parameterTokens = tempUrl.split( "\\?|=|&" );
                 String id = "";
@@ -204,7 +215,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
                     }
                 }
 
-                String url = baseURL + id + "/1.html?s=" + s;
+                String url = baseSingleURL + id + "/1.html?s=" + s;
                 System.out.println( url );
                 urlList.add( url );
 

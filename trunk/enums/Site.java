@@ -41,4 +41,5 @@ public class Site {
     public final static int BAIDU_PIC = 23;
     public final static int NANA = 24;
     public final static int CITY_MANGA = 25;
+    public final static int IIBQ = 26;
 }

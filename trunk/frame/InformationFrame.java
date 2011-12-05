@@ -61,7 +61,7 @@ public class InformationFrame extends JFrame {
     }
 
     private void setUpUIComponent() {
-        setSize( 440, 640 );
+        setSize( 470, 640 );
         setResizable( false );
         setLocationRelativeTo( this );  // set the frame in middle position of screen
         setIconImage( new CommonGUI().getImage( "main_icon.png" ) );

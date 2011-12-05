@@ -76,23 +76,31 @@ public class ParseNANA extends ParseOnlineComicSite {
         String allPageString = Common.getFileString( Common.tempDirectory, indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        int beginIndex = allPageString.indexOf( "class=\"pagelist\"" );
-        beginIndex = allPageString.indexOf( "|", beginIndex );
-        beginIndex = allPageString.indexOf( ": ", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "页", beginIndex );
-        String tempString = allPageString.substring( beginIndex, endIndex ).trim();
+        int beginIndex, endIndex;
 
-        totalPage = Integer.parseInt( tempString ) - 1; // 因為網頁騙人，少一頁....
+        if ( webSite.matches( "(?s).*\\.html(?s).*" ) ) {
+            beginIndex = allPageString.indexOf( "class=\"pagelist\"" );
+            beginIndex = allPageString.indexOf( "|", beginIndex );
+            beginIndex = allPageString.indexOf( ": ", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "页", beginIndex );
+            String tempString = allPageString.substring( beginIndex, endIndex ).trim();
+            totalPage = Integer.parseInt( tempString ) - 1; // 因為網頁騙人，少一頁....
+        }
+        else {
+            // 這種情形會把每一頁的位址都存在頁面中
+            totalPage = allPageString.split( "view.php" ).length - 1;
+        }
+
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
 
         // 開始取得第一頁網址 
-        beginIndex = allPageString.lastIndexOf( "src=\"" ) + 5;
+        beginIndex = allPageString.indexOf( "src=\"" ) + 5;
         endIndex = allPageString.indexOf( "\"", beginIndex );
         String firstPageURL = getFixedChineseURL( allPageString.substring( beginIndex, endIndex ) );
 
         String extensionName = firstPageURL.split( "\\." )[firstPageURL.split( "\\." ).length - 1]; // 取得檔案副檔名
-        NumberFormat formatter = new DecimalFormat( "000" ); // 預設000.jpg ~ xxx.jpg
+        NumberFormat formatter = new DecimalFormat( "000" ); // 預設001.jpg ~ xxx.jpg
 
         for ( int p = 1 ; p <= totalPage ; p++ ) {
             String fileNameBefore = formatter.format( p - 1 ) + "." + extensionName;
@@ -121,7 +129,8 @@ public class ParseNANA extends ParseOnlineComicSite {
 
     @Override
     public boolean isSingleVolumePage( String urlString ) {
-        if ( urlString.matches( "(?s).*/\\d+\\.html(?s).*" ) ) // ex. http://www.nanadm.com/fgw/3151/32021.html
+        if ( urlString.matches( "(?s).*/\\d+\\.html(?s).*" )
+                || urlString.matches( "(?s).*\\.php(?s).*" ) ) // ex. http://www.nanadm.com/fgw/3151/32021.html
         {
             return true;
         } else {
@@ -141,8 +150,19 @@ public class ParseNANA extends ParseOnlineComicSite {
 
     @Override
     public String getTitleOnSingleVolumePage( String urlString ) {
-        String mainUrlString = getMainUrlFromSingleVolumeUrl( urlString );
-
+        String mainUrlString = "";
+        
+        if ( urlString.matches( "(?s).*/\\d+\\.html(?s).*" ) )
+            mainUrlString = getMainUrlFromSingleVolumeUrl( urlString );
+        else {
+            String allPageString = getAllPageString( urlString );
+            int beginIndex = allPageString.indexOf( "<H1>" );
+            beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+            int endIndex = allPageString.indexOf( "\"", beginIndex );
+            
+            mainUrlString = baseURL + allPageString.substring( beginIndex, endIndex );
+        }
+                
         return getTitleOnMainPage( mainUrlString, getAllPageString( mainUrlString ) );
     }
 
@@ -173,15 +193,17 @@ public class ParseNANA extends ParseOnlineComicSite {
         int volumeCount = 0;
 
         for ( int i = 0 ; i < tokens.length ; i++ ) {
-            if ( tokens[i].matches( "(?s).*\\.html(?s).*" )  ) {
+            if ( tokens[i].matches( "(?s).*\\.html(?s).*" ) || tokens[i].matches( "(?s).*\\.php(?s).*" ) ) {
                 urlList.add( baseURL + tokens[i] );
 
                 // 取得單集名稱
                 String volumeTitle = tokens[i + 2];
-                
+
                 if ( volumeTitle.equals( "" ) ) // 中間插了一個<strong>
+                {
                     volumeTitle = tokens[i + 4];
-                
+                }
+
                 volumeList.add( Common.getStringRemovedIllegalChar(
                         Common.getTraditionalChinese( volumeTitle.trim() ) ) );
 

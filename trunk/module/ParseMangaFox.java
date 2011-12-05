@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.03: 對於改版後的mangaFox進行解析修正
  * 2.02: 修復部份集數命名重疊的bug。
 1.13: 新增對mangafox.com的支援
 ----------------------------------------------------------------------------------------------------
@@ -21,6 +22,7 @@ public class ParseMangaFox extends ParseOnlineComicSite {
     private String jsName;
     protected String indexName;
     protected String indexEncodeName;
+    protected String baseURL;
 
     /**
      *
@@ -31,6 +33,7 @@ public class ParseMangaFox extends ParseOnlineComicSite {
         indexName = Common.getStoredFileName( Common.tempDirectory, "index_mangaFox_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_mangaFox_encode_parse_", "html" );
 
+        baseURL = "http://www.mangafox.com";
         jsName = "index_mangaFox.js";
         radixNumber = 185271; // default value, not always be useful!!
     }
@@ -77,8 +80,8 @@ public class ParseMangaFox extends ParseOnlineComicSite {
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
                 allPageString = getAllPageString( baseURL + p + ".html" );
 
-                beginIndex = allPageString.indexOf( "Back to" );
-                beginIndex = allPageString.indexOf( "src=\"http", beginIndex ) + 5;
+                beginIndex = allPageString.indexOf( "<img " );
+                beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
                 endIndex = allPageString.indexOf( "\"", beginIndex );
                 comicURL[p - 1] = allPageString.substring( beginIndex, endIndex );
                 //Common.debugPrintln( p + " " + comicURL[p-1] ); // debug
@@ -122,13 +125,9 @@ public class ParseMangaFox extends ParseOnlineComicSite {
 
         String[] tokens = allPageString.split( ">|<" );
 
-        int beginIndex = allPageString.indexOf( "<h1>" ) + 4;
-        int endIndex = allPageString.indexOf( "</h1>", beginIndex );
-        String englishTitle = allPageString.substring( beginIndex, endIndex );
-
-        beginIndex = allPageString.indexOf( "<td>", beginIndex ) + 4;
-        endIndex = Common.getSmallerIndexOfTwoKeyword( allPageString, beginIndex, ";", "<" );
-        String japanTitle = allPageString.substring( beginIndex, endIndex );
+        int beginIndex = allPageString.indexOf( "<title>" ) + 7;
+        int endIndex = allPageString.indexOf( "-", beginIndex );
+        String englishTitle = allPageString.substring( beginIndex, endIndex ).trim();
 
         String title = englishTitle; // + "(" + japanTitle + ")"; // 不加了，因為日文資料夾打不開...
 
@@ -143,30 +142,36 @@ public class ParseMangaFox extends ParseOnlineComicSite {
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
-        int totalVolume = allPageString.split( "class=\"ch\"" ).length - 1;
+        int totalVolume = allPageString.split( "class=\"tips\"" ).length - 1;
         Common.debugPrintln( "共有" + totalVolume + "集" );
 
-        int beginIndex = allPageString.indexOf( "Chapter Name</th>" );
-        String baseURL = "http://www.mangafox.com";
-
-        int endIndex = 0;
-
-        for ( int i = 0 ; i < totalVolume ; i++ ) {
-            // 取得單集位址
-            beginIndex = allPageString.indexOf( "href=\"/", beginIndex ) + 6;
-            endIndex = allPageString.indexOf( "\"", beginIndex );
-            String volumeUrl = baseURL + allPageString.substring( beginIndex, endIndex );
-            urlList.add( volumeUrl );
-
-            // 取得單集名稱
-            beginIndex = allPageString.indexOf( "class=\"ch\"", beginIndex );
-            beginIndex = allPageString.indexOf( "title=", beginIndex );
-            beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
-            //endIndex = allPageString.indexOf( "</td>", beginIndex );
-            endIndex = Common.getSmallerIndexOfTwoKeyword( allPageString, beginIndex, "<span", "</td" );
-            String volumeTitle = allPageString.substring(
-                    beginIndex, endIndex ).trim().replaceAll( "</a>", "" ).replaceAll( ": ", "：" ).replaceAll( "\">", " - " );
-            volumeList.add( volumeTitle );
+        
+        int beginIndex = allPageString.indexOf( "<h3 " );
+        int endIndex = allPageString.indexOf( "id=\"discussion\"", beginIndex );
+        String[] tokens = allPageString.substring( beginIndex, endIndex ).split( ">|<|\"" );
+        int count = 0; // 計數用
+        String currentVolume = "";
+        
+        for ( int i = 0 ; i < tokens.length ; i++ ) {
+            
+            if ( tokens[i].matches( "volume" ) ) {
+                currentVolume = tokens[i+2];
+            }
+            
+            if ( tokens[i].matches( "http://(?s).*" ) ) {
+                // 取得單集位址
+                urlList.add( tokens[i] );
+            }
+            else if ( tokens[i].matches( "tips" ) ) {
+                // 取得單集名稱
+                volumeList.add( currentVolume + " - " + tokens[i+2].replaceAll( "\\.", "" ).trim() );
+                
+                count ++;
+            }
+            
+            
+            if ( count >= totalVolume )
+                break;
         }
 
         combinationList.add( volumeList );

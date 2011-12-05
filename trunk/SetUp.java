@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/11/1
+Last Modified : 2011/12/5
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.03: 增加下載失敗後重新嘗試次數(retryTimes)的選項
 1.12: 修復tempDirectory最後出現兩個斜線的bug。
 1.09: 加入是否保留書籤和記錄的選項
 ----------------------------------------------------------------------------------------------------
@@ -47,6 +48,9 @@ public class SetUp { // read setup file, and then setup
     private static String ehMemberID; // EH會員ID
     private static String ehMemberPasswordHash; // EH會員密碼Hash
     private static int timeoutTimer; // 逾時計時器的倒數時間
+    private static int retryTimes; // 下載失敗重試次數
+    private static String openPicFileProgram; // 預設開啟圖片檔的程式
+    private static String openZipFileProgram; // 預設開啟壓縮檔的程式
     
     public static boolean assignDownloadPath;
     public static boolean autoCompress;
@@ -88,6 +92,9 @@ public class SetUp { // read setup file, and then setup
         keepBookmark = true; // 是否保留書籤
         keepRecord = true; // 是否保留記錄
         choiceAllVolume = false; // 是否預設勾選全部集數
+        retryTimes = 0;
+        openPicFileProgram = ""; // 預設開啟圖片檔的程式
+        openZipFileProgram = ""; // 預設開啟壓縮檔的程式
 
         proxyServer = ""; // 預設沒有掛上代理伺服器
         proxyPort = "";
@@ -160,6 +167,12 @@ public class SetUp { // read setup file, and then setup
                 + "\nehMemberPasswordHash = " + ehMemberPasswordHash
                 + "\n# 快速下載模式下的逾時計時器倒數秒數" 
                 + "\ntimeoutTimer = " + timeoutTimer
+                + "\n# 下載失敗重新嘗試下載的次數" 
+                + "\nretryTimes = " + retryTimes
+                + "\n# 預設開啟圖片檔的程式" 
+                + "\nopenPicFileProgram = " + openPicFileProgram
+                + "\n# 預設開啟壓縮檔的程式" 
+                + "\nopenZipFileProgram = " + openZipFileProgram
                 + "\n";
 
         Common.outputFile( setString, "", setFileName );
@@ -191,6 +204,9 @@ public class SetUp { // read setup file, and then setup
         Common.debugPrintln( "ehMemberID = " + ehMemberID );
         Common.debugPrintln( "ehMemberPasswordHash = " + ehMemberPasswordHash );
         Common.debugPrintln( "timeoutTimer = " + timeoutTimer );
+        Common.debugPrintln( "retryTimes = " + retryTimes );
+        Common.debugPrintln( "openPicFileProgram = " + openPicFileProgram );
+        Common.debugPrintln( "openZipFileProgram = " + openZipFileProgram );
         Common.debugPrintln( "-----------------------" );
     }
 
@@ -216,6 +232,9 @@ public class SetUp { // read setup file, and then setup
         boolean existSettingFileDirectory = false;
         boolean existTimeoutTimer = false;
         boolean existChoiceAllVolume = false;
+        boolean existRetryTimes = false;
+        boolean existOpenPicFileProgram = false;
+        boolean existOpenZipFileProgram = false;
         
         for ( int i = 0 ; i < lines.length ; i++ ) {
             try {
@@ -359,6 +378,17 @@ public class SetUp { // read setup file, and then setup
                     } else if ( split[0].equals( "timeoutTimer" ) ) {
                         existTimeoutTimer = true;
                         setTimeoutTimer( Integer.parseInt( split[1] ) );
+                    } else if ( split[0].equals( "retryTimes" ) ) {
+                        existRetryTimes = true;
+                        setTimeoutTimer( Integer.parseInt( split[1] ) );
+                    } else if ( split[0].equals( "openPicFileProgram" ) ) {
+                        existOpenPicFileProgram = true;
+                        if ( split.length > 1 )
+                            setOpenPicFileProgram( split[1] );
+                    } else if ( split[0].equals( "openZipFileProgram" ) ) {
+                        existOpenZipFileProgram = true;
+                        if ( split.length > 1 )
+                            setOpenZipFileProgram( split[1] );
                     }
                 }
             } catch ( Exception ex ) {
@@ -374,7 +404,8 @@ public class SetUp { // read setup file, and then setup
             existDefaultFontName && existDefaultFontSize &&
             existEhMemberID && existEhMemberPasswordHash &&
             existSettingFileDirectory && existTimeoutTimer &&
-            existChoiceAllVolume ) {
+            existChoiceAllVolume && existRetryTimes &&
+            existOpenPicFileProgram && existOpenZipFileProgram ) {
             Common.debugPrintln( "設定檔全部讀取完畢" );
         } else {
             Common.debugPrintln( "設定檔缺乏新版參數! 套用預設值!" );
@@ -592,7 +623,27 @@ public class SetUp { // read setup file, and then setup
         timeoutTimer = timer;
     } 
     
+    public static int getRetryTimes() {
+        return retryTimes;
+    }
+    public static void setRetryTimes( int times ) {
+        retryTimes = times;
+    } 
+
+    public static String getOpenPicFileProgram() {
+        return openPicFileProgram;
+    }
+    public static void setOpenPicFileProgram( String program ) {
+        openPicFileProgram = program;
+    }
     
+    public static String getOpenZipFileProgram() {
+        return openZipFileProgram;
+    }
+    public static void setOpenZipFileProgram( String program ) {
+        openZipFileProgram = program;
+    }
+
     
     // ----------------------------------------------------------------
     
