@@ -133,8 +133,11 @@ public class ParseGooglePic extends ParseOnlineComicSite {
                     }
 
                     if ( choice == 0 ) {
-                        String newPicName = Common.getStoredFileName( Common.tempDirectory, picName.split( "\\." )[0], picName.split( "\\." )[1] );
-
+                        String newPicName = "";
+                        if ( picName.split( "\\." ).length > 1 )
+                            newPicName = Common.getStoredFileName( Common.tempDirectory, picName.split( "\\." )[0], picName.split( "\\." )[1] );
+                        else
+                            newPicName = Common.getStoredFileName( Common.tempDirectory, picName, "jpg" );
                         singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, newPicName, 0, true );
                     } else if ( choice == 1 ); else if ( choice == 2 ) {
                         new File( getDownloadDirectory() + picName ).delete();

@@ -242,7 +242,7 @@ public class Common {
     public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
             boolean needCookie, String cookieString, boolean fastMode, int retryTimes ) {
         // downlaod file by URL
-        
+
         int fileGotSize = 0;
 
         if ( CommonGUI.stateBarDetailMessage == null ) {
@@ -276,6 +276,13 @@ public class Common {
                     return;
                 }
 
+                // google圖片下載時因為有些連線很久沒回應，所以要設置計時器，預防連線時間過長
+                Timer timer = new Timer();
+                if ( SetUp.getTimeoutTimer() > 0 ) {
+                    // 預設(getTimeoutTimer()*1000)秒會timeout
+                    timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 );
+                }
+
                 tryConnect( connection );
 
                 int fileSize = connection.getContentLength() / 1000;
@@ -302,23 +309,16 @@ public class Common {
                 OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
                 InputStream is = connection.getInputStream();
 
-                
+
                 Common.debugPrint( "(" + fileSize + " k) " );
                 String fileSizeString = fileSize > 0 ? "" + fileSize : " ? ";
-
-                // google圖片下載時因為有些連線很久沒回應，所以要設置計時器，預防連線時間過長
-                Timer timer = new Timer();
-                if ( fastMode ) {
-                    // 預設(getTimeoutTimer()*100)秒會timeout
-                    timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 );
-                }
 
                 byte[] r = new byte[1024];
                 int len = 0;
 
                 while ( (len = is.read( r )) > 0 && Run.isAlive ) {
                     // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
-                    if ( fileSize > 1024 || !Flag.timeoutFlag || !fastMode ) // 預防卡住的機制
+                    if ( fileSize > 1024 || !Flag.timeoutFlag ) // 預防卡住的機制
                     {
                         os.write( r, 0, len );
                     } else {
@@ -354,35 +354,34 @@ public class Common {
                 }
 
                 connection.disconnect();
-                
-                
+
+
                 // 若真實下載檔案大小比預估來得小，則視設定值決定要重新嘗試幾次
-                int realFileGotSize = ( int ) new File( outputDirectory + outputFileName ).length() / 1000;
+                int realFileGotSize = (int) new File( outputDirectory + outputFileName ).length() / 1000;
                 if ( realFileGotSize + 1 < fileGotSize && retryTimes > 0 ) {
-                    String messageString = realFileGotSize + " < " + fileGotSize + 
-                            " -> 等待兩秒後重新嘗試下載" + outputFileName + "（" + retryTimes +
-                            "/" + SetUp.getRetryTimes() +  "）";
+                    String messageString = realFileGotSize + " < " + fileGotSize
+                            + " -> 等待兩秒後重新嘗試下載" + outputFileName + "（" + retryTimes
+                            + "/" + SetUp.getRetryTimes() + "）";
                     Common.debugPrintln( messageString );
                     ComicDownGUI.stateBar.setText( messageString );
                     Thread.sleep( 2000 ); // 每次暫停一秒再重新連線
-                    
-                    downloadFile( webSite, outputDirectory, outputFileName, 
+
+                    downloadFile( webSite, outputDirectory, outputFileName,
                             needCookie, cookieString, fastMode, retryTimes - 1 );
-                    
-                    
+
+
                 }
 
-                if ( fileSize < 1024 && Flag.timeoutFlag && fastMode ) {
+                if ( fileSize < 1024 && Flag.timeoutFlag ) {
                     new File( outputDirectory + outputFileName ).delete();
                     Common.debugPrintln( "刪除不完整檔案：" + outputFileName );
 
                     ComicDownGUI.stateBar.setText( "下載逾時，跳過" + outputFileName );
-                    
+
                 }
 
-                if ( fastMode )
-                    timer.cancel(); // 連線結束同時也關掉計時器
-                
+                timer.cancel(); // 連線結束同時也關掉計時器
+
                 Flag.timeoutFlag = false; // 歸回初始值
 
                 Common.debugPrintln( webSite + " downloads successful!" ); // for debug
@@ -440,7 +439,7 @@ public class Common {
             }
         } catch ( Exception ex ) {
             try {
-                if ( connection.getResponseCode() != 200 ) {
+                if ( connection.getResponseCode() != 200 && !Flag.timeoutFlag ) {
                     try {
                         Thread.sleep( 1000 ); // 每次暫停一秒再重新連線
                     } catch ( InterruptedException iex ) {

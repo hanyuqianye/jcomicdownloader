@@ -59,7 +59,7 @@ public class OptionFrame extends JFrame {
     public static JFrame optionFrame; // use by other frame
     private JFrame thisFrame; // use by self
     
-    private JSlider retryTimesSlider;
+    private JSlider retryTimesSlider, timeoutSlider;
     private JTabbedPane tabbedPane;
     private String tabLogoName = "tab_option.png";
     private JLabel viewPicFileLabel;
@@ -274,15 +274,31 @@ public class OptionFrame extends JFrame {
         retryTimesSlider.setPaintLabels(true);
         retryTimesSlider.setValue( SetUp.getRetryTimes() );
         retryTimesSlider.setToolTipText( "通常下載失敗是伺服器異常或網路速度過慢所致，立即重試的成功機率其實不高" );
-        
+
         JPanel retryTimesPortPanel = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
         retryTimesPortPanel.add( retryTimesLabel );
         retryTimesPortPanel.add( retryTimesSlider );
+        
+        JLabel timeoutLabel = getLabel( "連線逾時時間：" );
+        timeoutLabel.setToolTipText( "超過此時間會中斷此連線，直接下載下一個檔案，建議只在下載GOOGLE圖片時使用，其他時候建議設為0，代表沒有逾時限制" );
+        timeoutSlider = new JSlider( JSlider.HORIZONTAL, 0, 100, 10 );
+        timeoutSlider.addChangeListener( new SliderHandler() );
+        timeoutSlider.setMajorTickSpacing(20);
+        //timeoutSlider.setPaintTicks(true);
+        timeoutSlider.setPaintLabels(true);
+        timeoutSlider.setValue( SetUp.getTimeoutTimer() );
+        timeoutSlider.setToolTipText( "超過此時間會中斷此連線，直接下載下一個檔案，建議只在下載GOOGLE圖片時使用，其他時候建議設為0，代表沒有逾時限制" );
+
+        JPanel timeoutPanel = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        timeoutPanel.add( timeoutLabel );
+        timeoutPanel.add( timeoutSlider );
+        
         
         JPanel connectionPanel = new JPanel( new GridLayout( 6, 1, 2, 2 ) );
         connectionPanel.add( proxyServerPanel );
         connectionPanel.add( proxyPortPanel );
         connectionPanel.add( retryTimesPortPanel );
+        connectionPanel.add( timeoutPanel );
 
         panel.add( connectionPanel );
     }
@@ -487,6 +503,7 @@ public class OptionFrame extends JFrame {
                 SetUp.setProxyPort( proxyPortTextField.getText() );
                 
                 SetUp.setRetryTimes( retryTimesSlider.getValue() ); // 設定重新嘗試次數
+                SetUp.setTimeoutTimer( timeoutSlider.getValue() ); // 設定逾時時間
                 
                 SetUp.setOriginalDownloadDirectory( dirTextField.getText() ); // 紀錄到設定值
                 SetUp.setOpenPicFileProgram( viewPicFileTextField.getText() ); // 紀錄到設定值

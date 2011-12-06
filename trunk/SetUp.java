@@ -110,7 +110,7 @@ public class SetUp { // read setup file, and then setup
         ehMemberID = "0";
         ehMemberPasswordHash = "NULL";
         
-        timeoutTimer = 100;
+        timeoutTimer = 0;
 
         Common.closeHttpProxy(); // 預設為關閉代理伺服器。
     }
@@ -165,7 +165,7 @@ public class SetUp { // read setup file, and then setup
                 + "\nehMemberID = " + ehMemberID
                 + "\n# EH會員密碼Hash" 
                 + "\nehMemberPasswordHash = " + ehMemberPasswordHash
-                + "\n# 快速下載模式下的逾時計時器倒數秒數" 
+                + "\n# 逾時計時器倒數秒數（0代表不限）" 
                 + "\ntimeoutTimer = " + timeoutTimer
                 + "\n# 下載失敗重新嘗試下載的次數" 
                 + "\nretryTimes = " + retryTimes
@@ -380,7 +380,7 @@ public class SetUp { // read setup file, and then setup
                         setTimeoutTimer( Integer.parseInt( split[1] ) );
                     } else if ( split[0].equals( "retryTimes" ) ) {
                         existRetryTimes = true;
-                        setTimeoutTimer( Integer.parseInt( split[1] ) );
+                        setRetryTimes( Integer.parseInt( split[1] ) );
                     } else if ( split[0].equals( "openPicFileProgram" ) ) {
                         existOpenPicFileProgram = true;
                         if ( split.length > 1 )

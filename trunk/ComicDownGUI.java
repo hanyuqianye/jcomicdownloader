@@ -9,11 +9,12 @@ Last Modified : 2011/12/6
 ChangeLog:
  * 2.03: 1. 新增對www.iibq.com的支援。
  *      2. 增加可用外部程式開啟漫畫的選項。
- *      3. 增加下載失敗後重新嘗試次數(retryTimes)的選項
- *      4. 修復nanadm有些第一集無法解析的bug。
- *      5. 因應dmeden轉換位址進行解析修正（dmeden.net <-> www.dmeden.com）
- *      6. 因應改版後的mangaFox進行解析修正
- *      7. 修改選項視窗為多面板界面。
+ *      3. 增加逾時倒數時間設定的選項。
+ *      4. 增加下載失敗後重新嘗試次數(retryTimes)的選項
+ *      5. 修復nanadm有些第一集無法解析的bug。
+ *      6. 因應dmeden轉換位址進行解析修正（dmeden.net <-> www.dmeden.com）
+ *      7. 因應改版後的mangaFox進行解析修正
+ *      8. 修改選項視窗為多面板界面。
  * 2.02: 1. 新增對www.citymanga.com的支援。
  *      2. 修復kuku網址轉碼部份發生錯誤的bug。
  *      3. 修復92wy部分集數無法讀取的bug。
