@@ -265,7 +265,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         button[ButtonEnum.ADD] = getButton( "加入", "add.png" );
         button[ButtonEnum.DOWNLOAD] = getButton( "下載", "download.png" );
-        button[ButtonEnum.STOP] = getButton( "停止", "add.png" );
+        button[ButtonEnum.STOP] = getButton( "停止", "stop.png" );
         button[ButtonEnum.CLEAR] = getButton( "清除", "clear.png" );
         button[ButtonEnum.OPTION] = getButton( "選項", "option.png" );
         button[ButtonEnum.INFORMATION] = getButton( "資訊", "information.png" );

@@ -285,9 +285,16 @@ public class ParseEH extends ParseOnlineComicSite {
             urlList.add( urlString );
             String titleString = getTitleOnSingleVolumePageByAllPageString( allPageString );
             if ( titleString.matches( "Gallery Not Available" ) ) {
-                JOptionPane.showMessageDialog( ComicDownGUI.mainFrame,
+                
+                if ( urlString.matches( "(?s).*exhentai.org(?s).*" ) ) {
+                    JOptionPane.showMessageDialog( ComicDownGUI.mainFrame,
                         "解析錯誤，判斷是輸入有問題，因此重置ID和Hash值，請再一次選擇集數！", "提醒訊息", JOptionPane.ERROR_MESSAGE );
-                ParseEX.initialIDandPasswordHash();
+                    ParseEX.initialIDandPasswordHash();
+                }
+                else {
+                    JOptionPane.showMessageDialog( ComicDownGUI.mainFrame,
+                        "此頁面已被刪除或搬移，無法下載！", "提醒訊息", JOptionPane.ERROR_MESSAGE );
+                }
             }
 
             volumeList.add( getTitleOnSingleVolumePageByAllPageString( allPageString ) );
