@@ -183,8 +183,8 @@ public class ParseWY extends ParseOnlineComicSite {
 
                 // 取得單集名稱
                 String volumeTitle = tokens[i + 4];
-                volumeList.add( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( volumeTitle.trim() ) ) );
+                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                        Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
 
                 volumeCount++;
             }

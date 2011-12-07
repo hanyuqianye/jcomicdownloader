@@ -216,7 +216,7 @@ public class ParseEC extends ParseOnlineComicSite {
                 // 取得單集名稱
                 volumeTitle = Common.getStringRemovedIllegalChar( 
                     Common.getTraditionalChinese( tempStrings[i+1].trim() ) );
-                volumeList.add( volumeTitle );
+                volumeList.add( getVolumeWithFormatNumber( volumeTitle ) );
                 
                 if ( ++ nowVolume >= totalVolume )
                     break;

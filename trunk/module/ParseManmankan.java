@@ -154,8 +154,8 @@ public class ParseManmankan extends ParseOnlineComicSite {
                 urlList.add( tokens[i+1] );
                 
                 // 取得單集名稱
-                volumeList.add( Common.getStringRemovedIllegalChar( 
-                        Common.getTraditionalChinese( tokens[i+5].trim() ) ) );
+                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar( 
+                        Common.getTraditionalChinese( tokens[i+5].trim() ) ) ) );
             }
         }
         

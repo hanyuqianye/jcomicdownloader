@@ -167,8 +167,8 @@ public class ParseJumpcn extends ParseOnlineComicSite {
 
                 // 取得單集名稱
                 String volumeTitle = tokens[i + 7];
-                volumeList.add( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( volumeTitle.trim() ) ) );
+                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                        Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
 
                 //Common.debugPrintln( baseURL + tokens[i+1] + " " + volumeTitle );                
 

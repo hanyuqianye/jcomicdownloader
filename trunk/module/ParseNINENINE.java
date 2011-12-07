@@ -250,7 +250,8 @@ public class ParseNINENINE extends ParseOnlineComicSite {
 
             String title = allPageString.substring( volumeBeginIndex, volumeEndIndex );
 
-            volumeList.add( Common.getStringRemovedIllegalChar( title ) );
+            volumeList.add( getVolumeWithFormatNumber( 
+                    Common.getStringRemovedIllegalChar( title ) ) );
 
             index = volumeEndIndex;
         }

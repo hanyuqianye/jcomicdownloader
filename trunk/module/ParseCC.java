@@ -116,7 +116,9 @@ public class ParseCC extends ParseOnlineComicSite {
         NumberFormat formatter = new DecimalFormat( zeroNumber );
 
         if ( !Common.urlIsOK( picDir + formatter.format( radixNumber ) + formatter.format( 1 ) + ".jpg" ) )
-            radixNumber = 19527; // 可能還有其他例外情形，暫時先擋著
+            radixNumber = 19527; // 18527不行就換19527
+        if ( !Common.urlIsOK( picDir + formatter.format( radixNumber ) + formatter.format( 1 ) + ".jpg" ) )
+            radixNumber = 18828; // 19527不行就換18828
             
         for ( int i = 1; i <= totalPage; i ++ ) {
             String frontName = formatter.format( i * radixNumber );
@@ -218,7 +220,7 @@ public class ParseCC extends ParseOnlineComicSite {
             endIndex = lines[urlIndex].indexOf( "<", beginIndex );
 
             String volumeTitle = Common.getTraditionalChinese( lines[urlIndex].substring( beginIndex + 1, endIndex ) );
-            volumeList.add( volumeTitle );
+            volumeList.add( getVolumeWithFormatNumber( volumeTitle ) );
             Common.debugPrint( volumeTitle + "  " );
         }
 

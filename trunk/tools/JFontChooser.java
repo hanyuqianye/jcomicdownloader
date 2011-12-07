@@ -3,6 +3,7 @@ package jcomicdownloader.tools;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
@@ -231,7 +232,7 @@ public class JFontChooser extends JComponent {
         //        GridBagConstraints.WEST, GridBagConstraints.NONE,
         //        ins, 0, 0 ) );
 
-        previewLabel = new JLabel( "" );
+        previewLabel = new JLabel( "預覽字體區" );
         previewLabel.setHorizontalAlignment( JLabel.CENTER );
         previewLabel.setVerticalAlignment( JLabel.CENTER );
         add( new JScrollPane( previewLabel ), new GridBagConstraints( 0, 3, 2, 1, 1, 1,
@@ -499,6 +500,7 @@ class FontTracker implements ActionListener, Serializable {
 
     public FontTracker( JFontChooser c ) {
         chooser = c;
+
     }
 
     public void actionPerformed( ActionEvent e ) {
@@ -557,6 +559,7 @@ class DefaultFontSelectionModel implements FontSelectionModel {
         if ( selectedFont != null ) {
             this.selectedFont = selectedFont;
             fireChangeListeners();
+
         }
     }
 

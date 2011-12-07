@@ -123,7 +123,7 @@ public class SetUp { // read setup file, and then setup
                 + "\ndownloadDirectory = " + originalDownloadDirectory
                 + "\n# 暫存檔位置"
                 + "\ntempDirectory = " + tempDirectory
-                + "\n# 設定檔和紀錄檔位置"
+                + "\n# 紀錄檔位置"
                 + "\nrecordFileDirectory = " + recordFileDirectory
                 + "\n# 下載完畢後自動產生壓縮檔"
                 + "\nautoCompress = " + autoCompress
@@ -443,6 +443,13 @@ public class SetUp { // read setup file, and then setup
     }
     public static void setRecordFileDirectory( String dir ) {
         recordFileDirectory = dir;
+    }
+    
+    public static String getTempFileDirectory() {
+        return tempDirectory;
+    }
+    public static void setTempFileDirectory( String dir ) {
+        tempDirectory = dir;
     }
 
     // 設置版面

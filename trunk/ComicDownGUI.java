@@ -7,6 +7,12 @@ Version  : v2.03
 Last Modified : 2011/12/6
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.04: 1. 增加選擇紀錄檔和暫存資料夾的選項。
+ *      2. 修改下拉式介面選單的渲染機制，使其可改變字型。 
+ *      3. 修改集數名稱命名機制，將裡面的數字格式化（ex. 第3回 -> 第003回），以方便排序。
+ *      4. 增加選擇字型時可以預覽字型的功能。
+ *      5. 修復部份CC漫畫解析錯誤的bug。
+ * 
  * 2.03: 1. 新增對www.iibq.com的支援。
  *      2. 增加可用外部程式開啟漫畫的選項。
  *      3. 增加逾時倒數時間設定的選項。
@@ -178,7 +184,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.03" );
+        super( "JComicDownloader  v2.04" );
 
         minimizeEvent();
         initTrayIcon();
@@ -1112,7 +1118,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         if ( SetUp.getOpenPicFileProgram().matches( "" ) ) {
             JOptionPane.showMessageDialog( this,
-                    "<html>尚未設定開啟程式，請前往<font color=blue>選項 -> 瀏覽相關</font>做設定</html>",
+                    "<html>尚未設定開啟程式，請前往<font color=blue>選項 -> 瀏覽</font>做設定</html>",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
         }

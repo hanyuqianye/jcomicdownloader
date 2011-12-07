@@ -204,8 +204,8 @@ public class ParseNANA extends ParseOnlineComicSite {
                     volumeTitle = tokens[i + 4];
                 }
 
-                volumeList.add( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( volumeTitle.trim() ) ) );
+                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                        Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
 
                 volumeCount++;
             }

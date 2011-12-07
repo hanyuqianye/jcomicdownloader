@@ -190,8 +190,8 @@ public class ParseXindm extends ParseOnlineComicSite {
                 urlList.add( tokens[i] );
 
                 // 取得單集名稱
-                volumeList.add( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( tokens[i + 4].trim() ) ) );
+                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                        Common.getTraditionalChinese( tokens[i + 4].trim() ) ) ) );
 
                 volumeCount++;
             }

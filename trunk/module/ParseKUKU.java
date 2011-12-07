@@ -201,7 +201,8 @@ public class ParseKUKU extends ParseOnlineComicSite {
                          line.substring( beginIndex, endIndex ).length() > 2 &&
                          endIndex > 0 ) {
                         //System.out.println( Common.getTraditionalChinese( line.substring( beginIndex + 1, endIndex ) ) );
-                        volumeList.add( Common.getTraditionalChinese( line.substring( beginIndex + 1, endIndex ) ) );
+                        volumeList.add( getVolumeWithFormatNumber( 
+                                Common.getTraditionalChinese( line.substring( beginIndex + 1, endIndex ) ) ) );
                     }
 
                     endIndex = line.indexOf( "</A>", preEndIndex + 1 );
