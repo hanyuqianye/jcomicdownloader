@@ -3,10 +3,15 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v2.03
-Last Modified : 2011/12/6
+Version  : v2.05
+Last Modified : 2011/12/9
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.05: 1. 修改選項視窗，明確顯示失敗重傳次數和連線逾時時間（因為linux系統下無法看到刻度）。
+ *      2. 修復Linux系統下無法開啟檔案的bug。
+ *      3. 修復無法開啟壓縮檔的bug。（預設開啟圖片和壓縮檔為同個程式）
+ *      4. 修復暫存資料夾路徑無法改變的bug。
+ *
  * 2.04: 1. 增加選擇紀錄檔和暫存資料夾的選項。
  *      2. 修改下拉式介面選單的渲染機制，使其可改變字型。 
  *      3. 修改集數名稱命名機制，將裡面的數字格式化（ex. 第3回 -> 第003回），以方便排序。
@@ -184,7 +189,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.04" );
+        super( "JComicDownloader  v2.05" );
 
         minimizeEvent();
         initTrayIcon();
@@ -867,8 +872,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 // 任何時候都能開啟下載資料夾
                 if ( col == DownTableEnum.TITLE ) {
                     openDownloadDirectory( row );
-                }
-                else if ( col == DownTableEnum.STATE ) {
+                } else if ( col == DownTableEnum.STATE ) {
                     openDownloadFile( row );
                 }
 
@@ -1140,21 +1144,124 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Common.debugPrintln( "以外部程式開啟" + title + "的下載資料夾或壓縮檔" );
 
         if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" ) ) {
-            System.out.println( "\"" + SetUp.getOpenZipFileProgram() + "\" " + SetUp.getOriginalDownloadDirectory() + title + ".zip" );
+            String cmd = SetUp.getOpenZipFileProgram();
+            String path = "";
+
             if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".zip" ).exists() ) {
-                runUnansiCmd( SetUp.getOpenPicFileProgram(), SetUp.getOriginalDownloadDirectory() + title + ".zip" );
+                path = SetUp.getOriginalDownloadDirectory() + title + ".zip";
+                Common.debugPrintln( "開啟命令：" + cmd + " " + path );
+
+                if ( Common.isWindows() ) {
+                    runUnansiCmd( cmd, path );
+                } else {
+                    try {
+                        String[] cmds = new String[] { cmd, path };
+                        Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
+                    } catch ( IOException ex ) {
+                        Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+                    }
+                }
             } else {
-                runUnansiCmd( SetUp.getOpenPicFileProgram(), SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+                path = SetUp.getOriginalDownloadDirectory() + title + Common.getSlash();
+
+                if ( !new File( path ).exists() ) {
+                    JOptionPane.showMessageDialog( this, "<html><font color=blue>"
+                            + path + "</font>" + "不存在，無法開啟</html>",
+                            "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                    return;
+                }
+
+                if ( Common.isWindows() ) {
+                    Common.debugPrintln( "開啟命令：" + cmd + " " + path );
+                    runUnansiCmd( cmd, path );
+                } else {
+                    String[] picList = new File( path ).list();
+                    String firstPicFileInFirstVolume = picList[0];
+                    path += firstPicFileInFirstVolume;
+
+                    Common.debugPrintln( "開啟命令：" + cmd + " " + path );
+
+                    try {
+                        String[] cmds = new String[] { cmd, path };
+                        Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
+                    } catch ( IOException ex ) {
+                        Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+                    }
+                }
             }
+
         } else {
-            runUnansiCmd( SetUp.getOpenPicFileProgram(), SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+            if ( Common.isWindows() ) {
+                runUnansiCmd( SetUp.getOpenPicFileProgram(),
+                        SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+            } else {
+                runCmd( SetUp.getOpenPicFileProgram(),
+                        SetUp.getOriginalDownloadDirectory() + title );
+            }
         }
 
+    }
+
+    // 非windows系統時的操作
+    private void runCmd( String program, String file ) {
+        String path = file;
+        String cmd = program;
+
+        // 檔案不存在就只顯示訊息而不繼續操作
+        if ( !new File( file ).exists() ) {
+            JOptionPane.showMessageDialog( this, "<html><font color=blue>"
+                    + file + "</font>" + "不存在，無法開啟</html>",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
+
+        String[] fileList = new File( file ).list();
+        System.out.println( file );
+
+        String firstZipFileName = "";
+        boolean existZipFile = false;
+        for ( int i = 0 ; i < fileList.length ; i++ ) {
+            System.out.println( "FILE: " + fileList[i] );
+            if ( fileList[i].matches( "(?s).*\\.zip" ) ) {
+                firstZipFileName = fileList[i];
+                existZipFile = true;
+                break;
+            }
+        }
+
+
+        if ( existZipFile ) {
+            // 資料夾內存在壓縮檔
+            path = file + Common.getSlash() + firstZipFileName;
+        } else {
+            String[] picList = new File( file + Common.getSlash() + fileList[0] ).list();
+            String firstPicFileInFirstVolume = picList[0];
+            path = file + Common.getSlash() + fileList[0]
+                    + Common.getSlash() + firstPicFileInFirstVolume;
+        }
+
+        Common.debugPrintln( "開啟命令：" + cmd + path );
+
+        try {
+            String[] cmds = new String[] { cmd, path };
+            Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
+            //Runtime.getRuntime().exec(cmd + path);
+
+        } catch ( IOException ex ) {
+            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+        }
     }
 
     // 解決非ANSI字會變成？而無法使用程式開啟的問題
     // 出處：http://stackoverflow.com/questions/1876507/java-runtime-exec-on-windows-fails-with-unicode-in-arguments
     private void runUnansiCmd( String program, String file ) {
+
+        if ( !new File( file ).exists() ) {
+            JOptionPane.showMessageDialog( this, "<html><font color=blue>"
+                    + file + "</font>" + "不存在，無法開啟</html>",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
 
         String[] cmd = new String[] { program, file };
         Map<String, String> newEnv = new HashMap<String, String>();
@@ -1644,29 +1751,26 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         }
         if ( event.getSource() == button[ButtonEnum.OPTION] ) { // button of Option
-
-            //new Thread( new Runnable() { public void run() {
-            javax.swing.SwingUtilities.invokeLater( new Runnable() {
+            // 用javax.swing.SwingUtilities.invokeLater反而很頓......
+            new Thread( new Runnable() {
 
                 public void run() {
                     new OptionFrame();
                 }
-            } );
+            } ).start();
         }
         if ( event.getSource() == button[ButtonEnum.INFORMATION] ) { // button of Information
-            javax.swing.SwingUtilities.invokeLater( new Runnable() {
-
+            new Thread( new Runnable() {
                 public void run() {
                     final InformationFrame frame = new InformationFrame();
 
-                    javax.swing.SwingUtilities.invokeLater( new Runnable() {
-
+                    new Thread( new Runnable() {
                         public void run() {
-                            frame.setNewestVersion();
+                            frame.setNewestVersion(); // 更新版本資訊
                         }
-                    } );
+                    } ).start();
                 }
-            } );
+            } ).start();
         }
         if ( event.getSource() == button[ButtonEnum.CLEAR] ) { // button of CLEAR
             int choice = JOptionPane.showConfirmDialog( this, "請問是否要將目前內容全部清空？",
@@ -1696,7 +1800,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 Run.isAlive = false;
                 Common.debugPrintln( "刪除所有暫存檔案" );
-                Common.deleteFolder( Common.tempDirectory ); // 刪除暫存檔
+                Common.deleteFolder( SetUp.getTempDirectory() ); // 刪除暫存檔
                 Common.debugPrintln( "Exit JComicDownloader ... " );
 
                 System.exit( 0 );

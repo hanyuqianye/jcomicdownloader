@@ -33,8 +33,8 @@ public class ParseCC extends ParseOnlineComicSite {
  */
     public ParseCC() {
         siteID = Site.CC;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_kuku_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_kuku_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kuku_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kuku_encode_parse_", "html" );
 
         jsName = "index_cc.js";
         radixNumber = 18527; // 大部份的值，後來也發現有少數19527
@@ -49,13 +49,13 @@ public class ParseCC extends ParseOnlineComicSite {
 
     @Override
     public void setParameters() { // let all the non-set attributes get values
-        Common.downloadFile( webSite, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
 
-        Common.downloadFile( webSite + "index.js", Common.tempDirectory, jsName, false, "" );
+        Common.downloadFile( webSite + "index.js", SetUp.getTempDirectory(), jsName, false, "" );
         Common.debugPrintln( "開始解析各參數 :" );
         try {
-            BufferedReader br = Common.getBufferedReader( Common.tempDirectory + jsName );
+            BufferedReader br = Common.getBufferedReader( SetUp.getTempDirectory() + jsName );
 
             String line = br.readLine(); // it is only one line
 
@@ -83,7 +83,7 @@ public class ParseCC extends ParseOnlineComicSite {
         Common.debugPrintln( "作品名稱(title) : " + title );
 
 
-        String tempStr = Common.getFileString( Common.tempDirectory, indexEncodeName );
+        String tempStr = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         String[] lines = tempStr.split( "\n" );
 
         int wholeTitleIndex = 0;
@@ -143,13 +143,13 @@ public class ParseCC extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_CC_", "html" );
-        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_CC_encode_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_CC_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_CC_encode_", "html" );
 
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
 
-        return Common.getFileString( Common.tempDirectory, indexEncodeName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }
 
     @Override
@@ -232,8 +232,8 @@ public class ParseCC extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
     
     @Override

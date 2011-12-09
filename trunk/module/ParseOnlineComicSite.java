@@ -109,7 +109,7 @@ abstract public class ParseOnlineComicSite {
 
     public void deleteTempFile( String[] tempFileNames ) {
         for ( int i = 0 ; i < tempFileNames.length ; i++ ) {
-            Common.deleteFile( Common.tempDirectory, tempFileNames[i] );
+            Common.deleteFile( SetUp.getTempDirectory(), tempFileNames[i] );
         }
     }
 

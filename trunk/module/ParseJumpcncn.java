@@ -32,8 +32,8 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
  */
     public ParseJumpcncn() {
         siteID = Site.JUMPCNCN;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_jumpcn_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_jumpcn_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_encode_parse_", "html" );
 
         jsName = "index_jumpcn.js";
         radixNumber = 185271; // default value, not always be useful!!
@@ -52,11 +52,11 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
-        Common.downloadFile( webSite, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
             
         
-        String allPageString = Common.getFileString( Common.tempDirectory, indexEncodeName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
 
         String[] tokens = allPageString.split( "\\d*>\\d*|\\d*<\\d*" );
 
@@ -80,7 +80,7 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
     @Override
     public void parseComicURL() { // parse URL and save all URLs in comicURL
         // 先取得前面的下載伺服器網址
-        String[] lines = Common.getFileStrings( Common.tempDirectory, indexName );
+        String[] lines = Common.getFileStrings( SetUp.getTempDirectory(), indexName );
         
         // ex. http://www.jumpcn.com.cn/comic/2749/33313/
         
@@ -91,8 +91,8 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
         Common.debugPrintln( "漫畫代號為：" + idString );
         
         Common.debugPrint( "開始解析這一集有幾頁 :" );
-        Common.downloadFile( webSite + "index.js", Common.tempDirectory, jsName, false, "" );
-        String allJsPageString = Common.getFileString( Common.tempDirectory, jsName );
+        Common.downloadFile( webSite + "index.js", SetUp.getTempDirectory(), jsName, false, "" );
+        String allJsPageString = Common.getFileString( SetUp.getTempDirectory(), jsName );
         String[] jsTokens = allJsPageString.split( "=|;" ); // ex. var total=23;
         for ( int i = 0; i < jsTokens.length; i ++ ) {
             if ( jsTokens[i].matches( "(?s).*total" ) ) {
@@ -105,7 +105,7 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
         
         Common.debugPrintln( "取得圖片網址父目錄 :" );
         /*
-        String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
         beginIndex = allPageString.indexOf( "/Scripts/picshow.js" );
         endIndex = allPageString.indexOf( "\"", beginIndex );
@@ -150,13 +150,13 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_jumpcn_", "html" );
-        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_jumpcn_encode_", "html" );    
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_encode_", "html" );
         
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
 
-        return Common.getFileString( Common.tempDirectory, indexEncodeName ); 
+        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }
 
     @Override
@@ -241,8 +241,8 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
     
     @Override

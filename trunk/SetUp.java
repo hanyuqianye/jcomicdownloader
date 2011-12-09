@@ -42,7 +42,6 @@ public class SetUp { // read setup file, and then setup
     private static boolean keepBookmark; // 是否保留書籤
     private static boolean keepRecord; // 是否保留記錄
     private static boolean choiceAllVolume; // 是否預設勾選全部集數
-    
     private static String defaultFontName; // 使用者字型名稱（若沒設就直接用系統預設）
     private static int defaultFontSize; // 使用者字型大小（若沒設就直接用系統預設）
     private static String ehMemberID; // EH會員ID
@@ -51,7 +50,6 @@ public class SetUp { // read setup file, and then setup
     private static int retryTimes; // 下載失敗重試次數
     private static String openPicFileProgram; // 預設開啟圖片檔的程式
     private static String openZipFileProgram; // 預設開啟壓縮檔的程式
-    
     public static boolean assignDownloadPath;
     public static boolean autoCompress;
     public static boolean deleteOriginalPic;
@@ -106,10 +104,10 @@ public class SetUp { // read setup file, and then setup
         endVolume = 1;
         defaultFontName = new Font( null ).getName(); // 使用者字型名稱
         defaultFontSize = 18; // 使用者字型大小
-        
+
         ehMemberID = "0";
         ehMemberPasswordHash = "NULL";
-        
+
         timeoutTimer = 0;
 
         Common.closeHttpProxy(); // 預設為關閉代理伺服器。
@@ -161,28 +159,28 @@ public class SetUp { // read setup file, and then setup
                 + "\ndefaultFontName = " + defaultFontName
                 + "\n# 預設字體大小"
                 + "\ndefaultFontSize = " + defaultFontSize
-                + "\n# EH會員ID" 
+                + "\n# EH會員ID"
                 + "\nehMemberID = " + ehMemberID
-                + "\n# EH會員密碼Hash" 
+                + "\n# EH會員密碼Hash"
                 + "\nehMemberPasswordHash = " + ehMemberPasswordHash
-                + "\n# 逾時計時器倒數秒數（0代表不限）" 
+                + "\n# 逾時計時器倒數秒數（0代表不限）"
                 + "\ntimeoutTimer = " + timeoutTimer
-                + "\n# 下載失敗重新嘗試下載的次數" 
+                + "\n# 下載失敗重新嘗試下載的次數"
                 + "\nretryTimes = " + retryTimes
-                + "\n# 預設開啟圖片檔的程式" 
+                + "\n# 預設開啟圖片檔的程式"
                 + "\nopenPicFileProgram = " + openPicFileProgram
-                + "\n# 預設開啟壓縮檔的程式" 
+                + "\n# 預設開啟壓縮檔的程式"
                 + "\nopenZipFileProgram = " + openZipFileProgram
                 + "\n";
 
-        Common.outputFile( setString, "", setFileName );
+        Common.outputFile( setString, Common.getNowAbsolutePath(), setFileName );
     }
 
     // 印出目前設定值，除錯用
     public void showSetUpParameter() {
         Common.debugPrintln( "-----------------------" );
-        Common.debugPrintln( "downloadDirectory = " + Common.downloadDirectory );
-        Common.debugPrintln( "tempDirectory = " + Common.tempDirectory );
+        Common.debugPrintln( "downloadDirectory = " + originalDownloadDirectory );
+        Common.debugPrintln( "tempDirectory = " + tempDirectory );
         Common.debugPrintln( "recordFileDirectory = " + recordFileDirectory );
         Common.debugPrintln( "autoCompress = " + autoCompress );
         Common.debugPrintln( "deleteOriginalPic = " + deleteOriginalPic );
@@ -212,7 +210,8 @@ public class SetUp { // read setup file, and then setup
 
     // 讀入設定檔並依讀入資料來更新目前設定
     public void readSetFile() {
-        if ( !new File( setFileName ).exists() ) {
+        Common.debugPrintln( "SET路徑：" + Common.getNowAbsolutePath() + setFileName );
+        if ( !new File( Common.getNowAbsolutePath() + setFileName ).exists() ) {
             Common.debugPrintln( "找不到set.ini，故自動產生" );
             writeSetFile();
         }
@@ -235,39 +234,42 @@ public class SetUp { // read setup file, and then setup
         boolean existRetryTimes = false;
         boolean existOpenPicFileProgram = false;
         boolean existOpenZipFileProgram = false;
-        
+
         for ( int i = 0 ; i < lines.length ; i++ ) {
             try {
                 if ( lines[i].length() > 2 && !lines[i].matches( "(?s).*#(?s).*" ) ) {
                     String[] split = lines[i].split( "\\s*=\\s*" );
-                    
+
                     if ( split[0].equals( "downloadDirectory" ) ) {
                         String path = "";
                         // 如果最後已經有斜線，就不另外加斜線了
-                        if ( Common.getAbsolutePath( split[1] ).matches( "(?s).*" + Common.getRegexSlash() ) )
+                        if ( Common.getAbsolutePath( split[1] ).matches( "(?s).*" + Common.getRegexSlash() ) ) {
                             path = Common.getAbsolutePath( split[1] );
-                        else
+                        } else {
                             path = Common.getAbsolutePath( split[1] ) + Common.getSlash();
+                        }
 
-                        Common.downloadDirectory = originalDownloadDirectory = downloadDirectory = path;
+                        originalDownloadDirectory = downloadDirectory = path;
                     } else if ( split[0].equals( "tempDirectory" ) ) {
                         String path = "";
                         // 如果最後已經有斜線，就不另外加斜線了 
-                        if ( Common.getAbsolutePath( split[1] ).matches( "(?s).*" + Common.getRegexSlash() ) )
+                        if ( Common.getAbsolutePath( split[1] ).matches( "(?s).*" + Common.getRegexSlash() ) ) {
                             path = Common.getAbsolutePath( split[1] );
-                        else
+                        } else {
                             path = Common.getAbsolutePath( split[1] ) + Common.getSlash();
-                        
-                        Common.tempDirectory = tempDirectory = path;
+                        }
+
+                        setTempDirectory( path );
                     } else if ( split[0].equals( "recordFileDirectory" ) ) {
                         existSettingFileDirectory = true;
                         String path = "";
                         // 如果最後已經有斜線，就不另外加斜線了 
-                        if ( Common.getAbsolutePath( split[1] ).matches( "(?s).*" + Common.getRegexSlash() ) )
+                        if ( Common.getAbsolutePath( split[1] ).matches( "(?s).*" + Common.getRegexSlash() ) ) {
                             path = Common.getAbsolutePath( split[1] );
-                        else
+                        } else {
                             path = Common.getAbsolutePath( split[1] ) + Common.getSlash();
-                        
+                        }
+
                         recordFileDirectory = path;
                     } else if ( split[0].equals( "autoCompress" ) ) {
                         autoCompress = (new Boolean( split[1] )).booleanValue();
@@ -362,8 +364,7 @@ public class SetUp { // read setup file, and then setup
                         } else {
                             setChoiceAllVolume( false );
                         }
-                    } 
-                    else if ( split[0].equals( "defaultFontName" ) ) {
+                    } else if ( split[0].equals( "defaultFontName" ) ) {
                         existDefaultFontName = true;
                         setDefaultFontName( split[1] );
                     } else if ( split[0].equals( "defaultFontSize" ) ) {
@@ -383,12 +384,14 @@ public class SetUp { // read setup file, and then setup
                         setRetryTimes( Integer.parseInt( split[1] ) );
                     } else if ( split[0].equals( "openPicFileProgram" ) ) {
                         existOpenPicFileProgram = true;
-                        if ( split.length > 1 )
+                        if ( split.length > 1 ) {
                             setOpenPicFileProgram( split[1] );
+                        }
                     } else if ( split[0].equals( "openZipFileProgram" ) ) {
                         existOpenZipFileProgram = true;
-                        if ( split.length > 1 )
+                        if ( split.length > 1 ) {
                             setOpenZipFileProgram( split[1] );
+                        }
                     }
                 }
             } catch ( Exception ex ) {
@@ -398,14 +401,14 @@ public class SetUp { // read setup file, and then setup
             }
         }
 
-        if ( existAutoAddMission && 
-            existKeepBookmark && existKeepRecord && 
-            existProxyServer && existProxyPort && 
-            existDefaultFontName && existDefaultFontSize &&
-            existEhMemberID && existEhMemberPasswordHash &&
-            existSettingFileDirectory && existTimeoutTimer &&
-            existChoiceAllVolume && existRetryTimes &&
-            existOpenPicFileProgram && existOpenZipFileProgram ) {
+        if ( existAutoAddMission
+                && existKeepBookmark && existKeepRecord
+                && existProxyServer && existProxyPort
+                && existDefaultFontName && existDefaultFontSize
+                && existEhMemberID && existEhMemberPasswordHash
+                && existSettingFileDirectory && existTimeoutTimer
+                && existChoiceAllVolume && existRetryTimes
+                && existOpenPicFileProgram && existOpenZipFileProgram ) {
             Common.debugPrintln( "設定檔全部讀取完畢" );
         } else {
             Common.debugPrintln( "設定檔缺乏新版參數! 套用預設值!" );
@@ -437,18 +440,20 @@ public class SetUp { // read setup file, and then setup
     public static String getDownloadDirectory() {
         return downloadDirectory;
     }
-    
+
     public static String getRecordFileDirectory() {
         return recordFileDirectory;
     }
+
     public static void setRecordFileDirectory( String dir ) {
         recordFileDirectory = dir;
     }
-    
-    public static String getTempFileDirectory() {
+
+    public static String getTempDirectory() {
         return tempDirectory;
     }
-    public static void setTempFileDirectory( String dir ) {
+
+    public static void setTempDirectory( String dir ) {
         tempDirectory = dir;
     }
 
@@ -559,7 +564,7 @@ public class SetUp { // read setup file, and then setup
     public static boolean getKeepRecord() {
         return keepRecord;
     }
-    
+
     // 是否預設勾選全部集數
     public static void setChoiceAllVolume( boolean newChoiceAllVolume ) {
         choiceAllVolume = newChoiceAllVolume;
@@ -585,79 +590,84 @@ public class SetUp { // read setup file, and then setup
     public static void setProxyPort( String port ) {
         proxyPort = port;
     }
-    
+
     public static String getDefaultFontName() {
         return defaultFontName;
     }
+
     public static void setDefaultFontName( String fontName ) {
         defaultFontName = fontName;
     }
-    
+
     public static Font getDefaultFont() {
         return new Font( getDefaultFontName(), Font.PLAIN, getDefaultFontSize() );
     }
+
     public static Font getDefaultBoldFont() {
         return new Font( getDefaultFontName(), Font.BOLD, getDefaultFontSize() );
     }
+
     public static Font getDefaultFont( int offset ) { // 畢竟主界面按鈕名稱的字體要比較大......
         return new Font( getDefaultFontName(), Font.PLAIN, getDefaultFontSize() + offset );
     }
-    
+
     public static int getDefaultFontSize() {
         return defaultFontSize;
     }
+
     public static void setDefaultFontSize( int fontSize ) {
         defaultFontSize = fontSize;
     }
-    
+
     public static String getEhMemberID() {
         return ehMemberID;
     }
+
     public static void setEhMemberID( String id ) {
         ehMemberID = id;
-    }    
+    }
+
     public static String getEhMemberPasswordHash() {
         return ehMemberPasswordHash;
     }
+
     public static void setEhMemberPasswordHash( String hash ) {
         ehMemberPasswordHash = hash;
-    } 
-    
+    }
+
     public static int getTimeoutTimer() {
         return timeoutTimer;
     }
+
     public static void setTimeoutTimer( int timer ) {
         timeoutTimer = timer;
-    } 
-    
+    }
+
     public static int getRetryTimes() {
         return retryTimes;
     }
+
     public static void setRetryTimes( int times ) {
         retryTimes = times;
-    } 
+    }
 
     public static String getOpenPicFileProgram() {
         return openPicFileProgram;
     }
+
     public static void setOpenPicFileProgram( String program ) {
         openPicFileProgram = program;
     }
-    
+
     public static String getOpenZipFileProgram() {
         return openZipFileProgram;
     }
+
     public static void setOpenZipFileProgram( String program ) {
         openZipFileProgram = program;
     }
 
-    
     // ----------------------------------------------------------------
-    
-    
-    
-    
-
     public static void setPicFrontName( String front ) {
         picFrontName = front;
     }

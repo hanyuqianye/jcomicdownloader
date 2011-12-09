@@ -15,6 +15,7 @@ import java.text.NumberFormat;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
+import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Encoding;
 
 public class ParseXindm extends ParseOnlineComicSite {
@@ -30,8 +31,8 @@ public class ParseXindm extends ParseOnlineComicSite {
      */
     public ParseXindm() {
         siteID = Site.XINDM;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_xindm_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_xindm_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xindm_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xindm_encode_parse_", "html" );
 
         jsName = "index_xindm.js";
         radixNumber = 185273; // default value, not always be useful!!
@@ -123,12 +124,12 @@ public class ParseXindm extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_xindm_", "html" );
-        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_xindm_encode_", "html" );
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xindm_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xindm_encode_", "html" );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
 
-        return Common.getFileString( Common.tempDirectory, indexEncodeName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }
 
     @Override
@@ -207,8 +208,8 @@ public class ParseXindm extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
 
     @Override

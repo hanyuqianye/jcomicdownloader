@@ -34,8 +34,8 @@ public class ParseKUKU extends ParseOnlineComicSite {
  */
     public ParseKUKU() {
         siteID = Site.KUKU;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_kuku_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_kuku_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kuku_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kuku_encode_parse_", "html" );
 
         baseURL = "http://cc.kukudm.com/";
     }
@@ -51,10 +51,10 @@ public class ParseKUKU extends ParseOnlineComicSite {
 
     @Override
     public synchronized void setParameters() {
-        Common.downloadFile( webSite, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName, Encoding.GBK );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GBK );
 
-        String tempStr = Common.getFileString( Common.tempDirectory, indexEncodeName );
+        String tempStr = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         String[] lines = tempStr.split( "\n" );
 
         for ( int i = 0; i < lines.length; i ++ ) {
@@ -96,10 +96,10 @@ public class ParseKUKU extends ParseOnlineComicSite {
                 int endIndex = webSite.lastIndexOf( "/" );
                 String tempWebSite = webSite.substring( 0, endIndex + 1 ) + ( i + 1 ) + ".htm";
 
-                Common.downloadFile( tempWebSite, Common.tempDirectory, indexName, false, "" );
-                Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName, Encoding.GBK );
+                Common.downloadFile( tempWebSite, SetUp.getTempDirectory(), indexName, false, "" );
+                Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GBK );
 
-                String tempStr = Common.getFileString( Common.tempDirectory, indexEncodeName );
+                String tempStr = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
                 String[] lines = tempStr.split( "\n" );
 
                 for ( int count = 0; count < lines.length; count ++ ) {
@@ -141,13 +141,13 @@ public class ParseKUKU extends ParseOnlineComicSite {
     
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_KUKU_", "html" );
-        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_KUKU_encode_", "html" );    
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_KUKU_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_KUKU_encode_", "html" );
         
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName, Encoding.GBK );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GBK );
 
-        return Common.getFileString( Common.tempDirectory, indexEncodeName ); 
+        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }
     
     @Override
@@ -223,8 +223,8 @@ public class ParseKUKU extends ParseOnlineComicSite {
     
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
     
     @Override

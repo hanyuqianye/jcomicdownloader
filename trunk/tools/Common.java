@@ -514,6 +514,8 @@ public class Common {
     }
 
     public static void deleteFolder( String folderPath ) {
+        Common.debugPrintln( "刪除資料夾：" + folderPath );
+
         try {
             deleteAllFile( folderPath ); // delete all the file in dir
             String filePath = folderPath;
@@ -1185,6 +1187,10 @@ public class Common {
             Common.processPrintln( "因讀入錯誤，將全部任務清空" );
             ComicDownGUI.stateBar.setText( "下載任務檔格式錯誤，無法讀取!!" );
         }
+    }
+
+    public static String getHtmlStringWithColor( String string, String color ) {
+        return "<html><font color=" + color + string + "</font></html>";
     }
 }
 

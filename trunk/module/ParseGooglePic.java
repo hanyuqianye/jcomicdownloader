@@ -23,6 +23,7 @@ import jcomicdownloader.enums.*;
 import java.util.*;
 import javax.swing.JOptionPane;
 import jcomicdownloader.ComicDownGUI;
+import jcomicdownloader.SetUp;
 
 public class ParseGooglePic extends ParseOnlineComicSite {
 
@@ -38,8 +39,8 @@ public class ParseGooglePic extends ParseOnlineComicSite {
      */
     public ParseGooglePic() {
         siteID = Site.GOOGLE_PIC;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_google_pic_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_google_pic_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_google_pic_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_google_pic_encode_parse_", "html" );
 
         jsName = "index_google_pic.js";
         radixNumber = 185223571; // default value, not always be useful!!
@@ -135,9 +136,9 @@ public class ParseGooglePic extends ParseOnlineComicSite {
                     if ( choice == 0 ) {
                         String newPicName = "";
                         if ( picName.split( "\\." ).length > 1 )
-                            newPicName = Common.getStoredFileName( Common.tempDirectory, picName.split( "\\." )[0], picName.split( "\\." )[1] );
+                            newPicName = Common.getStoredFileName( SetUp.getTempDirectory(), picName.split( "\\." )[0], picName.split( "\\." )[1] );
                         else
-                            newPicName = Common.getStoredFileName( Common.tempDirectory, picName, "jpg" );
+                            newPicName = Common.getStoredFileName( SetUp.getTempDirectory(), picName, "jpg" );
                         singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, newPicName, 0, true );
                     } else if ( choice == 1 ); else if ( choice == 2 ) {
                         new File( getDownloadDirectory() + picName ).delete();
@@ -180,17 +181,17 @@ public class ParseGooglePic extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        if ( !new File( Common.tempDirectory + indexName ).exists() ) {
-            Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
+        if ( !new File( SetUp.getTempDirectory() + indexName ).exists() ) {
+            Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
         }
 
-        return Common.getFileString( Common.tempDirectory, indexName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     // 不管有沒有存在檔案，都下載新的
     public String getNewAllPageString( String urlString ) {
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
-        return Common.getFileString( Common.tempDirectory, indexName );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override
@@ -260,8 +261,8 @@ public class ParseGooglePic extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
 
     @Override

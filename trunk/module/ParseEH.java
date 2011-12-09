@@ -37,8 +37,8 @@ public class ParseEH extends ParseOnlineComicSite {
      */
     public ParseEH() {
         siteID = Site.EH;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_e_Hentai_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_e_Hentai_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_e_Hentai_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_e_Hentai_encode_parse_", "html" );
         onePagePicCount = 20; // 20 pics on every page
 
         needCookie = false;
@@ -51,25 +51,25 @@ public class ParseEH extends ParseOnlineComicSite {
         this();
         this.webSite = webSite;
         this.title = titleName;
-        //Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName );
+        //Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
     }
 
     @Override
     public void setParameters() { // let all the non-set attributes get values
 
-        Common.slowDownloadFile( webSite, Common.tempDirectory, indexName, 1000, needCookie, cookieString );
+        Common.slowDownloadFile( webSite, SetUp.getTempDirectory(), indexName, 1000, needCookie, cookieString );
 
-        String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
 
         if ( allPageString.matches( "(?s).*Content Warning(?s).*View Gallery(?s).*Never Warn Me Again(?s).*" ) ) {
             needCookie = true;
             Common.debugPrintln( "是警告畫面網頁，前去下載真實網頁" );
             cookieString = "nw=session";
-            Common.slowDownloadFile( webSite, Common.tempDirectory, indexName, 1000, true, cookieString );
+            Common.slowDownloadFile( webSite, SetUp.getTempDirectory(), indexName, 1000, true, cookieString );
         }
 
-        lines = Common.getFileStrings( Common.tempDirectory, indexName );
+        lines = Common.getFileStrings( SetUp.getTempDirectory(), indexName );
 
         Common.debugPrintln( "開始解析各參數 :" );
         Common.debugPrintln( "作品名稱(title) : " + title );
@@ -117,8 +117,8 @@ public class ParseEH extends ParseOnlineComicSite {
                 pageNumber++ ) {
 
             if ( pageNumber >= 1 ) {
-                Common.slowDownloadFile( webSite + "?p=" + pageNumber, Common.tempDirectory, indexName, 1000, true, cookieString );
-                lines = Common.getFileStrings( Common.tempDirectory, indexName );
+                Common.slowDownloadFile( webSite + "?p=" + pageNumber, SetUp.getTempDirectory(), indexName, 1000, true, cookieString );
+                lines = Common.getFileStrings( SetUp.getTempDirectory(), indexName );
             }
 
 
@@ -151,8 +151,8 @@ public class ParseEH extends ParseOnlineComicSite {
         // get URLs of real pic
         for ( int i = 0 ; i < totalPage && Run.isAlive && !getTitle().equals( "Gallery Not Available" ) ; i++ ) {
             if ( !Common.existPicFile( getDownloadDirectory(), i + 2 ) ) {
-                Common.slowDownloadFile( comicPageURL[i], Common.tempDirectory, indexName, 1000, needCookie, cookieString );
-                String line = Common.getFileString( Common.tempDirectory, indexName );
+                Common.slowDownloadFile( comicPageURL[i], SetUp.getTempDirectory(), indexName, 1000, needCookie, cookieString );
+                String line = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
                 lines = line.split( "\"" );
                 for ( int j = 0 ; j < lines.length ; j++ ) {
@@ -191,12 +191,12 @@ public class ParseEH extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_EH_", "html" );
-        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_EH_encode_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_EH_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_EH_encode_", "html" );
 
-        Common.slowDownloadFile( urlString, Common.tempDirectory, indexName, 1000, false, "" );
+        Common.slowDownloadFile( urlString, SetUp.getTempDirectory(), indexName, 1000, false, "" );
 
-        return Common.getFileString( Common.tempDirectory, indexName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override // 預設EH沒有單集頁面，只有主頁面。這樣可以讓單集也能加入任務
@@ -334,8 +334,8 @@ public class ParseEH extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
 
     @Override
@@ -371,8 +371,8 @@ class ParseEX extends ParseEH {
     public ParseEX() {
         super();
         siteID = Site.EX;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_ex_Hentai_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_ex_Hentai_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_ex_Hentai_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_ex_Hentai_encode_parse_", "html" );
 
         needCookie = true;
         /*
@@ -397,7 +397,7 @@ class ParseEX extends ParseEH {
         this();
         this.webSite = webSite;
         this.title = titleName;
-        //Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName );
+        //Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
     }
 
     public static void initialIDandPasswordHash() { // 重置id和hash並存入設定檔
@@ -436,12 +436,12 @@ class ParseEX extends ParseEH {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_EX_", "html" );
-        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_EX_encode_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_EX_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_EX_encode_", "html" );
 
-        Common.slowDownloadFile( urlString, Common.tempDirectory, indexName, 1000, true, cookieString );
+        Common.slowDownloadFile( urlString, SetUp.getTempDirectory(), indexName, 1000, true, cookieString );
 
-        return Common.getFileString( Common.tempDirectory, indexName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override

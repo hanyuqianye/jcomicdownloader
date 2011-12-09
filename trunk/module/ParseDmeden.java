@@ -15,6 +15,7 @@ package jcomicdownloader.module;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
+import jcomicdownloader.SetUp;
 
 public class ParseDmeden extends ParseOnlineComicSite {
 
@@ -30,8 +31,8 @@ public class ParseDmeden extends ParseOnlineComicSite {
      */
     public ParseDmeden() {
         siteID = Site.DMEDEN;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_dmeden_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_dmeden_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dmeden_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dmeden_encode_parse_", "html" );
 
         baseURL1 = "http://dmeden.net";
         baseURL2 = "http://www.dmeden.com";
@@ -51,10 +52,10 @@ public class ParseDmeden extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
-        Common.downloadFile( webSite, Common.tempDirectory, indexName, false, "" );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
 
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
-            String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+            String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
             int beginIndex = allPageString.indexOf( "<title>" ) + 7;
             int endIndex = allPageString.indexOf( "</title>", beginIndex );
@@ -72,7 +73,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
         // 先取得前面的下載伺服器網址
 
-        String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
         int beginIndex = allPageString.indexOf( "\"hdPageCount\"" );
@@ -97,8 +98,8 @@ public class ParseDmeden extends ParseOnlineComicSite {
             // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
                 String url = fontURL + p + backURL;
-                Common.downloadFile( url, Common.tempDirectory, indexName, false, "" );
-                allPageString = Common.getFileString( Common.tempDirectory, indexName );
+                Common.downloadFile( url, SetUp.getTempDirectory(), indexName, false, "" );
+                allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
                 beginIndex = allPageString.indexOf( "<img id=\"" );
                 endIndex = allPageString.indexOf( "onload=", beginIndex );
@@ -130,11 +131,11 @@ public class ParseDmeden extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_dmeden_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dmeden_", "html" );
 
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
-        return Common.getFileString( Common.tempDirectory, indexName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override
@@ -241,8 +242,8 @@ public class ParseDmeden extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
 
     @Override

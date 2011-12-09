@@ -5,6 +5,8 @@ Authors  : surveyorK
 Last Modified : 2011/12/5
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.05: 1. 修復無法開啟壓縮檔的bug。（預設開啟圖片和壓縮檔為同個程式）
+ *    2. 修復暫存資料夾路徑無法改變的bug。
 2.04: 1. 增加選擇紀錄檔和暫存資料夾的選項。
      2. 修改下拉式介面選單的渲染機制，使其可改變字型。 
 2.03: 1. 修改選項視窗為多面板界面。
@@ -39,7 +41,7 @@ public class OptionFrame extends JFrame {
     private Object[][] skins;
     private String[] skinStrings;
     private UIManager.LookAndFeelInfo looks[] = UIManager.getInstalledLookAndFeels();
-    private JLabel skinLabel;
+    private JLabel skinLabel; 
     private JComboBox skinBox;
     // about directory
     private JLabel dirLabel, tempDirLabel, recordDirLabel;
@@ -71,6 +73,8 @@ public class OptionFrame extends JFrame {
     private JLabel viewZipFileLabel;
     private JTextField viewZipFileTextField;
     private JButton viewZipFileButton;
+    public static JLabel retryTimesLabel;
+    public static JLabel timeoutLabel;
 
     /**
      *
@@ -175,7 +179,7 @@ public class OptionFrame extends JFrame {
 
         tempDirLabel = getLabel( "目前暫存檔目錄：       " );
 
-        tempDirTextField = new JTextField( SetUp.getTempFileDirectory(), 25 );
+        tempDirTextField = new JTextField( SetUp.getTempDirectory(), 25 );
         tempDirTextField.setFont( SetUp.getDefaultFont( -1 ) );
         tempDirTextField.setHorizontalAlignment( JTextField.LEADING );
         tempDirTextField.setToolTipText( "暫存資料夾的存放位置，執行時會新增暫存資料夾，等程式關閉後便自動刪除" );
@@ -316,8 +320,7 @@ public class OptionFrame extends JFrame {
         proxyPortPanel.add( proxyPortLabel );
         proxyPortPanel.add( proxyPortTextField );
 
-        JLabel retryTimesLabel = getLabel( "下載失敗重試次數：" );
-        retryTimesLabel.setToolTipText( "通常下載失敗是伺服器異常或網路速度過慢所致，立即重試的成功機率其實不高" );
+        
         retryTimesSlider = new JSlider( JSlider.HORIZONTAL, 0, 5, 1 );
         retryTimesSlider.addChangeListener( new SliderHandler() );
         retryTimesSlider.setMajorTickSpacing( 1 );
@@ -325,13 +328,13 @@ public class OptionFrame extends JFrame {
         retryTimesSlider.setPaintLabels( true );
         retryTimesSlider.setValue( SetUp.getRetryTimes() );
         retryTimesSlider.setToolTipText( "通常下載失敗是伺服器異常或網路速度過慢所致，立即重試的成功機率其實不高" );
+        retryTimesLabel = getLabel( "下載失敗重試次數：" + retryTimesSlider.getValue() + "次" );
+        retryTimesLabel.setToolTipText( "通常下載失敗是伺服器異常或網路速度過慢所致，立即重試的成功機率其實不高" );
 
         JPanel retryTimesPortPanel = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
         retryTimesPortPanel.add( retryTimesLabel );
         retryTimesPortPanel.add( retryTimesSlider );
 
-        JLabel timeoutLabel = getLabel( "連線逾時時間：" );
-        timeoutLabel.setToolTipText( "超過此時間會中斷此連線，直接下載下一個檔案，建議只在下載GOOGLE圖片時使用，其他時候建議設為0，代表沒有逾時限制" );
         timeoutSlider = new JSlider( JSlider.HORIZONTAL, 0, 100, 10 );
         timeoutSlider.addChangeListener( new SliderHandler() );
         timeoutSlider.setMajorTickSpacing( 20 );
@@ -339,7 +342,10 @@ public class OptionFrame extends JFrame {
         timeoutSlider.setPaintLabels( true );
         timeoutSlider.setValue( SetUp.getTimeoutTimer() );
         timeoutSlider.setToolTipText( "超過此時間會中斷此連線，直接下載下一個檔案，建議只在下載GOOGLE圖片時使用，其他時候建議設為0，代表沒有逾時限制" );
-
+        timeoutLabel = getLabel( "連線逾時時間：" + timeoutSlider.getValue() + "秒" );
+        timeoutLabel.setToolTipText( "超過此時間會中斷此連線，直接下載下一個檔案，建議只在下載GOOGLE圖片時使用，其他時候建議設為0，代表沒有逾時限制" );
+        
+        
         JPanel timeoutPanel = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
         timeoutPanel.add( timeoutLabel );
         timeoutPanel.add( timeoutSlider );
@@ -557,8 +563,8 @@ public class OptionFrame extends JFrame {
             if ( event.getSource() == dirButton ) {
                 chooseFile( JFileChooser.DIRECTORIES_ONLY, dirTextField, SetUp.getOriginalDownloadDirectory() );
             } else if ( event.getSource() == tempDirButton ) {
-                int endIndex = SetUp.getTempFileDirectory().lastIndexOf( Common.getSlash() + "temp" ) + 1;
-                String path = SetUp.getTempFileDirectory().substring( 0, endIndex );
+                int endIndex = SetUp.getTempDirectory().lastIndexOf( Common.getSlash() + "temp" ) + 1;
+                String path = SetUp.getTempDirectory().substring( 0, endIndex );
 
                 chooseFile( JFileChooser.DIRECTORIES_ONLY, tempDirTextField, path );
             } else if ( event.getSource() == recordDirButton ) {
@@ -577,8 +583,10 @@ public class OptionFrame extends JFrame {
                 SetUp.setTimeoutTimer( timeoutSlider.getValue() ); // 設定逾時時間
 
                 SetUp.setOriginalDownloadDirectory( dirTextField.getText() ); // 紀錄到設定值
+                SetUp.setTempDirectory( tempDirTextField.getText() ); // 紀錄到設定值
+
                 SetUp.setOpenPicFileProgram( viewPicFileTextField.getText() ); // 紀錄到設定值
-                SetUp.setOpenZipFileProgram( viewZipFileTextField.getText() ); // 紀錄到設定值
+                SetUp.setOpenZipFileProgram( viewPicFileTextField.getText() ); // 紀錄到設定值
                 SetUp.setRecordFileDirectory( recordDirTextField.getText() ); // 紀錄到設定值
 
                 if ( proxyServerTextField.getText() != null
@@ -602,6 +610,12 @@ public class OptionFrame extends JFrame {
     private class SliderHandler implements ChangeListener {
 
         public void stateChanged( ChangeEvent event ) {
+            
+            if ( event.getSource() == retryTimesSlider && OptionFrame.retryTimesLabel != null )
+                OptionFrame.retryTimesLabel.setText( "下載失敗重試次數：" + retryTimesSlider.getValue() + "次" );
+            if ( event.getSource() == timeoutSlider && OptionFrame.timeoutLabel != null )
+                OptionFrame.timeoutLabel.setText( "連線逾時時間：" + timeoutSlider.getValue() + "秒" );
+            
             //Common.debugPrintln( "改變重試次數：" + retryTimesSlider.getValue() );
         }
     }

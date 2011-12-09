@@ -143,19 +143,19 @@ public class InformationFrame extends JFrame {
     // 直接抓取官網網頁
     private void downloadOfficialHtml() {
         Run.isAlive = true;
-        Common.downloadFile( officialURL, Common.tempDirectory, officialName, false, "" );
+        Common.downloadFile( officialURL, SetUp.getTempDirectory(), officialName, false, "" );
     }
     
     // 刪除官方網頁
     private void deleteOfficialHtml() {
-        File file = new File( Common.tempDirectory + officialName );
+        File file = new File( SetUp.getTempDirectory() + officialName );
         if ( file.exists() )
             file.deleteOnExit();
     }
     
     // 回傳最新版本的字串
     private String getUpdateVersionString() {
-        String allPageString = Common.getFileString( Common.tempDirectory, officialName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), officialName );
 
         // 先找出最新的是第幾號版本
         int endIndex = allPageString.indexOf( "版發佈" );
@@ -167,7 +167,7 @@ public class InformationFrame extends JFrame {
     
     // 回傳更新日期的字串
     private String getUpdateDateString() {
-        String allPageString = Common.getFileString( Common.tempDirectory, officialName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), officialName );
 
         // 再找出發佈最新版本的日期
         int tempIndex = allPageString.indexOf( "countdown-fromdateutc" );
@@ -179,7 +179,7 @@ public class InformationFrame extends JFrame {
     
     // 回傳目前已經支援網站數目的字串
     private String getUpdateSupportedSiteString() {
-        String allPageString = Common.getFileString( Common.tempDirectory, officialName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), officialName );
         
         // 找出目前支援列表數目
         int supportedSiteAmount = allPageString.split( "<td style=" ).length / 2 + 1;

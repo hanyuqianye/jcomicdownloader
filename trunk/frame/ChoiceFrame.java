@@ -70,8 +70,8 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
         this.modifySelected = modifySelected;
 
         columnNames = new String[] { "是否下載", "標題" };
-        volumeStrings = Common.getFileStrings( Common.tempDirectory, Common.tempVolumeFileName );
-        urlStrings = Common.getFileStrings( Common.tempDirectory, Common.tempUrlFileName );
+        volumeStrings = Common.getFileStrings( SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        urlStrings = Common.getFileStrings( SetUp.getTempDirectory(), Common.tempUrlFileName );
         checkStrings = new String[volumeStrings.length];
 
         if ( modifySelected ) {

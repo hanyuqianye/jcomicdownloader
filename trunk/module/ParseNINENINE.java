@@ -30,9 +30,9 @@ public class ParseNINENINE extends ParseOnlineComicSite {
      * @author user
      */
     public ParseNINENINE() {
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_99_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_99_encode_parse_", "html" );
-        jsName = Common.getStoredFileName( Common.tempDirectory, "index_99_parse_", "js" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_encode_parse_", "html" );
+        jsName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_parse_", "js" );
     }
 
     public ParseNINENINE( String webSite, String titleName ) {
@@ -43,9 +43,9 @@ public class ParseNINENINE extends ParseOnlineComicSite {
 
     @Override
     public void setParameters() { // let all the non-set attributes get values
-        Common.downloadFile( webSite, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName );
-        String allString = Common.getFileString( Common.tempDirectory, indexEncodeName );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
+        String allString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
 
         Common.debugPrintln( "開始解析各參數 :" );
 
@@ -93,8 +93,8 @@ public class ParseNINENINE extends ParseOnlineComicSite {
     @Override
     public void parseComicURL() { // parse URL and save all URLs in comicURL
         // 先取得前面的下載伺服器網址
-        Common.downloadFile( jsURL, Common.tempDirectory, jsName, false, "" );
-        String allJsString = Common.getFileString( Common.tempDirectory, jsName );
+        Common.downloadFile( jsURL, SetUp.getTempDirectory(), jsName, false, "" );
+        String allJsString = Common.getFileString( SetUp.getTempDirectory(), jsName );
 
         int index = 0;
         for ( int i = 0 ; i < serverNo ; i++ ) {
@@ -108,7 +108,7 @@ public class ParseNINENINE extends ParseOnlineComicSite {
         Common.debugPrintln( "下載伺服器位址: " + baseDownloadURL );
 
         // 再取得後面的圖片目錄網址
-        String[] lines = Common.getFileStrings( Common.tempDirectory, indexEncodeName );
+        String[] lines = Common.getFileStrings( SetUp.getTempDirectory(), indexEncodeName );
         index = 0;
         while ( !lines[index].matches( "(?s).*\\|(?s).*" ) ) {
             index++;
@@ -132,14 +132,14 @@ public class ParseNINENINE extends ParseOnlineComicSite {
 
     @Override // 下載網址指向的網頁，全部存入String後回傳
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_99_", "html" );
-        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_99_encode_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_encode_", "html" );
 
         System.out.println( "URL: " + urlString );
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
 
-        return Common.getTraditionalChinese( Common.getFileString( Common.tempDirectory, indexEncodeName ) );
+        return Common.getTraditionalChinese( Common.getFileString( SetUp.getTempDirectory(), indexEncodeName ) );
     }
 
     @Override // 從網址判斷是否為單集頁面(true) 還是主頁面(false)
@@ -264,8 +264,8 @@ public class ParseNINENINE extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
 
     @Override

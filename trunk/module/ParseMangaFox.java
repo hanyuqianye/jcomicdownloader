@@ -15,6 +15,7 @@ package jcomicdownloader.module;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
+import jcomicdownloader.SetUp;
 
 public class ParseMangaFox extends ParseOnlineComicSite {
 
@@ -30,8 +31,8 @@ public class ParseMangaFox extends ParseOnlineComicSite {
      */
     public ParseMangaFox() {
         siteID = Site.DMEDEN;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_mangaFox_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_mangaFox_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mangaFox_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mangaFox_encode_parse_", "html" );
 
         baseURL = "http://www.mangafox.com";
         jsName = "index_mangaFox.js";
@@ -95,11 +96,11 @@ public class ParseMangaFox extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_mangaFox_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mangaFox_", "html" );
 
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
-        return Common.getFileString( Common.tempDirectory, indexName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override
@@ -182,8 +183,8 @@ public class ParseMangaFox extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
 
     @Override

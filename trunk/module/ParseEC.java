@@ -36,8 +36,8 @@ public class ParseEC extends ParseOnlineComicSite {
  */
     public ParseEC() {
         siteID = Site.EIGHT_COMIC;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_encode_parse_", "html" );
 
         jsName = "index_8comic.js";
         radixNumber = 18527345; // default value, not always be useful!!
@@ -58,8 +58,8 @@ public class ParseEC extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
         
-        Common.downloadFile( webSite, Common.tempDirectory, indexName, false, "" );
-        String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         
         // ex. http://www.8comic.com/love/drawing-8170.html?ch=3
         volumeNoString = webSite.split( "/|=")[webSite.split( "/|=" ).length-1];
@@ -74,7 +74,7 @@ public class ParseEC extends ParseOnlineComicSite {
     @Override
     public void parseComicURL() { // parse URL and save all URLs in comicURL
         // 先取得前面的下載伺服器網址
-        String[] lines = Common.getFileStrings( Common.tempDirectory, indexName );
+        String[] lines = Common.getFileStrings( SetUp.getTempDirectory(), indexName );
         
         int itemidIndex = 0;
         int index = 0;
@@ -143,12 +143,12 @@ public class ParseEC extends ParseOnlineComicSite {
 
     @Override // 因為原檔就是utf8了，所以無須轉碼
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_", "html" );
-        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_encode_", "html" );
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeBIG5File( Common.tempDirectory, indexName, indexEncodeName );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_encode_", "html" );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeBIG5File( SetUp.getTempDirectory(), indexName, indexEncodeName );
         
-        return Common.getFileString( Common.tempDirectory, indexEncodeName ).replace( "&#22338;", "阪" );
+        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName ).replace( "&#22338;", "阪" );
     }
 
     @Override
@@ -240,8 +240,8 @@ public class ParseEC extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
     
     @Override
@@ -262,8 +262,8 @@ public class ParseEC extends ParseOnlineComicSite {
 class ParseECphoto extends ParseEC {
     public ParseECphoto() {
         siteID = Site.EIGHT_COMIC_PHOTO;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_photo_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_8comic_photo_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_photo_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_photo_encode_parse_", "html" );
 
         jsName = "index_8comic_photo.js";
     }

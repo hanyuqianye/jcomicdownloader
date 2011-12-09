@@ -13,6 +13,7 @@ package jcomicdownloader.module;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
+import jcomicdownloader.SetUp;
 
 public class ParseCityManga extends ParseOnlineComicSite {
 
@@ -28,8 +29,8 @@ public class ParseCityManga extends ParseOnlineComicSite {
      */
     public ParseCityManga() {
         siteID = Site.CITY_MANGA;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_city_manga_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_city_manga_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_encode_parse_", "html" );
 
         jsName = "index_city_manga.js";
         radixNumber = 1564371; // default value, not always be useful!!
@@ -49,10 +50,10 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
-        Common.downloadFile( webSite, Common.tempDirectory, indexName, false, "" );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
 
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
-            String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+            String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
             int beginIndex = allPageString.lastIndexOf( "<h1>" ) + 4;
             int endIndex = allPageString.indexOf( "</h1>", beginIndex );
@@ -70,7 +71,7 @@ public class ParseCityManga extends ParseOnlineComicSite {
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
         // 先取得前面的下載伺服器網址
 
-        String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
         int beginIndex = allPageString.lastIndexOf( "pageselector" );
@@ -98,8 +99,8 @@ public class ParseCityManga extends ParseOnlineComicSite {
         for ( int p = 1 ; p <= totalPage ; p++ ) {
             // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
-                Common.downloadFile( pageURL[p - 1], Common.tempDirectory, indexName, false, "" );
-                allPageString = Common.getFileString( Common.tempDirectory, indexName );
+                Common.downloadFile( pageURL[p - 1], SetUp.getTempDirectory(), indexName, false, "" );
+                allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
                 // 開始取得第一頁網址 
                 beginIndex = allPageString.lastIndexOf( "<img src=" );
@@ -123,11 +124,11 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_city_manga_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_", "html" );
 
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
-        return Common.getFileString( Common.tempDirectory, indexName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override
@@ -207,8 +208,8 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
 
     @Override

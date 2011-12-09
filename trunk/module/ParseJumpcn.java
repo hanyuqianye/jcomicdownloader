@@ -16,6 +16,7 @@ import java.text.NumberFormat;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
+import jcomicdownloader.SetUp;
 
 public class ParseJumpcn extends ParseOnlineComicSite {
 
@@ -30,8 +31,8 @@ public class ParseJumpcn extends ParseOnlineComicSite {
      */
     public ParseJumpcn() {
         siteID = Site.JUMPCN;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_jumpcn_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_jumpcn_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_encode_parse_", "html" );
 
         jsName = "index_jumpcn.js";
         radixNumber = 185271; // default value, not always be useful!!
@@ -108,13 +109,13 @@ public class ParseJumpcn extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_dmeden_", "html" );
-        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_CC_encode_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dmeden_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_CC_encode_", "html" );
 
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
 
-        return Common.getFileString( Common.tempDirectory, indexEncodeName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }
 
     @Override
@@ -187,8 +188,8 @@ public class ParseJumpcn extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
 
     @Override

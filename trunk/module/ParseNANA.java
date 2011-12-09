@@ -16,6 +16,7 @@ import java.text.NumberFormat;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
+import jcomicdownloader.SetUp;
 
 public class ParseNANA extends ParseOnlineComicSite {
 
@@ -31,8 +32,8 @@ public class ParseNANA extends ParseOnlineComicSite {
      */
     public ParseNANA() {
         siteID = Site.NANA;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_nana_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_nana_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_nana_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_nana_encode_parse_", "html" );
 
         jsName = "index_nana.js";
         radixNumber = 18522371; // default value, not always be useful!!
@@ -52,10 +53,10 @@ public class ParseNANA extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
-        Common.downloadFile( webSite, Common.tempDirectory, indexName, false, "" );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
 
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
-            String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+            String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
             int beginIndex = allPageString.indexOf( "<h2>" ) + 4;
             int endIndex = allPageString.indexOf( "</h2>", beginIndex );
@@ -73,7 +74,7 @@ public class ParseNANA extends ParseOnlineComicSite {
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
         // 先取得前面的下載伺服器網址
 
-        String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
         int beginIndex, endIndex;
@@ -120,11 +121,11 @@ public class ParseNANA extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_nana_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_nana_", "html" );
 
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
-        return Common.getFileString( Common.tempDirectory, indexName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override
@@ -222,8 +223,8 @@ public class ParseNANA extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
 
     @Override

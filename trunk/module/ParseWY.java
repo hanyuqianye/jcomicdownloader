@@ -13,6 +13,7 @@ package jcomicdownloader.module;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
+import jcomicdownloader.SetUp;
 
 public class ParseWY extends ParseOnlineComicSite {
 
@@ -28,8 +29,8 @@ public class ParseWY extends ParseOnlineComicSite {
      */
     public ParseWY() {
         siteID = Site.WY;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_92wy_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_92wy_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_92wy_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_92wy_encode_parse_", "html" );
 
         jsName = "index_92wy.js";
         radixNumber = 18522371; // default value, not always be useful!!
@@ -49,10 +50,10 @@ public class ParseWY extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
-        Common.downloadFile( webSite, Common.tempDirectory, indexName, false, "" );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
 
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
-            String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+            String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
             int beginIndex = allPageString.indexOf( "<title>" ) + 7;
             beginIndex = allPageString.indexOf( ",", beginIndex ) + 1;
@@ -71,7 +72,7 @@ public class ParseWY extends ParseOnlineComicSite {
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
         // 先取得前面的下載伺服器網址
 
-        String allPageString = Common.getFileString( Common.tempDirectory, indexName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
         int beginIndex = allPageString.indexOf( "class=\"pages\"" );
@@ -92,8 +93,8 @@ public class ParseWY extends ParseOnlineComicSite {
             // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
                 String url = fontURL + p + ".htm";
-                Common.downloadFile( url, Common.tempDirectory, indexName, false, "" );
-                allPageString = Common.getFileString( Common.tempDirectory, indexName );
+                Common.downloadFile( url, SetUp.getTempDirectory(), indexName, false, "" );
+                allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
                 beginIndex = allPageString.indexOf( "id=\"picture\"" );
                 beginIndex = allPageString.indexOf( "src=\"", beginIndex ) + 5;
@@ -118,11 +119,11 @@ public class ParseWY extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_92wy_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_92wy_", "html" );
 
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
-        return Common.getFileString( Common.tempDirectory, indexName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override
@@ -201,8 +202,8 @@ public class ParseWY extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
 
     @Override

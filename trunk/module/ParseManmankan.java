@@ -13,6 +13,7 @@ package jcomicdownloader.module;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
+import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Encoding;
 
 public class ParseManmankan extends ParseOnlineComicSite {
@@ -27,8 +28,8 @@ public class ParseManmankan extends ParseOnlineComicSite {
  */
     public ParseManmankan() {
         siteID = Site.MANMANKAN;
-        indexName = Common.getStoredFileName( Common.tempDirectory, "index_manmankan_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_manmankan_encode_parse_", "html" );
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_manmankan_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_manmankan_encode_parse_", "html" );
 
         jsName = "index_manmankan.js";
         radixNumber = 185273; // default value, not always be useful!!
@@ -86,12 +87,12 @@ public class ParseManmankan extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( Common.tempDirectory, "index_manmankan_", "html" );
-        String indexEncodeName = Common.getStoredFileName( Common.tempDirectory, "index_manmankan_encode_", "html" );
-        Common.downloadFile( urlString, Common.tempDirectory, indexName, false, "" );
-        Common.newEncodeFile( Common.tempDirectory, indexName, indexEncodeName, Encoding.GBK );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_manmankan_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_manmankan_encode_", "html" );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GBK );
 
-        return Common.getFileString( Common.tempDirectory, indexEncodeName ); 
+        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }
 
     @Override
@@ -169,8 +170,8 @@ public class ParseManmankan extends ParseOnlineComicSite {
 
     @Override
     public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, Common.tempDirectory, Common.tempVolumeFileName );
-        Common.outputFile( urlList, Common.tempDirectory, Common.tempUrlFileName );
+        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
+        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
     
     @Override
