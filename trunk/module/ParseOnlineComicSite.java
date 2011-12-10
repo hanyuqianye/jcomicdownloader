@@ -243,33 +243,41 @@ abstract public class ParseOnlineComicSite {
     protected String getVolumeWithFormatNumber( String volume ) {
         String formatVolume = "";
 
-        int endIndex = -1;
-        for ( int i = volume.length() - 1 ; i >= 0 ; i-- ) {
-            if ( volume.substring( i, i + 1 ).matches( "\\d" ) ) {
-                endIndex = i + 1;
-                break;
-            }
-        }
+        try {
 
-        int beginIndex = -1;
-        for ( int i = endIndex - 1 ; i >= 0 ; i-- ) {
-            if ( volume.substring( i, i + 1 ).matches( "\\D" ) ) {
-                beginIndex = i + 1;
-                break;
+            int beginIndex = -1;
+            for ( int i = 0 ; i < volume.length() ; i++ ) {
+                if ( volume.substring( i, i + 1 ).matches( "\\d" ) ) {
+                    beginIndex = i;
+                    break;
+                }
             }
-        }
 
-        if ( endIndex < 0 || beginIndex < 0 ) {
-            //System.out.println( " " + beginIndex + " " + endIndex );
+            int endIndex = -1;
+            for ( int i = beginIndex ; i < volume.length() ; i++ ) {
+                if ( volume.substring( i, i + 1 ).matches( "\\D" ) ) {
+                    endIndex = i;
+                    break;
+                }
+            }
+
+            if ( endIndex < 0 || beginIndex < 0 ) {
+                //System.out.println( " " + beginIndex + " " + endIndex );
+                formatVolume = volume;
+            } else {
+                //System.out.println( volume + " " + beginIndex + " " + endIndex + " 數字部份：" + volume.substring( beginIndex, endIndex ) );
+
+                String originalNumber = volume.substring( beginIndex, endIndex );
+                NumberFormat formatter = new DecimalFormat( Common.getZero() );
+                String formatNumber = formatter.format( Integer.parseInt( originalNumber ) );
+
+                formatVolume = volume.replaceFirst( originalNumber, formatNumber );
+            }
+
+        } catch ( Exception ex ) {
             formatVolume = volume;
-        } else {
-            //System.out.println( beginIndex + " " + endIndex + " 數字部份：" + volume.substring( beginIndex, endIndex ) );
-
-            String originalNumber = volume.substring( beginIndex, endIndex );
-            NumberFormat formatter = new DecimalFormat( Common.getZero() );
-            String formatNumber = formatter.format( Integer.parseInt( originalNumber ) );
-
-            formatVolume = volume.replaceFirst( originalNumber, formatNumber );
+            Common.errorReport( "集數名稱的數字規格化處理發生錯誤！" );
+            ex.printStackTrace();
         }
 
         return formatVolume;
