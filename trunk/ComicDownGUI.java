@@ -4,9 +4,11 @@
 Program Name : JComicDownloader
 Authors  : surveyorK
 Version  : v2.05
-Last Modified : 2011/12/9
+Last Modified : 2011/12/11
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.06: 1. 新增對baidu的支援。
+ *      2. 修復集數名稱數字格式化的bug。
  * 2.05: 1. 修改選項視窗，明確顯示失敗重傳次數和連線逾時時間（因為linux系統下無法看到刻度）。
  *      2. 修復Linux系統下無法開啟檔案的bug。
  *      3. 修復無法開啟壓縮檔的bug。（預設開啟圖片和壓縮檔為同個程式）
@@ -189,7 +191,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.05" );
+        super( "JComicDownloader  v2.06" );
 
         minimizeEvent();
         initTrayIcon();

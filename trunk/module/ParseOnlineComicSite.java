@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/10/25
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.06: 修復集數名稱數字格式化的bug。
 2.04: 修改集數名稱命名機制，將裡面的數字格式化（ex. 第3回 -> 第003回），以方便排序。
 2.02: 拿掉轉網址碼的編碼修正
 ----------------------------------------------------------------------------------------------------
@@ -252,23 +253,27 @@ abstract public class ParseOnlineComicSite {
                     break;
                 }
             }
+            //System.out.println( beginIndex + " -> " + volume );
 
-            int endIndex = -1;
-            for ( int i = beginIndex ; i < volume.length() ; i++ ) {
+            int endIndex = volume.length();
+            for ( int i = beginIndex ; i < volume.length() && beginIndex >= 0; i++ ) {
                 if ( volume.substring( i, i + 1 ).matches( "\\D" ) ) {
                     endIndex = i;
                     break;
                 }
+                else {
+                    System.out.println( volume.substring(i,i+1) + " " );
+                }
             }
 
             if ( endIndex < 0 || beginIndex < 0 ) {
-                //System.out.println( " " + beginIndex + " " + endIndex );
+                System.out.println( "無法格式化: " + volume + " " + beginIndex + " " + endIndex );
                 formatVolume = volume;
             } else {
-                //System.out.println( volume + " " + beginIndex + " " + endIndex + " 數字部份：" + volume.substring( beginIndex, endIndex ) );
+                System.out.println( volume + " " + beginIndex + " " + endIndex + " 數字部份：" + volume.substring( beginIndex, endIndex ) );
 
                 String originalNumber = volume.substring( beginIndex, endIndex );
-                NumberFormat formatter = new DecimalFormat( Common.getZero() );
+                NumberFormat formatter = new DecimalFormat( "000" );
                 String formatNumber = formatter.format( Integer.parseInt( originalNumber ) );
 
                 formatVolume = volume.replaceFirst( originalNumber, formatNumber );
