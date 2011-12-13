@@ -93,6 +93,8 @@ public class ParseWebPage {
             siteID = Site.IIBQ;
         else if ( webSite.matches( "(?s).*baidu.com(?s).*" ) ) 
             siteID = Site.BAIDU;
+        else if ( webSite.matches( "(?s).*sfacg.com(?s).*" ) ) 
+            siteID = Site.SF;
         
         else
             siteID = Site.UNKNOWN;

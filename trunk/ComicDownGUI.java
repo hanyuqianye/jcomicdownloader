@@ -3,10 +3,12 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v2.05
-Last Modified : 2011/12/11
+Version  : v2.07
+Last Modified : 2011/12/13
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.07: 1. 新增對comic.sfacg.com的支援。
+ *      2. 增加baidu頁面下載時的選項。（至貼圖結束為止或解析全部頁面）
  * 2.06: 1. 新增對baidu的支援。
  *      2. 修復集數名稱數字格式化的bug。
  * 2.05: 1. 修改選項視窗，明確顯示失敗重傳次數和連線逾時時間（因為linux系統下無法看到刻度）。
@@ -1847,11 +1849,19 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             public void run() {
                 //Flag.allowDownloadFlag = Run.isAlive = true;
+                
+                String picURL = "http://img2.veryim.com/Z/zuishangys/ch_10/001000.jpg";
+                String pageURL = "http://comic.veryim.com/manhua/zuishangys/ch_10.html";
+                String testURL = "http://comic.veryim.com/manhua/zuishangys/";
+                
+                String cookie = "Hm_lpvt_280953f246fceb4c893ffac1981e0998=1323781874813;Hm_lvt_280953f246fceb4c893ffac1981e0998=1323780662695";
+                
+                Common.downloadFile( pageURL, "", "test.html", true, cookie );
+                Common.downloadFile( picURL, "", "test.jpg", true, cookie );
 
-                String picURL = "http://www.google.com.tw/search?um=1&hl=zh-TW&gbv=2&biw=1152&bih=726&tbs=isz%3Am&tbm=isch&sa=1&q=picture&oq=picture&aq=f&aqi=&aql=&gs_sm=s&gs_upl=0l0l0l3684l0l0l0l0l0l0l0l0ll0l0";
-                Common.debugPrintln( "開始測試下載:" );
-                Common.downloadFile( picURL,
-                        "", "test1.html", false, "" );
+                //String[] cookies = Common.getCookieStrings( pageURL );
+                
+                System.out.println( "OVER" );
 
             }
         } );

@@ -16,6 +16,8 @@ import java.text.NumberFormat;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
+import javax.swing.JOptionPane;
+import jcomicdownloader.ComicDownGUI;
 import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Zhcode;
 
@@ -80,10 +82,10 @@ public class ParseBAIDU extends ParseOnlineComicSite {
 
         int beginIndex = allPageString.indexOf( "class=\"l_pager\"" );
         int endIndex = allPageString.indexOf( "</li>", beginIndex );
-        
+
         String tempString = "";
         String basePageURL = "";
-        int pageAmount = 0; 
+        int pageAmount = 0;
         if ( beginIndex > 0 ) { // 有很多頁
             tempString = allPageString.substring( beginIndex, endIndex );
 
@@ -92,24 +94,39 @@ public class ParseBAIDU extends ParseOnlineComicSite {
             System.out.println( beginIndex + " " + endIndex + " " + tempString.substring( beginIndex, endIndex ) );
             basePageURL = baseURL + tempString.substring( beginIndex, endIndex ).split( "=" )[0] + "=";
             pageAmount = Integer.parseInt( tempString.substring( beginIndex, endIndex ).split( "=" )[1] );
-        }
-        else 
+        } else {
             pageAmount = 1; // 只有一頁
-        
+        }
         Common.debugPrintln( "此貼共有" + pageAmount + "頁" );
 
         int pageCount = 0;
+        int choice = -1;
         String tempComicURL = "";
         for ( int i = 0 ; i < pageAmount ; i++ ) {
             if ( i > 0 ) {
                 allPageString = getAllPageString( basePageURL + (i + 1) );
             }
 
-            // 第一頁之後若少於五張圖就不下載了
-            if ( i > 0 && allPageString.split( "\"BDE_Image\"" ).length < 5 ) {
-                break;
+            int picCountOnNowPage = allPageString.split( "\"BDE_Image\"" ).length - 1;
+
+            // 當此頁面貼圖數少於5張，且之前沒有選擇解析為止，且不是最後一頁，才跳出詢問視窗
+            if ( picCountOnNowPage < 5 && choice != 2 && i != pageAmount - 1 ) {
+                Object[] options = { "結束解析，完成此貼下載", "繼續解析下一頁", "將全部頁數解析為止" };
+                choice = JOptionPane.showOptionDialog( ComicDownGUI.mainFrame,
+                        "目前解析到第" + (i + 1) + "頁沒有貼圖，請問應該如何處理？",
+                        "下載詢問視窗",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                        null, options, options[0] );
             }
 
+            // 如果頁面貼圖數少於2張且選擇結束，或者頁面貼圖數少於2張且為最後一頁，就結束迴圈
+            if ( picCountOnNowPage < 2 ) {
+                if ( choice == 0 || i == pageAmount - 1 ) {
+                    break;
+                } else {
+                    continue;
+                }
+            }
             String[] tokens = allPageString.split( "\"" );
             for ( int j = 0 ; j < tokens.length ; j++ ) {
                 if ( tokens[j].matches( "BDE_Image" ) ) {
@@ -124,10 +141,12 @@ public class ParseBAIDU extends ParseOnlineComicSite {
             Common.debugPrintln( "此頁面解析得" + comicURL.length + "張圖" );
             int tempTotalPage = comicURL.length + pageCount;
             for ( int j = 0 ; j < comicURL.length ; j++ ) {
+                Common.debugPrint( " " + pageCount + " " );
                 singlePageDownload( getTitle(), getWholeTitle(), comicURL[j], tempTotalPage, pageCount + 1, 0 );
 
                 pageCount++;
             }
+
 
             Common.debugPrintln( "第" + (i + 1) + "頁解析完畢" );
             Common.debugPrintln( "目前共下載" + pageCount + "頁" );
@@ -190,15 +209,14 @@ public class ParseBAIDU extends ParseOnlineComicSite {
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         int beginIndex = 0;
-        int endIndex = 0; 
-        
+        int endIndex = 0;
+
         String title = "";
-        if ( urlString.matches( "(?s).*/p/(?s).*" ) ) {
+        if ( urlString.matches( "(?s).*\\d{7,}(?s).*" ) ) {
             beginIndex = allPageString.indexOf( "_" ) + 1;
             endIndex = allPageString.indexOf( "_", beginIndex );
             title = allPageString.substring( beginIndex, endIndex ).trim();
-        }
-        else {
+        } else {
             beginIndex = allPageString.indexOf( "<title>" ) + 7;
             endIndex = allPageString.indexOf( "_", beginIndex );
             title = allPageString.substring( beginIndex, endIndex ).trim();
@@ -218,9 +236,9 @@ public class ParseBAIDU extends ParseOnlineComicSite {
         int beginIndex = 0;
         int endIndex = 0;
 
-        if ( urlString.matches( "(?s).*/p/(?s).*" ) ) { // 單一貼子
+        if ( urlString.matches( "(?s).*\\d{7,}(?s).*" ) ) { // 單一貼子
             totalVolume = 1;
-            
+
             beginIndex = allPageString.indexOf( "<title>" ) + 7;
             endIndex = allPageString.indexOf( "_", beginIndex );
             String volumeTitle = allPageString.substring( beginIndex, endIndex ).trim();
@@ -229,33 +247,40 @@ public class ParseBAIDU extends ParseOnlineComicSite {
 
             volumeList.add( Common.getStringRemovedIllegalChar(
                     Common.getTraditionalChinese( volumeTitle ) ) );
-        }
-        else { // 貼子列表
-            totalVolume = allPageString.split( "class=\"thread_title\"" ).length - 1;
+        } else { // 貼子列表
+            String frontKeyword = "";
+            if ( allPageString.indexOf( "class=\"thread_title\"" ) > 0 ) {
+                frontKeyword = "class=\"thread_title\"";
+            } else {
+                frontKeyword = "class=\"th_lz\"";
+            }
+
+            totalVolume = allPageString.split( frontKeyword ).length - 1;
             beginIndex = 0;
             String tempURL = "";
             String volumeTitle = "";
-            for ( int i = 0; i < totalVolume; i ++ ) {
-                beginIndex = allPageString.indexOf( "class=\"thread_title\"", beginIndex );
+            for ( int i = 0 ; i < totalVolume ; i++ ) {
+                beginIndex = allPageString.indexOf( frontKeyword, beginIndex );
                 beginIndex = allPageString.indexOf( "href=\"", beginIndex ) + 6;
                 endIndex = allPageString.indexOf( "\"", beginIndex );
                 tempURL = allPageString.substring( beginIndex, endIndex );
-                
-                if ( Common.isLegalURL( tempURL ) )
+
+                if ( Common.isLegalURL( tempURL ) ) {
                     urlList.add( tempURL );
-                else
+                } else {
                     urlList.add( baseURL + tempURL );
-                
+                }
+
                 beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
                 endIndex = allPageString.indexOf( "<", beginIndex );
                 volumeTitle = allPageString.substring( beginIndex, endIndex );
-                
+
                 volumeList.add( Common.getStringRemovedIllegalChar(
-                    Common.getTraditionalChinese( volumeTitle ) ) );
+                        Common.getTraditionalChinese( volumeTitle ) ) );
             }
         }
 
-        
+
         Common.debugPrintln( "共有" + totalVolume + "集" );
 
         combinationList.add( volumeList );

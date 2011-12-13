@@ -212,16 +212,20 @@ public class Common {
         } catch ( Exception ex ) {
             ex.printStackTrace();
         }
+        
+        
 
         String[] cookieStrings = tempCookieStrings;
         int cookieCount = 0;
         if ( tempCookieStrings != null ) {
+            
             for ( int i = 0 ; i < tempCookieStrings.length ; i++ ) {
                 if ( tempCookieStrings[i] != null ) {
                     cookieStrings[cookieCount++] = tempCookieStrings[i]; // 把cookie都集中到前面
                     System.out.println( cookieCount + " " + tempCookieStrings[i] );
                 }
             }
+            Common.debugPrintln( "共有" + cookieCount + "串cookie" );
         }
 
         return cookieStrings;
@@ -783,7 +787,8 @@ public class Common {
                     || oldString.charAt( i ) == '"'
                     || oldString.charAt( i ) == '<'
                     || oldString.charAt( i ) == '>'
-                    || oldString.charAt( i ) == '|' ) {
+                    || oldString.charAt( i ) == '|'
+                    || oldString.charAt( i ) == '.' ) {
 
                 newString += String.valueOf( '_' );
             } else {

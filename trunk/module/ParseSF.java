@@ -15,7 +15,7 @@ import jcomicdownloader.enums.*;
 import java.util.*;
 import jcomicdownloader.SetUp;
 
-public class ParseCityManga extends ParseOnlineComicSite {
+public class ParseSF extends ParseOnlineComicSite {
 
     private int radixNumber; // use to figure out the name of pic
     private String jsName;
@@ -27,18 +27,18 @@ public class ParseCityManga extends ParseOnlineComicSite {
      *
      * @author user
      */
-    public ParseCityManga() {
-        siteID = Site.CITY_MANGA;
-        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_encode_parse_", "html" );
+    public ParseSF() {
+        siteID = Site.SF;
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_sf_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_sf_encode_parse_", "html" );
 
-        jsName = "index_city_manga.js";
-        radixNumber = 1564371; // default value, not always be useful!!
+        jsName = "index_sf.js";
+        radixNumber = 159371; // default value, not always be useful!!
 
-        baseURL = "http://www.citymanga.com";
+        baseURL = "http://coldpic.sfacg.com";
     }
 
-    public ParseCityManga( String webSite, String titleName ) {
+    public ParseSF( String webSite, String titleName ) {
         this();
         this.webSite = webSite;
         this.title = titleName;
@@ -55,8 +55,8 @@ public class ParseCityManga extends ParseOnlineComicSite {
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
-            int beginIndex = allPageString.lastIndexOf( "<h1>" ) + 4;
-            int endIndex = allPageString.indexOf( "</h1>", beginIndex );
+            int beginIndex = allPageString.indexOf( "content=\"" ) + 9;
+            int endIndex = allPageString.indexOf( ",", beginIndex );
             String tempTitleString = allPageString.substring( beginIndex, endIndex );
 
             setWholeTitle( Common.getStringRemovedIllegalChar(
@@ -74,44 +74,35 @@ public class ParseCityManga extends ParseOnlineComicSite {
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        int beginIndex = allPageString.lastIndexOf( "pageselector" );
-        int endIndex = allPageString.indexOf( "</select>", beginIndex );
-        String tempString = allPageString.substring( beginIndex, endIndex );
+        // 取得js位址
+        int beginIndex = allPageString.indexOf( "src=\"" ) + 1;
+        beginIndex = allPageString.indexOf( "src=\"", beginIndex ) + 5;
+        int endIndex = allPageString.indexOf( "\"", beginIndex );
+        
+        String jsBaseURL = webSite.substring( 0, webSite.indexOf( "/AllComic/" ) );
+        String jsURL = jsBaseURL + allPageString.substring( beginIndex, endIndex );
+        Common.debugPrintln( "JS檔位址：" + jsURL );
+        
+        // 取得js檔內容
+        allPageString = getAllPageString( jsURL );
+        
+        beginIndex = allPageString.indexOf( "Array()" );
+        String tempString = allPageString.substring( beginIndex, allPageString.length() );
 
-        totalPage = tempString.split( "</option>" ).length - 1;
+        totalPage = tempString.split( "http://" ).length - 1;
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
 
-        // 開始取得每一頁的網址
-        beginIndex = allPageString.lastIndexOf( "pageselector" );
-        endIndex = allPageString.indexOf( "</select>", beginIndex );
-        String[] pageTokens = allPageString.substring( beginIndex, endIndex ).split( "\"" );
-
-        String[] pageURL = new String[totalPage + 1];
-        int count = 0;
-        for ( int i = 0 ; i < pageTokens.length ; i++ ) {
-            if ( pageTokens[i].matches( "\\d+" ) ) {
-                pageURL[count++] = webSite + pageTokens[i] + "/"; // 存入每一頁的網頁網址
-                //Common.debugPrintln( count + " " + pageURL[count - 1]  ); // debug
+        String[] urlTokens = tempString.split( "\"" );
+        
+        int p = 0; // 目前頁數
+        for ( int i = 0 ; i < urlTokens.length ; i++ ) {
+            if ( urlTokens[i].matches( "http://(?s).*" ) ) {
+                comicURL[p++] = urlTokens[i]; // 存入每一頁的網頁網址
+                //Common.debugPrintln( p + " " + comicURL[p-1]  ); // debug
             }
         }
 
-        for ( int p = 1 ; p <= totalPage ; p++ ) {
-            // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
-            if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
-                Common.downloadFile( pageURL[p - 1], SetUp.getTempDirectory(), indexName, false, "" );
-                allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
-
-                // 開始取得第一頁網址 
-                beginIndex = allPageString.lastIndexOf( "<img src=" );
-                beginIndex = allPageString.indexOf( "/", beginIndex );
-                endIndex = allPageString.indexOf( "\"", beginIndex );
-                comicURL[p - 1] = baseURL + allPageString.substring( beginIndex, endIndex ).trim();
-                singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0 );
-
-                //Common.debugPrintln( p + " " + comicURL[p - 1]  ); // debug
-            }
-        }
         //System.exit( 0 ); // debug
     }
 
@@ -124,7 +115,7 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_sf_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
@@ -133,8 +124,8 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
     @Override
     public boolean isSingleVolumePage( String urlString ) {
-        // ex. http://www.citymanga.com/sexy_commando_gaiden_sugoiyo_masaru-san/chapter-71/
-        if ( urlString.matches( "(?).*/chapter(?).*" ) ) {
+        // ex. http://coldpic.sfacg.com/AllComic/554/030/
+        if ( urlString.matches( "(?).*/AllComic/(?).*" ) ) {
             return true;
         } else {
             return false;
@@ -144,8 +135,13 @@ public class ParseCityManga extends ParseOnlineComicSite {
     public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
         // ex. http://www.citymanga.com/sexy_commando_gaiden_sugoiyo_masaru-san/chapter-71/轉為
         //    http://www.citymanga.com/sexy_commando_gaiden_sugoiyo_masaru-san/
-        int endIndex = volumeURL.substring( 0, volumeURL.length() - 2 ).lastIndexOf( "/" ) + 1;
-        String mainPageURL = volumeURL.substring( 0, endIndex );
+
+        String allPageString = getAllPageString( volumeURL );
+
+        int beginIndex = allPageString.indexOf( "http://comic.sfacg.com/" ) + 1;
+        beginIndex = allPageString.indexOf( "http://comic.sfacg.com/", beginIndex );
+        int endIndex = allPageString.indexOf( "\"", beginIndex );
+        String mainPageURL = allPageString.substring( beginIndex, endIndex );
 
         Common.debugPrintln( "MAIN_URL: " + mainPageURL );
 
@@ -161,10 +157,11 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
-        int beginIndex = allPageString.indexOf( "asubtitle" );
-        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "<", beginIndex );
+        int beginIndex = allPageString.indexOf( "<title>" ) + 7;
+        int endIndex = allPageString.indexOf( ",", beginIndex );
         String title = allPageString.substring( beginIndex, endIndex );
+        
+        System.out.println( "XXXX:" + title );
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
     }
@@ -177,24 +174,29 @@ public class ParseCityManga extends ParseOnlineComicSite {
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
-        int beginIndex = allPageString.indexOf( "sclinfo" );
-        int endIndex = allPageString.lastIndexOf( "class=\"rss\"" );
+        int beginIndex = allPageString.indexOf( "class=\"serialise_list Blue_link2\"" );
+        int endIndex = allPageString.indexOf( "</ul>", beginIndex );
+        
         String tempString = allPageString.substring( beginIndex, endIndex );
-        String[] tokens = tempString.split( "\"" );
 
-        int volumeCount = 0;
+        int volumeCount = tempString.split( "href=\"" ).length - 1;
 
-        for ( int i = 0 ; i < tokens.length ; i++ ) {
-            if ( tokens[i].matches( "(?s).*http://(?s).*" ) ) {
-                urlList.add( tokens[i] );
+        String volumeTitle = "";
+        beginIndex = endIndex = 0;
+        for ( int i = 0 ; i < volumeCount ; i++ ) {
+            // 取得單集位址
+            beginIndex = tempString.indexOf( "href=\"", beginIndex ) + 6;
+            endIndex = tempString.indexOf( "\"", beginIndex );
+            urlList.add( tempString.substring( beginIndex, endIndex ) );
 
-                // 取得單集名稱
-                String volumeTitle = tokens[i + 2];
-                volumeList.add( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( volumeTitle.trim() ) ) );
+            // 取得單集名稱
+            beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "<", beginIndex );
+            volumeTitle = tempString.substring( beginIndex, endIndex );
 
-                volumeCount++;
-            }
+            volumeList.add( Common.getStringRemovedIllegalChar(
+                    Common.getTraditionalChinese( volumeTitle.trim() ) ) );
+
         }
 
         totalVolume = volumeCount;
@@ -221,7 +223,7 @@ public class ParseCityManga extends ParseOnlineComicSite {
     public void printLogo() {
         System.out.println( " ______________________________" );
         System.out.println( "|                            " );
-        System.out.println( "| Run the CityManga module:     " );
+        System.out.println( "| Run the SF module:     " );
         System.out.println( "|_______________________________\n" );
     }
 }
