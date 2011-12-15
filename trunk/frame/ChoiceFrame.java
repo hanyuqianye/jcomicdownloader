@@ -81,7 +81,7 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
         } else {
             // 依設定選擇是否預設全選
             String choiceString = SetUp.getChoiceAllVolume() ? "true" : "false";
-            
+
             for ( int i = 0 ; i < volumeStrings.length ; i++ ) {
                 checkStrings[i] = choiceString;
             }
@@ -152,31 +152,33 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
     private void setVolumeTableUI( Container contentPane ) {
         volumeTableModel = getDownloadTableModel();
         volumeTable = new JTable( volumeTableModel ) {
+
             protected String[] columnToolTips = { "希望下載哪一集就在同列的此欄位打勾",
-                                         "顯示淺色代表已經下載過（不保證下載完整，請自行檢查）"
+                "顯示淺色代表已經下載過（不保證下載完整，請自行檢查）"
             };
-            
+
             //Implement table header tool tips. 
             protected JTableHeader createDefaultTableHeader() {
-                return new JTableHeader(columnModel) {
-                    public String getToolTipText(MouseEvent e) {
+                return new JTableHeader( columnModel ) {
+
+                    public String getToolTipText( MouseEvent e ) {
                         String tip = null;
                         java.awt.Point p = e.getPoint();
-                        int index = columnModel.getColumnIndexAtX(p.x);
-                        int realIndex = columnModel.getColumn(index).getModelIndex();
+                        int index = columnModel.getColumnIndexAtX( p.x );
+                        int realIndex = columnModel.getColumn( index ).getModelIndex();
                         return columnToolTips[realIndex];
                     }
                 };
             }
         };
-        
+
         volumeTable.setModel( volumeTableModel );
         volumeTable.setPreferredScrollableViewportSize( new Dimension( 400, 170 ) );
         volumeTable.setFillsViewportHeight( true );
         volumeTable.setAutoCreateRowSorter( true );
 
         volumeTableModel.addTableModelListener( this );
-        
+
         setDefaultRenderer(); // 設置volumeTable上哪些集數要變色
 
         // 取得這個table的欄位模型
@@ -195,7 +197,7 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
         contentPane.add( volumePanel, BorderLayout.CENTER );
 
     }
-    
+
     private void setDefaultRenderer() { // 設置volumeTable上哪些集數要變色
         GridTableRender cellRender = new GridTableRender( title, url, volumeTableModel );
         try {
@@ -255,9 +257,10 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
         // do nothing when click X,
         // because it needs click buttons to unlock the downloadLock
         //setDefaultCloseOperation( JFrame.DO_NOTHING_ON_CLOSE );
-        
-        thisFrame.addWindowListener( new WindowAdapter(){
-            public void windowClosing( WindowEvent e ){
+
+        thisFrame.addWindowListener( new WindowAdapter() {
+
+            public void windowClosing( WindowEvent e ) {
                 notifyAllDownload();
                 thisFrame.dispose();
             }
@@ -409,10 +412,11 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
 }
 
 class GridTableRender extends DefaultTableCellRenderer {
+
     private String title; // 漫畫名稱
     private String url; // 漫畫位址
     DownloadTableModel tableModel; // 選擇表格的內容
-    
+
     public GridTableRender( String title, String url, DownloadTableModel tableModel ) {
         super();
         this.title = title;
@@ -436,42 +440,53 @@ class GridTableRender extends DefaultTableCellRenderer {
                 row,
                 column );
 
-       // if ( hasFocus ) {
-       //     cell.setBackground( Color.green );
-       //     cell.setForeground( Color.black );
-       // } else {
-            
-            if ( existsFileOnThisRow( ChoiceFrame.volumeTable.convertRowIndexToModel( row ) ) ) { // 若存在就顯示淺黑色
-                //cell.setBackground( Color.gray );
-                cell.setForeground( Color.lightGray );
-            } else { // 若不存在則顯示正常黑色
-                //cell.setBackground( Color.white );
+        // if ( hasFocus ) {
+        //     cell.setBackground( Color.green );
+        //     cell.setForeground( Color.black );
+        // } else {
+
+        String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
+
+        if ( existsFileOnThisRow( ChoiceFrame.volumeTable.convertRowIndexToModel( row ) ) ) { // 若存在就顯示淺黑色
+            //cell.setBackground( Color.gray );
+
+            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
                 cell.setForeground( Color.black );
             }
+            else
+                cell.setForeground( Color.lightGray );
+        } else { // 若不存在則顯示正常黑色
+            //cell.setBackground( Color.white );
+            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+                cell.setForeground( Color.lightGray );
+            }
+            else
+                cell.setForeground( Color.black );
+        }
 
-       // }
+        // }
         return cell;
 
     }
-    
+
     // 檢查第row列的單集漫畫是否已經存在於下載資料夾（只要有資料夾或壓縮檔都算）
     private boolean existsFileOnThisRow( int row ) {
         String volumeTitle = tableModel.getValueAt( row, ChoiceTableEnum.VOLUME_TITLE ).toString();
-        
+
         File dirFile = null;
         File zipFile = null;
-        if ( this.url.matches( "(?s).*hentai.org(?s).*" ) )  { // 讓EH和EX也能判斷是否已經下載
+        if ( this.url.matches( "(?s).*hentai.org(?s).*" ) ) { // 讓EH和EX也能判斷是否已經下載
             dirFile = new File( SetUp.getOriginalDownloadDirectory() + volumeTitle );
             zipFile = new File( SetUp.getOriginalDownloadDirectory() + volumeTitle + ".zip" );
         } else {
             dirFile = new File( SetUp.getOriginalDownloadDirectory() + this.title + Common.getSlash() + volumeTitle );
             zipFile = new File( SetUp.getOriginalDownloadDirectory() + this.title + Common.getSlash() + volumeTitle + ".zip" );
         }
-        
-        if ( dirFile.exists() || zipFile.exists() )
+
+        if ( dirFile.exists() || zipFile.exists() ) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
-    
 }

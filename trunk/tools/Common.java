@@ -1197,6 +1197,7 @@ public class Common {
     public static String getHtmlStringWithColor( String string, String color ) {
         return "<html><font color=" + color + string + "</font></html>";
     }
+
 }
 
 class TimeoutTask extends TimerTask {

@@ -16,6 +16,7 @@ import java.awt.Font;
 import jcomicdownloader.tools.*;
 
 import java.io.*;
+import jcomicdownloader.frame.OptionFrame;
 
 /**
  * 預設值的設置，讀寫設定檔
@@ -284,9 +285,12 @@ public class SetUp { // read setup file, and then setup
                             ex.printStackTrace();
                         }
                     } else if ( split[0].equals( "skinClassName" ) ) {
-
-                        if ( CommonGUI.getSkinOrderBySkinClassName( split[1] ) != -1 ) {
+                        int skinOrder = new CommonGUI().getSkinOrderBySkinClassName( split[1] );
+                        if ( skinOrder != -1 ) {
                             skinClassName = split[1];
+                            Common.debugPrintln( "將讀取" + split[1] + "介面" );
+                        } else {
+                            Common.debugPrintln( "找不到" + split[1] + "介面 !!" );
                         }
 
                         if ( CommonGUI.getGTKSkinOrder() != -1 ) // 若有gtk就優先選gtk版面

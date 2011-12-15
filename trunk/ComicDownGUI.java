@@ -3,12 +3,14 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v2.07
-Last Modified : 2011/12/13
+Version  : v2.08
+Last Modified : 2011/12/15
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.08: 1. 增加額外的JTattoo介面選項（共增加11組介面可供選擇）。
  * 2.07: 1. 新增對comic.sfacg.com的支援。
  *      2. 增加baidu頁面下載時的選項。（至貼圖結束為止或解析全部頁面）
+ *      3. 修改紀錄檔機制，下載清單和書籤清單會寫出檔案多次，避免因不正常關閉造成記錄遺失。
  * 2.06: 1. 新增對baidu的支援。
  *      2. 修復集數名稱數字格式化的bug。
  * 2.05: 1. 修改選項視窗，明確顯示失敗重傳次數和連線逾時時間（因為linux系統下無法看到刻度）。
@@ -29,7 +31,7 @@ ChangeLog:
  *      5. 修復nanadm有些第一集無法解析的bug。
  *      6. 因應dmeden轉換位址進行解析修正（dmeden.net <-> www.dmeden.com）
  *      7. 因應改版後的mangaFox進行解析修正
- *      8. 修改選項視窗為多面板界面。
+ *      8. 修改選項視窗為多面板介面。
  * 2.02: 1. 新增對www.citymanga.com的支援。
  *      2. 修復kuku網址轉碼部份發生錯誤的bug。
  *      3. 修復92wy部分集數無法讀取的bug。
@@ -144,7 +146,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     JTabbedPane tabbedPane; // 裡面放三個頁面（任務、書籤、紀錄）
     public static TrayIcon trayIcon; // 系統列圖示
     private JPopupMenu trayPopup;
-    private JMenuItem trayShowItem;  // 開啟主界面
+    private JMenuItem trayShowItem;  // 開啟主介面
     private JMenuItem trayStartItem; // 開始任務
     private JMenuItem trayStopItem;  // 停止任務
     private JMenuItem trayExitItem;  // 離開
@@ -185,7 +187,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     public static String[] downTableUrlStrings;
     public static String[] nowSelectedCheckStrings;
     public static int[][] downTableRealChoiceOrder;
-    private static String defaultSkinClassName;
+    public static String defaultSkinClassName;
     // non-GUI component
     private String[] args;
     private static String resourceFolder;
@@ -193,13 +195,19 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.06" );
+        super( "JComicDownloader  v2.08" );
 
         minimizeEvent();
         initTrayIcon();
 
         mainFrame = this; // for change look and feel
-        defaultSkinClassName = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+
+        if ( Common.isUnix() ) {
+            defaultSkinClassName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
+        } else {
+            defaultSkinClassName = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+        }
+
         resourceFolder = "resource" + Common.getSlash();
 
         downTableUrlStrings = new String[1000]; // 若任務超過1000個可能就會出錯...
@@ -227,6 +235,16 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         setUpUIComponent();
         setUpeListener();
         setVisible( true );
+
+        checkSkin(); // 檢查skin是否由外部jar支援，若是外部skin且沒有此jar，則下載
+
+    }
+
+     // 檢查skin是否由外部jar支援，若是外部skin且沒有此jar，則下載
+    private void checkSkin() {
+        if ( SetUp.getSkinClassName().matches( "com.jtattoo.plaf.*" ) && !new File( "JTattoo.jar" ).exists() ) {
+            new CommonGUI().downloadJTattoo(); // 下載JTattoo.jar
+        }
     }
 
     private void setUpUIComponent() {
@@ -241,6 +259,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         setButton( contentPane );
         setText( contentPane );
 
+        // default skin: Windows uses Nimbus skin, Ubuntu uses GTK skin
         setSkin( SetUp.getSkinClassName() );
 
         stateBar = new JLabel( "請貼上網址" );
@@ -263,13 +282,24 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     /**
      * 改成defaultSkinClassName名稱的版面
      * */
-    private void setSkin( String defaultSkinClassName ) {
-        // default skin: Windows uses Nimbus skin, Ubuntu uses GTK skin
-        CommonGUI.setLookAndFeelByClassName( SetUp.getSkinClassName() );
+    private void setSkin() {
+        setSkin( SetUp.getSkinClassName() );
+    }
+
+    private void setSkin( String skinClassName ) {
+        Common.debugPrintln( "設置" + skinClassName + "介面" );
+        try {
+            CommonGUI.setLookAndFeelByClassName( skinClassName );
+        } catch ( Exception ex ) {
+            Common.errorReport( "無法使用" + skinClassName + "介面 !!" );
+
+            // 若無法配置指定的skin，就用預設的
+            CommonGUI.setLookAndFeelByClassName( defaultSkinClassName );
+        }
         SwingUtilities.updateComponentTreeUI( this );
     }
 
-    // 設置主界面上的主要按鈕
+    // 設置主介面上的主要按鈕
     private void setButton( Container contentPane ) {
         button = new JButton[7];
         String buttonPic;
@@ -304,7 +334,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         contentPane.add( buttonPanel, BorderLayout.NORTH );
     }
 
-    // 設置主界面上的網址輸入框
+    // 設置主介面上的網址輸入框
     private void setText( Container contentPane ) {
         urlField = new JTextField( "請複製欲下載的漫畫頁面網址，此輸入欄會自動捕捉" );
         urlField.setFont( SetUp.getDefaultFont( 3 ) );
@@ -326,7 +356,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         contentPane.add( textPanel, BorderLayout.CENTER );
     }
 
-    // 設置主界面上的任務清單
+    // 設置主介面上的任務清單
     private void setDownloadTable( JPanel textPanel ) {
         downTable = getDownloadTable();//new JTable( new DataTable());
         //downTable.setPreferredScrollableViewportSize( new Dimension( 450, 120 ) );
@@ -340,7 +370,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         textPanel.add( downScrollPane, BorderLayout.CENTER );
     }
 
-    // 設置主界面上的書籤頁面
+    // 設置主介面上的書籤頁面
     private void setBookmarkTable( JPanel textPanel ) {
         bookmarkTable = getBookmarkTable();//new JTable( new DataTable());
         //downTable.setPreferredScrollableViewportSize( new Dimension( 450, 120 ) );
@@ -756,7 +786,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         trayStartItem.addActionListener( this );
         trayStopItem = new JMenuItem( "停止任務" );
         trayStopItem.addActionListener( this );
-        trayShowItem = new JMenuItem( "開啟主界面" );
+        trayShowItem = new JMenuItem( "開啟主介面" );
         trayShowItem.addActionListener( this );
 
         trayPopup = new JPopupMenu();
@@ -766,9 +796,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         trayPopup.add( trayShowItem );
 
         //trayIcon = new TrayIcon( image, "JComicDownloader", trayPopup );
-        trayIcon = new TrayIcon( image, "JComicDownloader", null );
-        trayIcon.addMouseListener( this );
 
+        if ( image != null ) {
+            trayIcon = new TrayIcon( image, "JComicDownloader", null );
+            trayIcon.addMouseListener( this );
+        } else {
+            trayIcon = null;
+        }
 
     }
 
@@ -1118,6 +1152,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 ++Common.bookmarkCount,
                 title,
                 url ) );
+
+        Common.outputBookmarkTableFile( bookmarkTableModel ); // 每加入書籤便寫入書籤記錄檔一次。
     }
 
     private void openDownloadFile( int row ) {  // 開啟第row列任務的下載檔案
@@ -1437,9 +1473,12 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         downTableModel.setValueAt( "下載中斷", i, DownTableEnum.STATE );
                         trayIcon.setToolTip( "下載中斷" );
                     }
+
+                    Common.outputDownTableFile( downTableModel ); // 每處理一個任務就寫出下載任務記錄檔一次
                 }
                 if ( Run.isAlive ) {
                     stateBar.setText( Common.missionCount + "個任務全部下載完畢! " );
+
                     if ( SetUp.getShowDoneMessageAtSystemTray() ) {
                         trayIcon.displayMessage( "JComicDownloader Message", Common.missionCount + "個任務全部下載完畢! ", TrayIcon.MessageType.INFO );
                     }
@@ -1765,10 +1804,12 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
         if ( event.getSource() == button[ButtonEnum.INFORMATION] ) { // button of Information
             new Thread( new Runnable() {
+
                 public void run() {
                     final InformationFrame frame = new InformationFrame();
 
                     new Thread( new Runnable() {
+
                         public void run() {
                             frame.setNewestVersion(); // 更新版本資訊
                         }
@@ -1798,18 +1839,26 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             if ( choice == JOptionPane.YES_OPTION ) {
                 // 輸出下載任務清單，下次開啟時會自動載入
-                Common.outputDownTableFile( downTableModel );
-                Common.outputBookmarkTableFile( bookmarkTableModel );
-                Common.outputRecordTableFile( recordTableModel );
 
-                Run.isAlive = false;
-                Common.debugPrintln( "刪除所有暫存檔案" );
-                Common.deleteFolder( SetUp.getTempDirectory() ); // 刪除暫存檔
-                Common.debugPrintln( "Exit JComicDownloader ... " );
-
-                System.exit( 0 );
+                exit();
             }
         }
+    }
+
+    // 結束程式之前要做的事情
+    public static void exit() {
+        SetUp.writeSetFile(); // 將目前的設定存入設定檔（set.ini）
+
+        Common.outputDownTableFile( downTableModel );
+        Common.outputBookmarkTableFile( bookmarkTableModel );
+        Common.outputRecordTableFile( recordTableModel );
+
+        Run.isAlive = false;
+        Common.debugPrintln( "刪除所有暫存檔案" );
+        Common.deleteFolder( SetUp.getTempDirectory() ); // 刪除暫存檔
+        Common.debugPrintln( "Exit JComicDownloader ... " );
+
+        System.exit( 0 );
     }
 
     private void whlie( boolean b ) {
@@ -1849,18 +1898,18 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             public void run() {
                 //Flag.allowDownloadFlag = Run.isAlive = true;
-                
+
                 String picURL = "http://img2.veryim.com/Z/zuishangys/ch_10/001000.jpg";
                 String pageURL = "http://comic.veryim.com/manhua/zuishangys/ch_10.html";
                 String testURL = "http://comic.veryim.com/manhua/zuishangys/";
-                
+
                 String cookie = "Hm_lpvt_280953f246fceb4c893ffac1981e0998=1323781874813;Hm_lvt_280953f246fceb4c893ffac1981e0998=1323780662695";
-                
+
                 Common.downloadFile( pageURL, "", "test.html", true, cookie );
                 Common.downloadFile( picURL, "", "test.jpg", true, cookie );
 
                 //String[] cookies = Common.getCookieStrings( pageURL );
-                
+
                 System.out.println( "OVER" );
 
             }

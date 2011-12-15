@@ -1,11 +1,11 @@
 /*
- ----------------------------------------------------------------------------------------------------
- Program Name : JComicDownloader
- Authors  : surveyorK
- Last Modified : 2011/11/1
- ----------------------------------------------------------------------------------------------------
- ChangeLog:
- 1.09: 加入書籤表格和紀錄表格相關的公用方法
+----------------------------------------------------------------------------------------------------
+Program Name : JComicDownloader
+Authors  : surveyorK
+Last Modified : 2011/11/1
+----------------------------------------------------------------------------------------------------
+ChangeLog:
+1.09: 加入書籤表格和紀錄表格相關的公用方法
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.tools;
@@ -21,19 +21,17 @@ import java.net.URL;
 import java.io.*;
 import java.text.DateFormat;
 import java.util.*;
-
+import jcomicdownloader.module.Run;
 
 /**
  *
- * 少部份的通用方法放在這邊，大都與視窗介面有相關。
+ * 少部份的通用方法放在這邊，大都與視窗界面有相關。
  */
 public class CommonGUI {
-    private static String resourceFolder;
 
+    private static String resourceFolder;
     public static String stateBarMainMessage;
     public static String stateBarDetailMessage;
-
-
 
     public CommonGUI() {
         resourceFolder = "resource/";
@@ -67,11 +65,11 @@ public class CommonGUI {
 
     public static String getButtonText( String word ) {
         return word;
-        
+
         /*
         return "<html><font face='文鼎細明體' size='6' >" +
-               word +
-               "</font></html>";
+        word +
+        "</font></html>";
          * 
          */
     }
@@ -80,7 +78,7 @@ public class CommonGUI {
         Icon icon = new ImageIcon();
         try {
             InputStream is = getClass().getResourceAsStream( resourceFolder + picName );
-            Image img = ImageIO.read( is ) ;
+            Image img = ImageIO.read( is );
             icon = new ImageIcon( img );
         } catch ( Exception ex ) {
             Common.errorReport( "找不到此資源：" + resourceFolder + picName );
@@ -90,9 +88,8 @@ public class CommonGUI {
     }
 
     public Image getImage( String picName ) {
-        return ( (ImageIcon) getImageIcon( picName ) ).getImage();
+        return ((ImageIcon) getImageIcon( picName )).getImage();
     }
-
 
     public String getButtonPic( String picName ) {
         URL url = getResourceURL( picName );
@@ -110,12 +107,13 @@ public class CommonGUI {
         return "<html><img align=\"center\" src=" + url + " width=\"" + width + "\" height=\"" + height + "\"/></html>";
     }
 
-
     public static int getSumOfTrue( boolean[] bool ) {
         int count = 0;
-        for ( int i = 0; i < bool.length; i ++ )
-            if ( bool[i] )
-                count ++;
+        for ( int i = 0 ; i < bool.length ; i++ ) {
+            if ( bool[i] ) {
+                count++;
+            }
+        }
 
         return count;
     }
@@ -123,9 +121,10 @@ public class CommonGUI {
     public static int getSumOfTrue( String[] boolStrings ) {
         int count = 0;
 
-        for ( int i = 0; i < boolStrings.length; i ++ ) {
-            if ( boolStrings[i] != null && boolStrings[i].equals( "true" ) )
-                count ++;
+        for ( int i = 0 ; i < boolStrings.length ; i++ ) {
+            if ( boolStrings[i] != null && boolStrings[i].equals( "true" ) ) {
+                count++;
+            }
         }
         return count;
     }
@@ -143,12 +142,12 @@ public class CommonGUI {
 
         return row;
     }
-    
+
     public static Vector<Object> getBookmarkDataRow( int order, String title, String url ) {
         Date date = new Date(); // 取得目前時間
-        DateFormat shortFormat = DateFormat.getDateTimeInstance( 
-                                        DateFormat.SHORT, DateFormat.SHORT ); 
-        
+        DateFormat shortFormat = DateFormat.getDateTimeInstance(
+                DateFormat.SHORT, DateFormat.SHORT );
+
         Vector<Object> row = new Vector<Object>();
 
         row.add( new Integer( order ) );
@@ -159,12 +158,12 @@ public class CommonGUI {
 
         return row;
     }
-    
+
     public static Vector<Object> getRecordDataRow( int order, String title, String url ) {
         Date date = new Date(); // 取得目前時間
-        DateFormat shortFormat = DateFormat.getDateTimeInstance( 
-                                        DateFormat.SHORT, DateFormat.SHORT ); 
-        
+        DateFormat shortFormat = DateFormat.getDateTimeInstance(
+                DateFormat.SHORT, DateFormat.SHORT );
+
         Vector<Object> row = new Vector<Object>();
 
         row.add( new Integer( order ) );
@@ -186,21 +185,133 @@ public class CommonGUI {
         UIManager.LookAndFeelInfo looks[] = UIManager.getInstalledLookAndFeels();
 
         int gtkOrder = -1;
-        for ( int i = 0; i < looks.length; i ++ )
-            if ( looks[i].getClassName().matches( ".*GTK.*" ) )
+        for ( int i = 0 ; i < looks.length ; i++ ) {
+            if ( looks[i].getClassName().matches( ".*GTK.*" ) ) {
                 gtkOrder = i;
+            }
+        }
 
         return gtkOrder;
     }
 
+    // 取得JTattoo所有可用的界面類別名稱
+    public String[] getJTattooClassNames() {
+        String[] jtattooClassNames = {
+            "com.jtattoo.plaf.noire.NoireLookAndFeel", // 柔和黑
+            "com.jtattoo.plaf.smart.SmartLookAndFeel", // 木質感+xp風格
+            "com.jtattoo.plaf.mint.MintLookAndFeel", // 橢圓按鈕+黃色按鈕背景
+            "com.jtattoo.plaf.mcwin.McWinLookAndFeel", // 橢圓按鈕+綠色按鈕背景
+            "com.jtattoo.plaf.luna.LunaLookAndFeel", // 純XP風格
+            "com.jtattoo.plaf.hifi.HiFiLookAndFeel", // 黑色風格
+            "com.jtattoo.plaf.fast.FastLookAndFeel", // 普通swing風格+藍色邊框
+            "com.jtattoo.plaf.bernstein.BernsteinLookAndFeel", // 黃色風格
+            "com.jtattoo.plaf.aluminium.AluminiumLookAndFeel", // 橢圓按鈕+翠綠色按鈕背景+金屬質感（預設）
+            "com.jtattoo.plaf.aero.AeroLookAndFeel", // xp清新風格
+            "com.jtattoo.plaf.acryl.AcrylLookAndFeel" // 布質感+swing純風格
+        };
+
+        return jtattooClassNames;
+    }
+
+    // 取得所有預設可用的界面類別名稱
+    public String[] getDefaultClassNames() {
+        String classNames = "";
+        try {
+            for ( UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels() ) {
+                //System.out.println( info.getName() );
+                classNames += info.getClassName() + "###";
+            }
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
+
+        return classNames.split( "###" );
+    }
+
+    // 取得預設所有skins和jtattoo所有skins的類別名稱
+    public String[] getClassNames() {
+        String[] defaultClassNames = getDefaultClassNames();
+        String[] jtattooClassNames = getJTattooClassNames();
+
+        int allClassAmount = defaultClassNames.length + jtattooClassNames.length;
+        String[] allClassNames = new String[allClassAmount];
+
+        int count = 0;
+        for ( int i = 0 ; i < defaultClassNames.length ; i++ ) {
+            allClassNames[count++] = defaultClassNames[i];
+        }
+
+        for ( int i = 0 ; i < jtattooClassNames.length ; i++ ) {
+            allClassNames[count++] = jtattooClassNames[i];
+        }
+
+        return allClassNames;
+    }
+
+    // 取得JTattoo所有可用的界面名稱
+    public String[] getJTattooSkinStrings() {
+        String[] jtattooSkinStrings = {
+            "Noire", // 柔和黑
+            "Smart", // 木質感+xp風格
+            "Mint", // 橢圓按鈕+黃色按鈕背景
+            "McWin", // 橢圓按鈕+綠色按鈕背景
+            "Luna", // 純XP風格
+            "HiFi", // 黑色風格
+            "Fast", // 普通swing風格+藍色邊框
+            "Bernstein", // 黃色風格
+            "Aluminium", // 橢圓按鈕+翠綠色按鈕背景+金屬質感（預設）
+            "Aero", // xp清新風格
+            "Acryl" // 布質感+swing純風格
+        };
+
+        return jtattooSkinStrings;
+    }
+
+    // 取得所有預設可用的界面名稱
+    public String[] getDefaultSkinStrings() {
+        String skinString = "";
+        try {
+            for ( UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels() ) {
+                //System.out.println( info.getName() );
+                skinString += info.getName() + "###";
+            }
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
+
+        return skinString.split( "###" );
+    }
+
+    // 取得預設所有skins和jtattoo所有skins的名稱
+    public String[] getSkinStrings() {
+        String[] defaultSkinStrings = getDefaultSkinStrings();
+        String[] jtattooSkinStrings = getJTattooSkinStrings();
+
+        int allSkinsAmount = defaultSkinStrings.length + jtattooSkinStrings.length;
+        String[] allSkinStrings = new String[allSkinsAmount];
+
+        int count = 0;
+        for ( int i = 0 ; i < defaultSkinStrings.length ; i++ ) {
+            allSkinStrings[count++] = defaultSkinStrings[i];
+        }
+
+        for ( int i = 0 ; i < jtattooSkinStrings.length ; i++ ) {
+            allSkinStrings[count++] = jtattooSkinStrings[i];
+        }
+
+        return allSkinStrings;
+    }
+
     // 找尋skinClassName在looks[i]中的順位，若沒找到就回傳-1
-    public static int getSkinOrderBySkinClassName( String skinClassName ) {
-        UIManager.LookAndFeelInfo looks[] = UIManager.getInstalledLookAndFeels();
+    public int getSkinOrderBySkinClassName( String skinClassName ) {
+        String[] classNames = getClassNames();
 
         int gtkOrder = -1;
-        for ( int i = 0; i < looks.length; i ++ )
-            if ( looks[i].getClassName().equals( skinClassName ) )
+        for ( int i = 0 ; i < classNames.length ; i++ ) {
+            if ( classNames[i].equals( skinClassName ) ) {
                 gtkOrder = i;
+            }
+        }
 
         return gtkOrder;
     }
@@ -218,6 +329,7 @@ public class CommonGUI {
         try {
             UIManager.setLookAndFeel( className );
         } catch ( Exception ex ) {
+            Common.errorReport( "無法使用" + className + "界面 !!" );
             try {
                 UIManager.setLookAndFeel( "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel" );
             } catch ( Exception exx ) {
@@ -227,4 +339,42 @@ public class CommonGUI {
         }
     }
 
+    // 下載JTattoo.jar檔
+    public void downloadJTattoo() {
+        String skinName = getSkinNameFromClassName( SetUp.getSkinClassName() );
+        int choice = JOptionPane.showConfirmDialog( ComicDownGUI.mainFrame, "資料夾內未發現JTattoo.jar，無法使用"
+                + skinName + "界面！\n\n請問是否要下載JTattoo.jar（634Kb）？",
+                "提醒訊息", JOptionPane.YES_NO_OPTION );
+
+        if ( choice == JOptionPane.YES_OPTION ) {
+            Thread downThread = new Thread( new Runnable() {
+
+                public void run() {
+                    boolean backupValue = Run.isAlive; // 備份原值
+                    Run.isAlive = true;
+
+                    String fileURL = "https://sites.google.com/site/jcomicdownloader/release/JTattoo.jar?attredirects=0&d=1";
+                    Common.downloadFile( fileURL, "", "JTattoo.jar", false, "" );
+
+                    Run.isAlive = backupValue; // 還原原值
+
+                    JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "JTattoo.jar下載完畢，程式即將關閉，請您再次啟動",
+                            "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+
+                    ComicDownGUI.exit(); // 結束程式
+                }
+            } );
+            downThread.start();
+        } else {
+            skinName = getSkinNameFromClassName( ComicDownGUI.getDefaultSkinClassName() );
+            JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "不下載JTattoo.jar，使用預設的"
+                    + skinName + "界面",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+        }
+    }
+    
+    private String getSkinNameFromClassName( String className ) {
+        String[] tempStrings = className.split( "\\." );
+        return tempStrings[tempStrings.length-1].replaceAll( "LookAndFeel", "" );
+    }
 }

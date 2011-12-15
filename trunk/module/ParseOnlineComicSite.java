@@ -262,15 +262,15 @@ abstract public class ParseOnlineComicSite {
                     break;
                 }
                 else {
-                    System.out.println( volume.substring(i,i+1) + " " );
+                    //System.out.println( volume.substring(i,i+1) + " " );
                 }
             }
 
             if ( endIndex < 0 || beginIndex < 0 ) {
-                System.out.println( "無法格式化: " + volume + " " + beginIndex + " " + endIndex );
+                //System.out.println( "無法格式化: " + volume + " " + beginIndex + " " + endIndex );
                 formatVolume = volume;
             } else {
-                System.out.println( volume + " " + beginIndex + " " + endIndex + " 數字部份：" + volume.substring( beginIndex, endIndex ) );
+                //System.out.println( volume + " " + beginIndex + " " + endIndex + " 數字部份：" + volume.substring( beginIndex, endIndex ) );
 
                 String originalNumber = volume.substring( beginIndex, endIndex );
                 NumberFormat formatter = new DecimalFormat( "000" );

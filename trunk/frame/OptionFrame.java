@@ -5,11 +5,12 @@ Authors  : surveyorK
 Last Modified : 2011/12/5
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.08: 1. 增加JTattoo介面選項。
 2.05: 1. 修復無法開啟壓縮檔的bug。（預設開啟圖片和壓縮檔為同個程式）
  *    2. 修復暫存資料夾路徑無法改變的bug。
 2.04: 1. 增加選擇紀錄檔和暫存資料夾的選項。
-     2. 修改下拉式介面選單的渲染機制，使其可改變字型。 
-2.03: 1. 修改選項視窗為多面板界面。
+2. 修改下拉式介面選單的渲染機制，使其可改變字型。 
+2.03: 1. 修改選項視窗為多面板介面。
 2. 增加下載失敗重試次數的選項。
 2.01: 1. 增加預設勾選全部集數的選項。 
 1.16: 勾選自動刪除就要連帶勾選自動壓縮。
@@ -30,6 +31,7 @@ import javax.swing.*;
 import java.io.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import jcomicdownloader.module.Run;
 
 /**
  *
@@ -40,8 +42,9 @@ public class OptionFrame extends JFrame {
     // about skin
     private Object[][] skins;
     private String[] skinStrings;
-    private UIManager.LookAndFeelInfo looks[] = UIManager.getInstalledLookAndFeels();
-    private JLabel skinLabel; 
+    //private UIManager.LookAndFeelInfo looks[] = UIManager.getInstalledLookAndFeels();
+    private String[] skinClassNames; // 存放所有介面類別名稱
+    private JLabel skinLabel;
     private JComboBox skinBox;
     // about directory
     private JLabel dirLabel, tempDirLabel, recordDirLabel;
@@ -124,7 +127,7 @@ public class OptionFrame extends JFrame {
     }
 
     private void setTabbedPane( JPanel panel ) {
-        // 檔案相關、界面相關、連線相關、其他雜項
+        // 檔案相關、介面相關、連線相關、其他雜項
 
         tabbedPane = new JTabbedPane();
 
@@ -149,8 +152,8 @@ public class OptionFrame extends JFrame {
 
         JPanel interfaceTablePanel = new CommonGUI().getCenterPanel( new JPanel( new GridLayout( 1, 1 ) ) );
         setInterfaceTablePanel( interfaceTablePanel );
-        tabbedPane.addTab( getTabeHtmlFontString( "界面" ), null, interfaceTablePanel,
-                "有關於視窗界面的設定" );
+        tabbedPane.addTab( getTabeHtmlFontString( "介面" ), null, interfaceTablePanel,
+                "有關於視窗介面的設定" );
         tabbedPane.setMnemonicAt( 3, KeyEvent.VK_4 );
 
         JPanel viewTablePanel = new CommonGUI().getCenterPanel( new JPanel( new GridLayout( 1, 1 ) ) );
@@ -320,7 +323,7 @@ public class OptionFrame extends JFrame {
         proxyPortPanel.add( proxyPortLabel );
         proxyPortPanel.add( proxyPortTextField );
 
-        
+
         retryTimesSlider = new JSlider( JSlider.HORIZONTAL, 0, 5, 1 );
         retryTimesSlider.addChangeListener( new SliderHandler() );
         retryTimesSlider.setMajorTickSpacing( 1 );
@@ -344,8 +347,8 @@ public class OptionFrame extends JFrame {
         timeoutSlider.setToolTipText( "超過此時間會中斷此連線，直接下載下一個檔案，建議只在下載GOOGLE圖片時使用，其他時候建議設為0，代表沒有逾時限制" );
         timeoutLabel = getLabel( "連線逾時時間：" + timeoutSlider.getValue() + "秒" );
         timeoutLabel.setToolTipText( "超過此時間會中斷此連線，直接下載下一個檔案，建議只在下載GOOGLE圖片時使用，其他時候建議設為0，代表沒有逾時限制" );
-        
-        
+
+
         JPanel timeoutPanel = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
         timeoutPanel.add( timeoutLabel );
         timeoutPanel.add( timeoutSlider );
@@ -371,7 +374,8 @@ public class OptionFrame extends JFrame {
         chooseFontPanel.add( chooseFontLabel );
         chooseFontPanel.add( chooseFontButton );
 
-        skinStrings = getSkinStrings();
+        skinClassNames = new CommonGUI().getClassNames(); // 取得所有介面類別名稱
+        skinStrings = new CommonGUI().getSkinStrings(); // 取得所有介面名稱
         skinBox = new JComboBox( skinStrings );
         ListCellRenderer renderer = new ComplexCellRenderer();
         skinBox.setRenderer( renderer );
@@ -380,7 +384,7 @@ public class OptionFrame extends JFrame {
         skinLabel = getLabel( "選擇介面：" );
 
         skinBox.addItemListener( new ItemHandler() ); // change skin if change skinBox
-        skinBox.setToolTipText( "可選擇您喜好的界面風格" );
+        skinBox.setToolTipText( "可選擇您喜好的介面風格" );
 
         // the order: skinLabel skinBox
         JPanel skinPanel = new JPanel();
@@ -431,21 +435,6 @@ public class OptionFrame extends JFrame {
         panel.add( missionPanel );
     }
 
-    // 取得所有可用的界面名稱
-    private String[] getSkinStrings() {
-        String skinString = "";
-        try {
-            for ( UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels() ) {
-                //System.out.println( info.getName() );
-                skinString += info.getName() + "###";
-            }
-        } catch ( Exception e ) {
-            e.printStackTrace();
-        }
-
-        return skinString.split( "###" );
-    }
-
     private int getSkinIndex( String skinClassName ) {
         int index = 0;
         for ( String skinName : skinStrings ) {
@@ -462,34 +451,61 @@ public class OptionFrame extends JFrame {
         }
     }
 
+    
+
     private void changeSkin( int value ) {
-        CommonGUI.setLookAndFeelByClassName( looks[value].getClassName() );
-        ComicDownGUI.setDefaultSkinClassName( looks[value].getClassName() );
-        SetUp.setSkinClassName( looks[value].getClassName() ); // 紀錄到設定值
+        // 檢查是否選擇的是jtattoo的介面
 
-        // change the skin of Option frame
-        SwingUtilities.updateComponentTreeUI( this );
+        boolean continueChange = true;
+        String className = skinClassNames[value];
+        SetUp.setSkinClassName( className ); // 紀錄到設定值
+        
+        if ( className.matches( "com.jtattoo.plaf.*" ) ) {
+            if ( !new File( "JTattoo.jar" ).exists() ) {
+                continueChange = false; // 不繼續改變介面了
+                new CommonGUI().downloadJTattoo(); // 下載JTattoo.jar
+            } else {
+                try {
+                    CommonGUI.setLookAndFeelByClassName( className );
+                } catch ( Exception ex ) {
+                    Common.debugPrintln( "無法使用" + className + "介面!!" );
 
-        // change the skin of main frame
-        SwingUtilities.updateComponentTreeUI( ComicDownGUI.mainFrame );
+                    className = ComicDownGUI.defaultSkinClassName; // 回歸預設介面
 
-
-        if ( InformationFrame.informationFrame != null ) // change the skin of information frame
-        {
-            SwingUtilities.updateComponentTreeUI( InformationFrame.informationFrame );
+                }
+            }
         }
 
-        if ( ChoiceFrame.choiceFrame != null ) // change the skin of information frame
-        {
-            SwingUtilities.updateComponentTreeUI( ChoiceFrame.choiceFrame );
-        }
+        if ( continueChange ) {
+            CommonGUI.setLookAndFeelByClassName( className );
+            ComicDownGUI.setDefaultSkinClassName( className );  
 
-        if ( LogFrame.logFrame != null ) // change the skin of information frame
-        {
-            SwingUtilities.updateComponentTreeUI( LogFrame.logFrame );
-        }
+            // change the skin of Option frame
+            SwingUtilities.updateComponentTreeUI( this );
 
-        Common.debugPrintln( "改為" + looks[value].getClassName() + "面板" );
+            // change the skin of main frame
+            SwingUtilities.updateComponentTreeUI( ComicDownGUI.mainFrame );
+
+
+            if ( InformationFrame.informationFrame != null ) // change the skin of information frame
+            {
+                SwingUtilities.updateComponentTreeUI( InformationFrame.informationFrame );
+            }
+
+            if ( ChoiceFrame.choiceFrame != null ) // change the skin of information frame
+            {
+                SwingUtilities.updateComponentTreeUI( ChoiceFrame.choiceFrame );
+            }
+
+            if ( LogFrame.logFrame != null ) // change the skin of information frame
+            {
+                SwingUtilities.updateComponentTreeUI( LogFrame.logFrame );
+            }
+
+            Common.debugPrintln( "改為" + className + "面板" );
+
+            Common.debugPrintln( "目前面板名稱: " + UIManager.getLookAndFeel().getName() );
+        }
     }
 
     private void chooseFile( final int type, final JTextField textField, final String directoryString ) {
@@ -610,12 +626,14 @@ public class OptionFrame extends JFrame {
     private class SliderHandler implements ChangeListener {
 
         public void stateChanged( ChangeEvent event ) {
-            
-            if ( event.getSource() == retryTimesSlider && OptionFrame.retryTimesLabel != null )
+
+            if ( event.getSource() == retryTimesSlider && OptionFrame.retryTimesLabel != null ) {
                 OptionFrame.retryTimesLabel.setText( "下載失敗重試次數：" + retryTimesSlider.getValue() + "次" );
-            if ( event.getSource() == timeoutSlider && OptionFrame.timeoutLabel != null )
+            }
+            if ( event.getSource() == timeoutSlider && OptionFrame.timeoutLabel != null ) {
                 OptionFrame.timeoutLabel.setText( "連線逾時時間：" + timeoutSlider.getValue() + "秒" );
-            
+            }
+
             //Common.debugPrintln( "改變重試次數：" + retryTimesSlider.getValue() );
         }
     }
@@ -754,7 +772,7 @@ class ComplexCellRenderer implements ListCellRenderer {
         if ( theIcon != null ) {
             renderer.setIcon( theIcon );
         }
-        
+
         renderer.setText( theText );
         renderer.setFont( SetUp.getDefaultFont() );
         return renderer;
