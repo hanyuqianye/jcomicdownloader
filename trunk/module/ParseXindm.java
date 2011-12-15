@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/11/9
+Last Modified : 2011/12/16
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.08: 修復xindm解析錯誤的問題。
 1.15: 新增對xindm.cn的支援
 ----------------------------------------------------------------------------------------------------
  */
@@ -78,12 +79,21 @@ public class ParseXindm extends ParseOnlineComicSite {
         String baseURL = "http://mh2.xindm.cn";
 
 
-        int beginIndex = allPageString.indexOf( "../" ) + 2;
+        int beginIndex = allPageString.indexOf( "img src=\"." );
+        beginIndex = allPageString.indexOf( "/",beginIndex );
         int endIndex = allPageString.indexOf( "\"", beginIndex );
         String firstPicFrontURL = allPageString.substring( beginIndex, endIndex );
-
-        endIndex = firstPicFrontURL.lastIndexOf( "_" ) + 1;
+        
+        Common.debugPrintln( "第一頁網址：" + firstPicFrontURL );
+        
+        if ( firstPicFrontURL.matches( "(?s).*_(?s).*" ) ) // 檔名中有_
+            endIndex = firstPicFrontURL.lastIndexOf( "_" ) + 1;
+        else // 檔名裏面沒有_
+            endIndex = firstPicFrontURL.lastIndexOf( "/" ) + 1;
+        
         String frontURL = baseURL + firstPicFrontURL.substring( 0, endIndex );
+        
+        Common.debugPrintln( "網址父目錄：" + frontURL );
 
         beginIndex = firstPicFrontURL.indexOf( "." );
         String extensionName = firstPicFrontURL.substring( beginIndex, firstPicFrontURL.length() );
@@ -220,8 +230,8 @@ public class ParseXindm extends ParseOnlineComicSite {
     @Override
     public void printLogo() {
         System.out.println( " _________________________________" );
-        System.out.println( "|                              |" );
-        System.out.println( "| Run the XinDM module:     |" );
-        System.out.println( "|__________________________________|\n" );
+        System.out.println( "|                              " );
+        System.out.println( "| Run the XinDM module:     " );
+        System.out.println( "|__________________________________\n" );
     }
 }

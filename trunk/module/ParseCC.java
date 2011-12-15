@@ -119,14 +119,16 @@ public class ParseCC extends ParseOnlineComicSite {
             radixNumber = 19527; // 18527不行就換19527
         if ( !Common.urlIsOK( picDir + formatter.format( radixNumber ) + formatter.format( 1 ) + ".jpg" ) )
             radixNumber = 18828; // 19527不行就換18828
+        if ( !Common.urlIsOK( picDir + formatter.format( radixNumber ) + formatter.format( 1 ) + ".jpg" ) )
+            radixNumber = 1; // 19527不行就換1 // ex. http://pic11.89890.com/jp/700/Hagane/01/001.jpg
             
         for ( int i = 1; i <= totalPage; i ++ ) {
             String frontName = formatter.format( i * radixNumber );
-            String rearName = formatter.format( i );
+            String rearName = radixNumber > 1 ? formatter.format( i ) : ""; // 如果radixNumber=1則不用rearName
             String picName = frontName + rearName + ".jpg";
 
             comicURL[i-1] = picDir + picName;
-            Common.debugPrintln( comicURL[i-1] );
+            //Common.debugPrintln( comicURL[i-1] );
         }
         //System.exit( 1 );
     }
