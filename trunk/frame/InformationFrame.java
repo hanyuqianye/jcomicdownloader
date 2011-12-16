@@ -191,15 +191,20 @@ public class InformationFrame extends JFrame {
 
     public void setNewestVersion() {
         Thread versionThread = new Thread( new Runnable() { public void run() {
+            String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
+            
             downloadOfficialHtml(); // 下載官方網頁
             versionLabel.setText( getUpdateVersionString() ); // 從官方網頁提取更新版本資訊
-            versionLabel.setForeground(  Color.RED );
-            
+
             dateLabel.setText( getUpdateDateString() ); // 從官方網頁提取更新日期資訊
-            dateLabel.setForeground(  Color.BLUE );
-            
+
             supportedSiteLabel.setText( getUpdateSupportedSiteString() ); // 從官方網頁提取支援網站資訊
-            supportedSiteLabel.setForeground(  Color.DARK_GRAY );
+            
+            if ( !nowSkinName.equals( "HiFi" ) && !nowSkinName.equals( "Noire" ) ) {
+                versionLabel.setForeground(  Color.RED );
+                dateLabel.setForeground(  Color.BLUE );
+                supportedSiteLabel.setForeground(  Color.DARK_GRAY );
+            }
             
             //Thread.currentThread().interrupt();
             

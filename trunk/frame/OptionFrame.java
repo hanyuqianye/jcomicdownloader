@@ -475,6 +475,8 @@ public class OptionFrame extends JFrame {
                 }
             }
         }
+        
+        //className = "org.jvnet.substance.skin.SubstanceModerateLookAndFeel";
 
         if ( continueChange ) {
             CommonGUI.setLookAndFeelByClassName( className );

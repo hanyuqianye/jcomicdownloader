@@ -79,7 +79,12 @@ public class SetUp { // read setup file, and then setup
         assignDownloadPath = false;
         autoCompress = true;
         deleteOriginalPic = false;
-        skinClassName = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+        
+        if ( Common.isUnix() )
+            skinClassName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
+        else
+            skinClassName = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+        
         outputUrlFile = false;
         downloadPicFile = true;
         openDebugMessageWindow = false;
@@ -293,10 +298,12 @@ public class SetUp { // read setup file, and then setup
                             Common.debugPrintln( "找不到" + split[1] + "介面 !!" );
                         }
 
+                        /*
                         if ( CommonGUI.getGTKSkinOrder() != -1 ) // 若有gtk就優先選gtk版面
                         {
                             skinClassName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
                         }
+                        */
 
                         ComicDownGUI.setDefaultSkinClassName( skinClassName );
                     } else if ( split[0].equals( "outputUrlFile" ) ) {
