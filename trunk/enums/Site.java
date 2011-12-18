@@ -44,4 +44,5 @@ public class Site {
     public final static int IIBQ = 26;
     public final static int BAIDU = 27;
     public final static int SF = 28;
+    public final static int KKKMH = 29;
 }

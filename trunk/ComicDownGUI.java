@@ -7,6 +7,10 @@ Version  : v2.08
 Last Modified : 2011/12/16
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.09: 1. 新增對www.kkkmh.com/的支援。
+ *      2. 增加開啟原始網頁的右鍵選單。
+ *      3. 修復顯示加入單集的訊息後仍抓取網址的問題。
+ *      4. 拿掉對comic.92wy.com的支援。（關站了......）
  * 2.08: 1. 增加額外的JTattoo介面選項（共增加11組介面可供選擇）。
  *      2. 修復xindm解析錯誤的bug。
  *      3. 修復部份89890解析錯誤的bug。
@@ -156,6 +160,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private JMenuItem pasteSystemClipboardItem; // 網址列的右鍵選單項目一
     private JPopupMenu downloadTablePopup;
     private int downloadTablePopupRow; // 觸發downloadTablePopup的所在列
+    private JMenuItem tableOpenDownloadURL;  // 以瀏覽器開啟漫畫網址
     private JMenuItem tableOpenDownloadFile;  // 開啟下載檔案
     private JMenuItem tableOpenDownloadDirectoryItem;  // 開啟下載資料夾
     private JMenuItem tableAddBookmarkFromDownloadItem;  // 加入到書籤
@@ -167,12 +172,14 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private JMenuItem tableMoveToFloorItem;  // 將此任務置底
     private JPopupMenu bookmarkTablePopup;
     private int bookmarkTablePopupRow; // 觸發downloadTablePopup的所在列
+    private JMenuItem tableOpenBookmarkURL;  // 開啟漫畫網址
     private JMenuItem tableOpenBookmarkFile;  // 開啟書籤檔案
     private JMenuItem tableOpenBookmarkDirectoryItem;  // 開啟書籤資料夾
     private JMenuItem tableAddMissionFromBookmarkItem;  // 加入到任務
     private JMenuItem tableDeleteBookmarkItem;  // 刪除書籤
     private JPopupMenu recordTablePopup;
     private int recordTablePopupRow; // 觸發downloadTablePopup的所在列
+    private JMenuItem tableOpenRecordURL;  // 開啟記錄漫畫網址
     private JMenuItem tableOpenRecordFile;  // 開啟記錄檔案
     private JMenuItem tableOpenRecordDirectoryItem;  // 開啟記錄資料夾
     private JMenuItem tableAddBookmarkFromRecordItem;  // 加入到書籤
@@ -197,7 +204,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.08" );
+        super( "JComicDownloader  v2.09" );
 
         minimizeEvent();
         initTrayIcon();
@@ -242,7 +249,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     }
 
-     // 檢查skin是否由外部jar支援，若是外部skin且沒有此jar，則下載
+    // 檢查skin是否由外部jar支援，若是外部skin且沒有此jar，則下載
     private void checkSkin() {
         if ( SetUp.getSkinClassName().matches( "com.jtattoo.plaf.*" ) && !new File( "JTattoo.jar" ).exists() ) {
             new CommonGUI().downloadJTattoo(); // 下載JTattoo.jar
@@ -483,6 +490,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     private void setDownloadTableJPopupMenu() {
+        tableOpenDownloadURL = new JMenuItem( "開啟網頁" ); // 以瀏覽器開啟漫畫網址
+        tableOpenDownloadURL.addActionListener( this );
         tableOpenDownloadFile = new JMenuItem( "開啟檔案" ); // 開啟下載資料夾
         tableOpenDownloadFile.addActionListener( this );
         tableOpenDownloadDirectoryItem = new JMenuItem( "開啟資料夾" ); // 開啟下載資料夾
@@ -506,6 +515,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         downloadTablePopup.add( tableAddBookmarkFromDownloadItem );
         downloadTablePopup.add( tableOpenDownloadDirectoryItem );
         downloadTablePopup.add( tableOpenDownloadFile );
+        downloadTablePopup.add( tableOpenDownloadURL );
         downloadTablePopup.add( tableRechoiceVolumeItem );
         downloadTablePopup.add( tableDeleteMissionItem );
         downloadTablePopup.add( tableDeleteAllUnselectedMissionItem );
@@ -517,6 +527,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     private void setBookmarkTableJPopupMenu() {
+        tableOpenBookmarkURL = new JMenuItem( "開啟網頁" ); // 開啟書籤漫畫網址
+        tableOpenBookmarkURL.addActionListener( this );
         tableOpenBookmarkDirectoryItem = new JMenuItem( "開啟資料夾" ); // 開啟下載資料夾
         tableOpenBookmarkDirectoryItem.addActionListener( this );
         tableOpenBookmarkFile = new JMenuItem( "開啟檔案" ); // 開啟下載資料夾
@@ -530,16 +542,19 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         bookmarkTablePopup.add( tableAddMissionFromBookmarkItem );
         bookmarkTablePopup.add( tableOpenBookmarkDirectoryItem );
         bookmarkTablePopup.add( tableOpenBookmarkFile );
+        bookmarkTablePopup.add( tableOpenBookmarkURL );
         bookmarkTablePopup.add( tableDeleteBookmarkItem );
 
         bookmarkTable.add( bookmarkTablePopup ); // 必須指定父元件，否則會拋出NullPointerException
     }
 
     private void setRecordTableJPopupMenu() {
-        tableOpenRecordDirectoryItem = new JMenuItem( "開啟資料夾" ); // 開啟下載資料夾
-        tableOpenRecordDirectoryItem.addActionListener( this );
+        tableOpenRecordURL = new JMenuItem( "開啟網頁" ); // 開啟記錄漫畫網址
+        tableOpenRecordURL.addActionListener( this );
         tableOpenRecordFile = new JMenuItem( "開啟檔案" ); // 開啟下載檔案
         tableOpenRecordFile.addActionListener( this );
+        tableOpenRecordDirectoryItem = new JMenuItem( "開啟資料夾" ); // 開啟下載資料夾
+        tableOpenRecordDirectoryItem.addActionListener( this );
         tableAddMissionFromRecordItem = new JMenuItem( "加入到下載任務" ); // 加入到下載任務
         tableAddMissionFromRecordItem.addActionListener( this );
         tableAddBookmarkFromRecordItem = new JMenuItem( "加入到書籤" ); // 開啟下載資料夾
@@ -552,6 +567,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         recordTablePopup.add( tableAddBookmarkFromRecordItem );
         recordTablePopup.add( tableOpenRecordDirectoryItem );
         recordTablePopup.add( tableOpenRecordFile );
+        recordTablePopup.add( tableOpenRecordURL );
         recordTablePopup.add( tableDeleteRecordItem );
 
         recordTable.add( recordTablePopup ); // 必須指定父元件，否則會拋出NullPointerException
@@ -1158,6 +1174,36 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Common.outputBookmarkTableFile( bookmarkTableModel ); // 每加入書籤便寫入書籤記錄檔一次。
     }
 
+    private void openDownloadURL( int row ) {  // 以瀏覽器開啟第row列任務的下載檔案網址
+        String title = "";
+        String url = "";
+
+        if ( SetUp.getOpenPicFileProgram().matches( "" ) ) {
+            JOptionPane.showMessageDialog( this,
+                    "<html>尚未設定開啟程式，請前往<font color=blue>選項 -> 瀏覽</font>做設定</html>",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
+
+        if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION ) { // 從任務清單開啟
+            row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
+            title = String.valueOf( downTableModel.getRealValueAt( row, DownTableEnum.TITLE ) );
+            url = downTableUrlStrings[row];
+        } else if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.BOOKMARK ) { // 從書籤清單開啟
+            row = bookmarkTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
+            title = String.valueOf( bookmarkTableModel.getValueAt( row, BookmarkTableEnum.TITLE ) );
+            url = String.valueOf( bookmarkTableModel.getValueAt( row, BookmarkTableEnum.URL ) );
+        } else if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.RECORD ) { // 從記錄清單開啟
+            row = recordTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
+            title = String.valueOf( recordTableModel.getValueAt( row, RecordTableEnum.TITLE ) );
+            url = String.valueOf( recordTableModel.getValueAt( row, RecordTableEnum.URL ) );
+        }
+
+        Common.debugPrintln( "以預設瀏覽器開啟" + title + "的原始網頁" );
+
+        new RunBrowser().runBroswer( url );
+    }
+
     private void openDownloadFile( int row ) {  // 開啟第row列任務的下載檔案
         String title = "";
         String url = "";
@@ -1297,7 +1343,6 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     // 解決非ANSI字會變成？而無法使用程式開啟的問題
     // 出處：http://stackoverflow.com/questions/1876507/java-runtime-exec-on-windows-fails-with-unicode-in-arguments
     private void runUnansiCmd( String program, String file ) {
-
         if ( !new File( file ).exists() ) {
             JOptionPane.showMessageDialog( this, "<html><font color=blue>"
                     + file + "</font>" + "不存在，無法開啟</html>",
@@ -1677,6 +1722,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             openDownloadFile( bookmarkTablePopupRow );
         } else if ( event.getSource() == tableOpenRecordFile ) {
             openDownloadFile( recordTablePopupRow );
+        }
+        if ( event.getSource() == tableOpenDownloadURL ) {
+            openDownloadURL( downloadTablePopupRow );
+        } else if ( event.getSource() == tableOpenBookmarkURL ) {
+            openDownloadURL( bookmarkTablePopupRow );
+        } else if ( event.getSource() == tableOpenRecordURL ) {
+            openDownloadURL( recordTablePopupRow );
         } else if ( event.getSource() == tableOpenDownloadDirectoryItem ) {
             openDownloadDirectory( downloadTablePopupRow );
         } else if ( event.getSource() == tableOpenBookmarkDirectoryItem ) {
@@ -1899,15 +1951,28 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Thread downThread = new Thread( new Runnable() {
 
             public void run() {
-                //Flag.allowDownloadFlag = Run.isAlive = true;
+                String code = "2f636f6d696364617461332f6a2f6a71747a2f3033302f3030326f737461757a692e706e67";
 
-                String picURL = "http://img2.veryim.com/Z/zuishangys/ch_10/001000.jpg";
+                StringBuilder decodeBuilder = new StringBuilder();
+                int charCode = 0;
+                for ( int i = 0 ; i < code.length() ; i += 2 ) {
+                    charCode = Integer.parseInt( code.substring( i, i + 2 ), 16 );
+                    System.out.print( i + " " + (i + 1) + " : " + charCode + " #\t" );
+                    decodeBuilder.append( Character.toChars( charCode ) );
+                }
+                System.out.println( "\nURL: " + decodeBuilder );
+
+
+
+                //Run.isAlive = true;
+
+                String picURL = "http://mhauto.kkkmh.com/comicdata3/j/jqtz/030/001japlyif.png";
                 String pageURL = "http://comic.veryim.com/manhua/zuishangys/ch_10.html";
                 String testURL = "http://comic.veryim.com/manhua/zuishangys/";
 
                 String cookie = "Hm_lpvt_280953f246fceb4c893ffac1981e0998=1323781874813;Hm_lvt_280953f246fceb4c893ffac1981e0998=1323780662695";
 
-                Common.downloadFile( pageURL, "", "test.html", true, cookie );
+                //Common.downloadFile( pageURL, "", "test.html", true, cookie );
                 Common.downloadFile( picURL, "", "test.jpg", true, cookie );
 
                 //String[] cookies = Common.getCookieStrings( pageURL );

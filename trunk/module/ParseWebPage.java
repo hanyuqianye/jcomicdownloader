@@ -81,8 +81,6 @@ public class ParseWebPage {
             siteID = Site.MANMANKAN;
         else if ( webSite.matches( "(?s).*xindm.cn/(?s).*" ) )
             siteID = Site.XINDM;
-        else if ( webSite.matches( "(?s).*comic.92wy.com(?s).*" ) ) 
-            siteID = Site.WY;
         else if ( webSite.matches( "(?s).*google.com(?s).*" ) ) 
             siteID = Site.GOOGLE_PIC;
         else if ( webSite.matches( "(?s).*nanadm.com(?s).*" ) ) 
@@ -95,6 +93,8 @@ public class ParseWebPage {
             siteID = Site.BAIDU;
         else if ( webSite.matches( "(?s).*sfacg.com(?s).*" ) ) 
             siteID = Site.SF;
+        else if ( webSite.matches( "(?s).*kkkmh.com(?s).*" ) ) 
+            siteID = Site.KKKMH;
         
         else
             siteID = Site.UNKNOWN;

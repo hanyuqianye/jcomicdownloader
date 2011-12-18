@@ -420,7 +420,9 @@ class Parse3G extends ParseNINENINE {
             int volumeBeginIndex = allPageString.indexOf( ">", index ) + 1;
             int volumeEndIndex = allPageString.indexOf( "<", volumeBeginIndex );
 
-            volumeList.add( allPageString.substring( volumeBeginIndex, volumeEndIndex ) );
+            String volumeTitle = allPageString.substring( volumeBeginIndex, volumeEndIndex );
+            volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                    Common.getTraditionalChinese( volumeTitle ) ) ) );
 
             index = volumeEndIndex;
         }

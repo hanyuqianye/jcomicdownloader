@@ -204,10 +204,6 @@ public class Run extends Thread { // main class to run whole program
                 ParseOnlineComicSite parse = new ParseEX();
                 runSingleParseModule( parse );
             }
-            else if ( pw.getSiteID() == Site.WY ) {
-                ParseOnlineComicSite parse = new ParseWY();
-                runSingleParseModule( parse );
-            }
             else if ( pw.getSiteID() == Site.GOOGLE_PIC ) {
                 ParseOnlineComicSite parse = new ParseGooglePic();
                 runSingleParseModule( parse );
@@ -230,6 +226,10 @@ public class Run extends Thread { // main class to run whole program
             }
             else if ( pw.getSiteID() == Site.SF ) {
                 ParseOnlineComicSite parse = new ParseSF();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.KKKMH ) {
+                ParseOnlineComicSite parse = new ParseKKKMH();
                 runSingleParseModule( parse );
             }
             

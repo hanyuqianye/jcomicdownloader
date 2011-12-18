@@ -1197,6 +1197,21 @@ public class Common {
     public static String getHtmlStringWithColor( String string, String color ) {
         return "<html><font color=" + color + string + "</font></html>";
     }
+    
+    // 字串A裡面有幾個字串B
+    public static int getAmountOfString( String aString, String bString ) {
+        int bLength = bString.length();
+        
+        int conformTimes = 0; // 符合次數
+        for ( int i = 0; i < aString.length(); i += bLength ) {
+            if ( aString.substring( i, i + bLength ).equals( bString ) )
+                conformTimes ++;
+        }
+        
+        //System.out.println( bString + "符合次數: " + conformTimes );
+        
+        return conformTimes;
+    }
 
 }
 
