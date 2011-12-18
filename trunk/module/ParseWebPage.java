@@ -95,6 +95,8 @@ public class ParseWebPage {
             siteID = Site.SF;
         else if ( webSite.matches( "(?s).*kkkmh.com(?s).*" ) ) 
             siteID = Site.KKKMH;
+        else if ( webSite.matches( "(?s).*6comic.com(?s).*" ) ) 
+            siteID = Site.SIX_COMIC;
         
         else
             siteID = Site.UNKNOWN;
