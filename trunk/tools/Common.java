@@ -28,6 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.text.*;
 import java.util.zip.*;
 import javax.swing.JOptionPane;
@@ -39,7 +40,7 @@ import jcomicdownloader.enums.*;
  * 大部分的通用方法都放在這邊，全宣告為靜態，方便使用。
  */
 public class Common {
-
+    public static String recordDirectory = getNowAbsolutePath();
     public static String tempDirectory = getNowAbsolutePath() + "temp" + getSlash();
     public static String downloadDirectory = getNowAbsolutePath() + "down" + getSlash();
     public static String tempVolumeFileName = "temp_volume.txt";
@@ -880,7 +881,8 @@ public class Common {
         }
     }
 
-    public static String getNowAbsolutePath() {
+    // 廢棄
+    public static String getNowAbsolutePathOld() {
         return new File( "" ).getAbsolutePath() + getSlash();
     }
 
@@ -1211,6 +1213,32 @@ public class Common {
         //System.out.println( bString + "符合次數: " + conformTimes );
         
         return conformTimes;
+    }
+
+
+    public static String getNowAbsolutePath() {
+        if ( Common.isUnix() ) {
+
+            String apath = Common.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            try {
+                apath = URLDecoder.decode(apath, "UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(Common.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+
+            String absolutePath;
+            if ( apath.endsWith(".jar") ) {
+                absolutePath = apath.replaceAll("([^/\\\\]+).jar$", "");
+            }
+            else
+                absolutePath = new File("").getAbsolutePath() + Common.getSlash();
+
+            return absolutePath;
+        }
+        else
+            return new File( "" ).getAbsolutePath() + getSlash();
+        
     }
 
 }

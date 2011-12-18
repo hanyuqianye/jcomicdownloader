@@ -461,7 +461,7 @@ public class OptionFrame extends JFrame {
         SetUp.setSkinClassName( className ); // 紀錄到設定值
         
         if ( className.matches( "com.jtattoo.plaf.*" ) ) {
-            if ( !new File( "JTattoo.jar" ).exists() ) {
+            if ( !new File( Common.getNowAbsolutePath() + "JTattoo.jar" ).exists() ) {
                 continueChange = false; // 不繼續改變介面了
                 new CommonGUI().downloadJTattoo(); // 下載JTattoo.jar
             } else {

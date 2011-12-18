@@ -3,14 +3,16 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v2.08
-Last Modified : 2011/12/16
+Version  : v2.09
+Last Modified : 2011/12/18
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
  * 2.09: 1. 新增對www.kkkmh.com/的支援。
  *      2. 增加開啟原始網頁的右鍵選單。
  *      3. 修復顯示加入單集的訊息後仍抓取網址的問題。
- *      4. 拿掉對comic.92wy.com的支援。（關站了......）
+ *      4. 修復Linux系統下無法在同目錄讀取set.ini的問題。
+ *      5. 修復Linux系統下無法正常使用JTattoo介面的問題。
+ *      6. 拿掉對comic.92wy.com的支援。（關站了......）
  * 2.08: 1. 增加額外的JTattoo介面選項（共增加11組介面可供選擇）。
  *      2. 修復xindm解析錯誤的bug。
  *      3. 修復部份89890解析錯誤的bug。
@@ -251,7 +253,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     // 檢查skin是否由外部jar支援，若是外部skin且沒有此jar，則下載
     private void checkSkin() {
-        if ( SetUp.getSkinClassName().matches( "com.jtattoo.plaf.*" ) && !new File( "JTattoo.jar" ).exists() ) {
+        if ( SetUp.getSkinClassName().matches( "com.jtattoo.plaf.*" ) && !new File( Common.getNowAbsolutePath() + "JTattoo.jar" ).exists() ) {
             new CommonGUI().downloadJTattoo(); // 下載JTattoo.jar
         }
     }
@@ -1953,16 +1955,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             public void run() {
                 String code = "2f636f6d696364617461332f6a2f6a71747a2f3033302f3030326f737461757a692e706e67";
 
-                StringBuilder decodeBuilder = new StringBuilder();
-                int charCode = 0;
-                for ( int i = 0 ; i < code.length() ; i += 2 ) {
-                    charCode = Integer.parseInt( code.substring( i, i + 2 ), 16 );
-                    System.out.print( i + " " + (i + 1) + " : " + charCode + " #\t" );
-                    decodeBuilder.append( Character.toChars( charCode ) );
-                }
-                System.out.println( "\nURL: " + decodeBuilder );
-
-
+                String message = "old: " + Common.getNowAbsolutePathOld() + "\n" +
+                                  "fixed: " + Common.getNowAbsolutePath();
+                JOptionPane.showMessageDialog( ComicDownGUI.mainFrame,
+                        message, "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
 
                 //Run.isAlive = true;
 

@@ -354,7 +354,7 @@ public class CommonGUI {
                     Run.isAlive = true;
 
                     String fileURL = "https://sites.google.com/site/jcomicdownloader/release/JTattoo.jar?attredirects=0&d=1";
-                    Common.downloadFile( fileURL, "", "JTattoo.jar", false, "" );
+                    Common.downloadFile( fileURL, Common.getNowAbsolutePath(), "JTattoo.jar", false, "" );
 
                     Run.isAlive = backupValue; // 還原原值
 

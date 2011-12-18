@@ -72,7 +72,7 @@ public class SetUp { // read setup file, and then setup
         downloadDirectory = new String( Common.downloadDirectory );
         originalDownloadDirectory = new String( Common.downloadDirectory );
         tempDirectory = new String( Common.tempDirectory );
-        recordFileDirectory = new String( new File( "" ).getAbsolutePath() ) + Common.getSlash(); // 預設設定檔放在同個資料夾
+        recordFileDirectory = new String( Common.recordDirectory ); // 預設設定檔放在同個資料夾
         picFrontName = "";
         volume = "0";
         fileNameLength = 3;
