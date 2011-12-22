@@ -59,8 +59,8 @@ public class ParseCityManga extends ParseOnlineComicSite {
             int endIndex = allPageString.indexOf( "</h1>", beginIndex );
             String tempTitleString = allPageString.substring( beginIndex, endIndex );
 
-            setWholeTitle( Common.getStringRemovedIllegalChar(
-                    Common.getTraditionalChinese( tempTitleString.trim() ) ) );
+            setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                    Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
         }
 
         Common.debugPrintln( "作品名稱(title) : " + getTitle() );
@@ -190,8 +190,8 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
                 // 取得單集名稱
                 String volumeTitle = tokens[i + 2];
-                volumeList.add( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( volumeTitle.trim() ) ) );
+                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                        Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
 
                 volumeCount++;
             }

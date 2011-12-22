@@ -3,10 +3,13 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v2.09
-Last Modified : 2011/12/18
+Version  : v2.10
+Last Modified : 2011/12/22
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.10: 1. 新增對manhua.178.com的支援。（仍有些問題，測試中）
+ *      2. 增加任務完成音效的選項。
+ *      3. 修復kuku解析少數圖片網址時後面多出">"的問題。
  * 2.09: 1. 新增對www.kkkmh.com/的支援。
  *      2. 新增對6comic.com的支援。
  *      3. 增加開啟原始網頁的右鍵選單。
@@ -207,7 +210,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.09" );
+        super( "JComicDownloader  v2.10" );
 
         minimizeEvent();
         initTrayIcon();
@@ -1093,7 +1096,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private void deleteAllUnselectedMission() { // 刪除所有未勾選的任務
         String message = "是否要在任務清單中刪除所有未勾選的任務 ?";
 
-        int choice = JOptionPane.showConfirmDialog( this, message, "提醒訊息", JOptionPane.YES_NO_OPTION );
+        int choice = JOptionPane.showConfirmDialog( this, message, "詢問視窗", JOptionPane.YES_NO_OPTION );
 
         if ( choice == JOptionPane.YES_OPTION ) { // agree to remove the title in the download list
             int nowRow = 0;
@@ -1518,6 +1521,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                         if ( SetUp.getShowDoneMessageAtSystemTray() ) {
                             trayIcon.displayMessage( "JComicDownloader Message", title + "下載完畢! ", TrayIcon.MessageType.INFO );
+                            if ( SetUp.getPlaySingleDoneAudio() )
+                                Common.playSingleDoneAudio(); // 播放單一任務完成音效
                         }
                     } else {
                         downTableModel.setValueAt( "下載中斷", i, DownTableEnum.STATE );
@@ -1528,6 +1533,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 }
                 if ( Run.isAlive ) {
                     stateBar.setText( Common.missionCount + "個任務全部下載完畢! " );
+                    if ( SetUp.getPlayAllDoneAudio() )
+                        Common.playAllDoneAudio(); // 播放全部任務完成音效
 
                     if ( SetUp.getShowDoneMessageAtSystemTray() ) {
                         trayIcon.displayMessage( "JComicDownloader Message", Common.missionCount + "個任務全部下載完畢! ", TrayIcon.MessageType.INFO );
@@ -1861,7 +1868,6 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
         if ( event.getSource() == button[ButtonEnum.INFORMATION] ) { // button of Information
             new Thread( new Runnable() {
-
                 public void run() {
                     final InformationFrame frame = new InformationFrame();
 
@@ -1954,23 +1960,29 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Thread downThread = new Thread( new Runnable() {
 
             public void run() {
-                String code = "2f636f6d696364617461332f6a2f6a71747a2f3033302f3030326f737461757a692e706e67";
 
+                //playAudio();
+
+                /*
                 String message = "old: " + Common.getNowAbsolutePathOld() + "\n" +
-                                  "fixed: " + Common.getNowAbsolutePath();
+                "fixed: " + Common.getNowAbsolutePath();
                 JOptionPane.showMessageDialog( ComicDownGUI.mainFrame,
-                        message, "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-
+                message, "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                
+                 */ 
                 //Run.isAlive = true;
-
-                String picURL = "http://mhauto.kkkmh.com/comicdata3/j/jqtz/030/001japlyif.png";
-                String pageURL = "http://comic.veryim.com/manhua/zuishangys/ch_10.html";
+                String picURL = "http://imgfast.manhua.178.com/k/%E6%81%90%E6%83%A7%E4%B9%8B%E6%BA%90/%E7%AC%AC01%E5%8D%B7/002.jpg";
+                String pageURL = "http://www.178.com/mh/wangliangdeylq/15039-5.shtml";
                 String testURL = "http://comic.veryim.com/manhua/zuishangys/";
 
-                String cookie = "Hm_lpvt_280953f246fceb4c893ffac1981e0998=1323781874813;Hm_lvt_280953f246fceb4c893ffac1981e0998=1323780662695";
-
+                String cookie = "";//Common.getCookieString( pageURL );
+                cookie = cookie.replaceAll( "20-", "21-" );
+                System.out.println( cookie );
+                cookie = "tyb=No; his=1324039671%7C%C8%AB1%BE%ED%7C179745%7C%BE%CD%CA%C7%B2%BB%D0%ED%B0%AE%BA%DC%B4%F3%7C201012%2F179746%7C%7C1324336783%7C%B5%DA1%BE%ED%7C212218%7C%C8%A8%C1%A6%B5%C4%D3%CE%CF%B7%7C201112%2F212222";
+                
+                cookie = "view_ad=1";
                 //Common.downloadFile( pageURL, "", "test.html", true, cookie );
-                Common.downloadFile( picURL, "", "test.jpg", true, cookie );
+                Common.downloadFile( picURL, "", "test.jpg", false, cookie );
 
                 //String[] cookies = Common.getCookieStrings( pageURL );
 
@@ -1980,6 +1992,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         } );
         //downThread.start();
     }
+    
+   
+        
 
     private JButton getButton( String string, String picName ) {
         JButton button = new JButton( string, new CommonGUI().getImageIcon( picName ) );

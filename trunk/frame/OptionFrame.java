@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/12/5
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.10: 1. 增加任務完成音效的選項。
 2.08: 1. 增加JTattoo介面選項。
 2.05: 1. 修復無法開啟壓縮檔的bug。（預設開啟圖片和壓縮檔為同個程式）
  *    2. 修復暫存資料夾路徑無法改變的bug。
@@ -21,6 +22,8 @@ ChangeLog:
  */
 package jcomicdownloader.frame;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import jcomicdownloader.*;
@@ -48,9 +51,14 @@ public class OptionFrame extends JFrame {
     private JComboBox skinBox;
     // about directory
     private JLabel dirLabel, tempDirLabel, recordDirLabel;
+    private JTextField singleDoneAudioTextField, allDoneAudioTextField;
     private JTextField dirTextField, recordDirTextField;
     static JTextField tempDirTextField;
+    private JButton playSingleDoneAudioButton, playAllDoneAudioButton;
+    private JButton singleDoneAudioButton, allDoneAudioButton;
+    private JButton defaultSingleDoneAudioButton, defaultAllDoneAudioButton;
     private JButton dirButton, chooseFontButton, tempDirButton, recordDirButton;
+    private JCheckBox singleDoneAudioCheckBox, allDoneAudioCheckBox; // 是否要開啟音效
     private JCheckBox compressCheckBox; // about compress
     private JCheckBox deleteCheckBox;  // about delete
     private JCheckBox logCheckBox; // about log
@@ -64,6 +72,8 @@ public class OptionFrame extends JFrame {
     private JTextField proxyServerTextField; // 輸入代理伺服器位址 ex. proxy.hinet.net
     private JTextField proxyPortTextField; // 輸入代理伺服器連接阜 ex. 80
     private JButton confirmButton;  // about confirm
+    private JButton cencelButton;  // 取消按鈕
+    private JButton defaultButton;  // 預設按鈕
     private String defaultColor; // 預設的建議設定顏色
     public static JFrame optionFrame; // use by other frame
     private JFrame thisFrame; // use by self
@@ -96,10 +106,10 @@ public class OptionFrame extends JFrame {
         Container contentPane = getContentPane();
         contentPane.setLayout( new BorderLayout() );
 
-        setSize( 540, 380 );
+        setSize( 590, 380 );
         setResizable( true );
         setLocationRelativeTo( this );  // set the frame in middle position of screen
-        setIconImage( new CommonGUI().getImage( "main_icon.png" ) );
+        setIconImage( new CommonGUI().getImage( Common.mainIcon ) );
 
         defaultColor = "black";
 
@@ -117,13 +127,23 @@ public class OptionFrame extends JFrame {
     private JPanel getConfirmPanel() {
         confirmButton = getButton( "   確定   " );
         confirmButton.addActionListener( new ActionHandler() );
-        confirmButton.setToolTipText( "按確定完成設定動作" );
+        confirmButton.setToolTipText( "儲存目前的設定動作" );
 
-        JPanel confirmPanel = new JPanel();
-        confirmPanel.setLayout( new FlowLayout( FlowLayout.CENTER, 0, 10 ) );
-        confirmPanel.add( confirmButton );
+        cencelButton = getButton( "   取消   " );
+        cencelButton.addActionListener( new ActionHandler() );
+        cencelButton.setToolTipText( "取消目前的設定動作" );
 
-        return confirmPanel;
+        defaultButton = getButton( "   還原預設值   " );
+        defaultButton.addActionListener( new ActionHandler() );
+        defaultButton.setToolTipText( "將所有的設定值還原回到原廠設定" );
+
+        JPanel choicePanel = new JPanel( new GridLayout( 1, 2, 40, 40 ) );
+        choicePanel.add( confirmButton );
+        choicePanel.add( cencelButton );
+
+        JPanel centerPanel = new CommonGUI().getCenterPanel( choicePanel, 10, 40 );
+
+        return centerPanel;
     }
 
     private void setTabbedPane( JPanel panel ) {
@@ -162,11 +182,17 @@ public class OptionFrame extends JFrame {
                 "有關於開啟圖片或壓縮檔的設定" );
         tabbedPane.setMnemonicAt( 3, KeyEvent.VK_4 );
 
+        JPanel audioTablePanel = new CommonGUI().getCenterPanel( new JPanel( new GridLayout( 1, 1 ) ) );
+        setAudioTablePanel( audioTablePanel );
+        tabbedPane.addTab( getTabeHtmlFontString( "音效" ), null, audioTablePanel,
+                "有關於開啟圖片或壓縮檔的設定" );
+        tabbedPane.setMnemonicAt( 4, KeyEvent.VK_5 );
+
         JPanel otherTablePanel = new CommonGUI().getCenterPanel( new JPanel( new GridLayout( 1, 1 ) ) );
         setOtherTablePanel( otherTablePanel );
         tabbedPane.addTab( getTabeHtmlFontString( "其他" ), null, otherTablePanel,
                 "有關於其他雜七雜八的設定" );
-        tabbedPane.setMnemonicAt( 4, KeyEvent.VK_5 );
+        tabbedPane.setMnemonicAt( 5, KeyEvent.VK_6 );
 
 
         panel.add( tabbedPane, BorderLayout.CENTER );
@@ -176,6 +202,95 @@ public class OptionFrame extends JFrame {
         int htmlFontSize = (int) (SetUp.getDefaultFontSize() / 4 + 1);
         String htmlFontFace = SetUp.getDefaultFontName();
         return "<html><font face=\"" + htmlFontFace + "\" size=\"" + htmlFontSize + "\"> " + tabName + "  </font></html>";
+    }
+
+    private void setAudioTablePanel( JPanel panel ) {
+
+        singleDoneAudioCheckBox = getCheckBoxBold( "播放單一任務完成的音效", SetUp.getPlaySingleDoneAudio() );
+        singleDoneAudioCheckBox.setToolTipText( "是否在單一任務下載完成後播放音效" );
+        singleDoneAudioCheckBox.addItemListener( new ItemHandler() );
+
+        singleDoneAudioTextField = new JTextField( SetUp.getSingleDoneAudioFile(), 20 );
+        singleDoneAudioTextField.setFont( SetUp.getDefaultFont( -1 ) );
+        singleDoneAudioTextField.setHorizontalAlignment( JTextField.LEADING );
+        singleDoneAudioTextField.setToolTipText( "單一任務完成後所播放的音效檔" );
+
+        JLabel playSingleDoneAudioLabel = new JLabel( new CommonGUI().getImageIcon( Common.playAudioPic ) );
+        playSingleDoneAudioLabel.setToolTipText( "測試播放單一任務完成的音效" );
+        playSingleDoneAudioLabel.addMouseListener( new java.awt.event.MouseAdapter() {
+
+            public void mousePressed( java.awt.event.MouseEvent evt ) {
+                Common.playSingleDoneAudio( singleDoneAudioTextField.getText() );
+            }
+        } );
+
+        JPanel singleDoneAudioCheckBoxPanel = new JPanel( new FlowLayout( FlowLayout.LEADING, 1, 1 ) );
+        singleDoneAudioCheckBoxPanel.add( singleDoneAudioCheckBox );
+        singleDoneAudioCheckBoxPanel.add( playSingleDoneAudioLabel );
+
+        singleDoneAudioButton = getButton( "外部音效" );
+        singleDoneAudioButton.addActionListener( new ActionHandler() );
+        singleDoneAudioButton.setToolTipText( "選擇單一任務完成後要播放的外部音效檔" );
+
+        defaultSingleDoneAudioButton = getButton( "預設音效" );
+        defaultSingleDoneAudioButton.addActionListener( new ActionHandler() );
+        defaultSingleDoneAudioButton.setToolTipText( "使用預設單一任務完成後要播放的外部音效檔" );
+
+        JPanel singleDoneAudioButtonPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        singleDoneAudioButtonPanelHorizontal.add( defaultSingleDoneAudioButton );
+        singleDoneAudioButtonPanelHorizontal.add( singleDoneAudioButton );
+
+        JPanel singleDoneAudioPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        singleDoneAudioPanelHorizontal.add( singleDoneAudioCheckBoxPanel );
+        singleDoneAudioPanelHorizontal.add( singleDoneAudioButtonPanelHorizontal );
+
+
+        allDoneAudioCheckBox = getCheckBoxBold( "播放全部任務完成的音效", SetUp.getPlayAllDoneAudio() );
+        allDoneAudioCheckBox.setToolTipText( "是否在全部任務下載完成後播放音效" );
+        allDoneAudioCheckBox.addItemListener( new ItemHandler() );
+
+        allDoneAudioTextField = new JTextField( SetUp.getAllDoneAudioFile(), 25 );
+        allDoneAudioTextField.setFont( SetUp.getDefaultFont( -1 ) );
+        allDoneAudioTextField.setHorizontalAlignment( JTextField.LEADING );
+        allDoneAudioTextField.setToolTipText( "全部任務完成後所播放的音效檔" );
+        
+        final JLabel playAllDoneAudioLabel = new JLabel( new CommonGUI().getImageIcon( Common.playAudioPic ) );
+        playAllDoneAudioLabel.setToolTipText( "測試播放全部任務完成的音效" );
+        playAllDoneAudioLabel.addMouseListener( new java.awt.event.MouseAdapter() {
+
+            public void mousePressed( java.awt.event.MouseEvent evt ) {
+                Common.playAllDoneAudio( allDoneAudioTextField.getText() );
+            }
+        } );
+        
+        JPanel allDoneAudioCheckBoxPanel = new JPanel( new FlowLayout( FlowLayout.LEADING, 1, 1 ) );
+        allDoneAudioCheckBoxPanel.add( allDoneAudioCheckBox );
+        allDoneAudioCheckBoxPanel.add( playAllDoneAudioLabel );
+
+        defaultAllDoneAudioButton = getButton( "預設音效" );
+        defaultAllDoneAudioButton.addActionListener( new ActionHandler() );
+        defaultAllDoneAudioButton.setToolTipText( "使用預設全部任務完成後要播放的外部音效檔" );
+
+        allDoneAudioButton = getButton( "外部音效" );
+        allDoneAudioButton.addActionListener( new ActionHandler() );
+        allDoneAudioButton.setToolTipText( "選擇全部任務完成後要播放的外部音效檔" );
+
+        JPanel allDoneAudioButtonPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        allDoneAudioButtonPanelHorizontal.add( defaultAllDoneAudioButton );
+        allDoneAudioButtonPanelHorizontal.add( allDoneAudioButton );
+
+        JPanel allDoneAudioPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        allDoneAudioPanelHorizontal.add( allDoneAudioCheckBoxPanel );
+        allDoneAudioPanelHorizontal.add( allDoneAudioButtonPanelHorizontal );
+
+
+        JPanel otherPanel = new JPanel( new GridLayout( 6, 1, 2, 2 ) );
+        otherPanel.add( singleDoneAudioPanelHorizontal );
+        otherPanel.add( singleDoneAudioTextField );
+        otherPanel.add( allDoneAudioPanelHorizontal );
+        otherPanel.add( allDoneAudioTextField );
+
+        panel.add( otherPanel );
     }
 
     private void setOtherTablePanel( JPanel panel ) {
@@ -451,15 +566,13 @@ public class OptionFrame extends JFrame {
         }
     }
 
-    
-
     private void changeSkin( int value ) {
         // 檢查是否選擇的是jtattoo的介面
 
         boolean continueChange = true;
         String className = skinClassNames[value];
         SetUp.setSkinClassName( className ); // 紀錄到設定值
-        
+
         if ( className.matches( "com.jtattoo.plaf.*" ) ) {
             if ( !new File( Common.getNowAbsolutePath() + "JTattoo.jar" ).exists() ) {
                 continueChange = false; // 不繼續改變介面了
@@ -475,12 +588,12 @@ public class OptionFrame extends JFrame {
                 }
             }
         }
-        
+
         //className = "org.jvnet.substance.skin.SubstanceModerateLookAndFeel";
 
         if ( continueChange ) {
             CommonGUI.setLookAndFeelByClassName( className );
-            ComicDownGUI.setDefaultSkinClassName( className );  
+            ComicDownGUI.setDefaultSkinClassName( className );
 
             // change the skin of Option frame
             SwingUtilities.updateComponentTreeUI( this );
@@ -511,14 +624,23 @@ public class OptionFrame extends JFrame {
     }
 
     private void chooseFile( final int type, final JTextField textField, final String directoryString ) {
+        chooseFile( type, textField, directoryString, null );
+    }
+
+    private void chooseFile( final int type, final JTextField textField, final String directoryString, final javax.swing.filechooser.FileFilter fileFilter ) {
         final Component tempThisComponent = this;
 
-        SwingUtilities.invokeLater( new Runnable() {
+        new Thread( new Runnable() {
 
             public void run() {
 
                 JFileChooser dirChooser = new JFileChooser( directoryString );
                 dirChooser.setFileSelectionMode( type );
+
+                if ( fileFilter != null ) {
+                    dirChooser.addChoosableFileFilter( fileFilter );
+                    dirChooser.setAcceptAllFileFilterUsed( false );
+                }
 
                 dirChooser.setDialogTitle( "請選擇新的下載目錄" );
 
@@ -550,7 +672,7 @@ public class OptionFrame extends JFrame {
                 }
 
             }
-        } );
+        } ).start();
     }
 
     private void setUpeListener() {
@@ -591,6 +713,16 @@ public class OptionFrame extends JFrame {
                 chooseFile( JFileChooser.FILES_ONLY, viewPicFileTextField, SetUp.getOpenPicFileProgram() );
             } else if ( event.getSource() == viewZipFileButton ) {
                 chooseFile( JFileChooser.FILES_ONLY, viewZipFileTextField, SetUp.getOpenZipFileProgram() );
+            } else if ( event.getSource() == singleDoneAudioButton ) {
+                chooseFile( JFileChooser.FILES_ONLY, singleDoneAudioTextField,
+                        SetUp.getSingleDoneAudioFile(), new AudioFileFilter() );
+            } else if ( event.getSource() == allDoneAudioButton ) {
+                chooseFile( JFileChooser.FILES_ONLY, allDoneAudioTextField,
+                        SetUp.getAllDoneAudioFile(), new AudioFileFilter() );
+            } else if ( event.getSource() == defaultSingleDoneAudioButton ) {
+                singleDoneAudioTextField.setText( Common.defaultSingleDoneAudio );
+            } else if ( event.getSource() == defaultAllDoneAudioButton ) {
+                allDoneAudioTextField.setText( Common.defaultAllDoneAudio );
             }
 
             if ( event.getSource() == confirmButton ) {
@@ -607,6 +739,30 @@ public class OptionFrame extends JFrame {
                 SetUp.setOpenZipFileProgram( viewPicFileTextField.getText() ); // 紀錄到設定值
                 SetUp.setRecordFileDirectory( recordDirTextField.getText() ); // 紀錄到設定值
 
+                // 除非有此檔案，否則一律歸初始值
+                if ( !new File( singleDoneAudioTextField.getText() ).exists() ) {
+                    singleDoneAudioTextField.setText( Common.defaultSingleDoneAudio );
+                }
+                SetUp.setSingleDoneAudioFile( singleDoneAudioTextField.getText() ); // 紀錄到設定值
+                if ( !new File( allDoneAudioTextField.getText() ).exists() ) {
+                    allDoneAudioTextField.setText( Common.defaultAllDoneAudio );
+                }
+                SetUp.setAllDoneAudioFile( allDoneAudioTextField.getText() ); // 紀錄到設定值
+
+
+                SetUp.setPlaySingleDoneAudio( singleDoneAudioCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setPlayAllDoneAudio( allDoneAudioCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setAutoCompress( compressCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setDeleteOriginalPic( deleteCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setOutputUrlFile( urlCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setDownloadPicFile( downloadCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setKeepDoneDownloadMission( keepDoneCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setKeepUndoneDownloadMission( keepUndoneCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setShowDoneMessageAtSystemTray( trayMessageCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setKeepRecord( keepRecordCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setChoiceAllVolume( choiceAllVolumeCheckBox.isSelected() ); // 紀錄到設定值
+
+
                 if ( proxyServerTextField.getText() != null
                         && !proxyServerTextField.getText().equals( "" )
                         && proxyPortTextField.getText() != null
@@ -621,6 +777,9 @@ public class OptionFrame extends JFrame {
                 }
                 SetUp.writeSetFile(); // 將目前的設定存入設定檔（set.ini）
                 thisFrame.dispose();
+            } else if ( event.getSource() == cencelButton ) {
+                thisFrame.dispose();
+            } else if ( event.getSource() == defaultButton ) {
             }
         }
     }
@@ -643,37 +802,15 @@ public class OptionFrame extends JFrame {
     private class ItemHandler implements ItemListener {
 
         public void itemStateChanged( ItemEvent event ) {
-
-            if ( event.getSource() == compressCheckBox ) {
-                SetUp.setAutoCompress( compressCheckBox.isSelected() ); // 紀錄到設定值
-            }
             if ( event.getSource() == deleteCheckBox ) {
                 if ( deleteCheckBox.isSelected() ) {
                     compressCheckBox.setSelected( true ); // 勾選自動刪除就要連帶勾選自動壓縮
                 }
-                SetUp.setDeleteOriginalPic( deleteCheckBox.isSelected() ); // 紀錄到設定值
             }
-            if ( event.getSource() == urlCheckBox ) {
-                SetUp.setOutputUrlFile( urlCheckBox.isSelected() ); // 紀錄到設定值
-            }
-            if ( event.getSource() == downloadCheckBox ) {
-                SetUp.setDownloadPicFile( downloadCheckBox.isSelected() ); // 紀錄到設定值
-            }
-
-            if ( event.getSource() == keepDoneCheckBox ) {
-                SetUp.setKeepDoneDownloadMission( keepDoneCheckBox.isSelected() ); // 紀錄到設定值
-            }
-            if ( event.getSource() == keepUndoneCheckBox ) {
-                SetUp.setKeepUndoneDownloadMission( keepUndoneCheckBox.isSelected() ); // 紀錄到設定值
-            }
-            if ( event.getSource() == trayMessageCheckBox ) {
-                SetUp.setShowDoneMessageAtSystemTray( trayMessageCheckBox.isSelected() ); // 紀錄到設定值
-            }
-            if ( event.getSource() == keepRecordCheckBox ) {
-                SetUp.setKeepRecord( keepRecordCheckBox.isSelected() ); // 紀錄到設定值
-            }
-            if ( event.getSource() == choiceAllVolumeCheckBox ) {
-                SetUp.setChoiceAllVolume( choiceAllVolumeCheckBox.isSelected() ); // 紀錄到設定值
+            if ( event.getSource() == compressCheckBox ) {
+                if ( !compressCheckBox.isSelected() ) {
+                    deleteCheckBox.setSelected( false ); // 勾選自動刪除就要連帶勾選自動壓縮
+                }
             }
 
             if ( event.getSource() == logCheckBox ) {
@@ -740,6 +877,13 @@ public class OptionFrame extends JFrame {
 
     private JButton getButton( String string ) {
         JButton button = new JButton( string );
+        button.setFont( SetUp.getDefaultFont() );
+
+        return button;
+    }
+
+    private JButton getButton( String string, String picName ) {
+        JButton button = new JButton( string, new CommonGUI().getImageIcon( picName ) );
         button.setFont( SetUp.getDefaultFont() );
 
         return button;

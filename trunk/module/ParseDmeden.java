@@ -61,8 +61,8 @@ public class ParseDmeden extends ParseOnlineComicSite {
             int endIndex = allPageString.indexOf( "</title>", beginIndex );
             String tempTitleString = allPageString.substring( beginIndex, endIndex );
 
-            setWholeTitle( Common.getStringRemovedIllegalChar(
-                    Common.getTraditionalChinese( tempTitleString.split( "\\d*-\\d*" )[0].trim() ) ) );
+            setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                    Common.getTraditionalChinese( tempTitleString.split( "\\d*-\\d*" )[0].trim() ) ) ) );
         }
 
         Common.debugPrintln( "作品名稱(title) : " + getTitle() );

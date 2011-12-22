@@ -165,7 +165,8 @@ public class ParseMangaFox extends ParseOnlineComicSite {
             }
             else if ( tokens[i].matches( "tips" ) ) {
                 // 取得單集名稱
-                volumeList.add( currentVolume + " - " + tokens[i+2].replaceAll( "\\.", "" ).trim() );
+                volumeList.add( Common.getStringRemovedIllegalChar( 
+                        currentVolume + " - " + tokens[i+2].replaceAll( "\\.", "" ).trim() ) );
                 
                 count ++;
             }

@@ -66,7 +66,8 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
 
                 orinialWholeTitle = tokens[i+1];
                 if ( getWholeTitle() == null || getWholeTitle().equals(  "" ) ) 
-                    setWholeTitle( Common.getTraditionalChinese( orinialWholeTitle ) );
+                    setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar( 
+                            Common.getTraditionalChinese( orinialWholeTitle ) ) ) );
                 
                 break;
             }

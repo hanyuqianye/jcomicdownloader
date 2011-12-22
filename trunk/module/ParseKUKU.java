@@ -5,6 +5,7 @@
  Last Modified : 2011/10/25
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 2.10: 修復解析少數圖片網址時後面多出">"的問題。
  1.15: 修正編碼為GBK
  1.11: 1. 改成一邊解析網址一邊下載。
  *    2. 修復kuku的美食的俘虜解析網址錯誤的bug。
@@ -106,7 +107,7 @@ public class ParseKUKU extends ParseOnlineComicSite {
                     String line = lines[count];
 
                     if ( line.matches( "(?s).*document.write(?s).*" ) ) {
-                        String[] temp = line.split( "'\"|\"|'" );
+                        String[] temp = line.split( "'\"|\"|'|>" );
                         
                         System.out.println( baseURL + temp[3] );
                         // replace %20 from white space in URL
@@ -201,8 +202,8 @@ public class ParseKUKU extends ParseOnlineComicSite {
                          line.substring( beginIndex, endIndex ).length() > 2 &&
                          endIndex > 0 ) {
                         //System.out.println( Common.getTraditionalChinese( line.substring( beginIndex + 1, endIndex ) ) );
-                        volumeList.add( getVolumeWithFormatNumber( 
-                                Common.getTraditionalChinese( line.substring( beginIndex + 1, endIndex ) ) ) );
+                        volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                                Common.getTraditionalChinese( line.substring( beginIndex + 1, endIndex ) ) ) ) );
                     }
 
                     endIndex = line.indexOf( "</A>", preEndIndex + 1 );

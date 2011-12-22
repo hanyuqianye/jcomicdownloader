@@ -264,7 +264,7 @@ public class ParseEH extends ParseOnlineComicSite {
             }
         }
 
-        return Common.getStringRemovedIllegalChar( titleString );
+        return Common.getStringRemovedIllegalChar( titleString.replaceAll( "&times;", "×" ) );
     }
 
     public int getTitleCountOnMainPage( String allPageString ) {
@@ -317,7 +317,7 @@ public class ParseEH extends ParseOnlineComicSite {
                     mainPageIndex++;
                 }
 
-                volumeList.add( tokenStrings[mainPageIndex + 2] );
+                volumeList.add( tokenStrings[mainPageIndex + 2].replaceAll( "&times;", "×" ) );
 
                 Common.debugPrint( i + " 標題 : " + volumeList.get( i ) );
                 Common.debugPrintln( "     網址 : " + urlList.get( i ) );

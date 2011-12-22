@@ -47,17 +47,33 @@ public class CommonGUI {
 
     public JLabel getFixedTansparentLabel() {
         // set white space in the Label
+        return getFixedTansparentLabel( 15 ); // 預設大小為15
+    }
+
+    public JLabel getFixedTansparentLabel( int size ) {
+        // set white space in the Label
         URL url = getResourceURL( "tansparent.png" );
-        return new JLabel( "<html><img align=\"center\" src=" + url + " width=\"15\" height=\"15\"/></html>" );
+        return new JLabel( "<html><img align=\"center\" src="
+                + url + " width=\"" + size + "\" height=\"" + size + "\"/></html>" );
     }
 
     public JPanel getCenterPanel( Component comp ) { // make fixed border around
+        return getCenterPanel( comp, 15 ); // 預設大小為15
+    }
+
+    public JPanel getCenterPanel( Component comp, int size ) { // make fixed border around
         JPanel panel = new JPanel( new BorderLayout() );
 
-        panel.add( getFixedTansparentLabel(), BorderLayout.EAST );
-        panel.add( getFixedTansparentLabel(), BorderLayout.WEST );
-        panel.add( getFixedTansparentLabel(), BorderLayout.SOUTH );
-        panel.add( getFixedTansparentLabel(), BorderLayout.NORTH );
+        return getCenterPanel( comp, size, size );
+    }
+    
+    public JPanel getCenterPanel( Component comp, int depth, int width ) { // make fixed border around
+        JPanel panel = new JPanel( new BorderLayout() );
+
+        panel.add( getFixedTansparentLabel( width ), BorderLayout.EAST );
+        panel.add( getFixedTansparentLabel( width ), BorderLayout.WEST );
+        panel.add( getFixedTansparentLabel( depth ), BorderLayout.SOUTH );
+        panel.add( getFixedTansparentLabel( depth ), BorderLayout.NORTH );
         panel.add( comp, BorderLayout.CENTER );
 
         return panel;
@@ -372,9 +388,9 @@ public class CommonGUI {
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
         }
     }
-    
+
     private String getSkinNameFromClassName( String className ) {
         String[] tempStrings = className.split( "\\." );
-        return tempStrings[tempStrings.length-1].replaceAll( "LookAndFeel", "" );
+        return tempStrings[tempStrings.length - 1].replaceAll( "LookAndFeel", "" );
     }
 }

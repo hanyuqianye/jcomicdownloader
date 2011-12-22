@@ -95,7 +95,8 @@ public class ParseCC extends ParseOnlineComicSite {
 
         if ( getWholeTitle() == null || getWholeTitle().equals(  "" ) ) {
             String wholeTitle = Common.getTraditionalChinese( lines[wholeTitleIndex].substring( beginIndex, endIndex ) );
-            setWholeTitle( Common.getStringRemovedIllegalChar( wholeTitle ) );
+            setWholeTitle( getVolumeWithFormatNumber( 
+                    Common.getStringRemovedIllegalChar( wholeTitle ) ) );
         }
         Common.debugPrintln( "作品+章節名稱(wholeTitle) : " + getWholeTitle() );
 

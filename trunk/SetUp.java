@@ -23,7 +23,6 @@ import jcomicdownloader.frame.OptionFrame;
  * */
 public class SetUp { // read setup file, and then setup
 
-    private static String setFileName;
     private static String downloadDirectory;
     private static String tempDirectory;
     private static String recordFileDirectory; // 設定檔和記錄檔的資料夾
@@ -60,6 +59,10 @@ public class SetUp { // read setup file, and then setup
     private static String proxyPort; // Http Proxy Server Port
     public static boolean addSchedule;
     public static boolean isError;
+    public static boolean playAllDoneAudio; // 是否播放全部任務完成音效
+    public static boolean playSingleDoneAudio; // 是否播放單一任務完成音效
+    public static String allDoneAudioFile; // 在全部任務完成後播放的外部音效檔
+    public static String singleDoneAudioFile; // 在單一任務完成後播放的外部音效檔
 
     /**
      *
@@ -68,7 +71,6 @@ public class SetUp { // read setup file, and then setup
     public SetUp() {
 
         // 預設值
-        setFileName = "set.ini";
         downloadDirectory = new String( Common.downloadDirectory );
         originalDownloadDirectory = new String( Common.downloadDirectory );
         tempDirectory = new String( Common.tempDirectory );
@@ -79,12 +81,13 @@ public class SetUp { // read setup file, and then setup
         assignDownloadPath = false;
         autoCompress = true;
         deleteOriginalPic = false;
-        
-        if ( Common.isUnix() )
+
+        if ( Common.isUnix() ) {
             skinClassName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
-        else
+        } else {
             skinClassName = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-        
+        }
+
         outputUrlFile = false;
         downloadPicFile = true;
         openDebugMessageWindow = false;
@@ -115,6 +118,11 @@ public class SetUp { // read setup file, and then setup
         ehMemberPasswordHash = "NULL";
 
         timeoutTimer = 0;
+
+        playAllDoneAudio = true; // 是否播放全部任務完成音效
+        playSingleDoneAudio = true; // 是否播放單一任務完成音效
+        allDoneAudioFile = Common.defaultAllDoneAudio; // 在全部任務完成後播放的外部音效檔
+        singleDoneAudioFile = Common.defaultSingleDoneAudio; // 在單一任務完成後播放的外部音效檔
 
         Common.closeHttpProxy(); // 預設為關閉代理伺服器。
     }
@@ -177,9 +185,17 @@ public class SetUp { // read setup file, and then setup
                 + "\nopenPicFileProgram = " + openPicFileProgram
                 + "\n# 預設開啟壓縮檔的程式"
                 + "\nopenZipFileProgram = " + openZipFileProgram
+                + "\n# 是否播放全部任務完成音效"
+                + "\nplaySingleDoneAudio = " + playSingleDoneAudio
+                + "\n# 是否播放單一任務完成音效"
+                + "\nplayAllDoneAudio = " + playAllDoneAudio
+                + "\n# 在全部任務完成後播放的外部音效檔"
+                + "\nsingleDoneAudioFile = " + singleDoneAudioFile
+                + "\n# 在單一任務完成後播放的外部音效檔"
+                + "\nallDoneAudioFile = " + allDoneAudioFile
                 + "\n";
 
-        Common.outputFile( setString, Common.getNowAbsolutePath(), setFileName );
+        Common.outputFile( setString, Common.getNowAbsolutePath(), Common.setFileName );
     }
 
     // 印出目前設定值，除錯用
@@ -211,18 +227,22 @@ public class SetUp { // read setup file, and then setup
         Common.debugPrintln( "retryTimes = " + retryTimes );
         Common.debugPrintln( "openPicFileProgram = " + openPicFileProgram );
         Common.debugPrintln( "openZipFileProgram = " + openZipFileProgram );
+        Common.debugPrintln( "playSingleDoneAudio = " + playSingleDoneAudio );
+        Common.debugPrintln( "playAllDoneAudio = " + playAllDoneAudio );
+        Common.debugPrintln( "singleDoneAudioFile = " + singleDoneAudioFile );
+        Common.debugPrintln( "allDoneAudioFile = " + allDoneAudioFile );
         Common.debugPrintln( "-----------------------" );
     }
 
     // 讀入設定檔並依讀入資料來更新目前設定
     public void readSetFile() {
-        Common.debugPrintln( "SET路徑：" + Common.getNowAbsolutePath() + setFileName );
-        if ( !new File( Common.getNowAbsolutePath() + setFileName ).exists() ) {
+        Common.debugPrintln( "SET路徑：" + Common.getNowAbsolutePath() + Common.setFileName );
+        if ( !new File( Common.getNowAbsolutePath() + Common.setFileName ).exists() ) {
             Common.debugPrintln( "找不到set.ini，故自動產生" );
             writeSetFile();
         }
 
-        String[] lines = Common.getFileStrings( getRecordFileDirectory(), setFileName );
+        String[] lines = Common.getFileStrings( getRecordFileDirectory(), Common.setFileName );
 
         // 為了讓之前的版本也能產生新的set.ini所做的修改
         boolean existKeepBookmark = false;
@@ -240,6 +260,10 @@ public class SetUp { // read setup file, and then setup
         boolean existRetryTimes = false;
         boolean existOpenPicFileProgram = false;
         boolean existOpenZipFileProgram = false;
+        boolean existPlayAllDoneAudio = false;
+        boolean existPlaySingleDoneAudio = false;
+        boolean existAllDoneAudioFile = false;
+        boolean existSingleDoneAudioFile = false;
 
         for ( int i = 0 ; i < lines.length ; i++ ) {
             try {
@@ -301,9 +325,9 @@ public class SetUp { // read setup file, and then setup
                         /*
                         if ( CommonGUI.getGTKSkinOrder() != -1 ) // 若有gtk就優先選gtk版面
                         {
-                            skinClassName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
+                        skinClassName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
                         }
-                        */
+                         */
 
                         ComicDownGUI.setDefaultSkinClassName( skinClassName );
                     } else if ( split[0].equals( "outputUrlFile" ) ) {
@@ -403,6 +427,28 @@ public class SetUp { // read setup file, and then setup
                         if ( split.length > 1 ) {
                             setOpenZipFileProgram( split[1] );
                         }
+                    } else if ( split[0].equals( "playSingleDoneAudio" ) ) {
+                        existPlaySingleDoneAudio = true;
+                        if ( split.length > 1 ) {
+                            boolean value = split[1].matches( "(?s).*true(?s).*" ) ? true : false;
+                            setPlaySingleDoneAudio( value );
+                        }
+                    } else if ( split[0].equals( "playAllDoneAudio" ) ) {
+                        existPlayAllDoneAudio = true;
+                        if ( split.length > 1 ) {
+                            boolean value = split[1].matches( "(?s).*true(?s).*" ) ? true : false;
+                            setPlayAllDoneAudio( value );
+                        }
+                    } else if ( split[0].equals( "singleDoneAudioFile" ) ) {
+                        existSingleDoneAudioFile = true;
+                        if ( split.length > 1 ) {
+                            setSingleDoneAudioFile( split[1] );
+                        }
+                    } else if ( split[0].equals( "allDoneAudioFile" ) ) {
+                        existAllDoneAudioFile = true;
+                        if ( split.length > 1 ) {
+                            setAllDoneAudioFile( split[1] );
+                        }
                     }
                 }
             } catch ( Exception ex ) {
@@ -419,7 +465,11 @@ public class SetUp { // read setup file, and then setup
                 && existEhMemberID && existEhMemberPasswordHash
                 && existSettingFileDirectory && existTimeoutTimer
                 && existChoiceAllVolume && existRetryTimes
-                && existOpenPicFileProgram && existOpenZipFileProgram ) {
+                && existOpenPicFileProgram && existOpenZipFileProgram
+                && existPlayAllDoneAudio
+                && existPlaySingleDoneAudio
+                && existAllDoneAudioFile
+                && existSingleDoneAudioFile ) {
             Common.debugPrintln( "設定檔全部讀取完畢" );
         } else {
             Common.debugPrintln( "設定檔缺乏新版參數! 套用預設值!" );
@@ -677,8 +727,45 @@ public class SetUp { // read setup file, and then setup
     public static void setOpenZipFileProgram( String program ) {
         openZipFileProgram = program;
     }
+    
+    public static boolean getPlaySingleDoneAudio() {
+        return playSingleDoneAudio;
+    }
+
+    public static void setPlaySingleDoneAudio( boolean value ) {
+        playSingleDoneAudio = value;
+    }
+
+    public static boolean getPlayAllDoneAudio() {
+        return playAllDoneAudio;
+    }
+
+    public static void setPlayAllDoneAudio( boolean value ) {
+        playAllDoneAudio = value;
+    }
+    
+    public static String getSingleDoneAudioFile() {
+        return singleDoneAudioFile;
+    }
+
+    public static void setSingleDoneAudioFile( String value ) {
+        singleDoneAudioFile = value;
+    }
+    
+    public static String getAllDoneAudioFile() {
+        return allDoneAudioFile;
+    }
+
+    public static void setAllDoneAudioFile( String value ) {
+        allDoneAudioFile = value;
+    }
+    
+    
+    
 
     // ----------------------------------------------------------------
+    
+    
     public static void setPicFrontName( String front ) {
         picFrontName = front;
     }

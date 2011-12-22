@@ -65,8 +65,8 @@ public class ParseIIBQ extends ParseOnlineComicSite {
             int endIndex = allPageString.indexOf( "</title>", beginIndex );
             String tempTitleString = allPageString.substring( beginIndex, endIndex ).trim().split( "\\s" )[0];
 
-            setWholeTitle( Common.getStringRemovedIllegalChar(
-                    Common.getTraditionalChinese( tempTitleString.trim() ) ) );
+            setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                    Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
         }
 
         Common.debugPrintln( "作品名稱(title) : " + getTitle() );

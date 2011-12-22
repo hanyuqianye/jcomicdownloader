@@ -46,4 +46,5 @@ public class Site {
     public final static int SF = 28;
     public final static int KKKMH = 29;
     public final static int SIX_COMIC = 30;
+    public final static int MANHUA_178 = 31;
 }

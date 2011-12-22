@@ -31,6 +31,11 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.text.*;
 import java.util.zip.*;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.SourceDataLine;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import jcomicdownloader.enums.*;
@@ -40,6 +45,7 @@ import jcomicdownloader.enums.*;
  * 大部分的通用方法都放在這邊，全宣告為靜態，方便使用。
  */
 public class Common {
+
     public static String recordDirectory = getNowAbsolutePath();
     public static String tempDirectory = getNowAbsolutePath() + "temp" + getSlash();
     public static String downloadDirectory = getNowAbsolutePath() + "down" + getSlash();
@@ -57,6 +63,11 @@ public class Common {
     public static String consoleThreadName = "Thread-console-version";
     public static String setFileName = "set.ini";
     public static int reconnectionTimes = 3; // 嘗試重新連線的最高次數
+    public static String defaultAudioString = "使用預設音效";
+    public static String defaultSingleDoneAudio = "single_done.wav";
+    public static String defaultAllDoneAudio = "all_done.wav";
+    public static String mainIcon = "main_icon.png";
+    public static String playAudioPic = "play.png";
 
     public static String getZero() {
         int length = SetUp.getFileNameLength();
@@ -201,6 +212,17 @@ public class Common {
 
         return cookieStrings;
     }
+    
+    // 將所有cookies串起來
+    public static String getCookieString( String urlString ) {
+        String[] cookies = getCookieStrings( urlString );
+        
+        String cookie = "";
+        for ( int i = 0; i < cookies.length && cookies[i] != null; i ++ ) {
+            cookie = cookies[i] + "; ";
+        }
+        return cookie;
+    }
 
     public static String[] getCookieStrings( String urlString ) {
         String[] tempCookieStrings = null;
@@ -213,17 +235,17 @@ public class Common {
         } catch ( Exception ex ) {
             ex.printStackTrace();
         }
-        
-        
+
+
 
         String[] cookieStrings = tempCookieStrings;
         int cookieCount = 0;
         if ( tempCookieStrings != null ) {
-            
+
             for ( int i = 0 ; i < tempCookieStrings.length ; i++ ) {
                 if ( tempCookieStrings[i] != null ) {
                     cookieStrings[cookieCount++] = tempCookieStrings[i]; // 把cookie都集中到前面
-                    System.out.println( cookieCount + " " + tempCookieStrings[i] );
+                    System.out.println( cookieCount + ": " + tempCookieStrings[i] );
                 }
             }
             Common.debugPrintln( "共有" + cookieCount + "串cookie" );
@@ -1199,48 +1221,106 @@ public class Common {
     public static String getHtmlStringWithColor( String string, String color ) {
         return "<html><font color=" + color + string + "</font></html>";
     }
-    
+
     // 字串A裡面有幾個字串B
     public static int getAmountOfString( String aString, String bString ) {
         int bLength = bString.length();
-        
+
         int conformTimes = 0; // 符合次數
-        for ( int i = 0; i < aString.length(); i += bLength ) {
-            if ( aString.substring( i, i + bLength ).equals( bString ) )
-                conformTimes ++;
+        for ( int i = 0 ; i < aString.length() ; i += bLength ) {
+            if ( aString.substring( i, i + bLength ).equals( bString ) ) {
+                conformTimes++;
+            }
         }
-        
+
         //System.out.println( bString + "符合次數: " + conformTimes );
-        
+
         return conformTimes;
     }
-
 
     public static String getNowAbsolutePath() {
         if ( Common.isUnix() ) {
 
             String apath = Common.class.getProtectionDomain().getCodeSource().getLocation().getPath();
             try {
-                apath = URLDecoder.decode(apath, "UTF-8");
-            } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(Common.class.getName()).log(Level.SEVERE, null, ex);
+                apath = URLDecoder.decode( apath, "UTF-8" );
+            } catch ( UnsupportedEncodingException ex ) {
+                Logger.getLogger( Common.class.getName() ).log( Level.SEVERE, null, ex );
             }
 
 
             String absolutePath;
-            if ( apath.endsWith(".jar") ) {
-                absolutePath = apath.replaceAll("([^/\\\\]+).jar$", "");
+            if ( apath.endsWith( ".jar" ) ) {
+                absolutePath = apath.replaceAll( "([^/\\\\]+).jar$", "" );
+            } else {
+                absolutePath = new File( "" ).getAbsolutePath() + Common.getSlash();
             }
-            else
-                absolutePath = new File("").getAbsolutePath() + Common.getSlash();
 
             return absolutePath;
-        }
-        else
+        } else {
             return new File( "" ).getAbsolutePath() + getSlash();
-        
+        }
+
+    }
+    
+    public static void playSingleDoneAudio() {
+        playSingleDoneAudio( SetUp.getSingleDoneAudioFile() );
     }
 
+    public static void playSingleDoneAudio( String fileString ) {
+        if ( new File( fileString ).exists() ) {
+            playAudio( fileString, false );
+        } else {
+            playAudio( Common.defaultSingleDoneAudio, true );
+        }
+    }
+    
+    public static void playAllDoneAudio() {
+        playAllDoneAudio( SetUp.getAllDoneAudioFile() );
+    }
+
+    public static void playAllDoneAudio( String fileString ) {
+        if ( new File( fileString ).exists() ) {
+            playAudio( fileString, false );
+        } else {
+            playAudio( Common.defaultAllDoneAudio, true );
+        }
+    }
+
+    // 播放音效
+    private static void playAudio( final String audioFileString, final boolean defaultResource ) {
+        Thread playThread = new Thread( new Runnable() {
+
+            public void run() {
+                try {
+                    AudioInputStream ais;
+
+                    if ( defaultResource ) { // 預設音效
+                        URL audioFileURL = new CommonGUI().getResourceURL( audioFileString );
+                        ais = AudioSystem.getAudioInputStream( audioFileURL );
+                    } else { // 外部音效
+                        File audioFile = new File( audioFileString );
+                        ais = AudioSystem.getAudioInputStream( audioFile );
+                    }
+
+                    AudioFormat af = ais.getFormat();
+                    DataLine.Info inf = new DataLine.Info( SourceDataLine.class, af );
+                    SourceDataLine sdl = (SourceDataLine) AudioSystem.getLine( inf );
+                    sdl.open( af );
+                    sdl.start();
+                    byte[] buf = new byte[65536];
+                    for ( int n = 0 ; (n = ais.read( buf, 0, buf.length )) > 0 ; ) {
+                        sdl.write( buf, 0, n );
+                    }
+                    sdl.drain();
+                    sdl.close();
+                } catch ( Exception e ) {
+                    e.printStackTrace();
+                }
+            }
+        } );
+        playThread.start();
+    }
 }
 
 class TimeoutTask extends TimerTask {

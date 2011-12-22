@@ -288,7 +288,8 @@ class ParseECphoto extends ParseEC {
             int endIndex = allPageString.indexOf( "</title>", beginIndex );
             String titleString = allPageString.substring( beginIndex, endIndex );
 
-            setWholeTitle( Common.getStringRemovedIllegalChar( titleString ) );
+            setWholeTitle( getVolumeWithFormatNumber( 
+                    Common.getStringRemovedIllegalChar( titleString ) ) );
         }
 
         Common.debugPrintln( "作品名稱(title) : " + getTitle() );

@@ -57,8 +57,8 @@ public class ParseJumpcn extends ParseOnlineComicSite {
             int endIndex = allPageString.indexOf( " ", beginIndex );
             String tempTitleString = allPageString.substring( beginIndex, endIndex );
 
-            setWholeTitle( Common.getStringRemovedIllegalChar(
-                    Common.getTraditionalChinese( tempTitleString.trim() ) ) );
+            setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                    Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
         }
 
         Common.debugPrintln( "作品名稱(title) : " + getTitle() );

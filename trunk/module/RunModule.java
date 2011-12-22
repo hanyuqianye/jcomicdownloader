@@ -54,7 +54,9 @@ public class RunModule {
             Common.isMainPage = false;
 
             if ( parse.getRunMode() == RunModeEnum.DOWNLOAD_MODE ) {
-                parse.setTitle( parse.getTitleOnSingleVolumePage( urlString ) );
+                if ( parse.getTitle() == null || parse.getTitle().equals( "" ) ) {
+                    parse.setTitle( parse.getTitleOnSingleVolumePage( urlString ) );
+                }
                 Common.debugPrintln( "漫畫名稱: " + parse.getTitle() );
                 //Common.nowTitle = parse.getTitle();
 
