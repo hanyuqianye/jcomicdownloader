@@ -9,7 +9,9 @@ Last Modified : 2011/12/22
 ChangeLog:
  * 2.10: 1. 新增對manhua.178.com的支援。（仍有些問題，測試中）
  *      2. 增加任務完成音效的選項。
- *      3. 修復kuku解析少數圖片網址時後面多出">"的問題。
+ *      3. 修改黑底介面的訊息文字顯示顏色（藍色 -> 黃色）。
+ *      4. 修復kuku解析少數圖片網址時後面多出">"的問題。
+ *      5. 修復沒有設定瀏覽圖片程式便無法開啟網頁的問題。
  * 2.09: 1. 新增對www.kkkmh.com/的支援。
  *      2. 新增對6comic.com的支援。
  *      3. 增加開啟原始網頁的右鍵選單。
@@ -1184,13 +1186,6 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         String title = "";
         String url = "";
 
-        if ( SetUp.getOpenPicFileProgram().matches( "" ) ) {
-            JOptionPane.showMessageDialog( this,
-                    "<html>尚未設定開啟程式，請前往<font color=blue>選項 -> 瀏覽</font>做設定</html>",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-            return;
-        }
-
         if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION ) { // 從任務清單開啟
             row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
             title = String.valueOf( downTableModel.getRealValueAt( row, DownTableEnum.TITLE ) );
@@ -1215,8 +1210,14 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         String url = "";
 
         if ( SetUp.getOpenPicFileProgram().matches( "" ) ) {
+            String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
+            String colorString = "blue";
+            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+                colorString = "yellow";
+            }
+
             JOptionPane.showMessageDialog( this,
-                    "<html>尚未設定開啟程式，請前往<font color=blue>選項 -> 瀏覽</font>做設定</html>",
+                    "<html>尚未設定開啟程式，請前往<font color=" + colorString + ">選項 -> 瀏覽</font>做設定</html>",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
         }
@@ -1259,7 +1260,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 path = SetUp.getOriginalDownloadDirectory() + title + Common.getSlash();
 
                 if ( !new File( path ).exists() ) {
-                    JOptionPane.showMessageDialog( this, "<html><font color=blue>"
+                    String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
+                    String colorString = "blue";
+                    if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+                        colorString = "yellow";
+                    }
+
+                    JOptionPane.showMessageDialog( this, "<html><font color=" + colorString + ">"
                             + path + "</font>" + "不存在，無法開啟</html>",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                     return;
@@ -1303,7 +1310,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         // 檔案不存在就只顯示訊息而不繼續操作
         if ( !new File( file ).exists() ) {
-            JOptionPane.showMessageDialog( this, "<html><font color=blue>"
+            String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
+            String colorString = "blue";
+            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+                colorString = "yellow";
+            }
+
+            JOptionPane.showMessageDialog( this, "<html><font color=" + colorString + ">"
                     + file + "</font>" + "不存在，無法開啟</html>",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
@@ -1350,7 +1363,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     // 出處：http://stackoverflow.com/questions/1876507/java-runtime-exec-on-windows-fails-with-unicode-in-arguments
     private void runUnansiCmd( String program, String file ) {
         if ( !new File( file ).exists() ) {
-            JOptionPane.showMessageDialog( this, "<html><font color=blue>"
+            String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
+            String colorString = "blue";
+            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+                colorString = "yellow";
+            }
+            
+            JOptionPane.showMessageDialog( this, "<html><font color=" + colorString + ">"
                     + file + "</font>" + "不存在，無法開啟</html>",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
@@ -1521,8 +1540,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                         if ( SetUp.getShowDoneMessageAtSystemTray() ) {
                             trayIcon.displayMessage( "JComicDownloader Message", title + "下載完畢! ", TrayIcon.MessageType.INFO );
-                            if ( SetUp.getPlaySingleDoneAudio() )
+                            if ( SetUp.getPlaySingleDoneAudio() ) {
                                 Common.playSingleDoneAudio(); // 播放單一任務完成音效
+                            }
                         }
                     } else {
                         downTableModel.setValueAt( "下載中斷", i, DownTableEnum.STATE );
@@ -1533,9 +1553,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 }
                 if ( Run.isAlive ) {
                     stateBar.setText( Common.missionCount + "個任務全部下載完畢! " );
-                    if ( SetUp.getPlayAllDoneAudio() )
+                    if ( SetUp.getPlayAllDoneAudio() ) {
                         Common.playAllDoneAudio(); // 播放全部任務完成音效
-
+                    }
                     if ( SetUp.getShowDoneMessageAtSystemTray() ) {
                         trayIcon.displayMessage( "JComicDownloader Message", Common.missionCount + "個任務全部下載完畢! ", TrayIcon.MessageType.INFO );
                     }
@@ -1868,6 +1888,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
         if ( event.getSource() == button[ButtonEnum.INFORMATION] ) { // button of Information
             new Thread( new Runnable() {
+
                 public void run() {
                     final InformationFrame frame = new InformationFrame();
 
@@ -1969,7 +1990,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 JOptionPane.showMessageDialog( ComicDownGUI.mainFrame,
                 message, "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                 
-                 */ 
+                 */
                 //Run.isAlive = true;
                 String picURL = "http://imgfast.manhua.178.com/k/%E6%81%90%E6%83%A7%E4%B9%8B%E6%BA%90/%E7%AC%AC01%E5%8D%B7/002.jpg";
                 String pageURL = "http://www.178.com/mh/wangliangdeylq/15039-5.shtml";
@@ -1979,7 +2000,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 cookie = cookie.replaceAll( "20-", "21-" );
                 System.out.println( cookie );
                 cookie = "tyb=No; his=1324039671%7C%C8%AB1%BE%ED%7C179745%7C%BE%CD%CA%C7%B2%BB%D0%ED%B0%AE%BA%DC%B4%F3%7C201012%2F179746%7C%7C1324336783%7C%B5%DA1%BE%ED%7C212218%7C%C8%A8%C1%A6%B5%C4%D3%CE%CF%B7%7C201112%2F212222";
-                
+
                 cookie = "view_ad=1";
                 //Common.downloadFile( pageURL, "", "test.html", true, cookie );
                 Common.downloadFile( picURL, "", "test.jpg", false, cookie );
@@ -1992,9 +2013,6 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         } );
         //downThread.start();
     }
-    
-   
-        
 
     private JButton getButton( String string, String picName ) {
         JButton button = new JButton( string, new CommonGUI().getImageIcon( picName ) );
