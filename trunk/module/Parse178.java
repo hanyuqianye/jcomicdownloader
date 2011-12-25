@@ -2,10 +2,11 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/12/18
+Last Modified : 2011/12/25
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
- *  2.09: 1. 新增新增對www.kkkmh.com/的支援。
+ *  2.11: 1. 修復有時候下載網頁發生錯誤的問題。
+ *  2.10: 1. 新增manhua.178.com的支援。
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -29,6 +30,7 @@ public class Parse178 extends ParseOnlineComicSite {
     protected String indexEncodeName;
     protected String baseURL;
     protected int waitingTime; // 下載錯誤後的等待時間
+    protected int retransmissionLimit; // 最高重試下載次數
 
     /**
      *
@@ -44,6 +46,7 @@ public class Parse178 extends ParseOnlineComicSite {
 
         baseURL = "http://manhua.178.com/";
         waitingTime = 2000;
+        retransmissionLimit = 30;
     }
 
     public Parse178( String webSite, String titleName ) {
@@ -57,23 +60,7 @@ public class Parse178 extends ParseOnlineComicSite {
         Common.debugPrintln( "開始解析各參數 :" );
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
-
-        int downloadTime = 0;
-        while ( true && Run.isAlive ) {
-            Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
-            downloadTime ++;
-
-            // 若網頁小於10k，代表下載到亂碼頁面，需重新下載
-            if ( new File( SetUp.getTempDirectory() + indexName ).length() > 11000 ) {
-                break;
-            }
-            try {
-                Common.debugPrint( " " + downloadTime + " " );
-                Thread.sleep( waitingTime );
-            } catch ( InterruptedException ex ) {
-                Logger.getLogger( Parse178.class.getName() ).log( Level.SEVERE, null, ex );
-            }
-        }
+        Common.downloadGZIPInputStreamFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
 
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
@@ -118,11 +105,12 @@ public class Parse178 extends ParseOnlineComicSite {
 
         Common.debugPrintln( "第一張圖片網址：" + firstPicURL );
 
-        endIndex = firstPicURL.lastIndexOf( "/" ) + 1;
+        endIndex = Common.getBiggerIndexOfTwoKeyword( firstPicURL, "/", "_" ) + 1;
         String parentPicURL = firstPicURL.substring( 0, endIndex );
 
         for ( int i = 0 ; i < codeTokens.length ; i++ ) {
-            beginIndex = codeTokens[i].lastIndexOf( "/" ) + 1;
+            beginIndex = Common.getBiggerIndexOfTwoKeyword( codeTokens[i], "/", "_" ) + 1;
+
             endIndex = codeTokens[i].indexOf( "\"", beginIndex );
             comicURL[i] = parentPicURL + codeTokens[i].substring( beginIndex, endIndex ); // 存入每一頁的網頁網址
             //Common.debugPrintln( ( i + 1 ) + " " + comicURL[i]  ); // debug
@@ -150,7 +138,7 @@ public class Parse178 extends ParseOnlineComicSite {
                 //System.out.print( utf8 + " " + gb );
                 urltoken = "\\" + urltokens[j];
                 if ( urltoken.matches( ".*\\" + utf8 + ".*" ) ) {
-                    System.out.println( "GB: " + gb );
+                    System.out.println( urltoken + " -> GB: " + gb );
                     isGB = true;
                     decodeBuilder.append( gb + urltoken.replaceAll( "\\" + utf8, "" ) );
                 }
@@ -177,7 +165,7 @@ public class Parse178 extends ParseOnlineComicSite {
         }
 
         String[] decodeLines = Common.getFileStrings( Common.getNowAbsolutePath(), "UTF8toGB.txt" );
-
+        
         return decodeLines;
     }
 
@@ -191,25 +179,7 @@ public class Parse178 extends ParseOnlineComicSite {
     @Override
     public String getAllPageString( String urlString ) {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_178_", "html" );
-
-        
-        int downloadTimes = 0;
-        while ( true && Run.isAlive ) {
-            Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
-            downloadTimes ++;
-            
-            // 若網頁小於10k，代表下載到亂碼頁面，需重新下載
-            if ( new File( SetUp.getTempDirectory() + indexName ).length() > 14000 ) {
-                break;
-            }
-            try {
-                Common.debugPrint( " " + downloadTimes + " " );
-                Thread.sleep( waitingTime );
-            } catch ( InterruptedException ex ) {
-                Logger.getLogger( Parse178.class.getName() ).log( Level.SEVERE, null, ex );
-            }
-        }
-        Common.debugPrintln( "\n" + indexName + "下載成功，結束重試" );
+        Common.downloadGZIPInputStreamFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }

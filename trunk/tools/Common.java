@@ -2,9 +2,11 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/11/9
+Last Modified : 2011/12/25
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.11: 1. 修改下載機制，增加讀取GZIPInputStream串流的選項（178.com專用）
+ *   2. 修復重試後無法下載中間漏頁的問題。（ex. 5.jpg 7.jpg 8.jpg，中間遺漏6.jpg）
 2.01: 1. 修改下載機制，不下載青蛙圖（檔案大小10771 bytes）
 2.0 : 1. 加入下載快速模式，專用於google圖片下載
 1.09: 1. 加入書籤表格和紀錄表格相關的公用方法
@@ -146,7 +148,8 @@ public class Common {
             String nextFileName = picFrontName + formatter.format( i + 1 ) + "." + extensionName;
             if ( webSite[i - 1] != null ) {
                 // if not all download, the last file needs to re-download
-                if ( !new File( outputDirectory + nextFileName ).exists() ) {
+                if ( !new File( outputDirectory + nextFileName ).exists() || 
+                    !new File( outputDirectory + fileName ).exists()  ) {
                     CommonGUI.stateBarMainMessage = mainMessage;
                     CommonGUI.stateBarDetailMessage = "  :  " + "共" + webSite.length + "頁"
                             + "，第" + i + "頁下載中";
@@ -158,7 +161,7 @@ public class Common {
 
                     CommonGUI.stateBarDetailMessage += " : " + fileName;
 
-                    downloadFile( webSite[i - 1], outputDirectory, fileName, false, "", false, SetUp.getRetryTimes() );
+                    downloadFile( webSite[i - 1], outputDirectory, fileName, false, "", false, SetUp.getRetryTimes(), false, false );
 
                 }
                 System.out.print( i + " " );
@@ -174,7 +177,7 @@ public class Common {
             ex.printStackTrace();
         }
 
-        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, false, SetUp.getRetryTimes() );
+        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, false, SetUp.getRetryTimes(), false, false );
 
     }
 
@@ -212,13 +215,13 @@ public class Common {
 
         return cookieStrings;
     }
-    
+
     // 將所有cookies串起來
     public static String getCookieString( String urlString ) {
         String[] cookies = getCookieStrings( urlString );
-        
+
         String cookie = "";
-        for ( int i = 0; i < cookies.length && cookies[i] != null; i ++ ) {
+        for ( int i = 0 ; i < cookies.length && cookies[i] != null ; i++ ) {
             cookie = cookies[i] + "; ";
         }
         return cookie;
@@ -253,21 +256,36 @@ public class Common {
 
         return cookieStrings;
     }
+    
+    
 
     // 普通下載模式，連線失敗會嘗試再次連線
     public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
             boolean needCookie, String cookieString ) {
-        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, false, SetUp.getRetryTimes() );
+        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, false, SetUp.getRetryTimes(), false, false );
+    }
+    
+    // 解壓縮下載模式，連線失敗會嘗試再次連線，且收取資料串流後會以Gzip解壓縮
+    public static void downloadGZIPInputStreamFile( String webSite, String outputDirectory, String outputFileName,
+            boolean needCookie, String cookieString ) {
+        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, false, SetUp.getRetryTimes(), true, false );
+    }
+    
+    // 直接下載模式，不管Run.isAlive值為何都可以直接下載
+    public static void downloadFileByForce( String webSite, String outputDirectory, String outputFileName,
+            boolean needCookie, String cookieString ) {
+        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, false, SetUp.getRetryTimes(), false, true );
     }
 
     // 加速下載模式，連線失敗就跳過
     public static void downloadFileFast( String webSite, String outputDirectory, String outputFileName,
             boolean needCookie, String cookieString ) {
-        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, true, SetUp.getRetryTimes() );
+        downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, true, SetUp.getRetryTimes(), false, false );
     }
 
     public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
-            boolean needCookie, String cookieString, boolean fastMode, int retryTimes ) {
+            boolean needCookie, String cookieString, boolean fastMode, int retryTimes, 
+            boolean gzipEncode, boolean forceDownload ) {
         // downlaod file by URL
 
         int fileGotSize = 0;
@@ -277,7 +295,7 @@ public class Common {
             CommonGUI.stateBarDetailMessage = outputFileName + " ";
         }
 
-        if ( Run.isAlive ) {
+        if ( Run.isAlive || forceDownload ) { // 當允許下載或強制下載時才執行連線程序
             try {
 
                 ComicDownGUI.stateBar.setText( webSite + " 連線中..." );
@@ -287,7 +305,30 @@ public class Common {
 
                 // 偽裝成瀏覽器
                 //connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)");
-                connection.setRequestProperty( "User-Agent", "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
+                //connection.setRequestProperty( "User-Agent", "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
+
+                // connection.setRequestMethod( "GET" ); // 默认是GET 
+                connection.setRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)" );
+                //connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; InfoPath.1; CIBA)");
+                connection.setFollowRedirects( true );
+                //connection.setDoOutput( true ); // 需要向服务器写数据
+                connection.setDoInput( true ); //
+                connection.setUseCaches( false ); // // Post 请求不能使用缓存 
+                connection.setAllowUserInteraction( false );
+                
+                // 设定传送的内容类型是可序列化的java对象   
+                // (如果不设此项,在传送序列化对象时,当WEB服务默认的不是这种类型时可能抛java.io.EOFException)
+                connection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
+                connection.setRequestProperty( "Accept-Language", "zh-cn" );
+                // connection.setRequestProperty("Content-Length", ""+data.length());
+                connection.setRequestProperty( "Cache-Control", "no-cache" );
+                connection.setRequestProperty( "Pragma", "no-cache" );
+                connection.setRequestProperty( "Host", "biz.finance.sina.com.cn" );
+                connection.setRequestProperty( "Accept", "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2" );
+                connection.setRequestProperty( "Connection", "keep-alive" );
+
+                connection.setConnectTimeout( 10000 ); // 與主機連接時間不能超過十秒
+
 
                 if ( needCookie ) {
                     connection.setRequestMethod( "GET" );
@@ -326,7 +367,8 @@ public class Common {
 
                 if ( connection.getResponseCode() != 200 ) {
                     //Common.debugPrintln( "第二次失敗，不再重試!" );
-                    Common.errorReport( "錯誤回傳碼(responseCode): " + connection.getResponseCode() );
+                    Common.errorReport( "錯誤回傳碼(responseCode): "
+                            + connection.getResponseCode() + " : " + webSite );
                     return;
                 }
 
@@ -334,16 +376,20 @@ public class Common {
 
                 //OutputStream os = response.getOutputStream();
                 OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
-                InputStream is = connection.getInputStream();
-
-
+                InputStream is = null;
+                
+                if ( gzipEncode && fileSize < 17 ) // 178漫畫小於17kb就認定為已經壓縮過的
+                    is = new GZIPInputStream( connection.getInputStream() ); // ex. 178.com
+                else
+                    is = connection.getInputStream(); // 其他漫畫網
+                    
                 Common.debugPrint( "(" + fileSize + " k) " );
                 String fileSizeString = fileSize > 0 ? "" + fileSize : " ? ";
 
                 byte[] r = new byte[1024];
                 int len = 0;
 
-                while ( (len = is.read( r )) > 0 && Run.isAlive ) {
+                while ( (len = is.read( r )) > 0 && ( Run.isAlive || forceDownload ) ) {
                     // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
                     if ( fileSize > 1024 || !Flag.timeoutFlag ) // 預防卡住的機制
                     {
@@ -394,7 +440,7 @@ public class Common {
                     Thread.sleep( 2000 ); // 每次暫停一秒再重新連線
 
                     downloadFile( webSite, outputDirectory, outputFileName,
-                            needCookie, cookieString, fastMode, retryTimes - 1 );
+                            needCookie, cookieString, fastMode, retryTimes - 1, gzipEncode, false );
 
 
                 }
@@ -946,6 +992,20 @@ public class Common {
         }
     }
 
+    // 找出keyword1和keyword2在string中的位置（index），並回傳較大的index
+    public static int getBiggerIndexOfTwoKeyword( String string, String keyword1, String keyword2 ) {
+        int index1 = string.lastIndexOf( keyword1 );
+        int index2 = string.lastIndexOf( keyword2 );
+
+        if ( index1 < 0 ) {
+            return index2;
+        } else if ( index2 < 0 ) {
+            return index1;
+        } else {
+            return index1 > index2 ? index1 : index2;
+        }
+    }
+
     // 寫出目前的下載任務清單
     public static void outputDownTableFile( DownloadTableModel downTableModel ) {
         StringBuffer sb = new StringBuffer();
@@ -1262,7 +1322,7 @@ public class Common {
         }
 
     }
-    
+
     public static void playSingleDoneAudio() {
         playSingleDoneAudio( SetUp.getSingleDoneAudioFile() );
     }
@@ -1274,7 +1334,7 @@ public class Common {
             playAudio( Common.defaultSingleDoneAudio, true );
         }
     }
-    
+
     public static void playAllDoneAudio() {
         playAllDoneAudio( SetUp.getAllDoneAudioFile() );
     }

@@ -3,10 +3,14 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v2.10
-Last Modified : 2011/12/22
+Version  : v2.11
+Last Modified : 2011/12/25
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.11: 1. 新增對www.kangdm.com的支援。
+ *      2. 增設取消勾選『分析後下載圖檔』時的提醒視窗。
+ *      3. 修復manhua.178.com擷取網頁時出錯的問題。（應該都可以正常下載了）
+ *      4. 修復重試後無法下載中間漏頁的問題。（ex. 5.jpg 7.jpg 8.jpg，中間遺漏6.jpg）
  * 2.10: 1. 新增對manhua.178.com的支援。（仍有些問題，測試中）
  *      2. 增加任務完成音效的選項。
  *      3. 修改黑底介面的訊息文字顯示顏色（藍色 -> 黃色）。
@@ -212,7 +216,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.10" );
+        super( "JComicDownloader  v2.11" );
 
         minimizeEvent();
         initTrayIcon();
@@ -231,7 +235,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         downTableRealChoiceOrder = new int[2000][]; // 最多1000個任務，每個任務最多2000集... ex.柯南七百集了...
 
         // 建立logFrame視窗，是否開啟則視預設值而定
-        javax.swing.SwingUtilities.invokeLater( new Runnable() {
+        //javax.swing.SwingUtilities.invokeLater( new Runnable() { sdf
+
+        //    public void run() {
+        Thread logFrameThread = new Thread( new Runnable() {
 
             public void run() {
                 logFrame = new LogFrame();
@@ -246,6 +253,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             }
         } );
+        logFrameThread.start();
+        
+        counter();  // 以code頁面記錄開啟次數（好玩測試看看）
 
         messageString = new StringBuffer( "" );
 
@@ -256,6 +266,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         checkSkin(); // 檢查skin是否由外部jar支援，若是外部skin且沒有此jar，則下載
 
     }
+
 
     // 檢查skin是否由外部jar支援，若是外部skin且沒有此jar，則下載
     private void checkSkin() {
@@ -1992,17 +2003,16 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 
                  */
                 //Run.isAlive = true;
-                String picURL = "http://imgfast.manhua.178.com/k/%E6%81%90%E6%83%A7%E4%B9%8B%E6%BA%90/%E7%AC%AC01%E5%8D%B7/002.jpg";
-                String pageURL = "http://www.178.com/mh/wangliangdeylq/15039-5.shtml";
+                String picURL = "http://1.kangdm.com/comic_img/kyo0/s/%E6%AD%BB%E4%BA%A1%E7%AC%94%E8%AE%B0%E5%90%8C%E4%BA%BA/002.jpg";
+                String pageURL = "http://www.kangdm.com/comic/10256/";
                 String testURL = "http://comic.veryim.com/manhua/zuishangys/";
 
-                String cookie = "";//Common.getCookieString( pageURL );
-                cookie = cookie.replaceAll( "20-", "21-" );
+                String cookie = null;//Common.getCookieString( pageURL );
+                //cookie = cookie.replaceAll( "20-", "21-" );
                 System.out.println( cookie );
-                cookie = "tyb=No; his=1324039671%7C%C8%AB1%BE%ED%7C179745%7C%BE%CD%CA%C7%B2%BB%D0%ED%B0%AE%BA%DC%B4%F3%7C201012%2F179746%7C%7C1324336783%7C%B5%DA1%BE%ED%7C212218%7C%C8%A8%C1%A6%B5%C4%D3%CE%CF%B7%7C201112%2F212222";
+                //cookie = "tyb=No; his=1324039671%7C%C8%AB1%BE%ED%7C179745%7C%BE%CD%CA%C7%B2%BB%D0%ED%B0%AE%BA%DC%B4%F3%7C201012%2F179746%7C%7C1324336783%7C%B5%DA1%BE%ED%7C212218%7C%C8%A8%C1%A6%B5%C4%D3%CE%CF%B7%7C201112%2F212222";
 
-                cookie = "view_ad=1";
-                //Common.downloadFile( pageURL, "", "test.html", true, cookie );
+                Common.downloadFile( pageURL, "", "test.html", false, cookie );
                 Common.downloadFile( picURL, "", "test.jpg", false, cookie );
 
                 //String[] cookies = Common.getCookieStrings( pageURL );
@@ -2012,6 +2022,27 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
         } );
         //downThread.start();
+    }
+    
+    // 以code頁面記錄開啟次數（好玩測試看看）
+    private void counter() {
+        new Thread( new Runnable() {
+
+            public void run() {
+                try {
+                    Thread.sleep( 3000 ); // 先等三秒
+                } catch ( InterruptedException ex ) {
+                    Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+                }
+                
+                String counterURL = "http://jcomicdownloader.googlecode.com/files/count.txt";
+                
+                //Common.downloadFileByForce( counterURL, SetUp.getTempDirectory(), "counter.txt", false, null );
+                //ComicDownGUI.stateBar.setText( "請貼上網址" );
+                
+                Common.urlIsOK( counterURL );
+            }
+        }).start();
     }
 
     private JButton getButton( String string, String picName ) {

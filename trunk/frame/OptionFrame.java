@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/12/5
+Last Modified : 2011/12/25
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.11: 1. 增加取消勾選『分析後下載圖檔』時的提醒視窗。
 2.10: 1. 增加任務完成音效的選項。
 2.08: 1. 增加JTattoo介面選項。
 2.05: 1. 修復無法開啟壓縮檔的bug。（預設開啟圖片和壓縮檔為同個程式）
@@ -812,6 +813,19 @@ public class OptionFrame extends JFrame {
                     deleteCheckBox.setSelected( false ); // 勾選自動刪除就要連帶勾選自動壓縮
                 }
             }
+            
+            if ( event.getSource() == downloadCheckBox ) {
+                if ( !downloadCheckBox.isSelected() ) {
+                    String message = "取消後就不會進行下載，確定取消？";
+                    int choice = JOptionPane.showConfirmDialog( thisFrame, message, "提醒訊息", JOptionPane.YES_NO_OPTION );
+                    if ( choice == JOptionPane.NO_OPTION ) { // agree to remove the title in the download list
+                        downloadCheckBox.setSelected( true );
+                    }
+                    else
+                        downloadCheckBox.setSelected( false );
+                }
+            }
+            
 
             if ( event.getSource() == logCheckBox ) {
                 if ( logCheckBox.isSelected() ) {

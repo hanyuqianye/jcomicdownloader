@@ -233,7 +233,8 @@ abstract public class ParseOnlineComicSite {
         CommonGUI.stateBarDetailMessage += ": [" + fileName + "]";
 
         if ( delayTime == 0 ) {
-            Common.downloadFile( url, getDownloadDirectory(), fileName, needCookie, cookieString, fastMode, SetUp.getRetryTimes() );
+            Common.downloadFile( url, getDownloadDirectory(), fileName, needCookie, cookieString, 
+                    fastMode, SetUp.getRetryTimes(), false, false );
         } else {
             Common.slowDownloadFile( url, getDownloadDirectory(), fileName, delayTime, needCookie, cookieString );
         }

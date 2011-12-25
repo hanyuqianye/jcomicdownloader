@@ -98,8 +98,10 @@ public class ParseWebPage {
         else if ( webSite.matches( "(?s).*6comic.com(?s).*" ) ) 
             siteID = Site.SIX_COMIC;
         else if ( webSite.matches( "(?s).*178.com(?s).*" ) ) 
-            siteID = Site.MANHUA_178;
-        
+            siteID = Site.MANHUA_178; 
+        else if ( webSite.matches( "(?s).*kangdm.com(?s).*" ) ) 
+            siteID = Site.KANGDM; 
+                    
         else
             siteID = Site.UNKNOWN;
     }
