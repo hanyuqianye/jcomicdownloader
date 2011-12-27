@@ -123,7 +123,7 @@ public class ParseXindm extends ParseOnlineComicSite {
             singlePageDownload( getTitle(), getWholeTitle(), comicURL[p-1], totalPage, p, 0 );
              */
 
-            comicURL[p - 1] = getFixedChineseURL( frontURL + formatter.format( p - 1 ) + 
+            comicURL[p - 1] = Common.getFixedChineseURL( frontURL + formatter.format( p - 1 ) + 
                                                         formatter.format( p ) + extensionName );
             singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0, true, cookieString );
 

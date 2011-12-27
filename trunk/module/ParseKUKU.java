@@ -112,7 +112,7 @@ public class ParseKUKU extends ParseOnlineComicSite {
                         System.out.println( baseURL + temp[3] );
                         // replace %20 from white space in URL
                         String frontURL = temp[3].replaceAll( "\\s", "%20" );
-                        comicURL[i] = getFixedChineseURL( baseURL + frontURL );
+                        comicURL[i] = Common.getFixedChineseURL( baseURL + frontURL );
                         Common.debugPrintln( i + " " + comicURL[i] ); // debug
 
                         // 每解析一個網址就下載一張圖

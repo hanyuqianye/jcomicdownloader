@@ -98,7 +98,7 @@ public class ParseNANA extends ParseOnlineComicSite {
         // 開始取得第一頁網址 
         beginIndex = allPageString.indexOf( "src=\"" ) + 5;
         endIndex = allPageString.indexOf( "\"", beginIndex );
-        String firstPageURL = getFixedChineseURL( allPageString.substring( beginIndex, endIndex ) );
+        String firstPageURL = Common.getFixedChineseURL( allPageString.substring( beginIndex, endIndex ) );
 
         String extensionName = firstPageURL.split( "\\." )[firstPageURL.split( "\\." ).length - 1]; // 取得檔案副檔名
         NumberFormat formatter = new DecimalFormat( "000" ); // 預設001.jpg ~ xxx.jpg

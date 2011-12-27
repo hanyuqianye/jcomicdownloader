@@ -106,7 +106,7 @@ public class ParseKangdm extends ParseOnlineComicSite {
 
         int p = 0; // 目前頁數
         for ( int i = 1 ; i <= totalPage ; i++ ) {
-            comicURL[p++] = baseURL + getFixedChineseURL( picMidURL )
+            comicURL[p++] = baseURL + Common.getFixedChineseURL( picMidURL )
                     + formatter.format( i ) + "." + "jpg"; // 存入每一頁的網頁網址
             //Common.debugPrintln( p + " " + comicURL[p - 1] ); // debug
 

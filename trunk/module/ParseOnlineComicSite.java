@@ -114,33 +114,6 @@ abstract public class ParseOnlineComicSite {
         }
     }
 
-    public String getFixedChineseURL( String url ) {
-        // ex. "收?的十二月" should be changed into
-        //     "%E6%94%B6%E8%8E%B7%E7%9A%84%E5%8D%81%E4%BA%8C%E6%9C%88"
-
-        try {
-            String temp = "";
-
-            for ( int k = 0 ; k < url.length() ; k++ ) {
-                // \u0080-\uFFFF -> 中日韓3byte以上的字符
-                if ( url.substring( k, k + 1 ).matches( "(?s).*[\u0080-\uFFFF]+(?s).*" ) ) {
-                    temp += URLEncoder.encode( url.substring( k, k + 1 ), "UTF-8" );
-                } else {
-                    temp += url.substring( k, k + 1 );
-                }
-
-            }
-            url = temp;
-        } catch ( Exception e ) {
-            e.printStackTrace();
-        }
-
-        url = url.replaceAll( "\\s", "%20" );
-        url = fixSpecialCase( url );
-
-        return url;
-    }
-
     public String fixSpecialCase( String url ) {
         /* 拿掉修正似乎就沒有問題了......奇怪當初怎麼需要修正勒.....
         //  第一數（%E6%95%B8）要改成第一話（%E8%A9%B1）...不曉得是否為特例...

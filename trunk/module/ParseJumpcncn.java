@@ -124,18 +124,18 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
         
         // 因為有的檔名是001.jpg有的是1.jpg，所以先對第一張測試連線，檢查是哪種檔名格式
         boolean noNeedToAddZero = false;
-        if ( Common.urlIsOK( getFixedChineseURL( baseURL ) + "1.jpg" ) )
+        if ( Common.urlIsOK( Common.getFixedChineseURL( baseURL ) + "1.jpg" ) )
             noNeedToAddZero = true;
 
         for ( int p = 1; p <= totalPage; p ++ ) {
             String frontURL = String.valueOf( p ) + ".jpg";
             
             if ( noNeedToAddZero )
-                comicURL[p-1] = getFixedChineseURL( baseURL + frontURL );
+                comicURL[p-1] = Common.getFixedChineseURL( baseURL + frontURL );
             else {
                 NumberFormat formatter = new DecimalFormat( "000" );
                 String fileName = formatter.format( p ) + ".jpg";
-                comicURL[p-1] = getFixedChineseURL( baseURL + fileName );
+                comicURL[p-1] = Common.getFixedChineseURL( baseURL + fileName );
             }
             //Common.debugPrintln( p + " " + comicURL[p-1] );
         }

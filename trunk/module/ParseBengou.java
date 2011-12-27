@@ -5,7 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/12/3
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
- *  2.02: 1. 新增對www.citymanga.com的支援。
+ *  2.12: 1. 新增對www.bengou.com的支援。
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -15,7 +15,7 @@ import jcomicdownloader.enums.*;
 import java.util.*;
 import jcomicdownloader.SetUp;
 
-public class ParseCityManga extends ParseOnlineComicSite {
+public class ParseBengou extends ParseOnlineComicSite {
 
     private int radixNumber; // use to figure out the name of pic
     private String jsName;
@@ -27,18 +27,18 @@ public class ParseCityManga extends ParseOnlineComicSite {
      *
      * @author user
      */
-    public ParseCityManga() {
-        siteID = Site.CITY_MANGA;
-        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_encode_parse_", "html" );
+    public ParseBengou() {
+        siteID = Site.BENGOU;
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_bengou_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_bengou_encode_parse_", "html" );
 
-        jsName = "index_city_manga.js";
-        radixNumber = 1564371; // default value, not always be useful!!
+        jsName = "index_bengou.js";
+        radixNumber = 15961371; // default value, not always be useful!!
 
-        baseURL = "http://www.citymanga.com";
+        baseURL = "http://www.bengou.com";
     }
 
-    public ParseCityManga( String webSite, String titleName ) {
+    public ParseBengou( String webSite, String titleName ) {
         this();
         this.webSite = webSite;
         this.title = titleName;
@@ -54,10 +54,13 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
-
-            int beginIndex = allPageString.lastIndexOf( "<h1>" ) + 4;
-            int endIndex = allPageString.indexOf( "</h1>", beginIndex );
-            String tempTitleString = allPageString.substring( beginIndex, endIndex );
+            String indexName = webSite.substring( webSite.lastIndexOf( "/" ) + 1, webSite.length() );
+            
+            int beginIndex = allPageString.indexOf( "/" + indexName ) + 1;
+            beginIndex = allPageString.indexOf( "/" + indexName ) + 1;
+            beginIndex = allPageString.indexOf( ">" + indexName ) + 1;
+            int endIndex = allPageString.indexOf( "<", beginIndex );
+            String tempTitleString = allPageString.substring( beginIndex, endIndex ).trim();
 
             setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                     Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
@@ -74,44 +77,35 @@ public class ParseCityManga extends ParseOnlineComicSite {
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        int beginIndex = allPageString.lastIndexOf( "pageselector" );
-        int endIndex = allPageString.indexOf( "</select>", beginIndex );
+        // 取得js位址
+        int beginIndex = allPageString.indexOf( "var pictree" ) + 1;
+        beginIndex = allPageString.indexOf( "[", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "]", beginIndex );
+        
         String tempString = allPageString.substring( beginIndex, endIndex );
 
-        totalPage = tempString.split( "</option>" ).length - 1;
+        totalPage = tempString.split( "," ).length;
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
 
-        // 開始取得每一頁的網址
-        beginIndex = allPageString.lastIndexOf( "pageselector" );
-        endIndex = allPageString.indexOf( "</select>", beginIndex );
-        String[] pageTokens = allPageString.substring( beginIndex, endIndex ).split( "\"" );
-
-        String[] pageURL = new String[totalPage + 1];
-        int count = 0;
-        for ( int i = 0 ; i < pageTokens.length ; i++ ) {
-            if ( pageTokens[i].matches( "\\d+" ) ) {
-                pageURL[count++] = webSite + pageTokens[i] + "/"; // 存入每一頁的網頁網址
-                //Common.debugPrintln( count + " " + pageURL[count - 1]  ); // debug
-            }
+        String[] urlTokens = tempString.split( "," );
+        
+        // 之後擷取出來的圖片網址都要在前面加上basePicURL才是真正圖片網址
+        beginIndex = allPageString.indexOf( "class=\"center comicpic\"" );
+        beginIndex = allPageString.indexOf( "src=", beginIndex );
+        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( "\"", beginIndex );
+        String firstPicURL = allPageString.substring( beginIndex, endIndex ); // 取得第一張圖片位址
+        String extensionName = firstPicURL.split( "\\." )[firstPicURL.split( "\\." ).length - 1]; // 取得圖片附檔名
+        String basePicURL = firstPicURL.substring( 0, firstPicURL.lastIndexOf( "/" ) + 1 ); // 取得基本圖片位址
+        
+        int p = 0; // 目前頁數
+        for ( int i = 0 ; i < urlTokens.length ; i++ ) {
+            comicURL[p++] = basePicURL + urlTokens[i].replaceAll( "'|\\.html", "" ) + "." + extensionName;
+            
+            //Common.debugPrintln( p + " " + comicURL[p-1]  ); // debug
         }
 
-        for ( int p = 1 ; p <= totalPage ; p++ ) {
-            // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
-            if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
-                Common.downloadFile( pageURL[p - 1], SetUp.getTempDirectory(), indexName, false, "" );
-                allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
-
-                // 開始取得第一頁網址 
-                beginIndex = allPageString.lastIndexOf( "<img src=" );
-                beginIndex = allPageString.indexOf( "/", beginIndex );
-                endIndex = allPageString.indexOf( "\"", beginIndex );
-                comicURL[p - 1] = baseURL + allPageString.substring( beginIndex, endIndex ).trim();
-                singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0 );
-
-                //Common.debugPrintln( p + " " + comicURL[p - 1]  ); // debug
-            }
-        }
         //System.exit( 0 ); // debug
     }
 
@@ -124,7 +118,7 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_bengou_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
@@ -133,8 +127,8 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
     @Override
     public boolean isSingleVolumePage( String urlString ) {
-        // ex. http://www.citymanga.com/sexy_commando_gaiden_sugoiyo_masaru-san/chapter-71/
-        if ( urlString.matches( "(?).*/chapter(?).*" ) ) {
+        // ex. http://www.bengou.com/100311/xymsl10031113/1268286243720/1268286244826.html
+        if ( Common.getAmountOfString( urlString, "/" ) > 5 ) {
             return true;
         } else {
             return false;
@@ -142,10 +136,12 @@ public class ParseCityManga extends ParseOnlineComicSite {
     }
 
     public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
-        // ex. http://www.citymanga.com/sexy_commando_gaiden_sugoiyo_masaru-san/chapter-71/轉為
-        //    http://www.citymanga.com/sexy_commando_gaiden_sugoiyo_masaru-san/
-        int endIndex = volumeURL.substring( 0, volumeURL.length() - 2 ).lastIndexOf( "/" ) + 1;
-        String mainPageURL = volumeURL.substring( 0, endIndex );
+        // ex. http://www.bengou.com/100311/xymsl10031113/1271645238922/1271645238922.html轉為
+        //    http://www.bengou.com/100311/xymsl10031113/index.html
+
+        int endIndex = volumeURL.lastIndexOf( "/" );
+        endIndex = volumeURL.lastIndexOf( "/", endIndex - 1 ) + 1;
+        String mainPageURL = volumeURL.substring( 0, endIndex ) + "index.html";
 
         Common.debugPrintln( "MAIN_URL: " + mainPageURL );
 
@@ -161,10 +157,10 @@ public class ParseCityManga extends ParseOnlineComicSite {
 
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
-        int beginIndex = allPageString.indexOf( "asubtitle" );
+        int beginIndex = allPageString.indexOf( "class=\"allfloatleft titletxtc titlepadding\"" );
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
         int endIndex = allPageString.indexOf( "<", beginIndex );
-        String title = allPageString.substring( beginIndex, endIndex );
+        String title = allPageString.substring( beginIndex, endIndex ).trim();
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
     }
@@ -177,24 +173,34 @@ public class ParseCityManga extends ParseOnlineComicSite {
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
-        int beginIndex = allPageString.indexOf( "sclinfo" );
-        int endIndex = allPageString.lastIndexOf( "class=\"rss\"" );
+        int beginIndex = allPageString.indexOf( "id=\"mhlist\"" );
+        int endIndex = allPageString.indexOf( "class=\"subscribe margintop\"", beginIndex );
+        
         String tempString = allPageString.substring( beginIndex, endIndex );
-        String[] tokens = tempString.split( "\"" );
 
-        int volumeCount = 0;
+        int volumeCount = tempString.split( "href=\"" ).length - 1;
+       
+        // 擷取單集網址後要加上baseVolumeURL才是完整位址
+        String baseVolumeURL = urlString.substring( 0, urlString.lastIndexOf( "/" ) + 1 );
 
-        for ( int i = 0 ; i < tokens.length ; i++ ) {
-            if ( tokens[i].matches( "(?s).*http://(?s).*" ) ) {
-                urlList.add( tokens[i] );
+        String volumeTitle = "";
+        beginIndex = endIndex = 0;
+        for ( int i = 0 ; i < volumeCount ; i++ ) {
+            // 取得單集位址
+            beginIndex = tempString.indexOf( "href=\"", beginIndex ) + 6;
+            endIndex = tempString.indexOf( "\"", beginIndex );
+            urlList.add( baseVolumeURL + tempString.substring( beginIndex, endIndex ) );
 
-                // 取得單集名稱
-                String volumeTitle = tokens[i + 2];
-                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+            // 取得單集名稱
+            beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "</a>", beginIndex );
+            volumeTitle = tempString.substring( beginIndex, endIndex );
+            volumeTitle = volumeTitle.replaceAll( "</span>", "" );
+            volumeTitle = volumeTitle.replaceAll( "<span.*>", "" );
+
+            volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                         Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
 
-                volumeCount++;
-            }
         }
 
         totalVolume = volumeCount;
@@ -221,7 +227,7 @@ public class ParseCityManga extends ParseOnlineComicSite {
     public void printLogo() {
         System.out.println( " ______________________________" );
         System.out.println( "|                            " );
-        System.out.println( "| Run the CityManga module:     " );
+        System.out.println( "| Run the Bengou module:     " );
         System.out.println( "|_______________________________\n" );
     }
 }

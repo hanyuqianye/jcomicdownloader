@@ -101,7 +101,7 @@ public class Parse178 extends ParseOnlineComicSite {
 
         String firstPicURL = "";
         Common.debugPrintln( "第一張編碼：" + firstCode );
-        firstPicURL = basePicURL + getFixedChineseURL( getDecodeURL( firstCode ) );
+        firstPicURL = basePicURL + Common.getFixedChineseURL( getDecodeURL( firstCode ) );
 
         Common.debugPrintln( "第一張圖片網址：" + firstPicURL );
 

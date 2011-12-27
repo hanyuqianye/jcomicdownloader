@@ -101,6 +101,8 @@ public class ParseWebPage {
             siteID = Site.MANHUA_178; 
         else if ( webSite.matches( "(?s).*kangdm.com(?s).*" ) ) 
             siteID = Site.KANGDM; 
+        else if ( webSite.matches( "(?s).*bengou.com(?s).*" ) ) 
+            siteID = Site.BENGOU; 
                     
         else
             siteID = Site.UNKNOWN;

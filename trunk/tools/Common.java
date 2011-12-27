@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.text.*;
 import java.util.zip.*;
 import javax.sound.sampled.AudioFormat;
@@ -148,8 +149,8 @@ public class Common {
             String nextFileName = picFrontName + formatter.format( i + 1 ) + "." + extensionName;
             if ( webSite[i - 1] != null ) {
                 // if not all download, the last file needs to re-download
-                if ( !new File( outputDirectory + nextFileName ).exists() || 
-                    !new File( outputDirectory + fileName ).exists()  ) {
+                if ( !new File( outputDirectory + nextFileName ).exists()
+                        || !new File( outputDirectory + fileName ).exists() ) {
                     CommonGUI.stateBarMainMessage = mainMessage;
                     CommonGUI.stateBarDetailMessage = "  :  " + "共" + webSite.length + "頁"
                             + "，第" + i + "頁下載中";
@@ -256,21 +257,19 @@ public class Common {
 
         return cookieStrings;
     }
-    
-    
 
     // 普通下載模式，連線失敗會嘗試再次連線
     public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
             boolean needCookie, String cookieString ) {
         downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, false, SetUp.getRetryTimes(), false, false );
     }
-    
+
     // 解壓縮下載模式，連線失敗會嘗試再次連線，且收取資料串流後會以Gzip解壓縮
     public static void downloadGZIPInputStreamFile( String webSite, String outputDirectory, String outputFileName,
             boolean needCookie, String cookieString ) {
         downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, false, SetUp.getRetryTimes(), true, false );
     }
-    
+
     // 直接下載模式，不管Run.isAlive值為何都可以直接下載
     public static void downloadFileByForce( String webSite, String outputDirectory, String outputFileName,
             boolean needCookie, String cookieString ) {
@@ -284,7 +283,7 @@ public class Common {
     }
 
     public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
-            boolean needCookie, String cookieString, boolean fastMode, int retryTimes, 
+            boolean needCookie, String cookieString, boolean fastMode, int retryTimes,
             boolean gzipEncode, boolean forceDownload ) {
         // downlaod file by URL
 
@@ -315,7 +314,7 @@ public class Common {
                 connection.setDoInput( true ); //
                 connection.setUseCaches( false ); // // Post 请求不能使用缓存 
                 connection.setAllowUserInteraction( false );
-                
+
                 // 设定传送的内容类型是可序列化的java对象   
                 // (如果不设此项,在传送序列化对象时,当WEB服务默认的不是这种类型时可能抛java.io.EOFException)
                 connection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
@@ -377,19 +376,20 @@ public class Common {
                 //OutputStream os = response.getOutputStream();
                 OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
                 InputStream is = null;
-                
+
                 if ( gzipEncode && fileSize < 17 ) // 178漫畫小於17kb就認定為已經壓縮過的
+                {
                     is = new GZIPInputStream( connection.getInputStream() ); // ex. 178.com
-                else
+                } else {
                     is = connection.getInputStream(); // 其他漫畫網
-                    
+                }
                 Common.debugPrint( "(" + fileSize + " k) " );
                 String fileSizeString = fileSize > 0 ? "" + fileSize : " ? ";
 
                 byte[] r = new byte[1024];
                 int len = 0;
 
-                while ( (len = is.read( r )) > 0 && ( Run.isAlive || forceDownload ) ) {
+                while ( (len = is.read( r )) > 0 && (Run.isAlive || forceDownload) ) {
                     // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
                     if ( fileSize > 1024 || !Flag.timeoutFlag ) // 預防卡住的機制
                     {
@@ -1380,6 +1380,33 @@ public class Common {
             }
         } );
         playThread.start();
+    }
+
+    static public String getFixedChineseURL( String url ) {
+        // ex. "收?的十二月" should be changed into
+        //     "%E6%94%B6%E8%8E%B7%E7%9A%84%E5%8D%81%E4%BA%8C%E6%9C%88"
+
+        try {
+            String temp = "";
+
+            for ( int k = 0 ; k < url.length() ; k++ ) {
+                // \u0080-\uFFFF -> 中日韓3byte以上的字符
+                if ( url.substring( k, k + 1 ).matches( "(?s).*[\u0080-\uFFFF]+(?s).*" ) ) {
+                    temp += URLEncoder.encode( url.substring( k, k + 1 ), "UTF-8" );
+                } else {
+                    temp += url.substring( k, k + 1 );
+                }
+
+            }
+            url = temp;
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
+
+        url = url.replaceAll( "\\s", "%20" );
+        //url = fixSpecialCase( url );
+
+        return url;
     }
 }
 
