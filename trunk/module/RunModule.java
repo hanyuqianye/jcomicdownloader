@@ -164,7 +164,9 @@ public class RunModule {
                 || siteID == Site.WY
                 || siteID == Site.GOOGLE_PIC
                 || siteID == Site.CITY_MANGA
-                || siteID == Site.BAIDU ) {
+                || siteID == Site.BAIDU
+                || siteID == Site.BENGOU 
+                || siteID == Site.EMLAND ) {
             return true;
         } else {
             return false;

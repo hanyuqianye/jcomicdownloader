@@ -253,9 +253,9 @@ public class ParseDmeden extends ParseOnlineComicSite {
 
     @Override
     public void printLogo() {
-        System.out.println( " ____________________________" );
-        System.out.println( "|                            |" );
-        System.out.println( "| Run the Dmeden module:     |" );
-        System.out.println( "|____________________________|\n" );
+        System.out.println( " ______________________________" );
+        System.out.println( "|                            " );
+        System.out.println( "| Run the Dmeden module:     " );
+        System.out.println( "|______________________________\n" );
     }
 }

@@ -40,6 +40,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import jcomicdownloader.enums.*;
 
@@ -379,7 +380,11 @@ public class Common {
 
                 if ( gzipEncode && fileSize < 17 ) // 178漫畫小於17kb就認定為已經壓縮過的
                 {
-                    is = new GZIPInputStream( connection.getInputStream() ); // ex. 178.com
+                    try {
+                        is = new GZIPInputStream( connection.getInputStream() ); // ex. 178.com
+                    } catch ( IOException ex ) {
+                        is = connection.getInputStream(); // 其他漫畫網
+                    }
                 } else {
                     is = connection.getInputStream(); // 其他漫畫網
                 }
@@ -1408,6 +1413,103 @@ public class Common {
 
         return url;
     }
+    
+     // 非windows系統時的操作
+    public static void runCmd( String program, String file ) {
+        String path = file;
+        String cmd = program;
+
+        // 檔案不存在就只顯示訊息而不繼續操作
+        if ( !new File( file ).exists() ) {
+            String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
+            String colorString = "blue";
+            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+                colorString = "yellow";
+            }
+
+            JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "<html><font color=" + colorString + ">"
+                    + file + "</font>" + "不存在，無法開啟</html>",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
+
+        String[] fileList = new File( file ).list();
+        System.out.println( file );
+
+        String firstZipFileName = "";
+        boolean existZipFile = false;
+        for ( int i = 0 ; i < fileList.length ; i++ ) {
+            System.out.println( "FILE: " + fileList[i] );
+            if ( fileList[i].matches( "(?s).*\\.zip" ) ) {
+                firstZipFileName = fileList[i];
+                existZipFile = true;
+                break;
+            }
+        }
+
+
+        if ( existZipFile ) {
+            // 資料夾內存在壓縮檔
+            path = file + Common.getSlash() + firstZipFileName;
+        } else {
+            String[] picList = new File( file + Common.getSlash() + fileList[0] ).list();
+            String firstPicFileInFirstVolume = picList[0];
+            path = file + Common.getSlash() + fileList[0]
+                    + Common.getSlash() + firstPicFileInFirstVolume;
+        }
+
+        Common.debugPrintln( "開啟命令：" + cmd + path );
+
+        try {
+            String[] cmds = new String[] { cmd, path };
+            Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
+            //Runtime.getRuntime().exec(cmd + path);
+
+        } catch ( IOException ex ) {
+            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+        }
+    }
+
+    // 解決非ANSI字會變成？而無法使用程式開啟的問題
+    // 出處：http://stackoverflow.com/questions/1876507/java-runtime-exec-on-windows-fails-with-unicode-in-arguments
+    public static void runUnansiCmd( String program, String file ) {
+        if ( !new File( file ).exists() ) {
+            String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
+            String colorString = "blue";
+            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+                colorString = "yellow";
+            }
+
+            JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "<html><font color=" + colorString + ">"
+                    + file + "</font>" + "不存在，無法開啟</html>",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
+
+        String[] cmd = new String[] { program, file };
+        Map<String, String> newEnv = new HashMap<String, String>();
+        newEnv.putAll( System.getenv() );
+        String[] i18n = new String[cmd.length + 2];
+        i18n[0] = "cmd";
+        i18n[1] = "/C";
+        i18n[2] = cmd[0];
+        for ( int counter = 1 ; counter < cmd.length ; counter++ ) {
+            String envName = "JENV_" + counter;
+            i18n[counter + 2] = "%" + envName + "%";
+            newEnv.put( envName, cmd[counter] );
+        }
+        cmd = i18n;
+
+        ProcessBuilder pb = new ProcessBuilder( cmd );
+        Map<String, String> env = pb.environment();
+        env.putAll( newEnv );
+        try {
+            final Process p = pb.start();
+        } catch ( IOException ex ) {
+            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+        }
+    }
+    
 }
 
 class TimeoutTask extends TimerTask {

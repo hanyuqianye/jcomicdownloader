@@ -196,8 +196,8 @@ public class ParseMangaFox extends ParseOnlineComicSite {
     @Override
     public void printLogo() {
         System.out.println( " ____________________________________" );
-        System.out.println( "|                                 |" );
-        System.out.println( "| Run the MangaFox module:     |" );
-        System.out.println( "|_____________________________________|\n" );
+        System.out.println( "|                                 " );
+        System.out.println( "| Run the MangaFox module:     " );
+        System.out.println( "|_____________________________________\n" );
     }
 }

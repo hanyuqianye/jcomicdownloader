@@ -603,9 +603,9 @@ public class OptionFrame extends JFrame {
             SwingUtilities.updateComponentTreeUI( ComicDownGUI.mainFrame );
 
 
-            if ( InformationFrame.informationFrame != null ) // change the skin of information frame
+            if ( InformationFrame.thisFrame != null ) // change the skin of information frame
             {
-                SwingUtilities.updateComponentTreeUI( InformationFrame.informationFrame );
+                SwingUtilities.updateComponentTreeUI( InformationFrame.thisFrame );
             }
 
             if ( ChoiceFrame.choiceFrame != null ) // change the skin of information frame

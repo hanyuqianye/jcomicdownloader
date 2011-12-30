@@ -235,8 +235,8 @@ public class ParseNANA extends ParseOnlineComicSite {
     @Override
     public void printLogo() {
         System.out.println( " ______________________________" );
-        System.out.println( "|                            |" );
-        System.out.println( "| Run the NANA module:     |" );
-        System.out.println( "|_______________________________|\n" );
+        System.out.println( "|                            " );
+        System.out.println( "| Run the NANA module:     " );
+        System.out.println( "|______________________________\n" );
     }
 }

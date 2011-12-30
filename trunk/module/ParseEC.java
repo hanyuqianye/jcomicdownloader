@@ -179,8 +179,10 @@ public class ParseEC extends ParseOnlineComicSite {
 
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
-        int beginIndex = allPageString.indexOf( "<title>" ) + 7;
-        int endIndex = allPageString.indexOf( ",", beginIndex ) - 2;
+        int beginIndex = allPageString.indexOf( "name=\"description\"" );
+        beginIndex = allPageString.indexOf( "content=", beginIndex );
+        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( " ", beginIndex );
 
         String titleString = allPageString.substring( beginIndex, endIndex );
 

@@ -446,9 +446,9 @@ class ParseEX extends ParseEH {
 
     @Override
     public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            |" );
-        System.out.println( "| Run the ExHentai module: |" );
-        System.out.println( "|_______________________________|\n" );
+        System.out.println( " ________________________________" );
+        System.out.println( "|                            " );
+        System.out.println( "| Run the ExHentai module: " );
+        System.out.println( "|_________________________________\n" );
     }
 }

@@ -247,8 +247,8 @@ public class ParseCC extends ParseOnlineComicSite {
     @Override
     public void printLogo() {
         System.out.println( " ________________________" );
-        System.out.println( "|                      |" );
-        System.out.println( "| Run the CC module: |" );
-        System.out.println( "|_________________________|\n" );
+        System.out.println( "|                      " );
+        System.out.println( "| Run the CC module: " );
+        System.out.println( "|_________________________\n" );
     }
 }

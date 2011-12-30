@@ -182,9 +182,9 @@ public class ParseManmankan extends ParseOnlineComicSite {
     @Override
     public void printLogo() {
         System.out.println( " _______________________________________" );
-        System.out.println( "|                                   |" );
-        System.out.println( "| Run the manmankan module:     |" );
-        System.out.println( "|________________________________________|\n" );
+        System.out.println( "|                                  " );
+        System.out.println( "| Run the manmankan module:     " );
+        System.out.println( "|________________________________________\n" );
     }
 }
 

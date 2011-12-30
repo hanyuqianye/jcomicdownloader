@@ -56,7 +56,7 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
     public JFrame thisFrame; // use by self
 
     public ChoiceFrame( String title, String url ) {
-        this( "選擇欲下載的集數", false, 0, title, url );
+        this( "選擇欲下載的集數 [" + title + "]", false, 0, title, url );
     }
 
     public ChoiceFrame( String frameTitle, boolean modifySelected, int modifyRow, String title, String url ) {

@@ -5,7 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/12/27
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
- *  2.12: 1. 新增對www.bengou.com的支援。
+ *  2.13: 1. 新增對mh.emland.net的支援。
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -14,8 +14,9 @@ import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
 import jcomicdownloader.SetUp;
+import jcomicdownloader.encode.Encoding;
 
-public class ParseBengou extends ParseOnlineComicSite {
+public class ParseEmland extends ParseOnlineComicSite {
 
     private int radixNumber; // use to figure out the name of pic
     private String jsName;
@@ -27,18 +28,18 @@ public class ParseBengou extends ParseOnlineComicSite {
      *
      * @author user
      */
-    public ParseBengou() {
-        siteID = Site.BENGOU;
-        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_bengou_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_bengou_encode_parse_", "html" );
+    public ParseEmland() {
+        siteID = Site.EMLAND;
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_emland_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_emland_encode_parse_", "html" );
 
-        jsName = "index_bengou.js";
-        radixNumber = 15961371; // default value, not always be useful!!
+        jsName = "index_emland.js";
+        radixNumber = 15961471; // default value, not always be useful!!
 
-        baseURL = "http://www.bengou.com";
+        baseURL = "http://mh.emland.net/";
     }
 
-    public ParseBengou( String webSite, String titleName ) {
+    public ParseEmland( String webSite, String titleName ) {
         this();
         this.webSite = webSite;
         this.title = titleName;
@@ -50,16 +51,13 @@ public class ParseBengou extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
-        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
-
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
-            String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
-            String indexName = webSite.substring( webSite.lastIndexOf( "/" ) + 1, webSite.length() );
-            
-            int beginIndex = allPageString.indexOf( "/" + indexName ) + 1;
-            beginIndex = allPageString.indexOf( "/" + indexName ) + 1;
-            beginIndex = allPageString.indexOf( ">" + indexName ) + 1;
-            int endIndex = allPageString.indexOf( "<", beginIndex );
+            String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+
+            int beginIndex = allPageString.indexOf( "content=" ) + 1;
+            beginIndex = allPageString.indexOf( "content=", beginIndex ) + 1;
+            beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+            int endIndex = allPageString.indexOf( ",", beginIndex );
             String tempTitleString = allPageString.substring( beginIndex, endIndex ).trim();
 
             setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
@@ -74,43 +72,40 @@ public class ParseBengou extends ParseOnlineComicSite {
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
         // 先取得前面的下載伺服器網址
 
-        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        // 取得js位址
-        int beginIndex = allPageString.indexOf( "var pictree" ) + 1;
-        beginIndex = allPageString.indexOf( "[", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "]", beginIndex );
-        
+        int beginIndex = allPageString.indexOf( "<select" ) + 1;
+        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "</select>", beginIndex );
+
         String tempString = allPageString.substring( beginIndex, endIndex );
 
-        totalPage = tempString.split( "," ).length;
+        totalPage = tempString.split( "<option" ).length - 1;
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
 
-        String[] urlTokens = tempString.split( "," );
-        
-        // 之後擷取出來的圖片網址都要在前面加上basePicURL才是真正圖片網址
-        beginIndex = allPageString.indexOf( "class=\"center comicpic\"" );
-        beginIndex = allPageString.indexOf( "src=", beginIndex );
-        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
-        endIndex = allPageString.indexOf( "\"", beginIndex );
-        String firstPicURL = allPageString.substring( beginIndex, endIndex ); // 取得第一張圖片位址
-        String extensionName = firstPicURL.split( "\\." )[firstPicURL.split( "\\." ).length - 1]; // 取得圖片附檔名
-        String basePicURL = firstPicURL.substring( 0, firstPicURL.lastIndexOf( "/" ) + 1 ); // 取得基本圖片位址
-        
         String picURL = "";
         int p = 0; // 目前頁數
-        for ( int i = 0 ; i < urlTokens.length ; i++ ) {
-            picURL = basePicURL + urlTokens[i].replaceAll( "'|\\.html", "" ) + "." + extensionName;;
-            if ( !Common.urlIsOK( picURL ) ) // 只猜jpg和png兩種，若有其他種副檔名就會下載失敗......
-                picURL = picURL.replaceAll( "\\.jpg", ".png" );
-            
-            comicURL[p++] = picURL;
+        for ( int i = 0 ; i < totalPage ; i++ ) {
+            beginIndex = allPageString.indexOf( "var nowpath" );
+            beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "\"", beginIndex );
+
+            comicURL[p++] = allPageString.substring( beginIndex, endIndex );
             //Common.debugPrintln( p + " " + comicURL[p-1]  ); // debug
-            
+
             // 每解析一個網址就下載一張圖
             singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0 );
+
+            if ( p < totalPage ) {
+                beginIndex = allPageString.indexOf( "</select>" );
+                beginIndex = allPageString.indexOf( "href=\"", beginIndex ) + 6;
+                endIndex = allPageString.indexOf( "\"", beginIndex );
+                
+                String nextPageURL = baseURL + allPageString.substring( beginIndex, endIndex );
+                allPageString = getAllPageString( nextPageURL );
+            }
         }
 
         //System.exit( 0 ); // debug
@@ -125,17 +120,18 @@ public class ParseBengou extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_bengou_", "html" );
-
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GBK );
 
-        return Common.getFileString( SetUp.getTempDirectory(), indexName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }
 
     @Override
     public boolean isSingleVolumePage( String urlString ) {
-        // ex. http://www.bengou.com/100311/xymsl10031113/1268286243720/1268286244826.html
-        if ( Common.getAmountOfString( urlString, "/" ) > 5 ) {
+        // ex. http://mh.emland.net/pic2165928.html
+        String allPageString = getAllPageString( urlString );
+        
+        if ( allPageString.indexOf( "name=\"description\"" ) < 0 ) {
             return true;
         } else {
             return false;
@@ -143,12 +139,15 @@ public class ParseBengou extends ParseOnlineComicSite {
     }
 
     public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
-        // ex. http://www.bengou.com/100311/xymsl10031113/1271645238922/1271645238922.html轉為
-        //    http://www.bengou.com/100311/xymsl10031113/index.html
+        // ex. http://mh.emland.net/pic2165928.html轉為
+        //    http://mh.emland.net/manga34390.html
 
-        int endIndex = volumeURL.lastIndexOf( "/" );
-        endIndex = volumeURL.lastIndexOf( "/", endIndex - 1 ) + 1;
-        String mainPageURL = volumeURL.substring( 0, endIndex ) + "index.html";
+        String allPageString = getAllPageString( volumeURL );
+
+        int beginIndex = allPageString.lastIndexOf( "<a href=" );
+        beginIndex = allPageString.lastIndexOf( "=", beginIndex ) + 1;
+        int endIndex = allPageString.lastIndexOf( ">", beginIndex );
+        String mainPageURL = baseURL + volumeURL.substring( beginIndex, endIndex ).trim();
 
         Common.debugPrintln( "MAIN_URL: " + mainPageURL );
 
@@ -164,7 +163,7 @@ public class ParseBengou extends ParseOnlineComicSite {
 
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
-        int beginIndex = allPageString.indexOf( "class=\"allfloatleft titletxtc titlepadding\"" );
+        int beginIndex = allPageString.indexOf( "class=\"atitle\"" );
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
         int endIndex = allPageString.indexOf( "<", beginIndex );
         String title = allPageString.substring( beginIndex, endIndex ).trim();
@@ -180,33 +179,46 @@ public class ParseBengou extends ParseOnlineComicSite {
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
-        int beginIndex = allPageString.indexOf( "id=\"mhlist\"" );
-        int endIndex = allPageString.indexOf( "class=\"subscribe margintop\"", beginIndex );
-        
-        String tempString = allPageString.substring( beginIndex, endIndex );
+        String tempString = "";
+        int beginIndex, endIndex;
+        if ( (beginIndex = allPageString.indexOf( "class=\"normal f12\"" )) > 0 ) {
+            beginIndex = allPageString.indexOf( "href=", beginIndex ) + 5;
+            endIndex = allPageString.indexOf( ">", beginIndex );
 
-        int volumeCount = tempString.split( "href=\"" ).length - 1;
-       
-        // 擷取單集網址後要加上baseVolumeURL才是完整位址
-        String baseVolumeURL = urlString.substring( 0, urlString.lastIndexOf( "/" ) + 1 );
+            String moreVolumeURL = baseURL + allPageString.substring( beginIndex, endIndex );
+
+            allPageString = getAllPageString( moreVolumeURL );
+
+            beginIndex = allPageString.indexOf( "class=\"lm720maintxt" );
+            endIndex = allPageString.indexOf( "class=\"f18\"", beginIndex );
+
+            // 存放集數頁面資訊的字串
+            tempString = allPageString.substring( beginIndex, endIndex );
+        } else {
+            beginIndex = allPageString.indexOf( "class=\"he3\"" );
+            endIndex = allPageString.indexOf( "</ul>", beginIndex );
+
+            // 存放集數頁面資訊的字串
+            tempString = allPageString.substring( beginIndex, endIndex );
+        }
+
+        int volumeCount = tempString.split( "href=" ).length - 1;
 
         String volumeTitle = "";
         beginIndex = endIndex = 0;
         for ( int i = 0 ; i < volumeCount ; i++ ) {
             // 取得單集位址
-            beginIndex = tempString.indexOf( "href=\"", beginIndex ) + 6;
-            endIndex = tempString.indexOf( "\"", beginIndex );
-            urlList.add( baseVolumeURL + tempString.substring( beginIndex, endIndex ) );
+            beginIndex = tempString.indexOf( "href=", beginIndex ) + 5;
+            endIndex = tempString.indexOf( " ", beginIndex );
+            urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
 
             // 取得單集名稱
             beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
-            endIndex = tempString.indexOf( "</a>", beginIndex );
+            endIndex = tempString.indexOf( "<", beginIndex );
             volumeTitle = tempString.substring( beginIndex, endIndex );
-            volumeTitle = volumeTitle.replaceAll( "</span>", "" );
-            volumeTitle = volumeTitle.replaceAll( "<span.*>", "" );
 
             volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
+                    Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
 
         }
 
@@ -234,7 +246,7 @@ public class ParseBengou extends ParseOnlineComicSite {
     public void printLogo() {
         System.out.println( " ______________________________" );
         System.out.println( "|                            " );
-        System.out.println( "| Run the Bengou module:     " );
+        System.out.println( "| Run the Emland module:     " );
         System.out.println( "|_______________________________\n" );
     }
 }

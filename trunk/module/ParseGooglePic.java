@@ -272,9 +272,9 @@ public class ParseGooglePic extends ParseOnlineComicSite {
 
     @Override
     public void printLogo() {
-        System.out.println( " _____________________________________" );
-        System.out.println( "|                                                                    |" );
-        System.out.println( "| Run the Google Picture Search module:     |" );
-        System.out.println( "|______________________________________|\n" );
+        System.out.println( " ______________________________________________" );
+        System.out.println( "|                                   " );
+        System.out.println( "| Run the Google Picture Search module:     " );
+        System.out.println( "|_______________________________________________\n" );
     }
 }

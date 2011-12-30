@@ -270,10 +270,10 @@ public class ParseNINENINE extends ParseOnlineComicSite {
 
     @Override
     public void printLogo() {
-        System.out.println( " _________________________________" );
-        System.out.println( "|                              |" );
-        System.out.println( "| Run the NINE NINE module: |" );
-        System.out.println( "|__________________________________|\n" );
+        System.out.println( " __________________________________" );
+        System.out.println( "|                              " );
+        System.out.println( "| Run the NINE NINE module: " );
+        System.out.println( "|__________________________________\n" );
     }
 
     @Override
@@ -292,9 +292,9 @@ class Parse99Comic extends ParseNINENINE {
     @Override
     public void printLogo() {
         System.out.println( " _______________________________" );
-        System.out.println( "|                            |" );
-        System.out.println( "| Run the 99 comic module: |" );
-        System.out.println( "|________________________________|\n" );
+        System.out.println( "|                            " );
+        System.out.println( "| Run the 99 comic module: " );
+        System.out.println( "|________________________________\n" );
     }
 }
 
@@ -308,9 +308,9 @@ class Parse99Manga extends ParseNINENINE {
     @Override
     public void printLogo() {
         System.out.println( " ________________________________" );
-        System.out.println( "|                             |" );
-        System.out.println( "| Run the 99 manga module: |" );
-        System.out.println( "|_________________________________|\n" );
+        System.out.println( "|                             " );
+        System.out.println( "| Run the 99 manga module: " );
+        System.out.println( "|_________________________________\n" );
     }
 }
 
@@ -323,10 +323,10 @@ class Parse99770 extends ParseNINENINE {
 
     @Override
     public void printLogo() {
-        System.out.println( " _____________________________" );
-        System.out.println( "|                           |" );
-        System.out.println( "| Run the 99770.cc module: |" );
-        System.out.println( "|_______________________________|\n" );
+        System.out.println( " ______________________________" );
+        System.out.println( "|                           " );
+        System.out.println( "| Run the 99770.cc module: " );
+        System.out.println( "|_______________________________\n" );
     }
 }
 
@@ -340,9 +340,9 @@ class Parse99Mh extends ParseNINENINE {
     @Override
     public void printLogo() {
         System.out.println( " ___________________________" );
-        System.out.println( "|                         |" );
-        System.out.println( "| Run the 99mh module: |" );
-        System.out.println( "|____________________________|\n" );
+        System.out.println( "|                         " );
+        System.out.println( "| Run the 99mh module: " );
+        System.out.println( "|____________________________\n" );
     }
 }
 
@@ -356,9 +356,9 @@ class ParseCoco extends ParseNINENINE {
     @Override
     public void printLogo() {
         System.out.println( " ________________________________" );
-        System.out.println( "|                             |" );
-        System.out.println( "| Run the cococomic module: |" );
-        System.out.println( "|_________________________________|\n" );
+        System.out.println( "|                             " );
+        System.out.println( "| Run the cococomic module: " );
+        System.out.println( "|_________________________________\n" );
     }
 }
 
@@ -372,9 +372,9 @@ class Parse1Mh extends ParseNINENINE {
     @Override
     public void printLogo() {
         System.out.println( " __________________________" );
-        System.out.println( "|                        |" );
-        System.out.println( "| Run the 1mh module: |" );
-        System.out.println( "|___________________________|\n" );
+        System.out.println( "|                        " );
+        System.out.println( "| Run the 1mh module: " );
+        System.out.println( "|___________________________\n" );
     }
 }
 
@@ -388,9 +388,9 @@ class Parse3G extends ParseNINENINE {
     @Override
     public void printLogo() {
         System.out.println( " ________________________" );
-        System.out.println( "|                      |" );
-        System.out.println( "| Run the 3G module: |" );
-        System.out.println( "|_________________________|\n" );
+        System.out.println( "|                      " );
+        System.out.println( "| Run the 3G module: " );
+        System.out.println( "|_________________________\n" );
     }
 
     @Override // 從主頁面取得所有集數名稱和網址

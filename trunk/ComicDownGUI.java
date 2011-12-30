@@ -3,10 +3,14 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v2.12
+Version  : v2.13
 Last Modified : 2011/12/27
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.13: 1. 新增對mh.emland.net的支援。
+ * 　　 2. 修改最新版本下載按鈕，使其按下去可以直接下載最新版本。
+ *         3. 修復178少數漫畫無法下載的bug。
+ *         4. 修復8comic少數漫畫名稱解析錯誤的bug。
  * 2.12: 1. 新增對www.bengou.com的支援。
  * 2.11: 1. 新增對www.kangdm.com的支援。
  *      2. 增加搜尋此本漫畫的右鍵選單。
@@ -221,7 +225,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.12" );
+        super( "JComicDownloader  v2.13" );
 
         minimizeEvent();
         initTrayIcon();
@@ -1294,10 +1298,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 Common.debugPrintln( "開啟命令：" + cmd + " " + path );
 
                 if ( Common.isWindows() ) {
-                    runUnansiCmd( cmd, path );
+                    Common.runUnansiCmd( cmd, path );
                 } else {
                     try {
-                        
+
                         String[] cmds = new String[] { cmd, path };
                         Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
                     } catch ( IOException ex ) {
@@ -1322,7 +1326,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 if ( Common.isWindows() ) {
                     Common.debugPrintln( "開啟命令：" + cmd + " " + path );
-                    runUnansiCmd( cmd, path );
+                    Common.runUnansiCmd( cmd, path );
                 } else {
                     String[] picList = new File( path ).list();
                     String firstPicFileInFirstVolume = picList[0];
@@ -1341,110 +1345,14 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         } else {
             if ( Common.isWindows() ) {
-                runUnansiCmd( SetUp.getOpenPicFileProgram(),
+                Common.runUnansiCmd( SetUp.getOpenPicFileProgram(),
                         SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
             } else {
-                runCmd( SetUp.getOpenPicFileProgram(),
+                Common.runCmd( SetUp.getOpenPicFileProgram(),
                         SetUp.getOriginalDownloadDirectory() + title );
             }
         }
 
-    }
-
-    // 非windows系統時的操作
-    private void runCmd( String program, String file ) {
-        String path = file;
-        String cmd = program;
-
-        // 檔案不存在就只顯示訊息而不繼續操作
-        if ( !new File( file ).exists() ) {
-            String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
-            String colorString = "blue";
-            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
-                colorString = "yellow";
-            }
-
-            JOptionPane.showMessageDialog( this, "<html><font color=" + colorString + ">"
-                    + file + "</font>" + "不存在，無法開啟</html>",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-            return;
-        }
-
-        String[] fileList = new File( file ).list();
-        System.out.println( file );
-
-        String firstZipFileName = "";
-        boolean existZipFile = false;
-        for ( int i = 0 ; i < fileList.length ; i++ ) {
-            System.out.println( "FILE: " + fileList[i] );
-            if ( fileList[i].matches( "(?s).*\\.zip" ) ) {
-                firstZipFileName = fileList[i];
-                existZipFile = true;
-                break;
-            }
-        }
-
-
-        if ( existZipFile ) {
-            // 資料夾內存在壓縮檔
-            path = file + Common.getSlash() + firstZipFileName;
-        } else {
-            String[] picList = new File( file + Common.getSlash() + fileList[0] ).list();
-            String firstPicFileInFirstVolume = picList[0];
-            path = file + Common.getSlash() + fileList[0]
-                    + Common.getSlash() + firstPicFileInFirstVolume;
-        }
-
-        Common.debugPrintln( "開啟命令：" + cmd + path );
-
-        try {
-            String[] cmds = new String[] { cmd, path };
-            Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
-            //Runtime.getRuntime().exec(cmd + path);
-
-        } catch ( IOException ex ) {
-            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
-        }
-    }
-
-    // 解決非ANSI字會變成？而無法使用程式開啟的問題
-    // 出處：http://stackoverflow.com/questions/1876507/java-runtime-exec-on-windows-fails-with-unicode-in-arguments
-    private void runUnansiCmd( String program, String file ) {
-        if ( !new File( file ).exists() ) {
-            String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
-            String colorString = "blue";
-            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
-                colorString = "yellow";
-            }
-
-            JOptionPane.showMessageDialog( this, "<html><font color=" + colorString + ">"
-                    + file + "</font>" + "不存在，無法開啟</html>",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-            return;
-        }
-
-        String[] cmd = new String[] { program, file };
-        Map<String, String> newEnv = new HashMap<String, String>();
-        newEnv.putAll( System.getenv() );
-        String[] i18n = new String[cmd.length + 2];
-        i18n[0] = "cmd";
-        i18n[1] = "/C";
-        i18n[2] = cmd[0];
-        for ( int counter = 1 ; counter < cmd.length ; counter++ ) {
-            String envName = "JENV_" + counter;
-            i18n[counter + 2] = "%" + envName + "%";
-            newEnv.put( envName, cmd[counter] );
-        }
-        cmd = i18n;
-
-        ProcessBuilder pb = new ProcessBuilder( cmd );
-        Map<String, String> env = pb.environment();
-        env.putAll( newEnv );
-        try {
-            final Process p = pb.start();
-        } catch ( IOException ex ) {
-            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
-        }
     }
 
     private void openDownloadDirectory( int row ) {  // 開啟第row列任務的下載資料夾
@@ -1470,19 +1378,25 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" ) ) {
             if ( Common.isWindows() ) {
                 if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".zip" ).exists() ) {
-                    runUnansiCmd( "explorer /select, ", SetUp.getOriginalDownloadDirectory() + title + ".zip" );
+                    // 開啟資料夾並將指定的檔案反白
+                    Common.runUnansiCmd( "explorer /select, ", SetUp.getOriginalDownloadDirectory() + title + ".zip" );
                 } else if ( new File( SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() ).exists() ) {
-                    runUnansiCmd( "explorer /select, ", SetUp.getOriginalDownloadDirectory() + title );
+                    // 開啟資料夾並將指定的資料夾反白
+                    Common.runUnansiCmd( "explorer /select, ", SetUp.getOriginalDownloadDirectory() + title );
                 } else {
-                    runUnansiCmd( "explorer ", SetUp.getOriginalDownloadDirectory() );
+                    Common.runUnansiCmd( "explorer ", SetUp.getOriginalDownloadDirectory() );
                 }
+            } else if ( Common.isMac() ) {
+                Common.runCmd( "Finder ", SetUp.getOriginalDownloadDirectory() );
             } else {
-                runCmd( "nautilus ", SetUp.getOriginalDownloadDirectory() );
+                Common.runCmd( "nautilus ", SetUp.getOriginalDownloadDirectory() );
             }
         } else if ( Common.isWindows() ) {
-            runUnansiCmd( "explorer ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+            Common.runUnansiCmd( "explorer ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+        } else if ( Common.isMac() ) {
+            Common.runCmd( "Finder ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
         } else {
-            runCmd( "nautilus ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+            Common.runCmd( "nautilus ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
         }
     }
 
@@ -1652,7 +1566,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         ChoiceFrame choiceFrame;
         if ( modifySelected ) {
-            choiceFrame = new ChoiceFrame( "重新選擇欲下載的集數", true, modifyRow, title, urlString );
+            choiceFrame = new ChoiceFrame( "重新選擇欲下載的集數 [" + title + "]", true, modifyRow, title, urlString );
         } else {
             choiceFrame = new ChoiceFrame( title, urlString );
         }

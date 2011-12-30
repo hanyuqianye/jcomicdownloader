@@ -248,6 +248,10 @@ public class Run extends Thread { // main class to run whole program
                 ParseOnlineComicSite parse = new ParseBengou();
                 runSingleParseModule( parse );
             }
+            else if ( pw.getSiteID() == Site.EMLAND ) {
+                ParseOnlineComicSite parse = new ParseEmland();
+                runSingleParseModule( parse );
+            }
             
             else // Site.UNKNOWN
                 Common.urlIsUnknown = true;

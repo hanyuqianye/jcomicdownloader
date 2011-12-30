@@ -199,9 +199,9 @@ public class ParseJumpcn extends ParseOnlineComicSite {
 
     @Override
     public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            |" );
-        System.out.println( "| Run the JumpCN module:  |" );
-        System.out.println( "|________________________________|\n" );
+        System.out.println( " _______________________________" );
+        System.out.println( "|                            " );
+        System.out.println( "| Run the JumpCN module:  " );
+        System.out.println( "|________________________________\n" );
     }
 }
