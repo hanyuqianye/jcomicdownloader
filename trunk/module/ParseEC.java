@@ -179,12 +179,12 @@ public class ParseEC extends ParseOnlineComicSite {
 
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
-        int beginIndex = allPageString.indexOf( "name=\"description\"" );
-        beginIndex = allPageString.indexOf( "content=", beginIndex );
+        int beginIndex = allPageString.indexOf( "addhistory(" );
+        beginIndex = allPageString.indexOf( ",", beginIndex );
         beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( " ", beginIndex );
+        int endIndex = allPageString.indexOf( "\"", beginIndex );
 
-        String titleString = allPageString.substring( beginIndex, endIndex );
+        String titleString = allPageString.substring( beginIndex, endIndex ).trim();
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( titleString ) );
     }
@@ -261,9 +261,9 @@ public class ParseEC extends ParseOnlineComicSite {
     @Override
     public void printLogo() {
         System.out.println( " _____________________________" );
-        System.out.println( "|                          |" );
-        System.out.println( "| Run the 8comic module: |" );
-        System.out.println( "|______________________________|\n" );
+        System.out.println( "|                          " );
+        System.out.println( "| Run the 8comic module: " );
+        System.out.println( "|______________________________\n" );
     }
 }
 
@@ -375,9 +375,9 @@ class ParseECphoto extends ParseEC {
     @Override
     public void printLogo() {
         System.out.println( " ____________________________________" );
-        System.out.println( "|                                 |" );
-        System.out.println( "| Run the 8comic photo module: |" );
-        System.out.println( "|_____________________________________|\n" );
+        System.out.println( "|                                 " );
+        System.out.println( "| Run the 8comic photo module: " );
+        System.out.println( "|_____________________________________\n" );
     }
 }
 
@@ -396,17 +396,7 @@ class ParseSixComic extends ParseEC {
         return getTitleOnMainPage( mainPageUrlString, getAllPageString( mainPageUrlString ) );
     }
 
-    @Override
-    public String getTitleOnMainPage( String urlString, String allPageString ) {
-        int beginIndex = allPageString.indexOf( "addhistory(" );
-        beginIndex = allPageString.indexOf( ",", beginIndex );
-        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "\"", beginIndex );
-
-        String titleString = allPageString.substring( beginIndex, endIndex );
-
-        return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( titleString ) );
-    }
+    
 
     @Override
     public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString ) {

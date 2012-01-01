@@ -7,6 +7,11 @@ Version  : v2.13
 Last Modified : 2011/12/27
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 2.14: 1. 修改任務列置換機制，使其在下載中仍能置頂或置底。
+ *          2. 修改下載清單版面，將"下載順序"改為"編號"，這樣順序置換後會比較清楚。
+ *          3. 修改紀錄儲存機制，即使取消"是否下載"的勾選，仍會儲存紀錄。
+ *          4. 修復8comic的作品名稱解析不完全的bug。
+ *          5. 修復kuku因為mh.socomic.com無法連接而解析失敗的問題。
  * 2.13: 1. 新增對mh.emland.net的支援。
  * 　　 2. 修改最新版本下載按鈕，使其按下去可以直接下載最新版本。
  *         3. 修復178少數漫畫無法下載的bug。
@@ -223,9 +228,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private static String resourceFolder;
     private StringBuffer messageString;
     private Run mainRun;
+    private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
+    public static String versionString = "JComicDownloader  v2.14";
 
     public ComicDownGUI() {
-        super( "JComicDownloader  v2.13" );
+        super( versionString );
 
         minimizeEvent();
         initTrayIcon();
@@ -264,7 +271,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         } );
         logFrameThread.start();
 
-        counter();  // 以code頁面記錄開啟次數（好玩測試看看）
+        //counter();  // 以code頁面記錄開啟次數（好玩測試看看）
 
         messageString = new StringBuffer( "" );
 
@@ -474,7 +481,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     public static Vector<String> getDownloadColumns() {
         Vector<String> columnName = new Vector<String>();
-        columnName.add( "下載順序" );
+        columnName.add( "編號" );
         columnName.add( "是否下載" );
         columnName.add( "漫畫名稱" );
         columnName.add( "總共集數" );
@@ -648,13 +655,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         TableColumnModel cModel = table.getColumnModel();
 
         // 配置每個欄位的寬度比例（可隨視窗大小而變化）
-        cModel.getColumn( DownTableEnum.ORDER ).setPreferredWidth( (int) (this.getWidth() * 0.14) );
+        cModel.getColumn( DownTableEnum.ORDER ).setPreferredWidth( (int) (this.getWidth() * 0.07) );
         cModel.getColumn( DownTableEnum.YES_OR_NO ).setPreferredWidth( (int) (this.getWidth() * 0.14) );
         cModel.getColumn( DownTableEnum.TITLE ).setPreferredWidth( (int) (this.getWidth() * 0.6) );
         cModel.getColumn( DownTableEnum.VOLUMES ).setPreferredWidth( (int) (this.getWidth() * 0.14) );
         cModel.getColumn( DownTableEnum.CHECKS ).setPreferredWidth( (int) (this.getWidth() * 0.14) );
         cModel.getColumn( DownTableEnum.STATE ).setPreferredWidth( (int) (this.getWidth() * 0.3) );
-        cModel.getColumn( DownTableEnum.URL ).setPreferredWidth( (int) (this.getWidth() * 0.02) );
+        cModel.getColumn( DownTableEnum.URL ).setPreferredWidth( (int) (this.getWidth() * 0.002) );
 
         return table;
     }
@@ -1075,36 +1082,75 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     private void moveMissionToRoof( int row ) { // 將第row列任務置頂
         row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
-        String urlString = downTableUrlStrings[row]; // 先將此列任務另存
+        
+        Common.debugPrint( "指定要置頂的列：" + row + "\t" );
+        Common.debugPrint( "目前正在下載的列：" + nowDownloadMissionRow + "\t" );
 
-        downTable.setValueAt( 1, row, DownTableEnum.ORDER );
-        for ( int i = row - 1 ; i >= 0 ; i-- ) {
+        // 若指定要置頂的該列正好是目前下載列，則禁止置換
+        if ( row == nowDownloadMissionRow ) {
+            JOptionPane.showMessageDialog( this, "目前正下載中，無法移動任務的順序位置",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
+
+        // 若不是下載中或位於正在下載該列的上方，則可以置換到最高處；反之，就只能置換到目前正在下載該列的後面。
+        int roof;
+        if ( row < nowDownloadMissionRow || !Flag.downloadingFlag ) {
+            roof = 0;
+        } else {
+            roof = nowDownloadMissionRow + 1;
+        }
+
+        Common.debugPrintln( "允許置換後的列：" + roof );
+
+        String urlString = downTableUrlStrings[row]; // 先將此列任務另存
+        //downTable.setValueAt( roof + 1, row, DownTableEnum.ORDER );
+        for ( int i = row - 1 ; i >= roof ; i-- ) {
             downTableUrlStrings[i + 1] = downTableUrlStrings[i]; // row列之前的往後遞移一位
             i = downTable.convertRowIndexToModel( i ); // 顯示的列 -> 實際的列
-            //int orderValue = Integer.parseInt( downTable.getValueAt( i, DownTableEnum.ORDER ).toString() );
-            downTable.setValueAt( i + 2, i, DownTableEnum.ORDER );
+            //downTable.setValueAt( i + 2, i, DownTableEnum.ORDER );
         }
-        downTableUrlStrings[0] = urlString; // 再將之前另存任務存入第一個位置
+        downTableUrlStrings[roof] = urlString; // 再將之前另存任務存入第一個位置
 
-        int missionAmount = downTableModel.getRowCount();
-        downTableModel.moveRow( row, row, 0 );
+        downTableModel.moveRow( row, row, roof );
 
     }
 
     private void moveMissionToFloor( int row ) { // 將第row列任務置底
         row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
-        int missionAmount = downTableModel.getRowCount();
-        String urlString = downTableUrlStrings[row]; // 先將此列任務另存
+        
+        Common.debugPrint( "指定要置底的列：" + row + "\t" );
+        Common.debugPrint( "目前正在下載的列：" + nowDownloadMissionRow + "\t" );
 
-        downTable.setValueAt( missionAmount, row, DownTableEnum.ORDER );
-        for ( int i = row + 1 ; i < missionAmount ; i++ ) {
+        // 若指定要置頂的該列正好是目前下載列，則禁止置換
+        if ( row == nowDownloadMissionRow ) {
+            JOptionPane.showMessageDialog( this, "目前正下載中，無法移動任務的順序位置",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
+        
+        int missionAmount = downTableModel.getRowCount();
+        
+        // 若不是下載中或位於正在下載該列的下方，則可以置換到最底處；反之，就只能置換到目前正在下載該列的上面。
+        int floor;
+        if ( row > nowDownloadMissionRow || !Flag.downloadingFlag ) {
+            floor = missionAmount - 1;
+        } else {
+            floor = nowDownloadMissionRow - 1;
+        }
+        
+        Common.debugPrintln( "允許置換後的列：" + floor );
+        
+        String urlString = downTableUrlStrings[row]; // 先將此列任務另存
+        //downTable.setValueAt( floor + 1, row, DownTableEnum.ORDER );
+        for ( int i = row + 1 ; i <= floor; i++ ) {
             i = downTable.convertRowIndexToModel( i ); // 顯示的列 -> 實際的列
             downTableUrlStrings[i - 1] = downTableUrlStrings[i]; // row列之後的往前遞移一位
-            downTable.setValueAt( i, i, DownTableEnum.ORDER );
+            //downTable.setValueAt( i, i, DownTableEnum.ORDER );
         }
-        downTableUrlStrings[missionAmount - 1] = urlString; // 再將之前另存任務存入第一個位置
+        downTableUrlStrings[floor] = urlString; // 再將之前另存任務存入第一個位置
 
-        downTableModel.moveRow( row, row, missionAmount - 1 );
+        downTableModel.moveRow( row, row, floor );
     }
 
     private void deleteMission( int row ) { // 刪除第row列任務
@@ -1391,12 +1437,14 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             } else {
                 Common.runCmd( "nautilus ", SetUp.getOriginalDownloadDirectory() );
             }
-        } else if ( Common.isWindows() ) {
-            Common.runUnansiCmd( "explorer ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
-        } else if ( Common.isMac() ) {
-            Common.runCmd( "Finder ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
         } else {
-            Common.runCmd( "nautilus ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+            if ( Common.isWindows() ) {
+                Common.runUnansiCmd( "explorer ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+            } else if ( Common.isMac() ) {
+                Common.runCmd( "Finder ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+            } else {
+                Common.runCmd( "nautilus ", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+            }
         }
     }
 
@@ -1465,6 +1513,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         Common.processPrintln( "跳過 " + downTableModel.getValueAt( i, DownTableEnum.TITLE ).toString() );
                         continue;
                     }
+
+                    nowDownloadMissionRow = i; // 目前正在進行下載的任務列的順序
 
                     // ex http://xxx  http://xxx  ...
                     String[] urlStrings = Common.getSeparateStrings(
@@ -1790,20 +1840,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
         }
         if ( event.getSource() == tableMoveToRoofItem ) {
-            if ( !Flag.downloadingFlag ) {
-                moveMissionToRoof( downloadTablePopupRow );
-            } else {
-                JOptionPane.showMessageDialog( this, "目前正下載中，無法移動任務的順序位置",
-                        "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-            }
+            moveMissionToRoof( downloadTablePopupRow );
+
         }
         if ( event.getSource() == tableMoveToFloorItem ) {
-            if ( !Flag.downloadingFlag ) {
-                moveMissionToFloor( downloadTablePopupRow );
-            } else {
-                JOptionPane.showMessageDialog( this, "目前正下載中，無法移動任務的順序位置",
-                        "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-            }
+            moveMissionToFloor( downloadTablePopupRow );
         }
 
         if ( event.getSource() == tableDeleteBookmarkItem ) {

@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2011/10/25
+ Last Modified : 2012/1/1
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 2.14: 集數基本位址從http://mh.socomic.com改為http://comic.kukudm.com
  2.10: 修復解析少數圖片網址時後面多出">"的問題。
  1.15: 修正編碼為GBK
  1.11: 1. 改成一邊解析網址一邊下載。
@@ -113,7 +114,7 @@ public class ParseKUKU extends ParseOnlineComicSite {
                         // replace %20 from white space in URL
                         String frontURL = temp[3].replaceAll( "\\s", "%20" );
                         comicURL[i] = Common.getFixedChineseURL( baseURL + frontURL );
-                        Common.debugPrintln( i + " " + comicURL[i] ); // debug
+                        //Common.debugPrintln( i + " " + comicURL[i] ); // debug
 
                         // 每解析一個網址就下載一張圖
                         singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage, i + 1, 0 );
@@ -179,43 +180,31 @@ public class ParseKUKU extends ParseOnlineComicSite {
         int beginIndex = 0;
         int endIndex = 0;
         
-        for ( int i = 0; i < lines.length; i ++ ) {
-            String line = lines[i];
-
-            if ( line.matches( "(?s).*socomic.com(?s).*" ) ) {
-                Common.debugPrint( "開始解析各集位址：" );
-
-                String[] temp = line.split( "'" );
-
-                for ( String str : temp ) {
-                    if ( str.matches( "(?s).*socomic.com(?s).*" ) )
-                        urlList.add( str );
-                }
-                Common.debugPrint( "  ......解析各集位址完畢!!" );
-
-                Common.debugPrintln( "開始解析各集名稱：" );
-                
-                beginIndex = endIndex = 0;
-                while ( endIndex != -1 ) { // endIndex = -1 if no matches
-                    int preEndIndex = endIndex;
-                    if ( line.substring( beginIndex, endIndex ).length() < 100 &&
-                         line.substring( beginIndex, endIndex ).length() > 2 &&
-                         endIndex > 0 ) {
-                        //System.out.println( Common.getTraditionalChinese( line.substring( beginIndex + 1, endIndex ) ) );
-                        volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                                Common.getTraditionalChinese( line.substring( beginIndex + 1, endIndex ) ) ) ) );
-                    }
-
-                    endIndex = line.indexOf( "</A>", preEndIndex + 1 );
-                    //System.out.println( endIndex );
-                    beginIndex = line.lastIndexOf( ">", endIndex );
-                    //System.out.println( beginIndex );
-                }
-                Common.debugPrintln( "  ......解析各集名稱完畢!!" );
-
-            }
+        beginIndex = allPageString.indexOf( "id='comiclistn'" );
+        String tempString = allPageString.substring( beginIndex, allPageString.length() );
+        
+        int volumeCount = tempString.split( "'/comiclist" ).length - 1;
+        
+        // 單集位址的網域名稱（有四組，可置換）
+        String baseVolumeURL = "http://comic.kukudm.com"; 
+        beginIndex = endIndex = 0;
+        for ( int i = 0; i < volumeCount; i ++ ) {
+            // 取得單集位址
+            beginIndex = tempString.indexOf( "'/comiclist", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "'", beginIndex );
+            urlList.add( baseVolumeURL + tempString.substring( beginIndex, endIndex ) );
+            
+            // 取得單集名稱
+            beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "<", beginIndex );
+            volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                                Common.getTraditionalChinese( tempString.substring( beginIndex, endIndex ).trim() ) ) ) );
+            
         }
- 
+            
+        totalVolume = volumeCount;
+        Common.debugPrintln( "共有" + totalVolume + "集" );
+
         combinationList.add( volumeList );
         combinationList.add( urlList );
             
@@ -235,10 +224,10 @@ public class ParseKUKU extends ParseOnlineComicSite {
     
     @Override
     public void printLogo() {
-        System.out.println( " ______________________" );
-        System.out.println( "|                      |" );
-        System.out.println( "| Run the KUKU module: |" );
-        System.out.println( "|______________  ______|\n" );
+        System.out.println( " __________________________" );
+        System.out.println( "|                      " );
+        System.out.println( "| Run the KUKU module: " );
+        System.out.println( "|__________________________\n" );
     }
 }
 

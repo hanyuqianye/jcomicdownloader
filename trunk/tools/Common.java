@@ -468,7 +468,7 @@ public class Common {
                 e.printStackTrace();
             }
 
-            CommonGUI.stateBarDetailMessage = null;
+            //CommonGUI.stateBarDetailMessage = null;
         }
     }
 
@@ -1015,8 +1015,8 @@ public class Common {
     public static void outputDownTableFile( DownloadTableModel downTableModel ) {
         StringBuffer sb = new StringBuffer();
         for ( int row = 0 ; row < Common.missionCount ; row++ ) {
-            // 有勾選下載才會儲存！
-            if ( downTableModel.getValueAt( row, DownTableEnum.YES_OR_NO ).toString().equals( "true" ) ) {
+            // 有勾選下載才會儲存！ -> 即使沒有勾選還是儲存！
+            //if ( downTableModel.getValueAt( row, DownTableEnum.YES_OR_NO ).toString().equals( "true" ) ) {
                 if ( SetUp.getKeepUndoneDownloadMission() ) { // 保存未完成任務
                     if ( !downTableModel.getValueAt( row, DownTableEnum.STATE ).toString().equals( "下載完畢" ) ) {
                         for ( int col = 0 ; col < ComicDownGUI.getDownloadColumns().size() ; col++ ) {
@@ -1037,7 +1037,7 @@ public class Common {
                         sb.append( "%%%%%%" );
                     }
                 }
-            }
+            //}
         }
 
         sb.append( "_OVER_" );

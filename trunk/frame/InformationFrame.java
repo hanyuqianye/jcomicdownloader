@@ -200,27 +200,34 @@ public class InformationFrame extends JFrame {
     }
 
     public void setNewestVersion() {
-       Thread versionThread = new Thread( new Runnable() { public void run() {
-            String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
-            
-            downloadOfficialHtml(); // 下載官方網頁
-            versionLabel.setText( getUpdateVersionString() ); // 從官方網頁提取更新版本資訊
+        Thread versionThread = new Thread( new Runnable() {
 
-            dateLabel.setText( getUpdateDateString() ); // 從官方網頁提取更新日期資訊
+            public void run() {
+                String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
 
-            supportedSiteLabel.setText( getUpdateSupportedSiteString() ); // 從官方網頁提取支援網站資訊
-            
-            if ( !nowSkinName.equals( "HiFi" ) && !nowSkinName.equals( "Noire" ) ) {
-                versionLabel.setForeground(  Color.RED );
-                dateLabel.setForeground(  Color.BLUE );
-                supportedSiteLabel.setForeground(  Color.DARK_GRAY );
+                downloadOfficialHtml(); // 下載官方網頁
+                versionLabel.setText( getUpdateVersionString() ); // 從官方網頁提取更新版本資訊
+                synchronized ( InformationFrame.thisFrame ) { // lock main frame
+                            InformationFrame.thisFrame.notifyAll();
+                            InformationFrame.downloadLock = false;
+                }
+
+                dateLabel.setText( getUpdateDateString() ); // 從官方網頁提取更新日期資訊
+
+                supportedSiteLabel.setText( getUpdateSupportedSiteString() ); // 從官方網頁提取支援網站資訊
+
+                if ( !nowSkinName.equals( "HiFi" ) && !nowSkinName.equals( "Noire" ) ) {
+                    versionLabel.setForeground( Color.RED );
+                    dateLabel.setForeground( Color.BLUE );
+                    supportedSiteLabel.setForeground( Color.DARK_GRAY );
+                }
+
+                //Thread.currentThread().interrupt();
+
+                deleteOfficialHtml(); // 刪除官方網頁檔案
+
             }
-            
-            //Thread.currentThread().interrupt();
-            
-            deleteOfficialHtml(); // 刪除官方網頁檔案
-            
-        } } );
+        } );
         versionThread.start();
     }
 
@@ -267,6 +274,7 @@ public class InformationFrame extends JFrame {
                     InformationFrame.downloadLock = true;
                     Common.debugPrint( "Not yet..." );
                 } else {
+                    InformationFrame.downloadLock = false;
                     Common.debugPrintln( "OK" );
                 }
 
@@ -281,34 +289,42 @@ public class InformationFrame extends JFrame {
                     Common.debugPrintln( "OK" );
                 }
 
-                Common.debugPrintln( "開始下載最新版本" );
-
                 String fileName = "JComicDownloader_" + versionLabel.getText() + ".jar";
-                String frontURL = "https://sites.google.com/site/jcomicdownloader/release/";
-                String backURL = "?attredirects=0&amp;d=1";
-                String lastestVersionURL = frontURL + fileName + backURL;
-                Common.downloadFile( lastestVersionURL, Common.getNowAbsolutePath(), fileName, false, null );
 
-                
-                Object[] options = { "確定", "開啟存放程式的資料夾" };
-                int choice = JOptionPane.showOptionDialog( thisFrame, "<html>最新版本 <font color=red>"  + fileName + "</font> 已下載完畢！</html>",
-                                "告知視窗",
-                                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
-                                null, options, options[0] );
-                
-                if ( choice == 1 ) {
-                     if ( Common.isWindows() ) {
-                         // 開啟資料夾並將最新版本jar檔反白
-                         Common.runUnansiCmd( "explorer /select, ", Common.getNowAbsolutePath() + fileName );
-                     }
-                     else if ( Common.isMac() ) {
-                         Common.runCmd( "Finder ", Common.getNowAbsolutePath() );
-                     }
-                     else {
-                         Common.runCmd( "nautilus ", Common.getNowAbsolutePath() );
-                     }
+                if ( ComicDownGUI.versionString.matches( ".*" + versionLabel.getText() + ".*" ) ) {
+                    JOptionPane.showMessageDialog( thisFrame, "目前程式已是最新版本！",
+                            "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                 }
-                
+                else if ( new File( Common.getNowAbsolutePath() + fileName ).exists() ) {
+                    JOptionPane.showMessageDialog( thisFrame, "最新版本已存在於程式資料夾！",
+                            "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                } else {
+                    Common.debugPrintln( "開始下載最新版本" );
+
+                    String frontURL = "https://sites.google.com/site/jcomicdownloader/release/";
+                    String backURL = "?attredirects=0&amp;d=1";
+                    String lastestVersionURL = frontURL + fileName + backURL;
+                    Common.downloadFile( lastestVersionURL, Common.getNowAbsolutePath(), fileName, false, null );
+
+
+                    Object[] options = { "確定", "開啟存放程式的資料夾" };
+                    int choice = JOptionPane.showOptionDialog( thisFrame, "<html>最新版本 <font color=red>" + fileName + "</font> 已下載完畢！</html>",
+                            "告知視窗",
+                            JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                            null, options, options[0] );
+
+                    if ( choice == 1 ) {
+                        if ( Common.isWindows() ) {
+                            // 開啟資料夾並將最新版本jar檔反白
+                            Common.runUnansiCmd( "explorer /select, ", Common.getNowAbsolutePath() + fileName );
+                        } else if ( Common.isMac() ) {
+                            Common.runCmd( "Finder ", Common.getNowAbsolutePath() );
+                        } else {
+                            Common.runCmd( "nautilus ", Common.getNowAbsolutePath() );
+                        }
+                    }
+                }
+
             }
         } ).start();
     }

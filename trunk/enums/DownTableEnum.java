@@ -13,7 +13,7 @@
 package jcomicdownloader.enums;
 
 /**
- * 主介面中的任務表格的行定義：下載順序、是否下載、標題名稱、總共集數、選擇集數、目前狀態和網址解析
+ * 主介面中的任務表格的行定義：編號、是否下載、標題名稱、總共集數、選擇集數、目前狀態和網址解析
  * */
 public class DownTableEnum {
     public static final int ORDER = 0;
