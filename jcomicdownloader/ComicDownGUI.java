@@ -7,8 +7,9 @@ Version  : v2.13
 Last Modified : 2011/12/27
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
- * 2.16: 1. 修復178少數檔名解析錯誤的bug。
- *         2. 修改任務列刪除機制，使其下載中仍能刪除任務。
+ * 2.16: 1. 改由NetBeans生成JAR檔。
+ *         2. 修復178少數檔名解析錯誤的bug。
+ *         3. 修改任務列刪除機制，使其下載中仍能刪除任務。
  * 2.15: 1. 增加NimROD介面風格（共六種）。
  *          2. 修復mangaFox已刪除漫畫加入後會當掉的問題。
  * 
@@ -155,6 +156,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.*;
 import javax.swing.table.*;
 import javax.swing.JFileChooser.*;
@@ -2025,30 +2027,25 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Thread downThread = new Thread( new Runnable() {
 
             public void run() {
-
-
-
-                //playAudio();
-
-                /*
-                String message = "old: " + Common.getNowAbsolutePathOld() + "\n" +
-                "fixed: " + Common.getNowAbsolutePath();
-                JOptionPane.showMessageDialog( ComicDownGUI.mainFrame,
-                message, "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                String cookieString = "tyb=No; his=1325767304%7C%B5%DA5%BE%ED%7C212878%7C%C9%FA%BB%AF%CE%A3%BB%FA%7C201112%2F212883;";
+                try {
+                    System.out.println( URLDecoder.decode( cookieString, "GB2312" ) );
+                } catch ( UnsupportedEncodingException ex ) {
+                    Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+                }
                 
-                 */
-                //Run.isAlive = true;
-                String picURL = "http://up1.emland.net/img.php?url=photo/27464/27465/46781292144946.jpg";
-                String pageURL = "http://www.kangdm.com/comic/10256/";
+                Run.isAlive = true;
+                String picURL = "http://222.218.156.59/h28/201112/2011122917365044964496.jpg";
+                String pageURL = "http://comic.xxbh.net/201112/212883.html";
                 String testURL = "http://comic.veryim.com/manhua/zuishangys/";
 
-                String cookie = null;//Common.getCookieString( pageURL );
+                //String cookie = Common.getCookieString( pageURL );
                 //cookie = cookie.replaceAll( "20-", "21-" );
-                System.out.println( cookie );
+                //System.out.println( cookie );
                 //cookie = "tyb=No; his=1324039671%7C%C8%AB1%BE%ED%7C179745%7C%BE%CD%CA%C7%B2%BB%D0%ED%B0%AE%BA%DC%B4%F3%7C201012%2F179746%7C%7C1324336783%7C%B5%DA1%BE%ED%7C212218%7C%C8%A8%C1%A6%B5%C4%D3%CE%CF%B7%7C201112%2F212222";
 
-                //Common.downloadFile( pageURL, "", "test.html", false, cookie );
-                Common.downloadFile( picURL, "", "test.jpg", false, cookie );
+                Common.downloadFile( pageURL, "", "test.html", false, cookieString );
+                Common.downloadFile( picURL, "", "test.jpg", true, cookieString );
 
                 //String[] cookies = Common.getCookieStrings( pageURL );
 
@@ -2056,7 +2053,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             }
         } );
-        //downThread.start();
+        downThread.start();
     }
 
     private JButton getButton( String string, String picName ) {
