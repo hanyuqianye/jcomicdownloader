@@ -57,7 +57,7 @@ public class Zhcode extends Encoding {
 
 	try {
                
-	    InputStream pydata = getClass().getResourceAsStream( "../tools/resource/hcutf8.txt" );
+	    InputStream pydata = getClass().getResourceAsStream( "hcutf8.txt" );
 	    BufferedReader in = new BufferedReader(new InputStreamReader(pydata, "UTF8"));
 	    while ((dataline = in.readLine()) != null) {
 		// Skip empty and commented lines
