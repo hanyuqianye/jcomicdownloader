@@ -8,8 +8,10 @@ Last Modified : 2011/12/27
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
  * 2.16: 1. 改由NetBeans生成JAR檔。
- *         2. 修復178少數檔名解析錯誤的bug。
+ *         2. 增加標題重新命名的右鍵選單。
  *         3. 修改任務列刪除機制，使其下載中仍能刪除任務。
+ *         4. 修復178少數檔名解析錯誤的bug。
+ *         5. 修復在非下載時，第一列任務仍無法置頂或置底的bug。
  * 2.15: 1. 增加NimROD介面風格（共六種）。
  *          2. 修復mangaFox已刪除漫畫加入後會當掉的問題。
  * 
@@ -197,7 +199,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private JMenuItem tableOpenDownloadFile;  // 開啟下載檔案
     private JMenuItem tableOpenDownloadDirectoryItem;  // 開啟下載資料夾
     private JMenuItem tableAddBookmarkFromDownloadItem;  // 加入到書籤
-    private JMenuItem tableRechoiceVolumeItem;  // 重新選擇集數
+    private JMenuItem tableRechoiceVolumeItem;  // 重新選擇集數 
+    private JMenuItem tableRenameTitleItem;  // 重新命名標題
     private JMenuItem tableDeleteMissionItem;  // 刪除任務
     private JMenuItem tableDeleteAllUnselectedMissionItem;  // 刪除所有未勾選的任務
     private JMenuItem tableDeleteAllDoneMissionItem;  // 刪除所有已經完成的任務
@@ -291,7 +294,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     private void setUpUIComponent() {
-        setSize( 640, 480 );
+        setSize( 640, 540 );
         setLocationRelativeTo( this );  // set the frame in middle position of screen
         setIconImage( new CommonGUI().getImage( "main_icon.png" ) ); // 設置左上角圖示
 
@@ -540,6 +543,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         tableAddBookmarkFromDownloadItem.addActionListener( this );
         tableRechoiceVolumeItem = new JMenuItem( "重新選擇集數" );  // 重新選擇集數
         tableRechoiceVolumeItem.addActionListener( this );
+        tableRenameTitleItem = new JMenuItem( "重新命名標題" );  // 重新命名漫畫名稱
+        tableRenameTitleItem.addActionListener( this );
         tableDeleteMissionItem = new JMenuItem( "刪除此任務" );  // 刪除任務
         tableDeleteMissionItem.addActionListener( this );
         tableDeleteAllUnselectedMissionItem = new JMenuItem( "刪除所有未勾選任務" );  // 刪除所有未勾選的任務
@@ -557,7 +562,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         downloadTablePopup.add( tableOpenDownloadFile );
         downloadTablePopup.add( tableOpenDownloadURL );
         downloadTablePopup.add( tableSearchDownloadComic );
-        downloadTablePopup.add( tableRechoiceVolumeItem );
+        downloadTablePopup.add( tableRechoiceVolumeItem ); 
+        downloadTablePopup.add( tableRenameTitleItem );
         downloadTablePopup.add( tableDeleteMissionItem );
         downloadTablePopup.add( tableDeleteAllUnselectedMissionItem );
         downloadTablePopup.add( tableDeleteAllDoneMissionItem );
@@ -1073,6 +1079,18 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Common.debugPrintln( "重新解析位址（為了重選集數）：" + downTableUrlStrings[row] );
         parseURL( new String[] { downTableUrlStrings[row] }, false, true, row );
     }
+    
+    private void renameTitle( int row ) { // 重新命名標題
+        row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
+        Common.debugPrintln( "原本標題名稱：" + downTableModel.getRealValueAt( row, DownTableEnum.TITLE ).toString() );
+        
+        String newTitleString = JOptionPane.showInputDialog( ComicDownGUI.mainFrame,
+                    "請輸入新的標題名稱（需在下載之前修改）", "輸入視窗", JOptionPane.INFORMATION_MESSAGE );
+        Common.debugPrintln( "新的標題名稱：" + newTitleString );
+        
+        if ( newTitleString != null )
+            downTableModel.setValueAt( newTitleString, row, DownTableEnum.TITLE );
+    }
 
     // 從beginIndex開始，後面的全部往前挪一格
     private void stringsMoveOneForward( String[] strings, int beginIndex ) {
@@ -1088,7 +1106,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Common.debugPrint( "目前正在下載的列：" + nowDownloadMissionRow + "\t" );
 
         // 若指定要置頂的該列正好是目前下載列，則禁止置換
-        if ( row == nowDownloadMissionRow ) {
+        if ( row == nowDownloadMissionRow && Flag.downloadingFlag ) {
             JOptionPane.showMessageDialog( this, "目前正下載中，無法移動任務的順序位置",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
@@ -1124,7 +1142,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Common.debugPrint( "目前正在下載的列：" + nowDownloadMissionRow + "\t" );
 
         // 若指定要置頂的該列正好是目前下載列，則禁止置換
-        if ( row == nowDownloadMissionRow ) {
+        if ( row == nowDownloadMissionRow && Flag.downloadingFlag ) {
             JOptionPane.showMessageDialog( this, "目前正下載中，無法移動任務的順序位置",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
@@ -1817,6 +1835,14 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 rechoiceVolume( downloadTablePopupRow );
             } else {
                 JOptionPane.showMessageDialog( this, "目前正下載中，無法重新選擇集數",
+                        "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            }
+        }
+        if ( event.getSource() == tableRenameTitleItem ) {
+            if ( !Flag.downloadingFlag ) {
+                renameTitle( downloadTablePopupRow );
+            } else {
+                JOptionPane.showMessageDialog( this, "目前正下載中，無法重新命名標題",
                         "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             }
         }

@@ -852,6 +852,9 @@ public class Common {
         oldString = getStringReplaceHttpCode( oldString ); // 先經過html字符編碼轉換
         String newString = "";
 
+        // \/ * " < > | .轉成_
+        // ? : 轉成空格
+        // '轉成空字元
         for ( int i = 0 ; i < oldString.length() ; i++ ) {
             if ( oldString.charAt( i ) == '\\'
                     || oldString.charAt( i ) == '/'
