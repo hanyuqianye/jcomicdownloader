@@ -72,7 +72,11 @@ public class RunModule {
 
             String allPageString = parse.getAllPageString( urlString );
 
-            parse.setTitle( parse.getTitleOnMainPage( urlString, allPageString ) );
+            // 臨時作法：如果處理EH或EX時已經有標題名稱，就不用再解析標題名稱
+           //if ( ( parse.siteID == Site.EH || parse.siteID == Site.EX ) && parse.getTitle() != null );
+           //else
+           if ( parse.getTitle() == null || parse.getTitle().equals( "" ) ) 
+                parse.setTitle( parse.getTitleOnMainPage( urlString, allPageString ) );
             Common.debugPrintln( "漫畫名稱: " + parse.getTitle() );
             //Common.nowTitle = parse.getTitle();
 

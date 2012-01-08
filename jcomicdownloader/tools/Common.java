@@ -1430,7 +1430,8 @@ public class Common {
         if ( !new File( file ).exists() ) {
             String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
             String colorString = "blue";
-            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+            //if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+            if ( CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
                 colorString = "yellow";
             }
 

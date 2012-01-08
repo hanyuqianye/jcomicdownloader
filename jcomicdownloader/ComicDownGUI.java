@@ -3,15 +3,16 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v2.13
-Last Modified : 2011/12/27
+Version  : v2.16
+Last Modified : 2012/1/8
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
  * 2.16: 1. 改由NetBeans生成JAR檔。
  *         2. 增加標題重新命名的右鍵選單。
- *         3. 修改任務列刪除機制，使其下載中仍能刪除任務。
- *         4. 修復178少數檔名解析錯誤的bug。
- *         5. 修復在非下載時，第一列任務仍無法置頂或置底的bug。
+ * 　　 3. 修改暗色系界面的已下載和未下載的顏色標示。 
+ *         4. 修改任務列刪除機制，使其下載中仍能刪除任務。
+ *         5. 修復178少數檔名解析錯誤的bug。
+ *         6. 修復在非下載時，第一列任務仍無法置頂或置底的bug。
  * 2.15: 1. 增加NimROD介面風格（共六種）。
  *          2. 修復mangaFox已刪除漫畫加入後會當掉的問題。
  * 
@@ -562,7 +563,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         downloadTablePopup.add( tableOpenDownloadFile );
         downloadTablePopup.add( tableOpenDownloadURL );
         downloadTablePopup.add( tableSearchDownloadComic );
-        downloadTablePopup.add( tableRechoiceVolumeItem ); 
+        downloadTablePopup.add( tableRechoiceVolumeItem );
         downloadTablePopup.add( tableRenameTitleItem );
         downloadTablePopup.add( tableDeleteMissionItem );
         downloadTablePopup.add( tableDeleteAllUnselectedMissionItem );
@@ -1079,17 +1080,26 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Common.debugPrintln( "重新解析位址（為了重選集數）：" + downTableUrlStrings[row] );
         parseURL( new String[] { downTableUrlStrings[row] }, false, true, row );
     }
-    
+
     private void renameTitle( int row ) { // 重新命名標題
         row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
-        Common.debugPrintln( "原本標題名稱：" + downTableModel.getRealValueAt( row, DownTableEnum.TITLE ).toString() );
+
+        if ( row == nowDownloadMissionRow && Flag.downloadingFlag ) {
+            JOptionPane.showMessageDialog( this, "目前正下載中，無法重新命名標題",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
+        
+        String oldTitleString = downTableModel.getRealValueAt( row, DownTableEnum.TITLE ).toString();
+        Common.debugPrintln( "原本標題名稱：" + oldTitleString );
         
         String newTitleString = JOptionPane.showInputDialog( ComicDownGUI.mainFrame,
-                    "請輸入新的標題名稱（需在下載之前修改）", "輸入視窗", JOptionPane.INFORMATION_MESSAGE );
-        Common.debugPrintln( "新的標題名稱：" + newTitleString );
-        
-        if ( newTitleString != null )
+                "請輸入新的標題名稱（需在下載之前修改）", "輸入視窗", JOptionPane.INFORMATION_MESSAGE );
+
+        if ( newTitleString != null ) {
+            Common.debugPrintln( "新的標題名稱：" + newTitleString );
             downTableModel.setValueAt( newTitleString, row, DownTableEnum.TITLE );
+        }
     }
 
     // 從beginIndex開始，後面的全部往前挪一格
@@ -1839,12 +1849,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
         }
         if ( event.getSource() == tableRenameTitleItem ) {
-            if ( !Flag.downloadingFlag ) {
-                renameTitle( downloadTablePopupRow );
-            } else {
-                JOptionPane.showMessageDialog( this, "目前正下載中，無法重新命名標題",
-                        "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-            }
+            renameTitle( downloadTablePopupRow );
         }
         if ( event.getSource() == tableDeleteMissionItem ) {
             deleteMission( downloadTablePopupRow );
@@ -2059,8 +2064,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 } catch ( UnsupportedEncodingException ex ) {
                     Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
                 }
-                
-                Run.isAlive = true;
+
+                //Run.isAlive = true;
                 String picURL = "http://222.218.156.59/h28/201112/2011122917365044964496.jpg";
                 String pageURL = "http://comic.xxbh.net/201112/212883.html";
                 String testURL = "http://comic.veryim.com/manhua/zuishangys/";
@@ -2079,7 +2084,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             }
         } );
-        downThread.start();
+        //downThread.start();
     }
 
     private JButton getButton( String string, String picName ) {

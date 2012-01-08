@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/4
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.16: 改變暗色系界面的已下載和未下載的顏色標示。
 2.01: 增加是否預設集數全選的選項
 1.16: 讓EH和EX也能判斷是否已經下載。
 1.14: 修改集數選擇視窗（choiceFrame）的關閉功能，允許按右上角的『X』來關閉。
@@ -445,19 +446,21 @@ class GridTableRender extends DefaultTableCellRenderer {
         //     cell.setForeground( Color.black );
         // } else {
 
-        String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
+        // 取得介面設定值（不用UIManager.getLookAndFeel().getName()是因為這樣才能讀到_之後的參數）
+        String nowSkinName = SetUp.getSkinClassName();
 
         if ( existsFileOnThisRow( ChoiceFrame.volumeTable.convertRowIndexToModel( row ) ) ) { // 若存在就顯示淺黑色
             //cell.setBackground( Color.gray );
-
-            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+            //if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+            if ( CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
                 cell.setForeground( Color.black );
             }
             else
                 cell.setForeground( Color.lightGray );
         } else { // 若不存在則顯示正常黑色
             //cell.setBackground( Color.white );
-            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+            //if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+            if ( CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
                 cell.setForeground( Color.lightGray );
             }
             else
