@@ -91,6 +91,9 @@ public class ParseEC extends ParseOnlineComicSite {
 
         String[] parses = lines[index].split( "\"|\\|" ); // 除了第一個和最後一個外都是解析碼
 
+        System.out.println( "lines[index]: " + lines[index] );
+        System.out.println( "volumeNoString: " + volumeNoString );
+        
         int order = 0;
         for ( int i = 0 ; i < parses.length ; i++ ) {
             if ( parses[i].split( " " )[0].equals( volumeNoString ) ) {
@@ -98,6 +101,8 @@ public class ParseEC extends ParseOnlineComicSite {
                 break;
             }
         }
+        
+        System.out.println( "parses[order]: " + parses[order] );
 
         String[] codes = parses[order].split( " " );
 
@@ -185,6 +190,8 @@ public class ParseEC extends ParseOnlineComicSite {
         int endIndex = allPageString.indexOf( "\"", beginIndex );
 
         String titleString = allPageString.substring( beginIndex, endIndex ).trim();
+        
+        System.out.println( titleString );
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( titleString ) );
     }

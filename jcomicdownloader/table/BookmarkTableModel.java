@@ -39,7 +39,12 @@ public class BookmarkTableModel extends DefaultTableModel {
     }
 
     public Object getValueAt( int row, int col ) {
-        return super.getValueAt( row, col );
+        if ( super.getRowCount() == 0 ) {
+            // 列數為0，代表目前沒有資料，故只回傳一個空物件
+            return new Object();
+        }
+        else
+            return super.getValueAt( row, col );
     }
 
 }

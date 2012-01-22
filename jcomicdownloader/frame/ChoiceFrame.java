@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/11/4
+Last Modified : 2012/1/10
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+2.17: 增加可以選擇反白集數的選項。
 2.16: 改變暗色系界面的已下載和未下載的顏色標示。
 2.01: 增加是否預設集數全選的選項
 1.16: 讓EH和EX也能判斷是否已經下載。
@@ -29,16 +30,19 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.util.*;
 import javax.swing.table.*;
+import jcomicdownloader.table.ChoiceTableRender;
+import jcomicdownloader.table.DownTableRender;
 
 /**
- *
- * 選取集數視窗
+
+選取集數視窗
  */
-public class ChoiceFrame extends JFrame implements TableModelListener {
+public class ChoiceFrame extends JFrame implements
+        TableModelListener, MouseListener, MouseMotionListener {
 
     static final long serialVersionUID = 3345678;
     // about RadioButton
-    private JRadioButton choiceAll, choiceNull;
+    private JRadioButton choiceAll, choiceNull, choiceSelected;
     private ButtonGroup choiceGroup;
     // about Button
     private JButton confirmButton;
@@ -54,7 +58,8 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
     private String title; // 傳入作品名稱，避免連續下載中被混淆
     private String url; // 傳入位址，避免同時有兩個位址在解析會混淆
     public static JFrame choiceFrame; // use by other frame
-    public JFrame thisFrame; // use by self
+    public static JFrame thisFrame; // use by self
+    private Dimension frameDimension;
 
     public ChoiceFrame( String title, String url ) {
         this( "選擇欲下載的集數 [" + title + "]", false, 0, title, url );
@@ -79,7 +84,8 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
             // 因為存入時是依當時顯示的順序，所以取得勾選集數的時候也要依當時順序為主
             checkStrings = getRealOrderCheckStrings( modifyRow, volumeStrings,
                     ComicDownGUI.nowSelectedCheckStrings );
-        } else {
+        }
+        else {
             // 依設定選擇是否預設全選
             String choiceString = SetUp.getChoiceAllVolume() ? "true" : "false";
 
@@ -116,10 +122,41 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
     }
 
     private void setUpUIComponent() {
-        Container contentPane = getContentPane();
+        String picFileString = SetUp.getBackgroundPicPathOfChoiceFrame();
+        // 檢查背景圖片是否存在
+        if ( SetUp.getUsingBackgroundPicOfChoiceFrame()
+                && !new File( picFileString ).exists() ) {
+            JOptionPane.showMessageDialog( this, picFileString
+                    + "\n背景圖片不存在，重新設定為原始佈景",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            SetUp.setUsingBackgroundPicOfChoiceFrame( false );
+        }
+
+        if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) {
+            frameDimension = CommonGUI.getDimension( picFileString );
+            int width = (int) frameDimension.getWidth() + CommonGUI.widthGapOfBackgroundPic;
+            int height = (int) frameDimension.getHeight() + CommonGUI.heightGapOfBackgroundPic;
+            setSize( width, height );
+            setResizable( false );
+        }
+        else {
+            setSize( 350, 470 );
+            setResizable( true );
+        }
+
+        Container contentPane;
+        if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) {
+            ((JPanel) getContentPane()).setOpaque( false );
+            contentPane = CommonGUI.getImagePanel( picFileString );
+            contentPane.setPreferredSize( frameDimension );
+            getContentPane().add( contentPane, BorderLayout.CENTER );
+        }
+        else {
+            contentPane = getContentPane();
+        }
         contentPane.setLayout( new BorderLayout() );
 
-        setSize( 320, 470 );
+        setDefaultLookAndFeelDecorated( false ); // 讓標題欄可以隨look and feel改變
         setLocationRelativeTo( this );  // set the frame in middle position of screen
         setIconImage( new CommonGUI().getImage( "main_icon.png" ) ); // 設置左上角圖示
 
@@ -133,19 +170,20 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
     private void setRadioButtonUI( Container contentPane ) {
         JPanel radioPanel = new JPanel();
         radioPanel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
-        radioPanel.setToolTipText( "下載順序由上而下，點擊上方『標題名稱』可改變集數的下載順序" );
+        CommonGUI.setToolTip( radioPanel, "下載順序由上而下，點擊上方『標題名稱』可改變集數的下載順序" );
 
-        choiceAll = new JRadioButton( "全部選擇", false );
-        choiceAll.addItemListener( new ItemHandler() );
-        choiceNull = new JRadioButton( "全部取消", false );
-        choiceNull.addItemListener( new ItemHandler() );
+        choiceAll = getRadioButton( "全部選擇", false );
+        choiceNull = getRadioButton( "全部取消", false );
+        choiceSelected = getRadioButton( "選擇反白集數", false );
 
         choiceGroup = new ButtonGroup();
         choiceGroup.add( choiceAll );
         choiceGroup.add( choiceNull );
+        choiceGroup.add( choiceSelected );
 
         radioPanel.add( choiceAll );
         radioPanel.add( choiceNull );
+        radioPanel.add( choiceSelected );
 
         contentPane.add( radioPanel, BorderLayout.NORTH );
     }
@@ -154,8 +192,8 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
         volumeTableModel = getDownloadTableModel();
         volumeTable = new JTable( volumeTableModel ) {
 
-            protected String[] columnToolTips = { "希望下載哪一集就在同列的此欄位打勾",
-                "顯示淺色代表已經下載過（不保證下載完整，請自行檢查）"
+            protected String[] columnToolTips = { CommonGUI.getToolTipString( "希望下載哪一集就在同列的此欄位打勾" ),
+                CommonGUI.getToolTipString( "顯示淺色代表已經下載過（不保證下載完整，請自行檢查）" )
             };
 
             //Implement table header tool tips. 
@@ -189,22 +227,37 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
         cModel.getColumn( ChoiceTableEnum.YES_OR_NO ).setPreferredWidth( (int) (this.getWidth() * 0.25) );
         cModel.getColumn( ChoiceTableEnum.VOLUME_TITLE ).setPreferredWidth( (int) (this.getWidth() * 0.75) );
 
+        // 若設定為透明，就用預定顏色字體。
+        if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) {
+            volumeTable.getTableHeader().setForeground( SetUp.getChoiceFrameTableDefaultColor() );
+            volumeTable.setForeground( SetUp.getChoiceFrameTableDefaultColor() );
+            //volumeTable.addMouseMotionListener( this ); // 可以隨著滑鼠移動而變色
+        }
+
+        if ( SetUp.getSkinClassName().matches( ".*napkin.*" ) ) {
+            // 因為napkin的預設字型不太清楚，所以用選定字型
+            volumeTable.setFont( SetUp.getDefaultFont( - 2 ) );
+            volumeTable.getTableHeader().setFont( SetUp.getDefaultFont( - 2 ) );
+        }
 
         JScrollPane volumeScrollPane = new JScrollPane( volumeTable );
 
         JPanel volumePanel = new CommonGUI().getCenterPanel( volumeScrollPane );
-        volumePanel.setToolTipText( "下載順序由上而下，點擊上方『標題名稱』可改變集數的下載順序" );
+        CommonGUI.setToolTip( volumePanel, "下載順序由上而下，點擊上方『標題名稱』可改變集數的下載順序" );
 
         contentPane.add( volumePanel, BorderLayout.CENTER );
 
     }
 
     private void setDefaultRenderer() { // 設置volumeTable上哪些集數要變色
-        GridTableRender cellRender = new GridTableRender( title, url, volumeTableModel );
+        DefaultTableCellRenderer cellRender = null;
+
+        cellRender = new ChoiceTableRender( title, url, volumeTableModel );
+
         try {
-            volumeTable.setDefaultRenderer( Class.forName( "java.lang.Object" ),
-                    cellRender );
-        } catch ( ClassNotFoundException ex ) {
+            volumeTable.setDefaultRenderer( Class.forName( "java.lang.Object" ), cellRender );
+        }
+        catch ( ClassNotFoundException ex ) {
             Logger.getLogger( ChoiceFrame.class.getName() ).log( Level.SEVERE, null, ex );
         }
     }
@@ -231,10 +284,8 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
 
-        confirmButton = new JButton( "確定" );
-        confirmButton.addActionListener( new ActionHandler() );
-        cancelButton = new JButton( "取消" );
-        cancelButton.addActionListener( new ActionHandler() );
+        confirmButton = getButton( "確定" );
+        cancelButton = getButton( "取消" );
 
         buttonPanel.add( confirmButton );
         buttonPanel.add( cancelButton );
@@ -263,7 +314,7 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
 
             public void windowClosing( WindowEvent e ) {
                 notifyAllDownload();
-                thisFrame.dispose();
+                dispose();
             }
         } );
     }
@@ -310,15 +361,69 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
         }
     }
 
+    @Override
+    public void mouseClicked( MouseEvent e ) {
+    }
+
+    @Override
+    public void mousePressed( MouseEvent e ) {
+    }
+
+    @Override
+    public void mouseReleased( MouseEvent e ) {
+    }
+
+    @Override
+    public void mouseExited( MouseEvent event ) {
+        if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) {
+
+            if ( event.getSource() instanceof JTable ) { // 主要是table
+                CommonGUI.nowMouseAtRow = 10000; // 給很大的初始值，避免剛開始就有上色情形
+                ((JComponent) event.getSource()).repaint();
+            }
+            else {
+                ((JComponent) event.getSource()).setForeground( SetUp.getChoiceFrameOtherDefaultColor() );
+                ((JComponent) event.getSource()).repaint();
+
+            }
+        }
+    }
+
+    @Override
+    public void mouseEntered( MouseEvent event ) {
+        if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) {
+            if ( event.getSource() instanceof JTable ) {
+            }
+            else {
+                ((JComponent) event.getSource()).setForeground( SetUp.getChoiceFrameOtherMouseEnteredColor() );
+            }
+        }
+    }
+
+    @Override
+    public void mouseDragged( MouseEvent e ) {
+    }
+
+    @Override
+    public void mouseMoved( MouseEvent event ) {
+        JTable table = (JTable) event.getSource();
+
+        // 現在滑鼠所在的列
+        CommonGUI.nowMouseAtRow = event.getY() / table.getRowHeight();
+        table.repaint(); // 給目前滑鼠所在列改變字體顏色
+    }
+
     private class ActionHandler implements ActionListener {
 
         public void actionPerformed( ActionEvent event ) {
 
 
             if ( event.getSource() == cancelButton ) {
+
                 notifyAllDownload();
-                thisFrame.dispose();
-            } else if ( event.getSource() == confirmButton ) {
+                dispose();
+            }
+            else if ( event.getSource() == confirmButton ) {
                 String[] volumeStrings = ChoiceFrame.getVolumeStrings();
                 String[] checkStrings = ChoiceFrame.getCheckStrings();
                 String[] urlStrings = ChoiceFrame.getUrlStrings();
@@ -342,11 +447,13 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
 
                     if ( Common.missionCount == 1 ) {
                         ComicDownGUI.downTableModel.addRow( dataVector );
-                    } else {
+                    }
+                    else {
                         ComicDownGUI.downTableModel.insertRow( modifyRow, dataVector );
                     }
 
-                } else { // 加入新任務
+                }
+                else { // 加入新任務
                     storeVolumeRealOrder( Common.missionCount + 1, volumeStrings.length ); // 存入真實集數順序
 
                     ComicDownGUI.downTableModel.addRow( CommonGUI.getDownDataRow(
@@ -370,7 +477,7 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
                 //Common.preTitle = title;
                 notifyAllDownload();
 
-                thisFrame.dispose();
+                dispose();
             }
         }
     }
@@ -399,8 +506,20 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
                 if ( choiceNull.isSelected() ) {
                     for ( int i = 0 ; i < volumeTable.getRowCount() ; i++ ) {
                         volumeTable.setValueAt( false, i, ChoiceTableEnum.YES_OR_NO );
+
                     }
 
+                    repaint();
+                }
+            }
+            if ( event.getSource() == choiceSelected ) {
+                if ( choiceSelected.isSelected() ) {
+                    boolean choiceValue;
+                    for ( int i = 0 ; i < volumeTable.getRowCount() ; i++ ) {
+                        // 反白 -> 選擇 ; 沒有反白 -> 不選
+                        choiceValue = volumeTable.isRowSelected( i ) ? true : false;
+                        volumeTable.setValueAt( choiceValue, i, ChoiceTableEnum.YES_OR_NO );
+                    }
                     repaint();
                 }
             }
@@ -410,86 +529,40 @@ public class ChoiceFrame extends JFrame implements TableModelListener {
 
         }
     }
-}
 
-class GridTableRender extends DefaultTableCellRenderer {
+    private JButton getButton( String string ) {
+        JButton button = new JButton( string );
+        //button.setFont( SetUp.getDefaultFont() );
+        if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) { // 若設定為透明，就用預定字體。
+            button.setOpaque( false );
+            button.setForeground( SetUp.getChoiceFrameOtherDefaultColor() );
+            button.addMouseListener( this );
+        }
+        button.addActionListener( new ActionHandler() );
 
-    private String title; // 漫畫名稱
-    private String url; // 漫畫位址
-    DownloadTableModel tableModel; // 選擇表格的內容
+        if ( SetUp.getSkinClassName().matches( ".*napkin.*" ) ) {
+            // 因為napkin的預設字型不太清楚，所以用選定字型
+            button.setFont( SetUp.getDefaultFont( - 2 ) );
+        }
 
-    public GridTableRender( String title, String url, DownloadTableModel tableModel ) {
-        super();
-        this.title = title;
-        this.url = url;
-        this.tableModel = tableModel;
+        return button;
     }
 
-    public Component getTableCellRendererComponent(
-            JTable table,
-            Object value,
-            boolean isSelected,
-            boolean hasFocus,
-            int row,
-            int column ) {
-        Component cell =
-                super.getTableCellRendererComponent(
-                table,
-                value,
-                isSelected,
-                hasFocus,
-                row,
-                column );
-
-        // if ( hasFocus ) {
-        //     cell.setBackground( Color.green );
-        //     cell.setForeground( Color.black );
-        // } else {
-
-        // 取得介面設定值（不用UIManager.getLookAndFeel().getName()是因為這樣才能讀到_之後的參數）
-        String nowSkinName = SetUp.getSkinClassName();
-
-        if ( existsFileOnThisRow( ChoiceFrame.volumeTable.convertRowIndexToModel( row ) ) ) { // 若存在就顯示淺黑色
-            //cell.setBackground( Color.gray );
-            //if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
-            if ( CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
-                cell.setForeground( Color.black );
-            }
-            else
-                cell.setForeground( Color.lightGray );
-        } else { // 若不存在則顯示正常黑色
-            //cell.setBackground( Color.white );
-            //if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
-            if ( CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
-                cell.setForeground( Color.lightGray );
-            }
-            else
-                cell.setForeground( Color.black );
+    private JRadioButton getRadioButton( String string, boolean selected ) {
+        JRadioButton radioButton = new JRadioButton( string, selected );
+        //button.setFont( SetUp.getDefaultFont() );
+        if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) { // 若設定為透明，就用預定字體。
+            radioButton.setOpaque( false );
+            radioButton.setForeground( SetUp.getChoiceFrameOtherDefaultColor() );
+            radioButton.addMouseListener( this );
+            radioButton.addItemListener( new ItemHandler() );
         }
 
-        // }
-        return cell;
-
-    }
-
-    // 檢查第row列的單集漫畫是否已經存在於下載資料夾（只要有資料夾或壓縮檔都算）
-    private boolean existsFileOnThisRow( int row ) {
-        String volumeTitle = tableModel.getValueAt( row, ChoiceTableEnum.VOLUME_TITLE ).toString();
-
-        File dirFile = null;
-        File zipFile = null;
-        if ( this.url.matches( "(?s).*hentai.org(?s).*" ) ) { // 讓EH和EX也能判斷是否已經下載
-            dirFile = new File( SetUp.getOriginalDownloadDirectory() + volumeTitle );
-            zipFile = new File( SetUp.getOriginalDownloadDirectory() + volumeTitle + ".zip" );
-        } else {
-            dirFile = new File( SetUp.getOriginalDownloadDirectory() + this.title + Common.getSlash() + volumeTitle );
-            zipFile = new File( SetUp.getOriginalDownloadDirectory() + this.title + Common.getSlash() + volumeTitle + ".zip" );
+        if ( SetUp.getSkinClassName().matches( ".*napkin.*" ) ) {
+            // 因為napkin的預設字型不太清楚，所以用選定字型
+            radioButton.setFont( SetUp.getDefaultFont( - 2 ) );
         }
 
-        if ( dirFile.exists() || zipFile.exists() ) {
-            return true;
-        } else {
-            return false;
-        }
+        return radioButton;
     }
 }

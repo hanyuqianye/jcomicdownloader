@@ -16,6 +16,7 @@ ChangeLog:
  */
 package jcomicdownloader.tools;
 
+import java.awt.Color;
 import java.awt.Font;
 import jcomicdownloader.table.*;
 import java.util.logging.Level;
@@ -40,6 +41,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import jcomicdownloader.enums.*;
@@ -175,7 +177,8 @@ public class Common {
             int delayMillisecond, boolean needCookie, String cookieString ) {
         try {
             Thread.currentThread().sleep( delayMillisecond );
-        } catch ( InterruptedException ex ) {
+        }
+        catch ( InterruptedException ex ) {
             ex.printStackTrace();
         }
 
@@ -200,7 +203,8 @@ public class Common {
             System.out.println( "code   " + code );
 
             tempCookieStrings = tryConnect( connection );
-        } catch ( Exception ex ) {
+        }
+        catch ( Exception ex ) {
             ex.printStackTrace();
         }
 
@@ -237,7 +241,8 @@ public class Common {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty( "User-Agent", "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
             tempCookieStrings = tryConnect( connection );
-        } catch ( Exception ex ) {
+        }
+        catch ( Exception ex ) {
             ex.printStackTrace();
         }
 
@@ -351,6 +356,7 @@ public class Common {
                     timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 );
                 }
 
+                System.out.println( "網址: " + webSite );
                 tryConnect( connection );
 
                 int fileSize = connection.getContentLength() / 1000;
@@ -360,7 +366,8 @@ public class Common {
                     Common.debugPrintln( "似乎連到盜連圖，停一秒後重新連線......" );
                     try {
                         Thread.sleep( 1000 ); // 每次暫停一秒再重新連線
-                    } catch ( InterruptedException iex ) {
+                    }
+                    catch ( InterruptedException iex ) {
                     }
                     tryConnect( connection );
                 }
@@ -382,10 +389,12 @@ public class Common {
                 {
                     try {
                         is = new GZIPInputStream( connection.getInputStream() ); // ex. 178.com
-                    } catch ( IOException ex ) {
+                    }
+                    catch ( IOException ex ) {
                         is = connection.getInputStream(); // 其他漫畫網
                     }
-                } else {
+                }
+                else {
                     is = connection.getInputStream(); // 其他漫畫網
                 }
                 Common.debugPrint( "(" + fileSize + " k) " );
@@ -399,7 +408,8 @@ public class Common {
                     if ( fileSize > 1024 || !Flag.timeoutFlag ) // 預防卡住的機制
                     {
                         os.write( r, 0, len );
-                    } else {
+                    }
+                    else {
                         break;
                     }
 
@@ -411,7 +421,8 @@ public class Common {
                         if ( fileSize > 0 ) {
                             percent = (fileGotSize * 100) / fileSize;
                             downloadText = fileSizeString + "Kb ( " + percent + "% ) ";
-                        } else {
+                        }
+                        else {
                             downloadText = fileSizeString + " Kb ( " + fileGotSize + "Kb ) ";
                         }
 
@@ -464,11 +475,12 @@ public class Common {
 
                 Common.debugPrintln( webSite + " downloads successful!" ); // for debug
 
-            } catch ( Exception e ) {
+            }
+            catch ( Exception e ) {
                 e.printStackTrace();
             }
 
-            //CommonGUI.stateBarDetailMessage = null;
+            CommonGUI.stateBarDetailMessage = null;
         }
     }
 
@@ -487,13 +499,15 @@ public class Common {
             if ( connection.getResponseCode() == HttpURLConnection.HTTP_OK ) {
                 isOK = true;
                 Common.debugPrintln( urlString + " 測試連線結果: OK" );
-            } else {
+            }
+            else {
                 isOK = false;
                 Common.debugPrintln( urlString + " 測試連線結果: 不OK ( " + connection.getResponseCode() + " )" );
             }
             connection.disconnect();
 
-        } catch ( Exception e ) {
+        }
+        catch ( Exception e ) {
             e.printStackTrace();
         }
         return isOK;
@@ -514,13 +528,21 @@ public class Common {
                     cookieStrings[i - 1] = new String( connection.getHeaderField( i ) );
                     //System.out.println( i + " " + cookieStrings[i-1] );
                 }
+                else {
+                    if ( headerName.matches( "Content-Length" ) ) {
+                        System.out.println( headerName + " = " + connection.getHeaderField( i ) );
+                    }
+                    //System.out.println( headerName + " = " + connection.getHeaderField( i ) );
+                }
             }
-        } catch ( Exception ex ) {
+        }
+        catch ( Exception ex ) {
             try {
                 if ( connection.getResponseCode() != 200 && !Flag.timeoutFlag ) {
                     try {
                         Thread.sleep( 1000 ); // 每次暫停一秒再重新連線
-                    } catch ( InterruptedException iex ) {
+                    }
+                    catch ( InterruptedException iex ) {
                     }
                     Common.debugPrintln( "重新嘗試連線......" );
                     if ( Common.withGUI() ) {
@@ -528,7 +550,8 @@ public class Common {
                         connection.connect(); // 第二次嘗試連線
                     }
                 }
-            } catch ( Exception exx ) {
+            }
+            catch ( Exception exx ) {
                 exx.printStackTrace();
             }
         }
@@ -539,7 +562,8 @@ public class Common {
         String regex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
         if ( webSite.matches( regex ) ) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
 
@@ -550,7 +574,8 @@ public class Common {
         try {
             // Deflater.NO_COMPRESSION: 沒有壓縮，僅儲存
             compress( source, destination, null, Deflater.NO_COMPRESSION );
-        } catch ( Exception e ) {
+        }
+        catch ( Exception e ) {
             e.printStackTrace();
         }
     }
@@ -579,7 +604,8 @@ public class Common {
             }
             fis.close();
             zos.closeEntry();
-        } else if ( source.isDirectory() ) {
+        }
+        else if ( source.isDirectory() ) {
             // 下面這三行是把資料夾加入到壓縮檔裡面，因為有亂碼，所以拿掉。
             //ZipEntry zipEntry = new ZipEntry( filename + "/" );
             //zos.putNextEntry( zipEntry );
@@ -600,7 +626,8 @@ public class Common {
             filePath = filePath.toString();
             File myFilePath = new File( filePath );
             myFilePath.delete(); // delete empty dir
-        } catch ( Exception e ) {
+        }
+        catch ( Exception e ) {
             e.printStackTrace();
         }
     }
@@ -621,7 +648,8 @@ public class Common {
         for ( int i = 0 ; i < tempList.length ; i++ ) {
             if ( path.endsWith( File.separator ) ) {
                 temp = new File( path + tempList[i] );
-            } else {
+            }
+            else {
                 temp = new File( path + File.separator + tempList[i] );
             }
 
@@ -652,7 +680,8 @@ public class Common {
             dataout.write( data1 );
             fout.close();
             Common.debugPrintln( "寫出 " + filePath + fileName + " 檔案" );
-        } catch ( IOException e ) {
+        }
+        catch ( IOException e ) {
             e.printStackTrace();
         }
     }
@@ -706,10 +735,12 @@ public class Common {
 
                 fileInputStream.close(); // 加這句才能讓official.html刪除，還在實驗中
 
-            } catch ( IOException e ) {
+            }
+            catch ( IOException e ) {
                 e.printStackTrace();
             }
-        } else {
+        }
+        else {
             Common.errorReport( "沒有找到" + filePath + fileName + "此一檔案" );
         }
 
@@ -852,9 +883,6 @@ public class Common {
         oldString = getStringReplaceHttpCode( oldString ); // 先經過html字符編碼轉換
         String newString = "";
 
-        // \/ * " < > | .轉成_
-        // ? : 轉成空格
-        // '轉成空字元
         for ( int i = 0 ; i < oldString.length() ; i++ ) {
             if ( oldString.charAt( i ) == '\\'
                     || oldString.charAt( i ) == '/'
@@ -866,13 +894,17 @@ public class Common {
                     || oldString.charAt( i ) == '.' ) {
 
                 newString += String.valueOf( '_' );
-            } else if ( oldString.charAt( i ) == '?'
-                    || oldString.charAt( i ) == ':'  ) {
+            }
+            else if ( oldString.charAt( i ) == '?'
+                    || oldString.charAt( i ) == ':' ) {
                 newString += String.valueOf( ' ' );
-            } else if ( oldString.charAt( i ) == '&'  ) {
+            }
+            else if ( oldString.charAt( i ) == '&' ) {
                 newString += String.valueOf( '＆' );
-            } else if ( oldString.charAt( i ) == '\''  ) {
-            } else {
+            }
+            else if ( oldString.charAt( i ) == '\'' ) {
+            }
+            else {
                 newString += String.valueOf( oldString.charAt( i ) );
             }
         }
@@ -885,13 +917,16 @@ public class Common {
         if ( title.matches( "(?s).*九九漫畫" ) ) // 拿掉多餘字尾
         {
             title = title.substring( 0, title.length() - 4 );
-        } else if ( title.matches( "(?s).*手機漫畫" ) ) // 拿掉多餘字尾
+        }
+        else if ( title.matches( "(?s).*手機漫畫" ) ) // 拿掉多餘字尾
         {
             title = title.substring( 0, title.length() - 4 );
-        } else if ( title.matches( "(?s).*第一漫畫" ) ) // 拿掉多餘字尾
+        }
+        else if ( title.matches( "(?s).*第一漫畫" ) ) // 拿掉多餘字尾
         {
             title = title.substring( 0, title.length() - 4 );
-        } else if ( title.matches( "(?s).*漫畫" ) ) // 拿掉[漫畫]字尾
+        }
+        else if ( title.matches( "(?s).*漫畫" ) ) // 拿掉[漫畫]字尾
         {
             title = title.substring( 0, title.length() - 2 );
         }
@@ -902,7 +937,8 @@ public class Common {
     public static boolean withGUI() { // check the running app is GUI version or console version
         if ( Thread.currentThread().getName().equals( consoleThreadName ) ) {
             return false;
-        } else {
+        }
+        else {
             return true;
         }
     }
@@ -917,7 +953,8 @@ public class Common {
                     + indexNameNo + "." + defaultExtensionName );
             if ( tempFile.exists() && (!tempFile.canRead() || !tempFile.canWrite()) ) {
                 indexNameNo++;
-            } else {
+            }
+            else {
                 over = true;
             }
         }
@@ -948,7 +985,8 @@ public class Common {
     public static String getSlash() {
         if ( Common.isWindows() ) {
             return "\\";
-        } else {
+        }
+        else {
             return "/";
         }
     }
@@ -956,7 +994,8 @@ public class Common {
     public static String getRegexSlash() { // \\要轉為\\\\
         if ( Common.isWindows() ) {
             return "\\\\";
-        } else {
+        }
+        else {
             return "/";
         }
     }
@@ -997,9 +1036,11 @@ public class Common {
 
         if ( index1 < 0 ) {
             return index2;
-        } else if ( index2 < 0 ) {
+        }
+        else if ( index2 < 0 ) {
             return index1;
-        } else {
+        }
+        else {
             return index1 < index2 ? index1 : index2;
         }
     }
@@ -1011,9 +1052,11 @@ public class Common {
 
         if ( index1 < 0 ) {
             return index2;
-        } else if ( index2 < 0 ) {
+        }
+        else if ( index2 < 0 ) {
             return index1;
-        } else {
+        }
+        else {
             return index1 > index2 ? index1 : index2;
         }
     }
@@ -1103,9 +1146,11 @@ public class Common {
                     for ( int col = 0 ; col < ComicDownGUI.getDownloadColumns().size() ; col++ ) {
                         if ( col == DownTableEnum.YES_OR_NO ) {
                             downTableModel.setValueAt( Boolean.valueOf( colStrings[col] ), row, col );
-                        } else if ( col == DownTableEnum.ORDER ) {
+                        }
+                        else if ( col == DownTableEnum.ORDER ) {
                             downTableModel.setValueAt( new Integer( row + 1 ), row, col );
-                        } else {
+                        }
+                        else {
                             downTableModel.setValueAt( colStrings[col], row, col );
                         }
                     }
@@ -1114,7 +1159,8 @@ public class Common {
 
                 }
                 Common.debugPrintln( "   ... 讀入完畢!!" );
-            } catch ( Exception ex ) {
+            }
+            catch ( Exception ex ) {
                 Common.debugPrintln( "   ... 讀入失敗!!" );
                 cleanDownTable();
                 new File( "downloadList.dat" ).delete();
@@ -1122,7 +1168,8 @@ public class Common {
 
 
             return downTableModel;
-        } else {
+        }
+        else {
             return new DownloadTableModel( ComicDownGUI.getDownloadColumns(), 0 );
         }
 
@@ -1145,7 +1192,8 @@ public class Common {
                         //Common.debugPrint( colStrings[col] + " " );
                         if ( col == BookmarkTableEnum.ORDER ) {
                             tableModel.setValueAt( new Integer( row + 1 ), row, col );
-                        } else {
+                        }
+                        else {
                             tableModel.setValueAt( colStrings[col], row, col );
                         }
                     }
@@ -1154,12 +1202,14 @@ public class Common {
                     //Common.debugPrintln( " 讀取OK！" );
                 }
                 Common.debugPrintln( "   ... 讀入完畢!!" );
-            } catch ( Exception ex ) {
+            }
+            catch ( Exception ex ) {
                 Common.debugPrintln( "   ... 讀入失敗!!" );
             }
 
             return tableModel;
-        } else {
+        }
+        else {
             return new BookmarkTableModel( ComicDownGUI.getBookmarkColumns(), 0 );
         }
 
@@ -1183,7 +1233,8 @@ public class Common {
 
                         if ( col == RecordTableEnum.ORDER ) {
                             tableModel.setValueAt( new Integer( row + 1 ), row, col );
-                        } else {
+                        }
+                        else {
                             tableModel.setValueAt( colStrings[col], row, col );
                         }
                     }
@@ -1192,12 +1243,14 @@ public class Common {
                     //Common.debugPrintln( " 讀取OK！" );
                 }
                 Common.debugPrintln( "   ... 讀入完畢!!" );
-            } catch ( Exception ex ) {
+            }
+            catch ( Exception ex ) {
                 Common.debugPrintln( "   ... 讀入失敗!!" );
             }
 
             return tableModel;
-        } else {
+        }
+        else {
             return new RecordTableModel( ComicDownGUI.getRecordColumns(), 0 );
         }
 
@@ -1244,7 +1297,8 @@ public class Common {
                 || fileName.matches( "(?s).*\\.bmp" )
                 || fileName.matches( "(?s).*\\.BMP" ) ) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
 
@@ -1265,7 +1319,8 @@ public class Common {
                 || new File( directory + fileName + ".bmp" ).exists()
                 || new File( directory + fileName + ".BMP" ).exists() ) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
 
@@ -1316,7 +1371,8 @@ public class Common {
             String apath = Common.class.getProtectionDomain().getCodeSource().getLocation().getPath();
             try {
                 apath = URLDecoder.decode( apath, "UTF-8" );
-            } catch ( UnsupportedEncodingException ex ) {
+            }
+            catch ( UnsupportedEncodingException ex ) {
                 Logger.getLogger( Common.class.getName() ).log( Level.SEVERE, null, ex );
             }
 
@@ -1324,12 +1380,14 @@ public class Common {
             String absolutePath;
             if ( apath.endsWith( ".jar" ) ) {
                 absolutePath = apath.replaceAll( "([^/\\\\]+).jar$", "" );
-            } else {
+            }
+            else {
                 absolutePath = new File( "" ).getAbsolutePath() + Common.getSlash();
             }
 
             return absolutePath;
-        } else {
+        }
+        else {
             return new File( "" ).getAbsolutePath() + getSlash();
         }
 
@@ -1342,7 +1400,8 @@ public class Common {
     public static void playSingleDoneAudio( String fileString ) {
         if ( new File( fileString ).exists() ) {
             playAudio( fileString, false );
-        } else {
+        }
+        else {
             playAudio( Common.defaultSingleDoneAudio, true );
         }
     }
@@ -1354,7 +1413,8 @@ public class Common {
     public static void playAllDoneAudio( String fileString ) {
         if ( new File( fileString ).exists() ) {
             playAudio( fileString, false );
-        } else {
+        }
+        else {
             playAudio( Common.defaultAllDoneAudio, true );
         }
     }
@@ -1370,7 +1430,8 @@ public class Common {
                     if ( defaultResource ) { // 預設音效
                         URL audioFileURL = new CommonGUI().getResourceURL( audioFileString );
                         ais = AudioSystem.getAudioInputStream( audioFileURL );
-                    } else { // 外部音效
+                    }
+                    else { // 外部音效
                         File audioFile = new File( audioFileString );
                         ais = AudioSystem.getAudioInputStream( audioFile );
                     }
@@ -1386,7 +1447,8 @@ public class Common {
                     }
                     sdl.drain();
                     sdl.close();
-                } catch ( Exception e ) {
+                }
+                catch ( Exception e ) {
                     e.printStackTrace();
                 }
             }
@@ -1405,13 +1467,15 @@ public class Common {
                 // \u0080-\uFFFF -> 中日韓3byte以上的字符
                 if ( url.substring( k, k + 1 ).matches( "(?s).*[\u0080-\uFFFF]+(?s).*" ) ) {
                     temp += URLEncoder.encode( url.substring( k, k + 1 ), "UTF-8" );
-                } else {
+                }
+                else {
                     temp += url.substring( k, k + 1 );
                 }
 
             }
             url = temp;
-        } catch ( Exception e ) {
+        }
+        catch ( Exception e ) {
             e.printStackTrace();
         }
 
@@ -1422,7 +1486,8 @@ public class Common {
     }
 
     // 非windows系統時的操作
-    public static void runCmd( String program, String file ) {
+    // openFileManger: 開啟檔案總管
+    public static void runCmd( String program, String file, boolean openFileManger ) {
         String path = file;
         String cmd = program;
 
@@ -1430,8 +1495,7 @@ public class Common {
         if ( !new File( file ).exists() ) {
             String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
             String colorString = "blue";
-            //if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
-            if ( CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
+            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
                 colorString = "yellow";
             }
 
@@ -1455,15 +1519,17 @@ public class Common {
             }
         }
 
-
-        if ( existZipFile ) {
-            // 資料夾內存在壓縮檔
-            path = file + Common.getSlash() + firstZipFileName;
-        } else {
-            String[] picList = new File( file + Common.getSlash() + fileList[0] ).list();
-            String firstPicFileInFirstVolume = picList[0];
-            path = file + Common.getSlash() + fileList[0]
-                    + Common.getSlash() + firstPicFileInFirstVolume;
+        if ( !openFileManger ) {
+            if ( existZipFile ) {
+                // 資料夾內存在壓縮檔
+                path = file + Common.getSlash() + firstZipFileName;
+            }
+            else {
+                String[] picList = new File( file + Common.getSlash() + fileList[0] ).list();
+                String firstPicFileInFirstVolume = picList[0];
+                path = file + Common.getSlash() + fileList[0]
+                        + Common.getSlash() + firstPicFileInFirstVolume;
+            }
         }
 
         Common.debugPrintln( "開啟命令：" + cmd + path );
@@ -1473,7 +1539,8 @@ public class Common {
             Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
             //Runtime.getRuntime().exec(cmd + path);
 
-        } catch ( IOException ex ) {
+        }
+        catch ( IOException ex ) {
             Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
         }
     }
@@ -1515,9 +1582,272 @@ public class Common {
         env.putAll( newEnv );
         try {
             final Process p = pb.start();
-        } catch ( IOException ex ) {
+        }
+        catch ( IOException ex ) {
             Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
         }
+    }
+
+    public static void downloadPost( String webSite, String outputDirectory,
+            String outputFileName, String postString, boolean needCookie, String cookieString ) {
+        // downlaod file by URL
+
+        boolean gzipEncode = false;
+        int retryTimes = 0;
+        boolean forceDownload = false;
+        boolean fastMode = false;
+
+        int fileGotSize = 0;
+
+        postString = "dm5_key=B1tLbaYxCtE%3D";
+
+
+        if ( CommonGUI.stateBarDetailMessage == null ) {
+            CommonGUI.stateBarMainMessage = "下載網頁進行分析 : ";
+            CommonGUI.stateBarDetailMessage = outputFileName + " ";
+        }
+
+        if ( Run.isAlive || forceDownload ) { // 當允許下載或強制下載時才執行連線程序
+            try {
+
+                ComicDownGUI.stateBar.setText( webSite + " 連線中..." );
+
+                URL url = new URL( webSite );
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+                // 偽裝成瀏覽器
+                //connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)");
+                //connection.setRequestProperty( "User-Agent", "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
+
+                //connection.setRequestMethod( "GET" ); // 默认是GET 
+                connection.setRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)" );
+                //connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; InfoPath.1; CIBA)");
+                connection.setFollowRedirects( true );
+                //connection.setDoOutput( true ); // 需要向服务器写数据
+                connection.setDoInput( true ); //
+                connection.setUseCaches( false ); // // Post 请求不能使用缓存 
+                connection.setAllowUserInteraction( false );
+
+                // 设定传送的内容类型是可序列化的java对象   
+                // (如果不设此项,在传送序列化对象时,当WEB服务默认的不是这种类型时可能抛java.io.EOFException)
+                connection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
+                connection.setRequestProperty( "Accept-Language", "zh-cn" );
+                //connection.setRequestProperty( "Content-Length", "" + postString.length() );
+                connection.setRequestProperty( "Cache-Control", "no-cache" );
+                //connection.setRequestProperty("Cache-Control", "private");
+                connection.setRequestProperty( "Pragma", "no-cache" );
+                connection.setRequestProperty( "Host", "10.0.0.172" );
+                connection.setRequestProperty( "Accept", "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2" );
+                connection.setRequestProperty( "Connection", "keep-alive" );
+
+                connection.setDoOutput( true );
+
+                connection.setConnectTimeout( 10000 ); // 與主機連接時間不能超過十秒
+
+
+                if ( needCookie ) {
+                    connection.setDoOutput( true );
+
+                    connection.setRequestProperty( "Cookie", cookieString );
+                }
+
+                int responseCode = 0;
+
+
+                // google圖片下載時因為有些連線很久沒回應，所以要設置計時器，預防連線時間過長
+                Timer timer = new Timer();
+                if ( SetUp.getTimeoutTimer() > 0 ) {
+                    // 預設(getTimeoutTimer()*1000)秒會timeout
+                    timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 );
+                }
+
+                connection.setRequestMethod( "POST" ); // 默认是GET 
+
+
+                tryConnect( connection );
+
+
+                System.out.println( "資料長度：" + connection.getContentLength() );
+
+                /*
+                 * OutputStream output = null; try { output =
+                 * connection.getOutputStream(); //output.write(
+                 * postString.getBytes() ); } catch ( Exception ex ) {
+                 * Common.errorReport( "無法送出給伺服器端" ); } finally { if ( output !=
+                 * null ) { try { output.close(); } catch ( IOException
+                 * logOrIgnore ) { } } }
+                 */
+
+
+                int fileSize = connection.getContentLength() / 1000;
+
+                if ( Common.isPicFileName( outputFileName )
+                        && (fileSize == 21 || fileSize == 22) ) { // 連到99系列的盜連圖
+                    Common.debugPrintln( "似乎連到盜連圖，停一秒後重新連線......" );
+                    try {
+                        Thread.sleep( 1000 ); // 每次暫停一秒再重新連線
+                    }
+                    catch ( InterruptedException iex ) {
+                    }
+                    tryConnect( connection );
+                }
+
+                if ( connection.getResponseCode() != 200 ) {
+                    //Common.debugPrintln( "第二次失敗，不再重試!" );
+                    Common.errorReport( "錯誤回傳碼(responseCode): "
+                            + connection.getResponseCode() + " : " + webSite );
+                    return;
+                }
+
+                Common.checkDirectory( outputDirectory ); // 檢查有無目標資料夾，若無則新建一個　
+
+                //OutputStream os = response.getOutputStream();
+                OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
+                InputStream is = null;
+
+                if ( gzipEncode && fileSize < 17 ) // 178漫畫小於17kb就認定為已經壓縮過的
+                {
+                    try {
+                        is = new GZIPInputStream( connection.getInputStream() ); // ex. 178.com
+                    }
+                    catch ( IOException ex ) {
+                        is = connection.getInputStream(); // 其他漫畫網
+                    }
+                }
+                else {
+                    is = connection.getInputStream(); // 其他漫畫網
+                }
+                Common.debugPrint( "(" + fileSize + " k) " );
+                String fileSizeString = fileSize > 0 ? "" + fileSize : " ? ";
+
+
+
+                byte[] r = new byte[1024];
+                int len = 0;
+
+                while ( (len = is.read( r )) > 0 && (Run.isAlive || forceDownload) ) {
+                    // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
+                    if ( fileSize > 1024 || !Flag.timeoutFlag ) // 預防卡住的機制
+                    {
+                        os.write( r, 0, len );
+                    }
+                    else {
+                        break;
+                    }
+
+                    fileGotSize += (len / 1000);
+
+                    if ( Common.withGUI() ) {
+                        int percent = 100;
+                        String downloadText = "";
+                        if ( fileSize > 0 ) {
+                            percent = (fileGotSize * 100) / fileSize;
+                            downloadText = fileSizeString + "Kb ( " + percent + "% ) ";
+                        }
+                        else {
+                            downloadText = fileSizeString + " Kb ( " + fileGotSize + "Kb ) ";
+                        }
+
+                        ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
+                                + CommonGUI.stateBarDetailMessage
+                                + " : " + downloadText );
+                    }
+                }
+
+                is.close();
+                os.flush();
+                os.close();
+
+
+
+
+                if ( Common.withGUI() ) {
+                    ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
+                            + CommonGUI.stateBarDetailMessage
+                            + " : " + fileSizeString + "Kb ( 100% ) " );
+                }
+
+                connection.disconnect();
+
+
+                // 若真實下載檔案大小比預估來得小，則視設定值決定要重新嘗試幾次
+                int realFileGotSize = (int) new File( outputDirectory + outputFileName ).length() / 1000;
+                if ( realFileGotSize + 1 < fileGotSize && retryTimes > 0 ) {
+                    String messageString = realFileGotSize + " < " + fileGotSize
+                            + " -> 等待兩秒後重新嘗試下載" + outputFileName + "（" + retryTimes
+                            + "/" + SetUp.getRetryTimes() + "）";
+                    Common.debugPrintln( messageString );
+                    ComicDownGUI.stateBar.setText( messageString );
+                    Thread.sleep( 2000 ); // 每次暫停一秒再重新連線
+
+                    downloadFile( webSite, outputDirectory, outputFileName,
+                            needCookie, cookieString, fastMode, retryTimes - 1, gzipEncode, false );
+
+
+                }
+
+                if ( fileSize < 1024 && Flag.timeoutFlag ) {
+                    new File( outputDirectory + outputFileName ).delete();
+                    Common.debugPrintln( "刪除不完整檔案：" + outputFileName );
+
+                    ComicDownGUI.stateBar.setText( "下載逾時，跳過" + outputFileName );
+
+                }
+
+                timer.cancel(); // 連線結束同時也關掉計時器
+
+                Flag.timeoutFlag = false; // 歸回初始值
+
+                Common.debugPrintln( webSite + " downloads successful!" ); // for debug
+
+            }
+            catch ( Exception e ) {
+                e.printStackTrace();
+            }
+
+            CommonGUI.stateBarDetailMessage = null;
+        }
+    }
+
+    public static void urlConnection( String urlString ) {
+        urlString = "http://www.coderanch.com/t/207232/sockets/java/httpURLConnection-content-length-always";
+
+        try {
+            URL url = new URL( urlString );
+            URLConnection yc = url.openConnection();
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(
+                    yc.getInputStream() ) );
+            String inputLine;
+
+
+
+            while ( (inputLine = in.readLine()) != null ) {
+                System.out.println( inputLine );
+            }
+            in.close();
+
+            Common.debugPrintln( "連線結束" );
+
+        }
+        catch ( Exception ex ) {
+            Common.errorReport( "無法連線" );
+        }
+
+    }
+
+    // 從java.awt.Color[r=255,g=175,b=175]轉為Color
+    public static Color getColor( String colorString ) {
+
+        String[] tempStrings = colorString.split( "=|,|\\[|\\]" );
+
+        int r = Integer.parseInt( tempStrings[2] );
+        int g = Integer.parseInt( tempStrings[4] );
+        int b = Integer.parseInt( tempStrings[6] );
+
+        //Common.debugPrintln( "取得色碼(r, g, b): " + r + " " + g + " " + b );
+
+        return new Color( r, g, b );
     }
 }
 

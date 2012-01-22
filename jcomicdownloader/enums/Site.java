@@ -50,4 +50,7 @@ public class Site {
     public final static int KANGDM = 32;
     public final static int BENGOU = 33;
     public final static int EMLAND = 34;
+    public final static int MOP = 35;
+    public final static int DM5 = 36;
+    public final static int CK = 37;
 }

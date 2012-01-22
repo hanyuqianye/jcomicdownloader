@@ -109,7 +109,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
 
                 for ( int i = 0 ; i < urlTokens.length ; i++ ) {
                     if ( urlTokens[i].matches( "\\s*src=\\s*" ) ) {
-                        comicURL[p - 1] = urlTokens[i + 1];
+                        comicURL[p - 1] = Common.getFixedChineseURL( urlTokens[i + 1] );
                         // 每解析一個網址就下載一張圖
                         singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0 );
 

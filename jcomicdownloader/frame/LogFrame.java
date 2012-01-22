@@ -23,7 +23,7 @@ public class LogFrame extends JFrame {
     private String resourceFolder;
     private StringBuffer messageString;
 
-    public static JFrame logFrame; // for change look and feel
+    public static JFrame thisFrame; // for change look and feel
 
 /**
  *
@@ -32,7 +32,7 @@ public class LogFrame extends JFrame {
     public LogFrame() {
         super( "程式記錄" );
 
-        logFrame = this; // for change look and feel
+        thisFrame = this; // for change look and feel
         resourceFolder = "resource/";
 
         messageString = new StringBuffer( "" );
@@ -44,6 +44,7 @@ public class LogFrame extends JFrame {
 
     private void setUpUIComponent() {
         setSize( 540, 690 );
+        setDefaultLookAndFeelDecorated( false ); // 讓標題欄可以隨look and feel改變
         setIconImage( new CommonGUI().getImage( "main_icon.png" ) );
 
         Container contentPane = getContentPane();

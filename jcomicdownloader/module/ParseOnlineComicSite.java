@@ -13,14 +13,13 @@ ChangeLog:
 package jcomicdownloader.module;
 
 import java.io.File;
-import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import jcomicdownloader.tools.*;
-
-import java.util.*;
+import java.util.List;
 import jcomicdownloader.ComicDownGUI;
 import jcomicdownloader.SetUp;
+import jcomicdownloader.tools.Common;
+import jcomicdownloader.tools.CommonGUI;
 
 /**
  *
@@ -168,7 +167,8 @@ abstract public class ParseOnlineComicSite {
         CommonGUI.stateBarDetailMessage += ": [" + fileName + "]";
 
         // 下載第n張之前，先檢查第n+1張圖是否存在，若是則跳下一張
-        if ( !new File( getDownloadDirectory() + nextFileName ).exists() ) {
+        if ( !new File( getDownloadDirectory() + fileName ).exists() ||
+             !new File( getDownloadDirectory() + nextFileName ).exists()) {
             if ( delayTime == 0 ) {
                 Common.downloadFile( url, getDownloadDirectory(), fileName, needCookie, cookieString );
             } else {
