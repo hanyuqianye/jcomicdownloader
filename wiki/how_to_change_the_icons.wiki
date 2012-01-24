@@ -1,9 +1,5 @@
 #labels Phase-Deploy
-<p>
-	</p>
-<p>
-	<meta content="text/html; charset=utf-8" http-equiv="content-type" />
-</p>
+
 <h3 align="left" id="sites-page-title-header" style="font-size: 22px; font-weight: bold; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; color: rgb(0, 0, 0); padding-top: 3px; padding-right: 10px; padding-bottom: 3px; padding-left: 10px; " xmlns="http://www.w3.org/1999/xhtml">
 	<span dir="ltr" id="sites-page-title">如何變更起始圖片和介面圖示</span></h3>
 <div class="sites-canvas-main" id="sites-canvas-main" style="background-image: initial; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: rgb(255, 255, 255); min-height: 150px; padding-bottom: 5px; padding-top: 15px; background-position: initial initial; background-repeat: initial initial; ">
