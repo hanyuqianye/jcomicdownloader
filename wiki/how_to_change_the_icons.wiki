@@ -1,0 +1,89 @@
+#labels Phase-Deploy
+<p>
+	</p>
+<p>
+	<meta content="text/html; charset=utf-8" http-equiv="content-type" />
+</p>
+<h3 align="left" id="sites-page-title-header" style="font-size: 22px; font-weight: bold; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; color: rgb(0, 0, 0); padding-top: 3px; padding-right: 10px; padding-bottom: 3px; padding-left: 10px; " xmlns="http://www.w3.org/1999/xhtml">
+	<span dir="ltr" id="sites-page-title">如何變更起始圖片和介面圖示</span></h3>
+<div class="sites-canvas-main" id="sites-canvas-main" style="background-image: initial; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: rgb(255, 255, 255); min-height: 150px; padding-bottom: 5px; padding-top: 15px; background-position: initial initial; background-repeat: initial initial; ">
+	<div id="sites-canvas-main-content">
+		<table cellspacing="0" class="sites-layout-name-one-column sites-layout-hbox" style="width: 1260px; table-layout: fixed; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; " xmlns="http://www.w3.org/1999/xhtml">
+			<tbody>
+				<tr>
+					<td class="sites-layout-tile sites-tile-name-content-1" style="vertical-align: top; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; ">
+						<div dir="ltr">
+							若希望置換起始圖片和介面上的各個圖示，可依以下步驟執行：
+							<div>
+								</div>
+							<div>
+								1. 以解壓縮程式開啟JComicDownloader，在此以WinRAR做為示範：</div>
+							<div>
+								<div style="display: block; text-align: left; ">
+									<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-change-the-icons/IconSetting_26.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1327215167432/step-by-step/how-to-change-the-icons/IconSetting_26.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+							</div>
+							<div>
+								</div>
+							<div>
+								2. 開啟後會看到jcomicdownloader和META-INF兩個資料夾，此時進入到<b><font color="#990000">jcomicdownloader\tools\resource</font></b>目錄底下：</div>
+							<div>
+								<div style="display: block; text-align: left; ">
+									<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-change-the-icons/IconSetting_27.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1327215201356/step-by-step/how-to-change-the-icons/IconSetting_27.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+							</div>
+							<div>
+								<img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1327215265329/step-by-step/how-to-change-the-icons/IconSetting_28.png" /></div>
+							<div>
+								</div>
+							<div>
+								</div>
+							<div>
+								3. 所有圖示全部存放在此目錄底下，在其中找出要換掉的圖示，而後將希望取代的新圖示變更為同個名稱：</div>
+							<div>
+								（ex. 假設要置換加入圖示，從中查得此圖示名稱為add.png，那麼要取代的新圖示名稱就要改為add.png）</div>
+							<div>
+								<div style="display: block; text-align: left; ">
+									<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-change-the-icons/IconSetting_29.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1327215504032/step-by-step/how-to-change-the-icons/IconSetting_29.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+							</div>
+							<div>
+								<div style="text-align: -webkit-auto; display: block; ">
+									PS: 起始圖片的名稱為<font color="#990000" style="font-weight: bold; ">logo.png</font>，系統小圖示的名稱為<font color="#990000" style="font-weight: bold; ">main_icon.png</font><b>。</b></div>
+							</div>
+							<div style="text-align: -webkit-auto; display: block; ">
+								</div>
+							<div>
+								</div>
+							<div>
+								4.接著以新圖示取代舊圖示，壓縮到JComicDownloader裡面的<b><font color="#990000">jcomicdownloader\tools\resource</font></b>目錄底下：</div>
+							<div>
+								<div style="display: block; text-align: left; ">
+									<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-change-the-icons/IconSetting_30.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1327215574315/step-by-step/how-to-change-the-icons/IconSetting_30.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+							</div>
+							<div>
+								</div>
+							<div>
+								5. 重新開啟程式，便可看到置換成果：</div>
+							<div>
+								</div>
+							<div>
+								<font color="#38761d"><b>起始圖片：</b></font></div>
+							<div>
+								<div style="display: block; text-align: left; ">
+									<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-change-the-icons/IconSetting_34.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1327215668516/step-by-step/how-to-change-the-icons/IconSetting_34.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+							</div>
+							<div>
+								</div>
+							<div>
+								<font color="#38761d"><span style="font-weight: bold; ">介面</span></font><b style="color: rgb(56, 118, 29); ">圖示</b><b style="color: rgb(56, 118, 29); ">：</b></div>
+							<div>
+								<div style="display: block; text-align: left; ">
+									<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-change-the-icons/IconSetting_31.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1327215683173/step-by-step/how-to-change-the-icons/IconSetting_31.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+							</div>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<p>
+	</p>
