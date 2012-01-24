@@ -1,0 +1,65 @@
+#labels Phase-Deploy
+
+<h3 align="left" id="sites-page-title-header" style="font-size: 22px; font-weight: bold; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; color: rgb(0, 0, 0); padding-top: 3px; padding-right: 10px; padding-bottom: 3px; padding-left: 10px; " xmlns="http://www.w3.org/1999/xhtml">
+	<span dir="ltr" id="sites-page-title">如何開啟執行權限（以Ubuntu為例）</span></h3>
+<div class="sites-canvas-main" id="sites-canvas-main" style="background-image: initial; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: rgb(255, 255, 255); min-height: 150px; padding-bottom: 5px; padding-top: 15px; background-position: initial initial; background-repeat: initial initial; ">
+	<div id="sites-canvas-main-content">
+		<table cellspacing="0" class="sites-layout-name-one-column sites-layout-hbox" style="width: 1260px; table-layout: fixed; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; " xmlns="http://www.w3.org/1999/xhtml">
+			<tbody>
+				<tr>
+					<td class="sites-layout-tile sites-tile-name-content-1" style="vertical-align: top; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; ">
+						<div dir="ltr">
+							可分別使用Nautilus或PCMan File Manager作設定：
+							<div>
+								</div>
+							<div>
+								</div>
+							<div>
+								<b><u>Nautilus</u>：</b></div>
+							<div>
+								</div>
+							<div>
+								以Nautilus開啟JComicDownloader所在資料夾，在JComicDownloader_vX.XX.jar（X.XX請自行代入版本號碼，如2.17）上按右鍵，選擇<font color="#990000">屬性</font>，會出現設定視窗，翻到<font color="#990000">權限</font>頁面，然後勾選<font color="#990000">允許檔案作為程式執行</font>即可。</div>
+							<div>
+								<div style="display: block; text-align: left; ">
+									<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-open-the-permission-on-ubuntu/JComicDownloader_v2.17.jar%20%E5%B1%AC%E6%80%A7_004.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1326454579465/step-by-step/how-to-open-the-permission-on-ubuntu/JComicDownloader_v2.17.jar%20%E5%B1%AC%E6%80%A7_004.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+							</div>
+							<div>
+								</div>
+							<div>
+								</div>
+							<div>
+								<b><u>PCMan File Manager</u>：</b></div>
+							<div>
+								</div>
+							<div>
+								以PCMan File Manager開啟JComicDownloader所在資料夾，在JComicDownloader_vX.XX.jar（X.XX為版本號碼）上按右鍵，選擇<font color="#990000">屬性</font>，會出現設定視窗，翻到<font color="#990000">權限</font>頁面，然後勾選<font color="#990000">執行</font>即可。</div>
+							<div>
+								<div style="display: block; text-align: left; ">
+									<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-open-the-permission-on-ubuntu/%E6%AA%94%E6%A1%88%E5%B1%AC%E6%80%A7_005.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1326454791621/step-by-step/how-to-open-the-permission-on-ubuntu/%E6%AA%94%E6%A1%88%E5%B1%AC%E6%80%A7_005.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+							</div>
+							<div>
+								</div>
+							<div>
+								</div>
+							<div>
+								開啟執行權限後，就可以用開啟普通程式的方式開啟JComicDownloader_vX.XX.jar了（雙擊滑鼠左鍵）。</div>
+							<div>
+								</div>
+							<div>
+								若仍有問題，也可以開啟終端機用指令開啟：</div>
+							<div>
+								<font color="#990000">java -jarJComicDownloader_vX.XX</font><font color="#990000">.jar</font></div>
+							<div>
+								</div>
+							<div>
+								<font color="#990000"><span style="color: rgb(0, 0, 0); ">PS:</span></font>X.XX<font color="#990000"><span style="color: rgb(0, 0, 0); ">請自行代入版本號碼，如2.17</span></font></div>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<p>
+	</p>
