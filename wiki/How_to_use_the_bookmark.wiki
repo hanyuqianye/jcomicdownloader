@@ -1,0 +1,77 @@
+#labels Phase-Deploy
+
+<h3 align="left" id="sites-page-title-header" style="font-size: 22px; font-weight: bold; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; color: rgb(0, 0, 0); padding-top: 3px; padding-right: 10px; padding-bottom: 3px; padding-left: 10px; " xmlns="http://www.w3.org/1999/xhtml">
+	<span dir="ltr" id="sites-page-title">如何使用我的書籤</span></h3>
+<div class="sites-canvas-main" id="sites-canvas-main" style="background-image: initial; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: rgb(255, 255, 255); min-height: 150px; padding-bottom: 5px; padding-top: 15px; background-position: initial initial; background-repeat: initial initial; ">
+	<div id="sites-canvas-main-content">
+		<table cellspacing="0" class="sites-layout-name-one-column sites-layout-hbox" style="width: 1260px; table-layout: fixed; margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px; " xmlns="http://www.w3.org/1999/xhtml">
+			<tbody>
+				<tr>
+					<td class="sites-layout-tile sites-tile-name-content-1" style="vertical-align: top; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; ">
+						<div dir="ltr">
+							<font size="2">我的書籤可以存放希望持續追蹤的漫畫，之後可從書籤清單中檢視是否更新，以下舉一例子作簡述：</font>
+							<div>
+								<br />
+								<div>
+									</div>
+								<div>
+									1. 假設我喜歡《Blood Lad<span>》</span><span>這部漫畫。</span></div>
+								<div>
+									<div style="display: block; text-align: left; ">
+										<span><a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20001.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1323855965200/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20001.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></span></div>
+								</div>
+								<div>
+									</div>
+								<div>
+									2. 然後今天想下載《Blood Lad<span>》的最新回數：</span></div>
+								<div>
+									<div style="display: block; text-align: left; ">
+										<font face="宋体"><span style="line-height: 14px; "><a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20014.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1323856029545/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20014.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></span></font></div>
+									<br />
+									<div>
+										<div>
+											</div>
+										<div>
+											3. 下載完畢後，若往後希望繼續追這本漫畫，可以在該列按右鍵，選擇『加入到書籤』：</div>
+										<div>
+											<div style="display: block; text-align: left; ">
+												<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20010.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1323856159965/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20010.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+										</div>
+										<div>
+											</div>
+										<div>
+											4. 翻到<b>我的書籤</b>頁面，即可看到《Blood Lad<span>》已經存在於清單當中：</span></div>
+										<div>
+											<div style="display: block; text-align: left; ">
+												<span><a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20011.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1323856218573/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20011.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></span></div>
+										</div>
+										<div>
+											</div>
+										<div>
+											</div>
+										<div>
+											5. 之後若要檢查有沒有更新的集數，可在該列按右鍵選擇『加入到下載任務』，或是在漫畫網址欄雙擊左鍵：</div>
+										<div>
+											<div style="display: block; text-align: left; ">
+												<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20013.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1323856362727/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20013.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+										</div>
+										<div>
+											</div>
+										<div>
+											6. 然後會跳出集數選擇視窗，下載過的漫畫會呈淺灰色，沒下載過的則為黑色，以此判斷是否有新的集數：</div>
+									</div>
+								</div>
+								<div>
+									<div style="display: block; text-align: left; ">
+										<a href="https://sites.google.com/site/jcomicdownloader/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20012.png?attredirects=0" imageanchor="1" style="color: rgb(0, 102, 204); outline-style: none; outline-width: initial; outline-color: initial; background-image: none; background-attachment: initial; background-origin: initial; background-clip: initial; background-color: initial; border-bottom-style: none; border-bottom-width: initial; border-bottom-color: initial; background-position: initial initial; background-repeat: initial initial; "><img border="0" src="https://sites.google.com/site/jcomicdownloader/_/rsrc/1323856446084/step-by-step/how-to-use-bookmark/%E5%9C%96%E7%89%87%20012.png" style="border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; border-style: initial; border-color: initial; padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; " /></a></div>
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<p>
+	</p>
