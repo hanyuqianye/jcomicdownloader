@@ -555,8 +555,9 @@ public class ChoiceFrame extends JFrame implements
             radioButton.setOpaque( false );
             radioButton.setForeground( SetUp.getChoiceFrameOtherDefaultColor() );
             radioButton.addMouseListener( this );
-            radioButton.addItemListener( new ItemHandler() );
+            
         }
+        radioButton.addItemListener( new ItemHandler() );
 
         if ( SetUp.getSkinClassName().matches( ".*napkin.*" ) ) {
             // 因為napkin的預設字型不太清楚，所以用選定字型

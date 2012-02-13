@@ -53,4 +53,5 @@ public class Site {
     public final static int MOP = 35;
     public final static int DM5 = 36;
     public final static int CK = 37;
+    public final static int TUKU = 38;
 }

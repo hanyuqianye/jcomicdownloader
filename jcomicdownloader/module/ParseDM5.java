@@ -17,6 +17,7 @@ import jcomicdownloader.enums.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Encoding;
 
@@ -29,8 +30,8 @@ public class ParseDM5 extends ParseOnlineComicSite {
     protected String baseURL;
 
     /**
-     *
-     * @author user
+
+     @author user
      */
     public ParseDM5() {
         siteID = Site.DM5;
@@ -54,6 +55,7 @@ public class ParseDM5 extends ParseOnlineComicSite {
         Common.debugPrintln( "開始解析各參數 :" );
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
+        //String cookieString = "isAdult=1; ";
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
 
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
@@ -90,6 +92,14 @@ public class ParseDM5 extends ParseOnlineComicSite {
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
 
+        // 取得主頁網址(用於檔頭Refer）
+        beginIndex = allPageString.indexOf( "href=\"/" ) + 2;
+        beginIndex = allPageString.indexOf( "href=\"/", beginIndex );
+        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( "\"", beginIndex );
+        String referURL = baseURL + allPageString.substring( beginIndex, endIndex );
+        Common.debugPrintln( "主頁網址：" + referURL );
+
         // ex. DM5_CID=85258;
         beginIndex = allPageString.indexOf( "DM5_CID" );
         beginIndex = allPageString.indexOf( "=", beginIndex ) + 1;
@@ -108,8 +118,9 @@ public class ParseDM5 extends ParseOnlineComicSite {
 
 
         Common.debugPrintln( "dm5_key = " + dm5Key );
-        //System.exit( 0 ); // debug
 
+
+        //String cookieString = Common.getCookieString( webSite );
 
         String frontURL = webSite.substring( 0, webSite.length() - 1 );
         String[] comicDataURL = new String[totalPage];
@@ -124,34 +135,46 @@ public class ParseDM5 extends ParseOnlineComicSite {
             comicDataURL[i] += "/chapterimagefun.ashx?cid="
                 + cid + "&page="
                 + ( i + 1 ) + "&language=1&key=" + dm5Key;
+
+            Common.debugPrintln( comicDataURL[i] );
         }
 
-
-
         String picURL = "";
-        for ( int p = 0; p < comicURL.length; p++ ) {
+        for ( int p = 0; p < comicURL.length; ) {
+            Common.debugPrintln( p + "" );
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 )
                 || !Common.existPicFile( getDownloadDirectory(), p + 2 ) ) {
-                allPageString = getAllPageString( comicDataURL[p] );
+                String dm5DataFileName = "dm5_data";
+                Common.downloadFile( comicDataURL[p], SetUp.getTempDirectory(),
+                    dm5DataFileName, false, "", referURL );
+
+                allPageString = Common.getFileString( SetUp.getTempDirectory(), dm5DataFileName );
 
                 beginIndex = allPageString.indexOf( "pix" );
                 beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
                 endIndex = allPageString.indexOf( "\"", beginIndex );
                 frontURL = allPageString.substring( beginIndex, endIndex );
 
-                beginIndex = allPageString.indexOf( "[", beginIndex ) + 1;
-                endIndex = allPageString.indexOf( "]", beginIndex );
+                beginIndex = allPageString.indexOf( "=", beginIndex ) + 1;
+                endIndex = allPageString.indexOf( ";", beginIndex );
                 String[] picNames = allPageString.substring(
                     beginIndex, endIndex ).split( "," );
 
-                for ( int i = 0; i < picNames.length; i++ ) {
-                    comicURL[p + i] = Common.getFixedChineseURL(
-                        frontURL + picNames[i].replaceAll( "\"", "" ) );
+                for ( int i = 0; i < picNames.length && p < comicURL.length; i++ ) {
+                    comicURL[p] = Common.getFixedChineseURL(
+                        frontURL + picNames[i].replaceAll( "\"|\\]|\\[", "" ) );
 
-                    Common.debugPrintln( ( p + 1 + i ) + " " + comicURL[p + i] ); // debug
+                    //Common.debugPrintln( ( p + 1 ) + " " + comicURL[p] ); // debug
                     // 每解析一個網址就下載一張圖
-                    singlePageDownload( getTitle(), getWholeTitle(), comicURL[p + i], totalPage, p + 1 + i, 0 );
+                    singlePageDownload( getTitle(), getWholeTitle(),
+                        comicURL[p], totalPage, p + 1, 0 );
+
+                    p++;
+
                 }
+            }
+            else {
+                p++;
             }
         }
 
@@ -161,16 +184,61 @@ public class ParseDM5 extends ParseOnlineComicSite {
     public String getDM5Key( String scriptString ) {
         int beginIndex, endIndex;
 
+
+
         // 先取得位置串列
         beginIndex = scriptString.indexOf( "return p" );
         beginIndex = scriptString.indexOf( "'", beginIndex ) + 1;
-        endIndex = scriptString.indexOf( ";", beginIndex );
+        endIndex = scriptString.lastIndexOf( "=\\';" );
+
+
+        int beginIndex1 = scriptString.lastIndexOf( "(", endIndex );
+        int beginIndex2 = scriptString.lastIndexOf( ";", endIndex );
+
+        // ('')之內只有一組var變數
+        if ( beginIndex1 > beginIndex2 ) {
+            beginIndex = beginIndex1 + 1;
+        }
+        else {
+            beginIndex = beginIndex2 + 1;
+        }
+
+        endIndex += 3;
+
         String tempString = scriptString.substring( beginIndex, endIndex );
 
-        String[] indexStrings = tempString.replaceAll( "\\'", "" ).replaceAll( "\\\\", "" ).split( "\\s|=|\\+" );
-        for ( int i = 0; i < indexStrings.length; i++ ) {
-            Common.debugPrintln( "index [" + i + "] = " + indexStrings[i] );
+
+        /*
+         // 如果/'+/'就沒轍了，譬如http://www.dm5.com/m9701/
+         String[] indexStrings = tempString.replaceAll( "\\'", "" ).replaceAll(
+         "\\\\", "" ).split( "\\s|=|\\+" );
+         for ( int i = 0; i < indexStrings.length; i++ ) {
+         Common.debugPrintln( "index [" + i + "] = " + indexStrings[i] );
+         }
+         */
+
+        System.out.println( "----------" );
+        List<String> indexList = new ArrayList<String>();
+        tempString = tempString.replaceAll( "\\'", "" ).replaceAll( "\\\\", "" );
+
+        // var fdlsmfl3511564612d的部份
+        indexList.add( String.valueOf( tempString.charAt( 0 ) ) );
+        indexList.add( String.valueOf( tempString.charAt( 1 ) ) );
+
+        // =後面的部份
+        for ( int i = 5; i < tempString.length(); i += 2 ) {
+            indexList.add( String.valueOf( tempString.charAt( i ) ) );
         }
+
+        System.out.println( indexList.toString() );
+
+        // 將ArrayList轉給String[]
+        String[] indexStrings = new String[indexList.size()];
+        for ( int i = 0; i < indexList.size(); i++ ) {
+            indexStrings[i] = indexList.get( i );
+        }
+
+        //System.exit( 0 );
 
         // 再取得資料串列
         beginIndex = scriptString.indexOf( "|", beginIndex );
@@ -182,18 +250,22 @@ public class ParseDM5 extends ParseOnlineComicSite {
         for ( int i = 0; i < arraryStrings.length; i++ ) {
             Common.debugPrintln( "arrary [" + i + "] = " + arraryStrings[i] );
         }
-        
+
         // 防止因為｜在最旁邊而少算
-        if ( arraryStrings[0].length() <= 1 )
+        if ( arraryStrings[0].length() <= 1 ) {
             arraryStrings[0] = "";
-        else
+        }
+        else {
             arraryStrings[0] = arraryStrings[0].substring( 1, arraryStrings[0].length() );
-        
+        }
+
         int len = arraryStrings.length - 1;
-        if ( arraryStrings[len].length() <= 1 )
+        if ( arraryStrings[len].length() <= 1 ) {
             arraryStrings[len] = "";
-        else
+        }
+        else {
             arraryStrings[len] = arraryStrings[len].substring( 0, arraryStrings[len].length() - 1 );
+        }
 
         // 然後將位置套入資料
         String dm5Key = "";
@@ -207,15 +279,17 @@ public class ParseDM5 extends ParseOnlineComicSite {
                 else {
                     dm5Key += arraryStrings[index];
                 }
-                
-                if ( i == 0 )
+
+                if ( i == 0 ) {
                     dm5Key += " ";
-                else if ( i == 1 )
+                }
+                else if ( i == 1 ) {
                     dm5Key += "=";
+                }
             }
         }
         Common.debugPrintln( "原始dm5Key = " + dm5Key );
-        
+
         dm5Key = dm5Key.split( "=" )[1] + "=";
         try {
             dm5Key = URLEncoder.encode( dm5Key, "UTF-8" );
@@ -235,11 +309,13 @@ public class ParseDM5 extends ParseOnlineComicSite {
             integer = Integer.parseInt( hex );
         }
         catch ( NumberFormatException ex ) {
-            if ( hex.charAt( 0 ) - 'a' >= 0 && 
-                 hex.charAt( 0 ) - 'a' <= 5 )
+            if ( hex.charAt( 0 ) - 'a' >= 0
+                && hex.charAt( 0 ) - 'a' <= 5 ) {
                 integer = 10 + ( hex.charAt( 0 ) - 'a' );
-            else
+            }
+            else {
                 integer = -1;
+            }
         }
 
         return integer;
@@ -254,9 +330,15 @@ public class ParseDM5 extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
+        return getAllPageString( urlString, "" );
+    }
+
+    public String getAllPageString( String urlString, String referURL ) {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dm5_", "html" );
 
-        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        //String cookieString = "isAdult=1; ";
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName,
+            false, "", referURL );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
@@ -321,8 +403,9 @@ public class ParseDM5 extends ParseOnlineComicSite {
         String tempString = "";
         int beginIndex, endIndex;
 
-        beginIndex = allPageString.indexOf( "id=\"cbc_1\"" );
-        endIndex = allPageString.indexOf( "</ul>", beginIndex );
+        beginIndex = allPageString.indexOf( "id=\"cbc" );
+        endIndex = allPageString.lastIndexOf( "id=\"cbc" );
+        endIndex = allPageString.indexOf( "</ul>", endIndex );
 
         // 存放集數頁面資訊的字串
         tempString = allPageString.substring( beginIndex, endIndex );
@@ -331,23 +414,33 @@ public class ParseDM5 extends ParseOnlineComicSite {
 
         String volumeTitle = "";
         beginIndex = endIndex = 0;
+        String tempURL = "";
+        int amountOfnonURL = 0;
         for ( int i = 0; i < volumeCount; i++ ) {
             // 取得單集位址
             beginIndex = tempString.indexOf( "href=", beginIndex );
             beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
             endIndex = tempString.indexOf( "\"", beginIndex );
-            urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
+            tempURL = baseURL + tempString.substring( beginIndex, endIndex );
 
-            // 取得單集名稱
-            beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
-            endIndex = tempString.indexOf( "</li>", beginIndex );
-            volumeTitle = tempString.substring( beginIndex, endIndex );
-            volumeTitle = volumeTitle.replaceFirst( "</a>", "" );
-            volumeTitle = volumeTitle.replaceFirst( "<span\\s+class.*>", "" );
+            if ( tempURL.matches( ".*javascript:.*" ) ) {
+                amountOfnonURL++;
+                beginIndex ++;
+            }
+            else {
+                urlList.add( tempURL );
+
+                // 取得單集名稱
+                beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+                endIndex = tempString.indexOf( "</li>", beginIndex );
+                volumeTitle = tempString.substring( beginIndex, endIndex );
+                volumeTitle = volumeTitle.replaceFirst( "</a>", "" );
+                volumeTitle = volumeTitle.replaceFirst( "<span\\s+class.*>", "" );
 
 
-            volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
+                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                    Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
+            }
 
         }
 

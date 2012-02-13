@@ -5,8 +5,9 @@ Authors  : surveyorK
 Last Modified : 2011/11/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
- *  2.01: 1. 修復無法解析粗體字集數名稱的bug。
- *  2.0 : 1. 新增新增對www.nanadm.com的支援。
+    3.03: 1. 修復nanadm無法下載的問題。
+    2.01: 1. 修復無法解析粗體字集數名稱的bug。
+    2.0 : 1. 新增新增對www.nanadm.com的支援。
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -96,7 +97,9 @@ public class ParseNANA extends ParseOnlineComicSite {
         comicURL = new String[totalPage];
 
         // 開始取得第一頁網址 
-        beginIndex = allPageString.indexOf( "src=\"" ) + 5;
+        
+        beginIndex = allPageString.indexOf( "<li " );
+        beginIndex = allPageString.indexOf( "src=\"", beginIndex ) + 5;
         endIndex = allPageString.indexOf( "\"", beginIndex );
         String firstPageURL = Common.getFixedChineseURL( allPageString.substring( beginIndex, endIndex ) );
 

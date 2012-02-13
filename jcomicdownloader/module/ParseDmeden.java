@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+3.04: 1. 修復dmeden標題名稱解析不全的bug。
 2.03: 1. 對於dmeden轉移位址後做解析修正（dmeden.net <-> www.dmeden.com）
 1.12: 1. 改成一邊解析網址一邊下載。
 1.11: 1. 新增對dmeden.net的支援。
@@ -167,15 +168,13 @@ public class ParseDmeden extends ParseOnlineComicSite {
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
 
-        String[] tokens = allPageString.split( ">|<" );
-
-        int beginIndex = allPageString.indexOf( "<title>" ) + 7;
-        int endIndex = allPageString.indexOf( "</title>", beginIndex );
+        int beginIndex = allPageString.indexOf( "<h1>" ) + 4;
+        int endIndex = allPageString.indexOf( "</h1>", beginIndex );
         String tempTitleString = allPageString.substring( beginIndex, endIndex );
 
         //System.out.println( tempTitleString );
 
-        String title = tempTitleString.trim().split( " " )[0];
+        String title = tempTitleString.trim();
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
     }

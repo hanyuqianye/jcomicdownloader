@@ -49,7 +49,7 @@ public class ParseCK extends ParseOnlineComicSite {
     public void setParameters() {
         Common.debugPrintln( "開始解析各參數 :" );
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
-
+        
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             Common.debugPrintln( "開始解析title和wholeTitle :" );
             String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
@@ -92,7 +92,10 @@ public class ParseCK extends ParseOnlineComicSite {
 
             // 每解析一個網址就下載一張圖
             singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0 );
-
+            
+            //Common.downloadFile( comicURL[p - 1], "", p + ".jpg", false, "" );
+            
+            
             if ( p < totalPage ) {
                 beginIndex = allPageString.indexOf( "</select>" );
                 beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;

@@ -1027,6 +1027,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                         || SetUp.getBackgroundPicPathOfMainFrame().equals( "" )) ) {
                     JOptionPane.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                    usingBackgroundPicOfMainFrameCheckBox.setSelected( false );
                 }
             }
             else if ( event.getSource() == usingBackgroundPicOfInformationFrameCheckBox ) {
@@ -1035,6 +1036,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                         || SetUp.getBackgroundPicPathOfInformationFrame().equals( "" )) ) {
                     JOptionPane.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                    usingBackgroundPicOfInformationFrameCheckBox.setSelected( false );
                 }
             }
             else if ( event.getSource() == usingBackgroundPicOfOptionFrameCheckBox ) {
@@ -1043,6 +1045,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                         || SetUp.getBackgroundPicPathOfOptionFrame().equals( "" )) ) {
                     JOptionPane.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                    usingBackgroundPicOfOptionFrameCheckBox.setSelected( false );
                 }
             }
             else if ( event.getSource() == usingBackgroundPicOfChoiceFrameCheckBox ) {
@@ -1051,6 +1054,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                         || SetUp.getBackgroundPicPathOfChoiceFrame().equals( "" )) ) {
                     JOptionPane.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                    usingBackgroundPicOfChoiceFrameCheckBox.setSelected( false );
                 }
             }
 

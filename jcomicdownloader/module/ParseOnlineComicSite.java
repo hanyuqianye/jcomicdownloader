@@ -135,13 +135,30 @@ abstract public class ParseOnlineComicSite {
     }
 
     // 只下載單一張圖片（因應部份網站無法一次解得所有圖片網址，只能每下載一張網頁，從中解析得到網址才下載）
-    protected void singlePageDownload( String title, String wholeTitle, String url, int totalPage, int nowPageNumber, int delayTime ) {
-        singlePageDownload( title, wholeTitle, url, totalPage, nowPageNumber, delayTime, false, "" );
+    protected void singlePageDownload( String title, String wholeTitle, String url, 
+        int totalPage, int nowPageNumber, int delayTime ) {
+        singlePageDownload( title, wholeTitle, url, totalPage, nowPageNumber, 
+            delayTime, false, "", "", false );
+    }
+    
+    // 需要用到refer檔頭
+    protected void singlePageDownloadUsingRefer( String title, String wholeTitle, String url, 
+        int totalPage, int nowPageNumber, int delayTime, String referURL ) {
+        singlePageDownload( title, wholeTitle, url, totalPage, nowPageNumber, 
+            delayTime, false, "", referURL, false );
+    }
+    
+    // 用最簡單的方式下載 使用Common.simpleDownloadFile
+    protected void singlePageDownloadUsingSimple( String title, String wholeTitle, String url, 
+        int totalPage, int nowPageNumber ) {
+        singlePageDownload( title, wholeTitle, url, totalPage, nowPageNumber, 
+            0, false, "", "", true );
     }
 
     // 只下載單一張圖片（因應部份網站無法一次解得所有圖片網址，只能每下載一張網頁，從中解析得到網址才下載）
-    protected void singlePageDownload( String title, String wholeTitle, String url, int totalPage, int nowPageNumber,
-            int delayTime, boolean needCookie, String cookieString ) {
+    protected void singlePageDownload( String title, String wholeTitle, String url, 
+        int totalPage, int nowPageNumber, int delayTime, boolean needCookie, 
+        String cookieString, String referURL, boolean simpleDownload ) {
         if ( wholeTitle == null ) {
             CommonGUI.stateBarMainMessage = title + " : ";
         } else {
@@ -169,8 +186,12 @@ abstract public class ParseOnlineComicSite {
         // 下載第n張之前，先檢查第n+1張圖是否存在，若是則跳下一張
         if ( !new File( getDownloadDirectory() + fileName ).exists() ||
              !new File( getDownloadDirectory() + nextFileName ).exists()) {
-            if ( delayTime == 0 ) {
-                Common.downloadFile( url, getDownloadDirectory(), fileName, needCookie, cookieString );
+            if ( simpleDownload ) {
+                Common.simpleDownloadFile( url, getDownloadDirectory(), fileName );
+            }
+            else if ( delayTime == 0 ) {
+                //Common.print( url, getDownloadDirectory(), fileName, needCookie + "", cookieString );
+                Common.downloadFile( url, getDownloadDirectory(), fileName, needCookie, cookieString, referURL );
             } else {
                 Common.slowDownloadFile( url, getDownloadDirectory(), fileName, delayTime, needCookie, cookieString );
             }
@@ -180,17 +201,25 @@ abstract public class ParseOnlineComicSite {
 
     // 只下載單一張圖片（因應部份網站無法一次解得所有圖片網址，只能每下載一張網頁，從中解析得到網址才下載）,圖片名稱指定
     protected void singlePageDownload( String title, String wholeTitle, String url, int totalPage, int nowPageNumber, String fileName, int delayTime, boolean fastMode ) {
-        singlePageDownload( title, wholeTitle, url, totalPage, nowPageNumber, fileName, delayTime, false, "", fastMode );
+        singlePageDownload( title, wholeTitle, url, totalPage, nowPageNumber, fileName, delayTime, false, "", "", fastMode );
+    }
+    
+    // 需要設定refer才能下載
+    protected void singlePageDownload( String title, String wholeTitle, String url, int totalPage, int nowPageNumber, String fileName,
+            int delayTime, boolean needCookie, String cookieString, String referURL ) {
+        singlePageDownload( title, wholeTitle, url, totalPage, nowPageNumber, fileName, delayTime, false, "", referURL, false );
     }
 
     protected void singlePageDownload( String title, String wholeTitle, String url, int totalPage, int nowPageNumber, String fileName,
             int delayTime, boolean needCookie, String cookieString ) {
-        singlePageDownload( title, wholeTitle, url, totalPage, nowPageNumber, fileName, delayTime, false, "", false );
+        singlePageDownload( title, wholeTitle, url, totalPage, nowPageNumber, fileName, delayTime, false, "", "", false );
     }
+    
+    
 
     // 只下載單一張圖片（因應部份網站無法一次解得所有圖片網址，只能每下載一張網頁，從中解析得到網址才下載）,圖片名稱指定
     protected void singlePageDownload( String title, String wholeTitle, String url, int totalPage, int nowPageNumber, String fileName,
-            int delayTime, boolean needCookie, String cookieString, boolean fastMode ) {
+            int delayTime, boolean needCookie, String cookieString, String referURL, boolean fastMode ) {
         if ( wholeTitle == null ) {
             CommonGUI.stateBarMainMessage = title + " : ";
         } else {
@@ -206,7 +235,7 @@ abstract public class ParseOnlineComicSite {
         CommonGUI.stateBarDetailMessage += ": [" + fileName + "]";
 
         if ( delayTime == 0 ) {
-            Common.downloadFile( url, getDownloadDirectory(), fileName, needCookie, cookieString, 
+            Common.downloadFile( url, getDownloadDirectory(), fileName, needCookie, cookieString, referURL, 
                     fastMode, SetUp.getRetryTimes(), false, false );
         } else {
             Common.slowDownloadFile( url, getDownloadDirectory(), fileName, delayTime, needCookie, cookieString );

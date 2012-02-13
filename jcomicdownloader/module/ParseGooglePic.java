@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/21
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+    3.0:  1. 修復非中文版的google圖片搜尋無法下載的bug。
  *  2.01: 1. 修正Google圖片搜尋中部份非英文關鍵字沒有正確解析為資料夾名稱的bug。
  *  1.19: 1. 修正後已支援『顯示更多結果』後面的圖。
  *       2. 修改下載機制，遇到非正常連線直接放棄，加快速度。
@@ -72,8 +73,9 @@ public class ParseGooglePic extends ParseOnlineComicSite {
         // 取得基本版位址的前面
         String baseURL = getBaseUrlString( webSite );
         // google圖片搜尋只有到980，之後就搜不到了。
-        allPageString = getNewAllPageString( baseURL + "&start=980&sa=N" );
-
+        
+        allPageString = getNewAllPageString( baseURL + "&start=980&sa=N" );       
+        
         Common.debugPrint( "開始解析這一集有幾頁 : " );
         //String[] tokens = allPageString.split( ";imgurl=");
 
@@ -165,7 +167,7 @@ public class ParseGooglePic extends ParseOnlineComicSite {
     private String getBaseUrlString( String standardUrlString ) {
         String allPageString = getAllPageString( standardUrlString + "&sout=1" );
 
-        int beginIndex = allPageString.indexOf( "href=\"http://" ) + 6;
+        int beginIndex = allPageString.indexOf( "href=\"http" ) + 6;
         int endIndex = allPageString.indexOf( "&gbv=", beginIndex );
         String baseUrlString = allPageString.substring( beginIndex, endIndex );
 

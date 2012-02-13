@@ -85,8 +85,15 @@ public class RunModule {
 
             Common.debugPrint( "開始解析解析各集位址和各集名稱：" );
             List<List<String>> combinationList = null;
-            combinationList = parse.getVolumeTitleAndUrlOnMainPage( urlString, allPageString );
-
+            try {
+                combinationList = parse.getVolumeTitleAndUrlOnMainPage( urlString, allPageString );
+            } catch ( Exception ex ) {
+                Common.errorReport( "\n解析集數失敗！" );
+                JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "解析集數失敗！",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                ex.printStackTrace();
+                return;
+            }
             if ( combinationList == null ) {
                 JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "此頁面沒有可下載的集數！",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );

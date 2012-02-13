@@ -640,7 +640,7 @@ public class CommonGUI {
         else if ( SetUp.getSkinClassName().matches( ".*NapkinLookAndFeel.*" )
                 && !new File( Common.getNowAbsolutePath() + napkinFileName ).exists() ) {
             new CommonGUI().downloadNewTheme( "Napkin", napkinFileName,
-                    "https://sites.google.com/site/jcomicdownloader/release/napkinlaf-alpha001.jar?attredirects=0&d=1" ); // 下載napkinlaf-alpha001.jar
+                    "https://sites.google.com/site/jcomicdownloaderbackup/release/napkinlaf-alpha001.jar?attredirects=0&d=1" ); // 下載napkinlaf-alpha001.jar
         }
         else if ( SetUp.getSkinClassName().matches( ".*substance.api.skin.*" )
                 && (!new File( Common.getNowAbsolutePath() + substanceFileName ).exists()
@@ -648,8 +648,8 @@ public class CommonGUI {
             String[] themeNames = new String[] { "Substance", "Trident" };
             String[] fileNames = new String[] { substanceFileName, tridentFileName };
             String[] urls = new String[] {
-                "https://sites.google.com/site/jcomicdownloader/release/substance-6.1.jar?attredirects=0&d=1",
-                "https://sites.google.com/site/jcomicdownloader/release/trident.jar?attredirects=0&d=1" };
+                "https://sites.google.com/site/jcomicdownloaderbackup/release/substance-6.1.jar?attredirects=0&d=1",
+                "https://sites.google.com/site/jcomicdownloaderbackup/release/trident.jar?attredirects=0&d=1" };
             new CommonGUI().downloadNewTheme( themeNames, fileNames,
                     urls ); // 
         }
@@ -691,7 +691,7 @@ public class CommonGUI {
         themeNameString =
                 themeNameString.substring( 0, themeNameString.length() - 2 );
 
-        int choice = JOptionPane.showConfirmDialog( ComicDownGUI.mainFrame, "資料夾內未發現"
+        int choice = JOptionPane.showConfirmDialog( null, "資料夾內未發現"
                 + themeFileNameString + "，無法使用"
                 + skinName + "界面！\n\n請問是否要下載" + themeFileNameString + " ？",
                 "提醒訊息", JOptionPane.YES_NO_OPTION );

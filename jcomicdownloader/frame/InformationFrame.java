@@ -138,7 +138,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         updatePanel.setOpaque( !SetUp.getUsingBackgroundPicOfInformationFrame() );
 
         JButton supportedSiteButton = getButton( " 支援網站列表", "information_supportedSite.png",
-            "https://sites.google.com/site/jcomicdownloader/" );
+            "https://sites.google.com/site/jcomicdownloader/home" );
 
         downloadButton = getButton( " 最新版本下載", "information_download.png",
             null );
@@ -149,7 +149,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         JButton searchButton = getButton( " 漫畫搜尋引擎", "information_search.png",
             "http://www.google.com/cse/home?cx=002948535609514911011:ls5mhwb6sqa&hl=zh-TW" );
         JButton messageButton = getButton( " 疑難問題回報", "information_report.png",
-            "http://jcomicdownloader.blogspot.com/2011/10/introduction.html" );
+            "http://jcomicdownloader.blogspot.com/2012/01/bug-report-1.html" );
 
         JLabel authorLabel = getLabel( "作者：surveyorK （abc9070410@gmail.com）" );
 
@@ -165,7 +165,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         informationPanel.setOpaque( !SetUp.getUsingBackgroundPicOfInformationFrame() );
 
         if ( SetUp.getUsingBackgroundPicOfInformationFrame() ) {
-            //informationScrollPane.setPreferredSize( frameDimension );
+            informationPanel.setPreferredSize( frameDimension );
             contentPane.add( new CommonGUI().getCenterPanel( informationPanel ), BorderLayout.CENTER );
         }
         else {
@@ -240,7 +240,6 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
             public void run() {
                 // 取得介面設定值（不用UIManager.getLookAndFeel().getName()是因為這樣才能讀到_之後的參數）
                 String nowSkinName = SetUp.getSkinClassName();
-
                 downloadOfficialHtml(); // 下載官方網頁
                 versionLabel.setText( getUpdateVersionString() ); // 從官方網頁提取更新版本資訊
                 synchronized ( InformationFrame.thisFrame ) { // lock main frame

@@ -111,6 +111,8 @@ public class ParseWebPage {
             siteID = Site.DM5; 
         else if ( webSite.matches( "(?s).*comic.ck101.com(?s).*" ) ) 
             siteID = Site.CK; 
+        else if ( webSite.matches( "(?s).*tuku.cc(?s).*" ) ) 
+            siteID = Site.TUKU; 
                     
         else
             siteID = Site.UNKNOWN;

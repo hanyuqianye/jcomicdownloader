@@ -1,13 +1,14 @@
 /*
-----------------------------------------------------------------------------------------------------
-Program Name : JComicDownloader
-Authors  : surveyorK
-Last Modified : 2011/12/16
-----------------------------------------------------------------------------------------------------
-ChangeLog:
-2.08: 修復xindm解析錯誤的問題。
-1.15: 新增對xindm.cn的支援
-----------------------------------------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------
+ Program Name : JComicDownloader
+ Authors  : surveyorK
+ Last Modified : 2011/12/16
+ ----------------------------------------------------------------------------------------------------
+ ChangeLog:
+ 3.02: 修復xindm部份漫畫無法下載的bug。
+ 2.08: 修復xindm解析錯誤的問題。
+ 1.15: 新增對xindm.cn的支援
+ ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
 
@@ -27,8 +28,8 @@ public class ParseXindm extends ParseOnlineComicSite {
     protected String indexEncodeName;
 
     /**
-     *
-     * @author user
+
+     @author user
      */
     public ParseXindm() {
         siteID = Site.XINDM;
@@ -80,19 +81,23 @@ public class ParseXindm extends ParseOnlineComicSite {
 
 
         int beginIndex = allPageString.indexOf( "img src=\"." );
-        beginIndex = allPageString.indexOf( "/",beginIndex );
+        beginIndex = allPageString.indexOf( "/", beginIndex );
         int endIndex = allPageString.indexOf( "\"", beginIndex );
         String firstPicFrontURL = allPageString.substring( beginIndex, endIndex );
-        
+
         Common.debugPrintln( "第一頁網址：" + firstPicFrontURL );
-        
+
         if ( firstPicFrontURL.matches( "(?s).*_(?s).*" ) ) // 檔名中有_
+        {
             endIndex = firstPicFrontURL.lastIndexOf( "_" ) + 1;
+        }
         else // 檔名裏面沒有_
+        {
             endIndex = firstPicFrontURL.lastIndexOf( "/" ) + 1;
-        
+        }
+
         String frontURL = baseURL + firstPicFrontURL.substring( 0, endIndex );
-        
+
         Common.debugPrintln( "網址父目錄：" + frontURL );
 
         beginIndex = firstPicFrontURL.indexOf( "." );
@@ -108,25 +113,32 @@ public class ParseXindm extends ParseOnlineComicSite {
         cookieString = cookies[0] + "; " + cookies[1];
         Common.debugPrintln( "取得cookies：" + cookieString );
 
-        for ( int p = 1 ; p <= totalPage ; p++ ) {
-            /* // 原本想用這種方法比較有彈性，但問題是最後一頁都會錯誤（500），只好放棄......
+        for ( int p = 1; p <= totalPage; p++ ) {
+
+            // 原本想用這種方法比較有彈性，但問題是最後一頁都會錯誤（500），只好放棄......
             allPageString = getAllPageString( webSite + "&page=" + p );
-            if ( p == totalPage )
-            allPageString = getAllPageString( webSite.replace( "mh.xindm.cn", "www.xindm.cn" ) + "&page=" + p );
-            
+            if ( p == totalPage ) {
+                allPageString = getAllPageString( webSite.replace( "mh.xindm.cn",
+                    "www.xindm.cn" ) + "&page=" + p );
+            }
+
             beginIndex = allPageString.indexOf( "../" ) + 2;
             endIndex = allPageString.indexOf( "\"", beginIndex );
             String fontURL = allPageString.substring( beginIndex, endIndex );
-            comicURL[p-1] = baseURL + fontURL;
-            
+            comicURL[p - 1] = baseURL + fontURL;
+
             // 每解析一個網址就下載一張圖
-            singlePageDownload( getTitle(), getWholeTitle(), comicURL[p-1], totalPage, p, 0 );
+            singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], 
+                totalPage, p, 0, true, cookieString, "", false );
+
+
+            /*
+             comicURL[p - 1] = Common.getFixedChineseURL( frontURL +
+             formatter.format( p - 1 )
+             + formatter.format( p ) + extensionName );
+             singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1],
+             totalPage, p, 0, true, cookieString, "" );
              */
-
-            comicURL[p - 1] = Common.getFixedChineseURL( frontURL + formatter.format( p - 1 ) + 
-                                                        formatter.format( p ) + extensionName );
-            singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0, true, cookieString );
-
             //Common.debugPrintln( (p) + " " + comicURL[p - 1] ); // debug
         }
         //System.exit(1); // debug
@@ -147,7 +159,8 @@ public class ParseXindm extends ParseOnlineComicSite {
         // ex.http://mh2.xindm.cn/display.asp?id=55200
         if ( urlString.matches( "(?s).*display.asp(?s).*" ) ) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -187,28 +200,32 @@ public class ParseXindm extends ParseOnlineComicSite {
         List<String> volumeList = new ArrayList<String>();
 
         int beginIndex = allPageString.indexOf( "http://mh2.xindm" ) - 1;
-        int endIndex = allPageString.lastIndexOf( "http://mh.xindm.cn" );
+        int endIndex = allPageString.lastIndexOf( "http://mh2.xindm.cn" ) + 30;
         String listString = allPageString.substring( beginIndex, endIndex );
 
-        String[] tokens = listString.split( "'|>|<" );
+        totalVolume = allPageString.split( "http://mh.xindm.cn" ).length - 1;
 
-        int volumeCount = 0; // 計算總共集數
 
-        for ( int i = 0 ; i < tokens.length ; i++ ) {
+        beginIndex = endIndex = 0;
+        for ( int i = 0; i < totalVolume; i++ ) {
 
-            if ( tokens[i].matches( "http://mh2.xindm(?s).*" ) ) {
-                // 取得單集位址
-                urlList.add( tokens[i] );
+            beginIndex = listString.indexOf( ">", beginIndex ) + 1;
+            endIndex = listString.indexOf( "<", beginIndex );
+            String volumeTitle = listString.substring( beginIndex, endIndex );
 
-                // 取得單集名稱
-                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( tokens[i + 4].trim() ) ) ) );
+            // 取得單集名稱
+            volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
 
-                volumeCount++;
-            }
+            beginIndex = listString.indexOf( "'", beginIndex ) + 1;
+            endIndex = listString.indexOf( "'", beginIndex );
+            urlList.add( listString.substring( beginIndex, endIndex ) );
+
+            beginIndex = listString.indexOf( "http://mh2.xindm.cn", beginIndex ) + 1;
+            beginIndex = listString.indexOf( "http://mh2.xindm.cn", beginIndex );
         }
 
-        Common.debugPrintln( "共有" + volumeCount + "集" );
+        Common.debugPrintln( "共有" + totalVolume + "集" );
 
         combinationList.add( volumeList );
         combinationList.add( urlList );
@@ -224,7 +241,7 @@ public class ParseXindm extends ParseOnlineComicSite {
 
     @Override
     public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
+        return new String[]{indexName, indexEncodeName, jsName};
     }
 
     @Override
