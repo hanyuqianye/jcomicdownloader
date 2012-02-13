@@ -948,7 +948,7 @@ public class Common {
             title = title.substring( 0, title.length() - 2 );
         }
 
-        return title;
+        return title.trim();
     }
 
     public static boolean withGUI() { // check the running app is GUI version or console version
