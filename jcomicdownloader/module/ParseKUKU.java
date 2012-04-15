@@ -73,8 +73,8 @@ public class ParseKUKU extends ParseOnlineComicSite {
             }
             else if ( line.matches( "(?s).*page(?s).*" ) ) {
                 // get total page ex. | 共34頁 |
-                int beginIndex = line.indexOf( "共" );
-                int endIndex = line.indexOf( "頁" );
+                int beginIndex = line.indexOf( Common.getStringUsingDefaultLanguage( "共" ) );
+                int endIndex = line.indexOf( Common.getStringUsingDefaultLanguage( "頁" ) );
 
                 String temp = line.substring( beginIndex + 1, endIndex );
                 totalPage = Integer.parseInt( temp );

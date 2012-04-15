@@ -17,6 +17,7 @@ import java.awt.Font;
 import jcomicdownloader.tools.*;
 
 import java.io.*;
+import jcomicdownloader.enums.LanguageEnum;
 import jcomicdownloader.frame.OptionFrame;
 
 
@@ -95,6 +96,9 @@ public class SetUp { // read setup file, and then setup
 
     // 壓縮檔的格式
     private static String compressFormat;
+    
+    // 預設介面語言
+    private static int defaultLanguage;
 
     /**
 
@@ -189,6 +193,9 @@ public class SetUp { // read setup file, and then setup
 
         // 預設壓縮檔格式
         compressFormat = "zip";
+        
+         // 預設介面語言
+        defaultLanguage = 0; // 預設正體中文
     }
 
     // 將目前的設定寫入到設定檔(set.ini)
@@ -303,6 +310,8 @@ public class SetUp { // read setup file, and then setup
             + "\nchoiceFrameTableMouseEnteredColor = " + choiceFrameTableMouseEnteredColor.toString()
             + "\n# 預設壓縮檔格式"
             + "\ncompressFormat = " + compressFormat
+            + "\n# 預設介面語言"
+            + "\ndefaultLanguage = " + defaultLanguage
             + "\n";
 
         Common.outputFile( setString, Common.getNowAbsolutePath(), Common.setFileName );
@@ -372,6 +381,7 @@ public class SetUp { // read setup file, and then setup
         Common.debugPrintln( "MainFrameMenuItemDefaultColor = " + mainFrameMenuItemDefaultColor.toString() ); 
         
         Common.debugPrintln( "CompressFormat = " + compressFormat );
+        Common.debugPrintln( "DefaultLanguage = " + defaultLanguage );
         
         
         Common.debugPrintln( "-----------------------" );
@@ -439,6 +449,9 @@ public class SetUp { // read setup file, and then setup
 
         // 預設壓縮格式
         boolean existCompressFormat = false;
+        
+        // 預設介面語言
+        boolean existDefaultLanguage = false;
 
 
         for ( int i = 0; i < lines.length; i++ ) {
@@ -892,6 +905,12 @@ public class SetUp { // read setup file, and then setup
                             existCompressFormat = true;
                         }
                     }
+                    else if ( split[0].equals( "defaultLanguage" ) ) {
+                        if ( split.length > 1 ) {
+                            existDefaultLanguage = true;
+                            setDefaultLanguage( Integer.parseInt( split[1] ) );
+                        }
+                    }
 
                 }
             }
@@ -939,7 +958,8 @@ public class SetUp { // read setup file, and then setup
             && existMainFrameTableMouseEnteredColor
             && existMainFrameTableDefaultColor
             && existMainFrameMenuItemDefaultColor
-            && existCompressFormat ) {
+            && existCompressFormat
+            && existDefaultLanguage ) {
             Common.debugPrintln( "設定檔全部讀取完畢" );
         }
         else {
@@ -1416,6 +1436,15 @@ public class SetUp { // read setup file, and then setup
     public static void setCompressFormat( String format ) {
         compressFormat = format;
     }
+    
+    public static int getDefaultLanguage() {
+        return defaultLanguage;
+    }
+    public static void setDefaultLanguage( int language ) {
+        defaultLanguage = language;
+    }
+    
+    
 
     // ----------------------------------------------------------------
     public static void setPicFrontName( String front ) {

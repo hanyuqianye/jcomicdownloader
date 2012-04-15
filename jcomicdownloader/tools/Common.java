@@ -101,12 +101,16 @@ public class Common {
     }
 
     public static void debugPrintln( String print ) { // for debug
+        print = Common.getStringUsingDefaultLanguage( print ); // 使用預設語言 
+        
         if ( Debug.debugMode ) {
             System.out.println( print );
         }
     }
 
     public static void debugPrint( String print ) { // for debug
+        print = Common.getStringUsingDefaultLanguage( print ); // 使用預設語言 
+        
         if ( Debug.debugMode ) {
             System.out.print( print );
         }
@@ -323,8 +327,8 @@ public class Common {
                 HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
 
                 // 偽裝成瀏覽器
-                //connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)");
-                connection.setRequestProperty( "User-Agent", "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
+                connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)");
+                //connection.setRequestProperty( "User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
 
                 // connection.setRequestMethod( "GET" ); // 默认是GET 
                 //connection.setRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)" );
@@ -800,18 +804,34 @@ public class Common {
     public static boolean isNeedConvert( char para ) {
         return ( ( para & ( 0x00FF ) ) != para );
     }
+    
+    public static String getStringUsingDefaultLanguage( String string ) {
+        if ( SetUp.getDefaultLanguage() == LanguageEnum.TRADITIONAL_CHINESE ) {
+            return string;
+        }
+        else if ( SetUp.getDefaultLanguage() == LanguageEnum.SIMPLIFIED_CHINESE ) {
+            return Common.getSimplifiedChinese( string );
+        }
+        else
+            return string;
+    }
 
     public static String getTraditionalChinese( String gbString ) {
         // Simplified Chinese To Traditional Chinese
         Zhcode mycode = new Zhcode();
 
-        //
-        return mycode.convertString( gbString, mycode.GB2312, mycode.BIG5 ).replaceAll( "[\\\\]ufffd", "_" );
+        if ( SetUp.getDefaultLanguage() == LanguageEnum.TRADITIONAL_CHINESE ) {
+            return mycode.convertString( gbString, mycode.GB2312, mycode.BIG5 ).replaceAll( "[\\\\]ufffd", "_" );
+        }
+        else {
+            return gbString;
+        }
     }
 
-    public static String getSimplifiedChinese( String gbString ) {
+    public static String getSimplifiedChinese( String big5String ) {
         Zhcode mycode = new Zhcode();
-        return mycode.convertString( gbString, mycode.GB2312, mycode.BIG5 );
+        String gbString = mycode.convertString( big5String, mycode.BIG5, mycode.GB2312 );
+        return gbString.replace(  "\\u51ea", "止" ).replace( "\\u9ed2", "黑" );
     }
 
     public static String getUtf8toUnicode( String utf8 ) {
@@ -1530,7 +1550,7 @@ public class Common {
                 colorString = "yellow";
             }
 
-            JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "<html><font color=" + colorString + ">"
+            CommonGUI.showMessageDialog( ComicDownGUI.mainFrame, "<html><font color=" + colorString + ">"
                 + file + "</font>" + "不存在，無法開啟</html>",
                 "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
@@ -1593,7 +1613,7 @@ public class Common {
                 colorString = "yellow"; // 暗色風格界面用黃色比較看得清楚
             }
 
-            JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "<html><font color=" + colorString + ">"
+            CommonGUI.showMessageDialog( ComicDownGUI.mainFrame, "<html><font color=" + colorString + ">"
                 + file + "</font>" + "不存在，無法開啟</html>",
                 "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;

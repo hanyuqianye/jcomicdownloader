@@ -72,7 +72,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         // 檢查背景圖片是否存在
         if ( SetUp.getUsingBackgroundPicOfInformationFrame() && 
             !new File( picFileString ).exists() ) {
-            JOptionPane.showMessageDialog( this, picFileString
+            CommonGUI.showMessageDialog( this, picFileString
                 + "\n背景圖片不存在，重新設定為原始佈景",
                 "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             SetUp.setUsingBackgroundPicOfInformationFrame( false );
@@ -209,7 +209,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         int beginIndex = allPageString.substring( 0, endIndex ).lastIndexOf( ">" ) + 1;
         String versionString = allPageString.substring( beginIndex, endIndex );
 
-        return versionString;
+        return Common.getStringUsingDefaultLanguage( versionString );
     }
 
     // 回傳更新日期的字串
@@ -221,7 +221,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         String[] tokens = allPageString.substring( tempIndex, allPageString.length() ).split( "-|\"" );
         String dateString = "（" + tokens[2] + "年" + tokens[3] + "月" + tokens[4] + "日發佈）";
 
-        return dateString;
+        return Common.getStringUsingDefaultLanguage( dateString ); // 使用預設語言 dateString;
     }
 
     // 回傳目前已經支援網站數目的字串
@@ -233,7 +233,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
 
         String supportedSiteString = supportedSiteAmount + " 個網站";
 
-        return supportedSiteString;
+        return Common.getStringUsingDefaultLanguage( supportedSiteString );
     }
 
     public void setNewestVersion() {
@@ -285,6 +285,8 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
     }
 
     private JLabel getLabel( String string ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JLabel label = new JLabel( string );
         label.setFont( SetUp.getDefaultFont() );
 
@@ -298,6 +300,8 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
     }
 
     private JButton getButton( String string, String picName, final String urlString ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JButton button = new JButton( string, new CommonGUI().getImageIcon( picName ) );
         button.setFont( SetUp.getDefaultFont( 3 ) );
         if ( urlString != null ) {
@@ -355,11 +359,11 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
                         String fileName = "JComicDownloader_" + versionLabel.getText() + ".jar";
 
                         if ( ComicDownGUI.versionString.matches( ".*" + versionLabel.getText() + ".*" ) ) {
-                            JOptionPane.showMessageDialog( thisFrame, "目前程式已是最新版本！",
+                            CommonGUI.showMessageDialog( thisFrame, "目前程式已是最新版本！",
                                 "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                         }
                         else if ( new File( Common.getNowAbsolutePath() + fileName ).exists() ) {
-                            JOptionPane.showMessageDialog( thisFrame, "最新版本已存在於程式資料夾！",
+                            CommonGUI.showMessageDialog( thisFrame, "最新版本已存在於程式資料夾！",
                                 "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                         }
                         else {

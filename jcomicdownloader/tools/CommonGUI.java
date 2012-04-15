@@ -465,6 +465,12 @@ public class CommonGUI {
 
         return classNames;
     }
+    
+    // 取得所有預設語言的名稱
+    public String[] getLanguageStrings() {
+        
+        return new String[] { "正體中文", "简体中文" };
+    }
 
     // 取得預設所有skins和jtattoo所有skins的名稱
     public String[] getSkinStrings() {
@@ -711,7 +717,7 @@ public class CommonGUI {
                     }
                     Run.isAlive = backupValue; // 還原原值
 
-                    JOptionPane.showMessageDialog( ComicDownGUI.mainFrame,
+                    CommonGUI.showMessageDialog( ComicDownGUI.mainFrame,
                             themeFileNameString + "下載完畢，程式即將關閉，請您再次啟動",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
 
@@ -725,7 +731,7 @@ public class CommonGUI {
         else {
             skinName = getSkinNameFromClassName( ComicDownGUI.getDefaultSkinClassName() );
             SetUp.setSkinClassName( ComicDownGUI.getDefaultSkinClassName() );
-            JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "不下載" + themeFileNameString + "，使用預設的"
+            CommonGUI.showMessageDialog( ComicDownGUI.mainFrame, "不下載" + themeFileNameString + "，使用預設的"
                     + skinName + "界面",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
 
@@ -811,7 +817,7 @@ public class CommonGUI {
 
         /*
         if ( SetUp.getSkinClassName().matches( ".*napkin\\..*" ) ) {
-        JOptionPane.showMessageDialog( thisFrame,
+        CommonGUI.showMessageDialog( thisFrame,
         "使用Napkin介面時無法開啟目錄視窗，\n\n請置換為其他介面後再選擇檔案或目錄",
         "提醒視窗", JOptionPane.INFORMATION_MESSAGE );
         
@@ -906,6 +912,8 @@ public class CommonGUI {
 
     // 用於tab和table
     public static String getToolTipString( String toolTipString ) {
+        toolTipString = Common.getStringUsingDefaultLanguage( toolTipString ); // 使用預設語言 
+        
         if ( SetUp.getSkinClassName().matches( ".*napkin.*" ) ) {
             // 因為有可能變成透明而看不清楚
             return getHtmlStringOfToolTip( toolTipString );
@@ -917,10 +925,37 @@ public class CommonGUI {
 
     // 用於絕大多數的元件
     public static void setToolTip( JComponent componet, String toolTipString ) {
+        toolTipString = Common.getStringUsingDefaultLanguage( toolTipString ); // 使用預設語言 
+        
         if ( SetUp.getSkinClassName().matches( ".*napkin.*" ) ) {
             // 因為有可能變成透明而看不清楚
             toolTipString = getHtmlStringOfToolTip( toolTipString );
         }
         componet.setToolTipText( toolTipString );
+    }
+    
+    public static void showMessageDialog( Component parentComponent, String message, String title, int messageType ) {
+        message = Common.getStringUsingDefaultLanguage( message ); // 使用預設語言 
+        title = Common.getStringUsingDefaultLanguage( title ); // 使用預設語言 
+        
+        JOptionPane.showMessageDialog( parentComponent, message, title, messageType );
+    }
+    
+    public static void showMessageDialog( Component parentComponent, String message ) {
+        message = Common.getStringUsingDefaultLanguage( message ); // 使用預設語言 
+        
+        JOptionPane.showMessageDialog( parentComponent, message );
+    }
+    
+    public static String showInputDialog(Component parentComponent, String message, String title, int messageType)  {
+        message = Common.getStringUsingDefaultLanguage( message ); // 使用預設語言 
+        title = Common.getStringUsingDefaultLanguage( title ); // 使用預設語言 
+        return JOptionPane.showInputDialog( parentComponent, message, title, messageType);
+    }
+    
+    public static int showConfirmDialog(Component parentComponent, String message, String title, int optionType)  {
+        message = Common.getStringUsingDefaultLanguage( message ); // 使用預設語言 
+        title = Common.getStringUsingDefaultLanguage( title ); // 使用預設語言 
+        return JOptionPane.showConfirmDialog( parentComponent, message, title, optionType );
     }
 }

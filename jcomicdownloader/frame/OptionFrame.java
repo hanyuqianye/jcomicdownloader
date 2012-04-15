@@ -45,7 +45,14 @@ import jcomicdownloader.module.Run;
 選項視窗
  */
 public class OptionFrame extends JFrame implements MouseListener {
-
+    // about language
+    private Object[][] languages;
+    private String[] languageStrings;
+    //private UIManager.LookAndFeelInfo looks[] = UIManager.getInstalledLookAndFeels();
+    private String[] languageClassNames; // 存放所有介面類別名稱
+    private JLabel languageLabel;
+    private JComboBox languageBox;
+    
     // about skin
     private Object[][] skins;
     private String[] skinStrings;
@@ -123,7 +130,7 @@ public class OptionFrame extends JFrame implements MouseListener {
         // 檢查背景圖片是否存在
         if ( SetUp.getUsingBackgroundPicOfOptionFrame()
                 && !new File( picFileString ).exists() ) {
-            JOptionPane.showMessageDialog( this, picFileString
+            CommonGUI.showMessageDialog( this, picFileString
                     + "\n背景圖片不存在，重新設定為原始佈景",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             SetUp.setUsingBackgroundPicOfOptionFrame( false );
@@ -255,6 +262,8 @@ public class OptionFrame extends JFrame implements MouseListener {
     }
 
     private String getTabeHtmlFontString( String tabName ) {
+        tabName = Common.getStringUsingDefaultLanguage( tabName ); // 使用預設語言 
+        
         int htmlFontSize = (int) (SetUp.getDefaultFontSize() / 4 + 1);
         String htmlFontFace = SetUp.getDefaultFontName();
         return "<html><font face=\"" + htmlFontFace + "\" size=\"" + htmlFontSize + "\"> " + tabName + "  </font></html>";
@@ -592,14 +601,47 @@ public class OptionFrame extends JFrame implements MouseListener {
     private void setInterfaceTablePanel( JPanel panel ) {
         JLabel chooseFontLabel = getLabel( "目前字型：" + SetUp.getDefaultFontName() + SetUp.getDefaultFontSize() );
         chooseFontButton = getButton( "選擇新字型" );
-        CommonGUI.setToolTip( chooseFontLabel, "選定字型後需關閉重啟才能看到新設定的字型" );
-        CommonGUI.setToolTip( chooseFontButton, "選定字型後需關閉重啟才能看到新設定的字型" );
+        CommonGUI.setToolTip( chooseFontLabel, "選定字型後需關閉重啟，方能看到新設定的字型" );
+        CommonGUI.setToolTip( chooseFontButton, "選定字型後需關閉重啟，方能看到新設定的字型" );
 
         JPanel chooseFontPanel = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
         chooseFontPanel.add( chooseFontLabel );
         chooseFontPanel.add( chooseFontButton );
         chooseFontPanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
 
+
+        // set language
+        
+        languageClassNames = new CommonGUI().getClassNames(); // 取得所有介面類別名稱
+        languageStrings = new CommonGUI().getLanguageStrings(); // 取得所有介面名稱
+        languageBox = new JComboBox( languageStrings );
+        if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
+            languageBox.setForeground( SetUp.getOptionFrameOtherDefaultColor() );
+            languageBox.setOpaque( false );
+            languageBox.addMouseListener( this );
+        }
+
+        ListCellRenderer languageRenderer = new ComplexCellRenderer();
+        languageBox.setRenderer( languageRenderer );
+        languageBox.setSelectedIndex( SetUp.getDefaultLanguage() );
+        languageBox.setFont( SetUp.getDefaultFont() );
+
+        languageLabel = getLabel( "選擇語言：" );
+        CommonGUI.setToolTip( languageLabel, "選定介面語言後需關閉重啟，方能看到新設定的語言" );
+
+        languageBox.addItemListener( new ItemHandler() ); // change skin if change skinBox
+        CommonGUI.setToolTip( languageBox, "選定介面語言後需關閉重啟，方能看到新設定的語言" );
+
+        // the order: skinLabel skinBox
+        JPanel languagePanel = new JPanel();
+        languagePanel.setLayout( new GridLayout( 1, 2, 5, 5 ) );
+        languagePanel.add( languageLabel );
+        languagePanel.add( languageBox );
+        languagePanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+        
+        
+        // set skin
+        
         skinClassNames = new CommonGUI().getClassNames(); // 取得所有介面類別名稱
         skinStrings = new CommonGUI().getSkinStrings(); // 取得所有介面名稱
         skinBox = new JComboBox( skinStrings );
@@ -609,17 +651,18 @@ public class OptionFrame extends JFrame implements MouseListener {
             skinBox.addMouseListener( this );
         }
 
-        ListCellRenderer renderer = new ComplexCellRenderer();
-        skinBox.setRenderer( renderer );
+        ListCellRenderer skinRenderer = new ComplexCellRenderer();
+        skinBox.setRenderer( skinRenderer );
         skinBox.setSelectedIndex( getSkinIndex( SetUp.getSkinClassName() ) );
         skinBox.setFont( SetUp.getDefaultFont() );
 
         skinLabel = getLabel( "選擇介面：" );
+        CommonGUI.setToolTip( skinLabel, "可選擇您喜好的介面風格" );
 
         skinBox.addItemListener( new ItemHandler() ); // change skin if change skinBox
         CommonGUI.setToolTip( skinBox, "可選擇您喜好的介面風格" );
 
-        // the order: skinLabel skinBox
+        // the order: skinLabel skinBoxoyoahalnf.jar
         JPanel skinPanel = new JPanel();
         skinPanel.setLayout( new GridLayout( 1, 2, 5, 5 ) );
         skinPanel.add( skinLabel );
@@ -634,6 +677,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
         JPanel interfacePanel = new JPanel( new GridLayout( 6, 1, 2, 2 ) );
         interfacePanel.add( chooseFontPanel );
+        interfacePanel.add( languagePanel );
         interfacePanel.add( skinPanel );
         interfacePanel.add( trayMessageCheckBox );
         interfacePanel.add( logCheckBox );
@@ -789,7 +833,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                 || usingBackgroundPicOfOptionFrameCheckBox.isSelected()
                 || usingBackgroundPicOfChoiceFrameCheckBox.isSelected())
                 && (SetUp.getSkinClassName().matches( ".*napkin.*" )) ) {
-            JOptionPane.showMessageDialog( OptionFrame.thisFrame,
+            CommonGUI.showMessageDialog( OptionFrame.thisFrame,
                     "若欲讓此介面選擇生效，請取消佈景頁面中背景圖片的設定勾選",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return true;
@@ -879,7 +923,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                                 }
 
                                 if ( font != null ) {
-                                    JOptionPane.showMessageDialog( OptionFrame.thisFrame, "你選擇的字型是" + font.getName() + "　"
+                                    CommonGUI.showMessageDialog( OptionFrame.thisFrame, "你選擇的字型是" + font.getName() + "　"
                                             + "大小為" + font.getSize() + "（需重新開啟才會啟用新設定）" );
                                 }
 
@@ -980,6 +1024,8 @@ public class OptionFrame extends JFrame implements MouseListener {
                 SetUp.setShowDoneMessageAtSystemTray( trayMessageCheckBox.isSelected() ); // 紀錄到設定值
                 SetUp.setKeepRecord( keepRecordCheckBox.isSelected() ); // 紀錄到設定值
                 SetUp.setChoiceAllVolume( choiceAllVolumeCheckBox.isSelected() ); // 紀錄到設定值
+                
+                SetUp.setDefaultLanguage( languageBox.getSelectedIndex() ); // 記錄到設定值
 
                 String compressFormatString = "";
                 if ( zipRadioButtion.isSelected() )
@@ -990,7 +1036,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
                 Boolean tempBool = new Boolean( usingBackgroundPicOfMainFrameCheckBox.isSelected() );
                 if ( !tempBool.equals( SetUp.getUsingBackgroundPicOfMainFrame() ) ) {
-                    JOptionPane.showMessageDialog( OptionFrame.thisFrame, "主視窗背景設定已改變，請重新開啟程式",
+                    CommonGUI.showMessageDialog( OptionFrame.thisFrame, "主視窗背景設定已改變，請重新開啟程式",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                 }
 
@@ -1061,7 +1107,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                 if ( usingBackgroundPicOfMainFrameCheckBox.isSelected()
                         && (SetUp.getBackgroundPicPathOfMainFrame() == null
                         || SetUp.getBackgroundPicPathOfMainFrame().equals( "" )) ) {
-                    JOptionPane.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
+                    CommonGUI.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                     usingBackgroundPicOfMainFrameCheckBox.setSelected( false );
                 }
@@ -1070,7 +1116,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                 if ( usingBackgroundPicOfInformationFrameCheckBox.isSelected()
                         && (SetUp.getBackgroundPicPathOfInformationFrame() == null
                         || SetUp.getBackgroundPicPathOfInformationFrame().equals( "" )) ) {
-                    JOptionPane.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
+                    CommonGUI.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                     usingBackgroundPicOfInformationFrameCheckBox.setSelected( false );
                 }
@@ -1079,7 +1125,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                 if ( usingBackgroundPicOfOptionFrameCheckBox.isSelected()
                         && (SetUp.getBackgroundPicPathOfOptionFrame() == null
                         || SetUp.getBackgroundPicPathOfOptionFrame().equals( "" )) ) {
-                    JOptionPane.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
+                    CommonGUI.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                     usingBackgroundPicOfOptionFrameCheckBox.setSelected( false );
                 }
@@ -1088,7 +1134,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                 if ( usingBackgroundPicOfChoiceFrameCheckBox.isSelected()
                         && (SetUp.getBackgroundPicPathOfChoiceFrame() == null
                         || SetUp.getBackgroundPicPathOfChoiceFrame().equals( "" )) ) {
-                    JOptionPane.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
+                    CommonGUI.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                     usingBackgroundPicOfChoiceFrameCheckBox.setSelected( false );
                 }
@@ -1148,6 +1194,14 @@ public class OptionFrame extends JFrame implements MouseListener {
             //Common.debugPrintln( "getDownloadPicFile: " + SetUp.getDownloadPicFile() +
             //                     "\ngetOutputUrlFile: " + SetUp.getOutputUrlFile() );
 
+            if ( event.getSource() == languageBox
+                    && event.getStateChange() == ItemEvent.SELECTED ) {
+                if ( languageBox.getSelectedIndex() == LanguageEnum.TRADITIONAL_CHINESE )
+                    Common.debugPrintln( "介面文字設定為正體中文" );
+                else if ( languageBox.getSelectedIndex() == LanguageEnum.SIMPLIFIED_CHINESE )
+                    Common.debugPrintln( "介面文字設定為簡體中文" );
+            }
+            
             if ( event.getSource() == skinBox
                     && event.getStateChange() == ItemEvent.SELECTED ) {
                 String nowSelectedSkin = skinBox.getSelectedItem().toString();
@@ -1163,6 +1217,8 @@ public class OptionFrame extends JFrame implements MouseListener {
     }
 
     private JCheckBox getCheckBox( String string, boolean selected ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JCheckBox checkBox = new JCheckBox( string, selected );
         checkBox.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
@@ -1175,6 +1231,8 @@ public class OptionFrame extends JFrame implements MouseListener {
     }
 
     private JCheckBox getCheckBoxBold( String string, boolean selected ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JCheckBox checkBox = new JCheckBox( string, selected );
         checkBox.setFont( SetUp.getDefaultBoldFont() );
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
@@ -1187,6 +1245,8 @@ public class OptionFrame extends JFrame implements MouseListener {
     }
 
     private JLabel getLabel( String string ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JLabel label = new JLabel( string );
         label.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
@@ -1198,6 +1258,8 @@ public class OptionFrame extends JFrame implements MouseListener {
     }
 
     private JLabel getLabel( String string, String toolTipString ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JLabel label = new JLabel( string );
         label.setFont( SetUp.getDefaultFont() );
         CommonGUI.setToolTip( label, toolTipString );
@@ -1210,6 +1272,8 @@ public class OptionFrame extends JFrame implements MouseListener {
     }
 
     private JButton getButton( String string ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JButton button = new JButton( string );
         button.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
@@ -1223,6 +1287,8 @@ public class OptionFrame extends JFrame implements MouseListener {
     }
 
     private JButton getButton( String string, String picName ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JButton button = new JButton( string, new CommonGUI().getImageIcon( picName ) );
         button.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
@@ -1235,6 +1301,8 @@ public class OptionFrame extends JFrame implements MouseListener {
     }
 
     private JTextField getTextField( String string ) {
+        //string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JTextField textField = new JTextField( string, 20 );
         textField.setFont( SetUp.getDefaultFont( -1 ) );
         textField.setHorizontalAlignment( JTextField.LEADING );
@@ -1248,6 +1316,8 @@ public class OptionFrame extends JFrame implements MouseListener {
     }
 
     private JRadioButton getRadioButton( String string, boolean selected ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JRadioButton radioButton = new JRadioButton( string, selected );
         //button.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) { // 若設定為透明，就用預定字體。

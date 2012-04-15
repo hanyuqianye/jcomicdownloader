@@ -77,7 +77,7 @@ public class ParseXindm extends ParseOnlineComicSite {
         comicURL = new String[totalPage];
 
         // ex. http://76.manmankan.com/2011/201111/1916/43124/001.jpg
-        String baseURL = "http://www.xindm.cn";
+        String baseURL = "http://mh.xindm.cn";
 
 
         int beginIndex = allPageString.indexOf( "img src=\"." );

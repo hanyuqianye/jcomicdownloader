@@ -62,11 +62,11 @@ public class ChoiceFrame extends JFrame implements
     private Dimension frameDimension;
 
     public ChoiceFrame( String title, String url ) {
-        this( "選擇欲下載的集數 [" + title + "]", false, 0, title, url );
+        this( Common.getStringUsingDefaultLanguage( "選擇欲下載的集數 [" ) + title + "]", false, 0, title, url );
     }
 
     public ChoiceFrame( String frameTitle, boolean modifySelected, int modifyRow, String title, String url ) {
-        super( frameTitle );
+        super( Common.getStringUsingDefaultLanguage( frameTitle ) );
         this.title = title;
         this.url = url;
 
@@ -264,8 +264,15 @@ public class ChoiceFrame extends JFrame implements
 
     private Vector<String> getDefaultColumns() {
         Vector<String> columnName = new Vector<String>();
-        columnName.add( "是否下載" );
-        columnName.add( "標題名稱" );
+       
+        if ( SetUp.getDefaultLanguage() == LanguageEnum.TRADITIONAL_CHINESE ) {
+            columnName.add( "是否下載" );
+            columnName.add( "標題名稱" );
+        }
+        else {
+            columnName.add( "是否下载" );
+            columnName.add( "标题名称" );
+        }
 
         return columnName;
     }
@@ -535,6 +542,8 @@ public class ChoiceFrame extends JFrame implements
     }
 
     private JButton getButton( String string ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JButton button = new JButton( string );
         //button.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) { // 若設定為透明，就用預定字體。
@@ -553,6 +562,8 @@ public class ChoiceFrame extends JFrame implements
     }
 
     private JRadioButton getRadioButton( String string, boolean selected ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JRadioButton radioButton = new JRadioButton( string, selected );
         //button.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) { // 若設定為透明，就用預定字體。

@@ -390,7 +390,7 @@ class ParseEX extends ParseEH {
 
     public void enterMemberID() { // 輸入id
         while ( SetUp.getEhMemberID().equals( "0" ) ) {
-            String idString = JOptionPane.showInputDialog( ComicDownGUI.mainFrame,
+            String idString = CommonGUI.showInputDialog( ComicDownGUI.mainFrame,
                     "請輸入e-hentai的ipb_member_id", "輸入視窗", JOptionPane.INFORMATION_MESSAGE );
             if ( idString.matches( "\\d+" ) ) {
                 SetUp.setEhMemberID( idString );
@@ -404,7 +404,7 @@ class ParseEX extends ParseEH {
 
     public void enterMemberPasswordHash() { // 輸入密碼hash
         if ( SetUp.getEhMemberPasswordHash().equals( "NULL" ) ) {
-            String hashString = JOptionPane.showInputDialog( ComicDownGUI.mainFrame,
+            String hashString = CommonGUI.showInputDialog( ComicDownGUI.mainFrame,
                     "請輸入e-hentai的ipb_pass_hash", "輸入視窗", JOptionPane.INFORMATION_MESSAGE );
             SetUp.setEhMemberPasswordHash( hashString );
         }
