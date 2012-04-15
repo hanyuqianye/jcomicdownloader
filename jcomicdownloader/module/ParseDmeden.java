@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+3.09: 1. 修復對dmeden.net的支援。
 3.04: 1. 修復dmeden標題名稱解析不全的bug。
 2.03: 1. 對於dmeden轉移位址後做解析修正（dmeden.net <-> www.dmeden.com）
 1.12: 1. 改成一邊解析網址一邊下載。
@@ -153,8 +154,11 @@ public class ParseDmeden extends ParseOnlineComicSite {
     public String getTitleOnSingleVolumePage( String urlString ) {
         String allPageString = getAllPageString( urlString );
 
-        int beginIndex = allPageString.indexOf( "href=\"/comicinfo/" ) + 6;
-        int endIndex = allPageString.indexOf( "\">", beginIndex );
+        int beginIndex = 0;
+        int endIndex = 0;
+        beginIndex = allPageString.indexOf( "href=\"/comicinfo/" ) + 6;
+        endIndex = allPageString.indexOf( "\">", beginIndex );
+        
         
         // 1:繁體　2:簡體
         String baseURL = urlString.matches( "http://dmeden.net/(?s).*" ) ? baseURL1 : baseURL2;
@@ -187,8 +191,18 @@ public class ParseDmeden extends ParseOnlineComicSite {
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
-        int beginIndex = allPageString.indexOf( "<ul class=\"list_s\">" );
-        int endIndex = allPageString.indexOf( "</ul", beginIndex );
+        int beginIndex = 0;
+        int endIndex = 0;
+        
+        if ( urlString.matches( ".*dmeden.net/.*" ) ) {
+            beginIndex = allPageString.indexOf( "class=\"cVolList\"" );
+            endIndex = allPageString.indexOf( "class=\"cCRHtm\"", beginIndex );
+        }
+        else {
+            beginIndex = allPageString.indexOf( "class=\"list_s\"" );
+            endIndex = allPageString.indexOf( "</ul>", beginIndex );
+        }
+        
         String tempString = allPageString.substring( beginIndex, endIndex );
         String[] tokens = tempString.split( "'" );
 

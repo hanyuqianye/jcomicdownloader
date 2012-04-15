@@ -105,16 +105,19 @@ public class ChoiceTableRender extends DefaultTableCellRenderer {
 
         File dirFile = null;
         File zipFile = null;
+        File cbzFile = null;
         if ( this.url.matches( "(?s).*hentai.org(?s).*" ) ) { // 讓EH和EX也能判斷是否已經下載
             dirFile = new File( SetUp.getOriginalDownloadDirectory() + volumeTitle );
             zipFile = new File( SetUp.getOriginalDownloadDirectory() + volumeTitle + ".zip" );
+            cbzFile = new File( SetUp.getOriginalDownloadDirectory() + volumeTitle + ".cbz" );
         }
         else {
             dirFile = new File( SetUp.getOriginalDownloadDirectory() + this.title + Common.getSlash() + volumeTitle );
             zipFile = new File( SetUp.getOriginalDownloadDirectory() + this.title + Common.getSlash() + volumeTitle + ".zip" );
+            cbzFile = new File( SetUp.getOriginalDownloadDirectory() + this.title + Common.getSlash() + volumeTitle + ".cbz" );
         }
 
-        if ( dirFile.exists() || zipFile.exists() ) {
+        if ( dirFile.exists() || zipFile.exists() || cbzFile.exists() ) {
             return true;
         }
         else {

@@ -77,7 +77,7 @@ public class ParseXindm extends ParseOnlineComicSite {
         comicURL = new String[totalPage];
 
         // ex. http://76.manmankan.com/2011/201111/1916/43124/001.jpg
-        String baseURL = "http://mh2.xindm.cn";
+        String baseURL = "http://www.xindm.cn";
 
 
         int beginIndex = allPageString.indexOf( "img src=\"." );
@@ -112,7 +112,7 @@ public class ParseXindm extends ParseOnlineComicSite {
         int cookieCount = 0; // 取得前兩組cookie就可以了
         cookieString = cookies[0] + "; " + cookies[1];
         Common.debugPrintln( "取得cookies：" + cookieString );
-
+        
         for ( int p = 1; p <= totalPage; p++ ) {
 
             // 原本想用這種方法比較有彈性，但問題是最後一頁都會錯誤（500），只好放棄......
@@ -129,7 +129,7 @@ public class ParseXindm extends ParseOnlineComicSite {
 
             // 每解析一個網址就下載一張圖
             singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], 
-                totalPage, p, 0, true, cookieString, "", false );
+                totalPage, p, 0, true, cookieString, webSite + "&page=" + p, false );
 
 
             /*
@@ -199,13 +199,14 @@ public class ParseXindm extends ParseOnlineComicSite {
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
-        int beginIndex = allPageString.indexOf( "http://mh2.xindm" ) - 1;
-        int endIndex = allPageString.lastIndexOf( "http://mh2.xindm.cn" ) + 30;
+        int beginIndex = allPageString.indexOf( "http://mh2.xindm.cn" ) - 1;
+        int endIndex = allPageString.indexOf( "</table>", beginIndex );
         String listString = allPageString.substring( beginIndex, endIndex );
 
-        totalVolume = allPageString.split( "http://mh.xindm.cn" ).length - 1;
-
-
+        totalVolume = allPageString.split( "http://mh2.xindm.cn" ).length - 1;
+        System.out.println( "-----------\n" + listString + "\n------------\n" );
+        //System.exit( 0 );
+        
         beginIndex = endIndex = 0;
         for ( int i = 0; i < totalVolume; i++ ) {
 

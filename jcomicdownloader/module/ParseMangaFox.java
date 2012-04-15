@@ -34,7 +34,7 @@ public class ParseMangaFox extends ParseOnlineComicSite {
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mangaFox_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mangaFox_encode_parse_", "html" );
 
-        baseURL = "http://www.mangafox.com";
+        baseURL = "http://www.mangafox.me";
         jsName = "index_mangaFox.js";
         radixNumber = 185271; // default value, not always be useful!!
     }

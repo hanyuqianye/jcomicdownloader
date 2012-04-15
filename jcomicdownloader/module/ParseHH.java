@@ -2,10 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/2/12
+ Last Modified : 2012/2/13
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
- *  3.05: 1. 新增對www.tuku.cc的支援。
+ *  3.06: 1. 新增對hhcomic.com的支援。
  ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -18,7 +18,7 @@ import java.util.*;
 import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Zhcode;
 
-public class ParseTUKU extends ParseOnlineComicSite {
+public class ParseHH extends ParseOnlineComicSite {
 
     private int radixNumber; // use to figure out the name of pic
     private String jsName;
@@ -30,18 +30,18 @@ public class ParseTUKU extends ParseOnlineComicSite {
 
      @author user
      */
-    public ParseTUKU() {
-        siteID = Site.TUKU;
-        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tuku_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tuku_encode_parse_", "html" );
+    public ParseHH() {
+        siteID = Site.HH;
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_hh_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_hh_encode_parse_", "html" );
 
-        jsName = "index_tuku.js";
-        radixNumber = 1591371; // default value, not always be useful!!
+        jsName = "index_hh.js";
+        radixNumber = 15913371; // default value, not always be useful!!
 
-        baseURL = "http://www.tuku.cc/";
+        baseURL = "http://hhcomic.com";
     }
 
-    public ParseTUKU( String webSite, String titleName ) {
+    public ParseHH( String webSite, String titleName ) {
         this();
         this.webSite = webSite;
         this.title = titleName;
@@ -59,9 +59,9 @@ public class ParseTUKU extends ParseOnlineComicSite {
 
             String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
 
-            int beginIndex = allPageString.indexOf( "</a>->" ) + 1;
-            beginIndex = allPageString.indexOf( "</a>->", beginIndex ) + 6;
-            int endIndex = allPageString.indexOf( "->", beginIndex );
+            int beginIndex = allPageString.indexOf( "content=" );
+            beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+            int endIndex = allPageString.indexOf( "\"", beginIndex );
             String tempTitleString = allPageString.substring( beginIndex, endIndex ).replaceAll( "&nbsp;", "" );
 
             setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
@@ -74,56 +74,50 @@ public class ParseTUKU extends ParseOnlineComicSite {
 
     @Override
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
-        // 先取得前面的下載伺服器網址
 
-        if ( !webSite.matches( "(?s).*/" ) ) {
-            webSite += "/";
-        }
-
-        int endIndex = Common.getIndexOfOrderKeyword( webSite, "/", 6 ) + 1;
-        String jsURL = webSite.substring( 0, endIndex ) + "index.js";
-
+        // 先取得所有的下載伺服器網址
+        int beginIndex = 0, endIndex = 0;
+        String jsURL = baseURL + "/hh/h.js";
         String allPageString = getAllPageString( jsURL );
-        Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        String[] tokens = allPageString.split( "=|;" );
-
-        String picMidURL1 = ""; // 圖片網址中間的部份 ex. 100
-        String picMidURL2 = ""; // 圖片網址中間的部份 ex. 全职猎人/第297话 
-        int zeroAmount = 0; // 正規化檔名中補零的數量
-
-        for ( int i = 0; i < tokens.length; i++ ) {
-            if ( tokens[i].matches( "(?s).*var\\s*total\\s*" ) ) {
-                totalPage = Integer.parseInt( tokens[i + 1].trim() );
-            }
-            else if ( tokens[i].matches( "(?s).*var\\s*volpic\\s*" ) ) {
-                picMidURL2 = tokens[i + 1].trim().replaceAll( "'", "" ) + "/";
-            }
-            else if ( tokens[i].matches( "(?s).*var\\s*tpf\\s*" ) ) {
-                zeroAmount = Integer.parseInt( tokens[i + 1].trim() );
-            }
-            else if ( tokens[i].matches( "(?s).*var\\s*tpf2\\s*" ) ) {
-                picMidURL1 = tokens[i + 1].trim() + "00/";
-            }
+        int amountOfServer = allPageString.split( "]=\"" ).length - 1;
+        String[] serverStrings = new String[amountOfServer];
+        int serverCount = 0;
+        for ( int i = 0; i < amountOfServer; i++ ) {
+            beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "\"", beginIndex );
+            serverStrings[i] = allPageString.substring( beginIndex, endIndex );
+            //Common.debugPrintln( "server " + i + ": " + serverStrings[i] );
+            beginIndex = endIndex + 1;
         }
+        
+        // 取得此集數的伺服器編號
+        int serverNo = Integer.parseInt( webSite.split( "=" )[1].replace( "/", "" ) );
 
-        // 圖片基本位址
-        String baseURL1 = "http://pic.tuku.cc/";
-        String baseURL2 = "http://pic1.tuku.cc/";
-        String baseURL3 = "http://pic2.tuku.cc/";
-        String baseURL4 = "http://pic3.tuku.cc/";
+        // 取得此集數的伺服器位址
+        String serverURL = serverStrings[serverNo-1];
+        
+
+        Common.debugPrint( "開始解析這一集有幾頁 : " );
+        allPageString = getAllPageString( webSite );
+        
+        beginIndex = allPageString.indexOf( "PicListUrl" );
+        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( ";", beginIndex );
+        endIndex = allPageString.lastIndexOf( "\"", endIndex );
+        
+        String tempString = allPageString.substring( beginIndex, endIndex );
+        
+        String[] urlStrings = tempString.split( "\\|" );
+        totalPage = urlStrings.length;
 
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
 
-        NumberFormat formatter = new DecimalFormat( Common.getZero( zeroAmount + 1 ) );
-        String fileName = "";
 
         int p = 0; // 目前頁數
         for ( int i = 1; i <= totalPage; i++ ) {
-            comicURL[p++] = baseURL2 + picMidURL1
-                + Common.getFixedChineseURL( picMidURL2 )
-                + formatter.format( i ) + "." + "jpg"; // 存入每一頁的網頁網址
+            comicURL[p++] = serverURL + urlStrings[i-1]; // 存入每一頁的網頁網址
             //Common.debugPrintln( p + " " + comicURL[p - 1] ); // debug
 
         }
@@ -139,8 +133,8 @@ public class ParseTUKU extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tuku_", "html" );
-        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tuku_encode_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_hh_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_hh_encode_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
@@ -150,8 +144,8 @@ public class ParseTUKU extends ParseOnlineComicSite {
 
     @Override
     public boolean isSingleVolumePage( String urlString ) {
-        // ex. http://www.tuku.cc/comic/48/297/?12
-        if ( Common.getAmountOfString( urlString, "/" ) > 5 ) {
+        // ex. http://hhcomic.com/page/188346/hh92137.htm?s=10
+        if ( urlString.matches( ".*\\?s=.*" ) ) {
             return true;
         }
         else {
@@ -160,11 +154,12 @@ public class ParseTUKU extends ParseOnlineComicSite {
     }
 
     public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
-        // ex. http://www.tuku.cc/comic/48/297/?12轉為
-        //    http://www.tuku.cc/comic/48
+        // ex. http://hhcomic.com/page/188346/hh92137.htm?s=10轉為
+        //    http://hhcomic.com/comic/188346/
 
-        int endIndex = Common.getIndexOfOrderKeyword( volumeURL, "/", 5 );
-        String mainPageURL = volumeURL.substring( 0, endIndex );
+        int endIndex = volumeURL.lastIndexOf( "s=" );
+        endIndex = volumeURL.lastIndexOf( "/", endIndex ) + 1;
+        String mainPageURL = volumeURL.substring( 0, endIndex ).replace( "/page/", "/comic/" );
 
         Common.debugPrintln( "MAIN_URL: " + mainPageURL );
 
@@ -180,9 +175,9 @@ public class ParseTUKU extends ParseOnlineComicSite {
 
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
-        int beginIndex = allPageString.indexOf( "<strong>" );
+        int beginIndex = allPageString.indexOf( "<title>" );
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "</strong>", beginIndex );
+        int endIndex = allPageString.indexOf( "</title>", beginIndex );
         String title = allPageString.substring( beginIndex, endIndex ).trim();
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
@@ -196,37 +191,30 @@ public class ParseTUKU extends ParseOnlineComicSite {
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
-        int beginIndex = allPageString.indexOf( "class=\"ms_box2\"" );
-        int endIndex = allPageString.indexOf( "</table>", beginIndex );
+        int beginIndex = allPageString.indexOf( "<ul " );
+        int endIndex = allPageString.indexOf( "</ul>", beginIndex );
 
         String tempString = allPageString.substring( beginIndex, endIndex );
 
-        int volumeCount = tempString.split( "vAlign=middle" ).length - 1;
+        int volumeCount = tempString.split( "href=" ).length - 1;
 
         String volumeTitle = "";
         beginIndex = endIndex = 0;
         for ( int i = 0; i < volumeCount; i++ ) {
-            // 取得單集名稱
-            beginIndex = tempString.indexOf( "vAlign=middle", beginIndex );
-            beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
 
-            // 檢查集數名稱最前面有沒有「.」，若有就拿掉
-            if ( "・".equals( tempString.substring( beginIndex, beginIndex + 1 ) ) ) {
-                beginIndex++;
-            }
+            // 取得單集位址
+            beginIndex = tempString.indexOf( "href=", beginIndex );
+            beginIndex = tempString.indexOf( "=", beginIndex ) + 1;
+            endIndex = tempString.indexOf( " ", beginIndex );
+            urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
+
+            // 取得單集名稱
+            beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
 
             endIndex = tempString.indexOf( "<", beginIndex );
             volumeTitle = tempString.substring( beginIndex, endIndex );
             volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                 Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
-
-
-            // 取得單集位址
-            beginIndex = tempString.indexOf( "href", beginIndex );
-            beginIndex = tempString.indexOf( "'", beginIndex ) + 1;
-            endIndex = tempString.indexOf( "'", beginIndex );
-            urlList.add( urlString + tempString.substring( beginIndex, endIndex ) );
-
         }
 
         totalVolume = volumeCount;
@@ -253,7 +241,7 @@ public class ParseTUKU extends ParseOnlineComicSite {
     public void printLogo() {
         System.out.println( " ______________________________" );
         System.out.println( "|                            " );
-        System.out.println( "| Run the Tuku(CC) module:     " );
+        System.out.println( "| Run the HH module:     " );
         System.out.println( "|_______________________________\n" );
     }
 }

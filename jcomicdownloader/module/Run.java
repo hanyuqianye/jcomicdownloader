@@ -146,6 +146,10 @@ public class Run extends Thread { // main class to run whole program
                 ParseOnlineComicSite parse = new Parse99770();
                 runSingleParseModule( parse );
             }
+            else if ( pw.getSiteID() == Site.NINENINE_MH_99770 ) {
+                ParseOnlineComicSite parse = new ParseMh99770();
+                runSingleParseModule( parse );
+            }
             else if ( pw.getSiteID() == Site.NINENINE_MH ) {
                 ParseOnlineComicSite parse = new Parse99Mh();
                 runSingleParseModule( parse );
@@ -266,6 +270,14 @@ public class Run extends Thread { // main class to run whole program
             }
             else if ( pw.getSiteID() == Site.TUKU ) {
                 ParseOnlineComicSite parse = new ParseTUKU();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.HH ) {
+                ParseOnlineComicSite parse = new ParseHH();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.IASK ) {
+                ParseOnlineComicSite parse = new ParseIASK();
                 runSingleParseModule( parse );
             }
             

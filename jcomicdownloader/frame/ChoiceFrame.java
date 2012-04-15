@@ -419,8 +419,8 @@ public class ChoiceFrame extends JFrame implements
 
 
             if ( event.getSource() == cancelButton ) {
-
                 notifyAllDownload();
+
                 dispose();
             }
             else if ( event.getSource() == confirmButton ) {
@@ -473,6 +473,10 @@ public class ChoiceFrame extends JFrame implements
                     //ComicDownGUI.recordTableUrlStrings[Common.recordCount-1] = new String( url );
 
                 }
+                
+                // 每加一個任務就紀錄一次。
+                Common.outputRecordTableFile( ComicDownGUI.recordTableModel ); 
+                Common.outputDownTableFile( ComicDownGUI.downTableModel ); 
 
                 //Common.preTitle = title;
                 notifyAllDownload();

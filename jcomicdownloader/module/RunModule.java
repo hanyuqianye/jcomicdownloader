@@ -74,6 +74,13 @@ public class RunModule {
 
             String allPageString = parse.getAllPageString( urlString );
 
+            if ( allPageString == null || allPageString.equals( "" ) ) {
+                Common.errorReport( "網頁沒有內容（網頁下載錯誤）" );
+                JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "解析網頁失敗（網頁無法下載？！）",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                return;
+            }
+
             // 臨時作法：如果處理EH或EX時已經有標題名稱，就不用再解析標題名稱
             //if ( ( parse.siteID == Site.EH || parse.siteID == Site.EX ) && parse.getTitle() != null );
             //else
@@ -192,7 +199,8 @@ public class RunModule {
             || siteID == Site.BENGOU
             || siteID == Site.EMLAND
             || siteID == Site.MOP
-            || siteID == Site.DM5 ) {
+            || siteID == Site.DM5
+            || siteID == Site.IASK ) {
             return true;
         }
         else {
@@ -203,10 +211,10 @@ public class RunModule {
     public boolean existZipFile( String downloadPicDirectory ) {
         String file;
         if ( downloadPicDirectory.lastIndexOf( Common.getSlash() ) == downloadPicDirectory.length() - 1 ) {
-            file = downloadPicDirectory.substring( 0, downloadPicDirectory.length() - 1 ) + ".zip";
+            file = downloadPicDirectory.substring( 0, downloadPicDirectory.length() - 1 ) + "." + SetUp.getCompressFormat();
         }
         else {
-            file = downloadPicDirectory + ".zip";
+            file = downloadPicDirectory + "." + SetUp.getCompressFormat();
         }
 
         //Common.debugPrintln( "將處理的壓縮檔名稱：" + file );
@@ -224,8 +232,9 @@ public class RunModule {
             File downloadPath = new File( parse.getDownloadDirectory() );
 
             if ( SetUp.getAutoCompress() ) { // compress to zip file or not
+
                 File zipFile = new File( downloadPath.getParent() + "/"
-                    + parse.getWholeTitle() + ".zip" );
+                    + parse.getWholeTitle() + "." + SetUp.getCompressFormat() );
 
                 if ( downloadPath.list().length < 1 ) {
                     Common.debugPrintln( "不產生壓縮檔（" + downloadPath.getAbsolutePath() + "資料夾內沒有任何檔案）" );

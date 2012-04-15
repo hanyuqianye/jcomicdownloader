@@ -217,51 +217,27 @@ public class ParseEH extends ParseOnlineComicSite {
     public String getTitleOnSingleVolumePage( String urlString ) {
 
         String allPageString = getAllPageString( urlString );
-        String[] lines = allPageString.split( "\n" );
-        int beginIndex = 0;
-        int endIndex = 0;
-        String titleString = "";
 
-        for ( int i = 0 ; i < lines.length ; i++ ) {
-            if ( lines[i].matches( "(?s).*<title>(?s).*" ) ) {
-                System.out.println( lines[i] );
-                beginIndex = lines[i].indexOf( "title", 0 ) + 6;
-                if ( siteID == Site.EH ) {
-                    endIndex = lines[i].indexOf( "E-Hentai", beginIndex ) - 3;
-                } else if ( siteID == Site.EX ) {
-                    endIndex = lines[i].indexOf( "ExHentai", beginIndex ) - 3;
-                }
-
-                titleString = lines[i].substring( beginIndex, endIndex );
-
-                break;
-            }
-        }
-
-        return Common.getStringRemovedIllegalChar( titleString );
+        return getTitleOnSingleVolumePageByAllPageString( allPageString );
     }
 
     public String getTitleOnSingleVolumePageByAllPageString( String allPageString ) {
+        
+        int beginIndex = allPageString.indexOf( "id=\"gj\"" );
+        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "</h1>", beginIndex );
+        String titleString = allPageString.substring( beginIndex, endIndex ).trim();
 
-        String[] lines = allPageString.split( "\n" );
-        int beginIndex = 0;
-        int endIndex = 0;
-        String titleString = "";
-
-        for ( int i = 0 ; i < lines.length ; i++ ) {
-            if ( lines[i].matches( "(?s).*<title>(?s).*" ) ) {
-                System.out.println( lines[i] );
-                beginIndex = lines[i].indexOf( "title", 0 ) + 6;
-                if ( siteID == Site.EH ) {
-                    endIndex = lines[i].indexOf( "E-Hentai", beginIndex ) - 3;
-                } else if ( siteID == Site.EX ) {
-                    endIndex = lines[i].indexOf( "ExHentai", beginIndex ) - 3;
-                }
-
-                titleString = lines[i].substring( beginIndex, endIndex );
-
-                break;
+        if ( "".equals( titleString ) ) {
+            beginIndex = allPageString.indexOf( "<title>" );
+            beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            if ( siteID == Site.EH ) {
+                endIndex = allPageString.indexOf( "E-Hentai", beginIndex ) - 3;
+            } else if ( siteID == Site.EX ) {
+                endIndex = allPageString.indexOf( "ExHentai", beginIndex ) - 3;
             }
+            
+            titleString = allPageString.substring( beginIndex, endIndex );
         }
 
         return Common.getStringRemovedIllegalChar( titleString.replaceAll( "&times;", "×" ) );

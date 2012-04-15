@@ -228,7 +228,7 @@ public class Common {
 
         String cookie = "";
         for ( int i = 0; i < cookies.length && cookies[i] != null; i++ ) {
-            cookie = cookies[i] + "; ";
+            cookie += cookies[i] + "; ";
         }
         return cookie;
     }
@@ -254,8 +254,9 @@ public class Common {
 
             for ( int i = 0; i < tempCookieStrings.length; i++ ) {
                 if ( tempCookieStrings[i] != null ) {
-                    cookieStrings[cookieCount++] = tempCookieStrings[i]; // 把cookie都集中到前面
+                    cookieStrings[cookieCount] = tempCookieStrings[i]; // 把cookie都集中到前面
                     System.out.println( cookieCount + ": " + tempCookieStrings[i] );
+                    cookieCount++;
                 }
             }
             Common.debugPrintln( "共有" + cookieCount + "串cookie" );
@@ -310,6 +311,13 @@ public class Common {
             try {
 
                 ComicDownGUI.stateBar.setText( webSite + " 連線中..." );
+                
+                // google圖片下載時因為有些連線很久沒回應，所以要設置計時器，預防連線時間過長
+                Timer timer = new Timer();
+                if ( SetUp.getTimeoutTimer() > 0 ) {
+                    // 預設(getTimeoutTimer()*1000)秒會timeout
+                    timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 );
+                }
 
                 URL url = new URL( webSite );
                 HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
@@ -324,7 +332,7 @@ public class Common {
                 connection.setFollowRedirects( true );
                 //connection.setDoOutput( true ); // 需要向服务器写数据
                 connection.setDoInput( true ); //
-                
+
                 // dm5加這一行無法下載...
                 //connection.setUseCaches( false ); // // Post 请求不能使用缓存 
                 connection.setAllowUserInteraction( false );
@@ -361,13 +369,7 @@ public class Common {
                     || ( fastMode && connection.getContentLength() == 10771 ) ) {
                     return;
                 }
-
-                // google圖片下載時因為有些連線很久沒回應，所以要設置計時器，預防連線時間過長
-                Timer timer = new Timer();
-                if ( SetUp.getTimeoutTimer() > 0 ) {
-                    // 預設(getTimeoutTimer()*1000)秒會timeout
-                    timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 );
-                }
+                
                 tryConnect( connection );
 
 
@@ -576,8 +578,19 @@ public class Common {
     }
 
     public static boolean isLegalURL( String webSite ) {
-        String regex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+\\+&@!#/%=~_|]";
-        if ( webSite.matches( regex ) ) {
+        
+        boolean theURLisLegal = true;
+       
+        try {
+            URL url = new URL( webSite );
+        }
+        catch ( MalformedURLException ex ) {
+            theURLisLegal = false;
+        }
+        
+        //String regex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+\\+&@!#/%=~_|]";
+        
+        if ( theURLisLegal ) {
             return true;
         }
         else {
@@ -1526,25 +1539,30 @@ public class Common {
         String[] fileList = new File( file ).list();
         System.out.println( file );
 
-        String firstZipFileName = "";
-        boolean existZipFile = false;
+        String firstCompressFileName = "";
+        boolean existCompressFile = false;
         for ( int i = 0; i < fileList.length; i++ ) {
             System.out.println( "FILE: " + fileList[i] );
-            if ( fileList[i].matches( "(?s).*\\.zip" ) ) {
-                firstZipFileName = fileList[i];
-                existZipFile = true;
+            if ( fileList[i].matches( "(?s).*\\.zip" )
+                || fileList[i].matches( "(?s).*\\.cbz" ) ) {
+                firstCompressFileName = fileList[i];
+                existCompressFile = true;
                 break;
             }
         }
 
         if ( !openFileManger ) {
-            if ( existZipFile ) {
+            if ( existCompressFile ) {
                 // 資料夾內存在壓縮檔
-                path = file + Common.getSlash() + firstZipFileName;
+                path = file + Common.getSlash() + firstCompressFileName;
             }
             else {
                 String[] picList = new File( file + Common.getSlash() + fileList[0] ).list();
-                String firstPicFileInFirstVolume = picList[0];
+                String firstPicFileInFirstVolume = "";
+                
+                if ( picList != null )
+                    firstPicFileInFirstVolume = picList[0];
+                
                 path = file + Common.getSlash() + fileList[0]
                     + Common.getSlash() + firstPicFileInFirstVolume;
             }
@@ -1607,7 +1625,7 @@ public class Common {
     }
 
     public static void downloadPost( String webSite, String outputDirectory,
-        String outputFileName, String postString, boolean needCookie, String cookieString, String referURL ) {
+        String outputFileName, boolean needCookie, String cookieString, String postString, String referURL ) {
         // downlaod file by URL
 
         boolean gzipEncode = false;
@@ -1616,8 +1634,6 @@ public class Common {
         boolean fastMode = false;
 
         int fileGotSize = 0;
-
-        postString = "dm5_key=B1tLbaYxCtE%3D";
 
 
         if ( CommonGUI.stateBarDetailMessage == null ) {
@@ -1634,51 +1650,37 @@ public class Common {
                 HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
 
                 // 偽裝成瀏覽器
-                
-                //connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)");
-                connection.setRequestProperty( "User-Agent", "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
-                
-                //connection.setRequestMethod( "GET" ); // 默认是GET 
-                //connection.setRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)" );
-                //connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; InfoPath.1; CIBA)");
-                
-                connection.setFollowRedirects( true );
-                
-                //connection.setDoOutput( true ); // 需要向服务器写数据
-                connection.setDoInput( true ); //
-                
-                //connection.setUseCaches( false ); // // Post 请求不能使用缓存 
-                
-                connection.setAllowUserInteraction( false );
-                
-                // 设定传送的内容类型是可序列化的java对象   
-                
-                // (如果不设此项,在传送序列化对象时,当WEB服务默认的不是这种类型时可能抛java.io.EOFException)
-                //connection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
-                //connection.setRequestProperty( "Accept-Language", "zh-cn" );
-                //connection.setRequestProperty( "Referer", "http://www.dm5.com/manhua-jihuantianshi/" );
-                //connection.setRequestProperty( "Content-Length", "" + postString.length() );
-                //connection.setRequestProperty( "Cache-Control", "no-cache" );
-                
-                //connection.setRequestProperty( "Pragma", "no-cache" );
-                //connection.setRequestProperty( "Host", "10.0.0.172" );
-                
-                connection.setRequestProperty( "Accept", "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2" );
-                connection.setRequestProperty( "Connection", "keep-alive" );
-                
 
                 connection.setDoOutput( true );
+                connection.setDoInput( true );
+                ( ( HttpURLConnection ) connection ).setRequestMethod( "POST" );
+                connection.setUseCaches( false );
+                connection.setAllowUserInteraction( true );
+                HttpURLConnection.setFollowRedirects( true );
+                connection.setInstanceFollowRedirects( true );
 
-                connection.setConnectTimeout( 10000 ); // 與主機連接時間不能超過十秒
-
-
-                if ( needCookie ) {
-                    connection.setDoOutput( true );
-
+                connection.setRequestProperty(
+                    "User-agent",
+                    "Mozilla/5.0 (Windows; U; Windows NT 6.0; zh-TW; rv:1.9.1.2) "
+                    + "Gecko/20090729 Firefox/3.5.2 GTB5 (.NET CLR 3.5.30729)" );
+                connection.setRequestProperty( "Accept",
+                    "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" );
+                connection.setRequestProperty( "Accept-Language",
+                    "zh-tw,en-us;q=0.7,en;q=0.3" );
+                connection.setRequestProperty( "Accept-Charse",
+                    "Big5,utf-8;q=0.7,*;q=0.7" );
+                if ( cookieString != null ) {
                     connection.setRequestProperty( "Cookie", cookieString );
                 }
+                if ( referURL != null ) {
+                    connection.setRequestProperty( "Referer", referURL );
+                }
 
-                int responseCode = 0;
+                connection.setRequestProperty( "Content-Type",
+                    "application/x-www-form-urlencoded" );
+                
+
+                connection.setRequestProperty( "Content-Length", String.valueOf( postString.getBytes().length ) );
 
 
                 // google圖片下載時因為有些連線很久沒回應，所以要設置計時器，預防連線時間過長
@@ -1687,36 +1689,20 @@ public class Common {
                     // 預設(getTimeoutTimer()*1000)秒會timeout
                     timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 );
                 }
+                
+                Common.checkDirectory( outputDirectory ); // 檢查有無目標資料夾，若無則新建一個　
+                
+                //OutputStream os = response.getOutputStream();
+                OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
+                InputStream is = null;
+                
+                
+                java.io.DataOutputStream dos = new java.io.DataOutputStream(
+                    connection.getOutputStream()); 
+                dos.writeBytes(postString); 
+                dos.close();
 
-                //connection.setRequestMethod( "POST" ); // 默认是GET 
-
-
-                tryConnect( connection );
-
-                System.out.println( "資料長度：" + connection.getContentLength() );
-
-                /*
-                 OutputStream output = null; try { output =
-                 connection.getOutputStream(); //output.write(
-                 postString.getBytes() ); } catch ( Exception ex ) {
-                 Common.errorReport( "無法送出給伺服器端" ); } finally { if ( output !=
-                 null ) { try { output.close(); } catch ( IOException
-                 logOrIgnore ) { } } }
-                 */
-
-
-                int fileSize = connection.getContentLength() / 1000;
-
-                if ( Common.isPicFileName( outputFileName )
-                    && ( fileSize == 21 || fileSize == 22 ) ) { // 連到99系列的盜連圖
-                    Common.debugPrintln( "似乎連到盜連圖，停一秒後重新連線......" );
-                    try {
-                        Thread.sleep( 1000 ); // 每次暫停一秒再重新連線
-                    }
-                    catch ( InterruptedException iex ) {
-                    }
-                    tryConnect( connection );
-                }
+                //tryConnect( connection );
 
                 if ( connection.getResponseCode() != 200 ) {
                     //Common.debugPrintln( "第二次失敗，不再重試!" );
@@ -1725,28 +1711,11 @@ public class Common {
                     return;
                 }
 
-                Common.checkDirectory( outputDirectory ); // 檢查有無目標資料夾，若無則新建一個　
+                is = connection.getInputStream(); 
 
-                //OutputStream os = response.getOutputStream();
-                OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
-                InputStream is = null;
-
-                if ( gzipEncode && fileSize < 17 ) // 178漫畫小於17kb就認定為已經壓縮過的
-                {
-                    try {
-                        is = new GZIPInputStream( connection.getInputStream() ); // ex. 178.com
-                    }
-                    catch ( IOException ex ) {
-                        is = connection.getInputStream(); // 其他漫畫網
-                    }
-                }
-                else {
-                    is = connection.getInputStream(); // 其他漫畫網
-                }
+                int fileSize = connection.getContentLength() / 1000;
                 Common.debugPrint( "(" + fileSize + " k) " );
                 String fileSizeString = fileSize > 0 ? "" + fileSize : " ? ";
-
-
 
                 byte[] r = new byte[1024];
                 int len = 0;
@@ -1867,89 +1836,89 @@ public class Common {
         try {
             URL url = new URL( webSite );
             HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setDoOutput(true);
+            connection.setRequestMethod( "GET" );
+            connection.setDoOutput( true );
             //connection.setRequestProperty( "Referer", "http://www.dm5.com/manhua-yaolinvshen/" );
-            
+
             ComicDownGUI.stateBar.setText( webSite + " 連線中..." );
-            
+
             tryConnect( connection );
-            
+
             int fileSize = connection.getContentLength() / 1000;
-            
+
             if ( connection.getResponseCode() != 200 ) {
-                    //Common.debugPrintln( "第二次失敗，不再重試!" );
-                    Common.errorReport( "錯誤回傳碼(responseCode): "
-                        + connection.getResponseCode() + " : " + webSite );
-                    return;
+                //Common.debugPrintln( "第二次失敗，不再重試!" );
+                Common.errorReport( "錯誤回傳碼(responseCode): "
+                    + connection.getResponseCode() + " : " + webSite );
+                return;
+            }
+
+            Common.checkDirectory( outputDirectory ); // 檢查有無目標資料夾，若無則新建一個　
+
+            //OutputStream os = response.getOutputStream();
+            OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
+            InputStream is = null;
+
+
+            is = connection.getInputStream(); // 其他漫畫網
+
+            Common.debugPrint( "(" + fileSize + " k) " );
+            String fileSizeString = fileSize > 0 ? "" + fileSize : " ? ";
+
+
+
+            byte[] r = new byte[1024];
+            int len = 0;
+
+            int fileGotSize = 0;
+            while ( ( len = is.read( r ) ) > 0 && ( Run.isAlive ) ) {
+                // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
+                if ( fileSize > 1024 || !Flag.timeoutFlag ) // 預防卡住的機制
+                {
+                    os.write( r, 0, len );
+                }
+                else {
+                    break;
                 }
 
-                Common.checkDirectory( outputDirectory ); // 檢查有無目標資料夾，若無則新建一個　
-
-                //OutputStream os = response.getOutputStream();
-                OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
-                InputStream is = null;
-
-
-                is = connection.getInputStream(); // 其他漫畫網
-   
-                Common.debugPrint( "(" + fileSize + " k) " );
-                String fileSizeString = fileSize > 0 ? "" + fileSize : " ? ";
-
-
-
-                byte[] r = new byte[1024];
-                int len = 0;
-
-                int fileGotSize = 0;
-                while ( ( len = is.read( r ) ) > 0 && ( Run.isAlive ) ) {
-                    // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
-                    if ( fileSize > 1024 || !Flag.timeoutFlag ) // 預防卡住的機制
-                    {
-                        os.write( r, 0, len );
-                    }
-                    else {
-                        break;
-                    }
-
-                    fileGotSize += ( len / 1000 );
-
-                    if ( Common.withGUI() ) {
-                        int percent = 100;
-                        String downloadText = "";
-                        if ( fileSize > 0 ) {
-                            percent = ( fileGotSize * 100 ) / fileSize;
-                            downloadText = fileSizeString + "Kb ( " + percent + "% ) ";
-                        }
-                        else {
-                            downloadText = fileSizeString + " Kb ( " + fileGotSize + "Kb ) ";
-                        }
-
-                        ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
-                            + CommonGUI.stateBarDetailMessage
-                            + " : " + downloadText );
-                    }
-                }
-
-                is.close();
-                os.flush();
-                os.close();
-
-
-
+                fileGotSize += ( len / 1000 );
 
                 if ( Common.withGUI() ) {
+                    int percent = 100;
+                    String downloadText = "";
+                    if ( fileSize > 0 ) {
+                        percent = ( fileGotSize * 100 ) / fileSize;
+                        downloadText = fileSizeString + "Kb ( " + percent + "% ) ";
+                    }
+                    else {
+                        downloadText = fileSizeString + " Kb ( " + fileGotSize + "Kb ) ";
+                    }
+
                     ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
                         + CommonGUI.stateBarDetailMessage
-                        + " : " + fileSizeString + "Kb ( 100% ) " );
+                        + " : " + downloadText );
                 }
+            }
 
-                connection.disconnect();
-                
-                Flag.timeoutFlag = false; // 歸回初始值
+            is.close();
+            os.flush();
+            os.close();
 
-                Common.debugPrintln( webSite + " downloads successful!" ); // for debug
-            
+
+
+
+            if ( Common.withGUI() ) {
+                ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
+                    + CommonGUI.stateBarDetailMessage
+                    + " : " + fileSizeString + "Kb ( 100% ) " );
+            }
+
+            connection.disconnect();
+
+            Flag.timeoutFlag = false; // 歸回初始值
+
+            Common.debugPrintln( webSite + " downloads successful!" ); // for debug
+
         }
         catch ( MalformedURLException e ) {
             e.printStackTrace();

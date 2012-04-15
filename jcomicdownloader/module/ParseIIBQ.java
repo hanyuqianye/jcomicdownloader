@@ -2,10 +2,11 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/12/4
+Last Modified : 2012/3/25
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
- *  2.03 : 1. 新增新增對www.iibq.com的支援。
+    3.11 :1. 修復對www.iibq.com的支援。
+ *  2.03 :1. 新增新增對www.iibq.com的支援。
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -116,9 +117,9 @@ public class ParseIIBQ extends ParseOnlineComicSite {
         String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_iibq_encode_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
+        //Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
 
-        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override
@@ -169,23 +170,28 @@ public class ParseIIBQ extends ParseOnlineComicSite {
         List<String> volumeList = new ArrayList<String>();
 
         int beginIndex = allPageString.indexOf( "class=\"cVol\"" );
-        int endIndex = allPageString.indexOf( "class=\"cFooter\"", beginIndex );
+        int endIndex = allPageString.indexOf( "class=\"cCRHtm\"", beginIndex );
         String tempString = allPageString.substring( beginIndex, endIndex );
-        String[] tempTokens = tempString.split( "'|<|>" );
         
-        int volumeCount = 0;
-        for ( int i = 0 ; i < tempTokens.length ; i++ ) {
+        endIndex = beginIndex = 0;
+        int volumeCount = tempString.split( "href='" ).length - 1;
+        String tempURL = "";
+        String tempTitle = "";
+        for ( int i = 0 ; i < volumeCount ; i++ ) {
+            // 取得單集位址
+            beginIndex = tempString.indexOf( "href='", beginIndex ) + 6;
+            endIndex = tempString.indexOf( "'", beginIndex );
+            tempURL = tempString.substring( beginIndex, endIndex );
+            urlList.add( tempURL );
             
-            if ( tempTokens[i].matches( "/.*/.*/.*" ) ) {
-                // 取得單集位址
-                urlList.add( baseURL + tempTokens[i] );
-                
-                // 取得單集名稱
-                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( tempTokens[i+2].trim() ) ) ) );
-                
-                volumeCount ++;
-            }
+            // 取得單集名稱
+            beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "<", beginIndex );
+            tempTitle = tempString.substring( beginIndex, endIndex );            
+            volumeList.add( getVolumeWithFormatNumber( 
+                Common.getStringRemovedIllegalChar(
+                Common.getTraditionalChinese( tempTitle.trim() ) ) ) );
+
         }
         
         totalVolume = volumeCount;

@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+3.12: 1. 修復jumpcn解析標題錯誤的問題。
 1.12: 1. 新增對jumpcn的支援。
  *    2. 改成一邊解析網址一邊下載。
 ----------------------------------------------------------------------------------------------------
@@ -139,8 +140,10 @@ public class ParseJumpcn extends ParseOnlineComicSite {
 
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
-        int beginIndex = allPageString.indexOf( "<h1>" ) + 4;
-        int endIndex = allPageString.indexOf( "</h1>", beginIndex );
+        int beginIndex = allPageString.indexOf( "<h1>" );
+        beginIndex = allPageString.indexOf( "href=", beginIndex );
+        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "<", beginIndex );
         String title = allPageString.substring( beginIndex, endIndex );
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );

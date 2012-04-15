@@ -60,6 +60,8 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         setUpUIComponent();
         setUpeListener();
         setVisible( true );
+        
+        deleteOfficialHtml(); // 刪除官方網頁檔案
 
         setNewestVersion(); // 檢查是否有新版本
 
@@ -194,7 +196,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
     private void deleteOfficialHtml() {
         File file = new File( SetUp.getTempDirectory() + officialName );
         if ( file.exists() ) {
-            file.deleteOnExit();
+            file.delete();
         }
     }
 
@@ -238,6 +240,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         Thread versionThread = new Thread( new Runnable() {
 
             public void run() {
+
                 // 取得介面設定值（不用UIManager.getLookAndFeel().getName()是因為這樣才能讀到_之後的參數）
                 String nowSkinName = SetUp.getSkinClassName();
                 downloadOfficialHtml(); // 下載官方網頁

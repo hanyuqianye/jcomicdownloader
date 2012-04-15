@@ -103,6 +103,8 @@ public class OptionFrame extends JFrame implements MouseListener {
     private JButton setBackgroundPicOfOptionFrameButton;
     private JButton setBackgroundPicOfChoiceFrameButton;
 
+    private JRadioButton zipRadioButtion, cbzRadioButtion;
+
     /**
     
     @author user
@@ -473,6 +475,33 @@ public class OptionFrame extends JFrame implements MouseListener {
         compressCheckBox = getCheckBoxBold( "自動產生壓縮檔", SetUp.getAutoCompress() );
         CommonGUI.setToolTip( compressCheckBox, "下載完成後進行壓縮，壓縮檔名與資料夾名稱相同" );
 
+        boolean choiceZip = false, choiceCbz = false;
+        if ( "zip".equals( SetUp.getCompressFormat() ) ) {
+            choiceZip = true;
+            choiceCbz = false;
+        }
+        else {
+            choiceZip = false;
+            choiceCbz = true;
+        }
+
+        zipRadioButtion = getRadioButton( "zip", choiceZip );
+        CommonGUI.setToolTip( zipRadioButtion, "壓縮為zip檔" );
+        cbzRadioButtion = getRadioButton( "cbz", choiceCbz );
+        CommonGUI.setToolTip( cbzRadioButtion, "壓縮為cbz檔" );
+        ButtonGroup compressGroup = new ButtonGroup();
+        compressGroup.add( zipRadioButtion );
+        compressGroup.add( cbzRadioButtion );
+
+        JPanel compressPanel = new JPanel();
+        compressPanel.add( zipRadioButtion );
+        compressPanel.add( cbzRadioButtion );
+
+        JPanel compressPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        compressPanelHorizontal.add( compressCheckBox );
+        compressPanelHorizontal.add( compressPanel );
+        compressPanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
         deleteCheckBox = getCheckBox( "自動刪除圖片檔", SetUp.getDeleteOriginalPic() );
         CommonGUI.setToolTip( deleteCheckBox, "下載完成後便刪除圖檔，此選項應與『自動產生壓縮檔』搭配使用" );
 
@@ -486,7 +515,7 @@ public class OptionFrame extends JFrame implements MouseListener {
         JPanel filePanel = new JPanel( new GridLayout( 6, 1, 2, 2 ) );
         filePanel.add( dirPanelHorizontal );
         filePanel.add( dirTextField );
-        filePanel.add( compressCheckBox );
+        filePanel.add( compressPanelHorizontal );
         filePanel.add( deleteCheckBox );
         filePanel.add( urlCheckBox );
         filePanel.add( downloadCheckBox );
@@ -952,6 +981,13 @@ public class OptionFrame extends JFrame implements MouseListener {
                 SetUp.setKeepRecord( keepRecordCheckBox.isSelected() ); // 紀錄到設定值
                 SetUp.setChoiceAllVolume( choiceAllVolumeCheckBox.isSelected() ); // 紀錄到設定值
 
+                String compressFormatString = "";
+                if ( zipRadioButtion.isSelected() )
+                    compressFormatString = "zip";
+                else
+                    compressFormatString = "cbz";
+                SetUp.setCompressFormat( compressFormatString ); // 紀錄到設定值
+
                 Boolean tempBool = new Boolean( usingBackgroundPicOfMainFrameCheckBox.isSelected() );
                 if ( !tempBool.equals( SetUp.getUsingBackgroundPicOfMainFrame() ) ) {
                     JOptionPane.showMessageDialog( OptionFrame.thisFrame, "主視窗背景設定已改變，請重新開啟程式",
@@ -1123,6 +1159,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                 }
             }
         }
+
     }
 
     private JCheckBox getCheckBox( String string, boolean selected ) {
@@ -1207,9 +1244,26 @@ public class OptionFrame extends JFrame implements MouseListener {
             textField.setForeground( SetUp.getOptionFrameOtherDefaultColor() );
             textField.addMouseListener( this );
         }
-
         return textField;
+    }
 
+    private JRadioButton getRadioButton( String string, boolean selected ) {
+        JRadioButton radioButton = new JRadioButton( string, selected );
+        //button.setFont( SetUp.getDefaultFont() );
+        if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) { // 若設定為透明，就用預定字體。
+            radioButton.setOpaque( false );
+            radioButton.setForeground( SetUp.getChoiceFrameOtherDefaultColor() );
+            radioButton.addMouseListener( this );
+
+        }
+        radioButton.addItemListener( new ItemHandler() );
+
+        if ( SetUp.getSkinClassName().matches( ".*napkin.*" ) ) {
+            // 因為napkin的預設字型不太清楚，所以用選定字型
+            radioButton.setFont( SetUp.getDefaultFont( - 2 ) );
+        }
+
+        return radioButton;
     }
 }
 

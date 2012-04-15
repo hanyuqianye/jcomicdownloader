@@ -19,6 +19,8 @@ import jcomicdownloader.tools.*;
 import java.io.*;
 import jcomicdownloader.frame.OptionFrame;
 
+
+
 /**
  預設值的設置，讀寫設定檔
 
@@ -90,6 +92,9 @@ public class SetUp { // read setup file, and then setup
     private static String backgroundPicPathOfInformationFrame;
     private static String backgroundPicPathOfOptionFrame;
     private static String backgroundPicPathOfChoiceFrame;
+
+    // 壓縮檔的格式
+    private static String compressFormat;
 
     /**
 
@@ -182,6 +187,8 @@ public class SetUp { // read setup file, and then setup
         mainFrameTableDefaultColor = Color.WHITE;
         mainFrameMenuItemDefaultColor = Color.GRAY;
 
+        // 預設壓縮檔格式
+        compressFormat = "zip";
     }
 
     // 將目前的設定寫入到設定檔(set.ini)
@@ -294,6 +301,8 @@ public class SetUp { // read setup file, and then setup
             + "\nchoiceFrameTableFileExistedColor = " + choiceFrameTableFileExistedColor.toString()
             + "\n# 選擇集數視窗視窗表格內容在滑鼠碰觸時的字體顏色"
             + "\nchoiceFrameTableMouseEnteredColor = " + choiceFrameTableMouseEnteredColor.toString()
+            + "\n# 預設壓縮檔格式"
+            + "\ncompressFormat = " + compressFormat
             + "\n";
 
         Common.outputFile( setString, Common.getNowAbsolutePath(), Common.setFileName );
@@ -362,7 +371,7 @@ public class SetUp { // read setup file, and then setup
         Common.debugPrintln( "MainFrameTableDefaultColor = " + mainFrameTableDefaultColor.toString() );  
         Common.debugPrintln( "MainFrameMenuItemDefaultColor = " + mainFrameMenuItemDefaultColor.toString() ); 
         
-        
+        Common.debugPrintln( "CompressFormat = " + compressFormat );
         
         
         Common.debugPrintln( "-----------------------" );
@@ -428,7 +437,8 @@ public class SetUp { // read setup file, and then setup
         boolean existMainFrameTableDefaultColor = false;
         boolean existMainFrameMenuItemDefaultColor = false;
 
-
+        // 預設壓縮格式
+        boolean existCompressFormat = false;
 
 
         for ( int i = 0; i < lines.length; i++ ) {
@@ -876,6 +886,12 @@ public class SetUp { // read setup file, and then setup
                             existChoiceFrameTableMouseEnteredColor = true;
                         }
                     }
+                    else if ( split[0].equals( "compressFormat" ) ) {
+                        if ( split.length > 1 ) {
+                            setCompressFormat( split[1] );
+                            existCompressFormat = true;
+                        }
+                    }
 
                 }
             }
@@ -922,7 +938,8 @@ public class SetUp { // read setup file, and then setup
             && existMainFrameOtherDefaultColor
             && existMainFrameTableMouseEnteredColor
             && existMainFrameTableDefaultColor
-            && existMainFrameMenuItemDefaultColor ) {
+            && existMainFrameMenuItemDefaultColor
+            && existCompressFormat ) {
             Common.debugPrintln( "設定檔全部讀取完畢" );
         }
         else {
@@ -1391,6 +1408,13 @@ public class SetUp { // read setup file, and then setup
 
     public static void setBackgroundPicPathOfChoiceFrame( String path ) {
         backgroundPicPathOfChoiceFrame = path;
+    }
+
+    public static String getCompressFormat() {
+        return compressFormat;
+    }
+    public static void setCompressFormat( String format ) {
+        compressFormat = format;
     }
 
     // ----------------------------------------------------------------

@@ -54,4 +54,7 @@ public class Site {
     public final static int DM5 = 36;
     public final static int CK = 37;
     public final static int TUKU = 38;
+    public final static int HH = 39;
+    public final static int IASK = 40;
+    public final static int NINENINE_MH_99770 = 41;
 }

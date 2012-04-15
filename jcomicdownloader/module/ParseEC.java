@@ -59,9 +59,10 @@ public class ParseEC extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
-        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "", "" );
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
-
+        
+        
         // ex. http://www.8comic.com/love/drawing-8170.html?ch=3
         volumeNoString = webSite.split( "/|=" )[webSite.split( "/|=" ).length - 1];
 
@@ -91,6 +92,9 @@ public class ParseEC extends ParseOnlineComicSite {
 
         String[] parses = lines[index].split( "\"|\\|" ); // 除了第一個和最後一個外都是解析碼
 
+        //for ( int i = 0; i < parses.length; i ++ )
+        //    System.out.println( i + "_" + parses[i] );
+
         System.out.println( "lines[index]: " + lines[index] );
         System.out.println( "volumeNoString: " + volumeNoString );
         
@@ -102,10 +106,11 @@ public class ParseEC extends ParseOnlineComicSite {
             }
         }
         
-        System.out.println( "parses[order]: " + parses[order] );
+        System.out.println( "parses[" + order + "]: " + parses[order] );
 
         String[] codes = parses[order].split( " " );
 
+        // ex. http://img3.8comic.com/4/8323/24/001_88n.jpg
         // ex. http://img"+sid+".8comic.com/"+did+"/"+itemid+"/"+num+"/"+img+".jpg"
         // 找出網址
         String num = codes[0];
@@ -162,7 +167,7 @@ public class ParseEC extends ParseOnlineComicSite {
 
     @Override
     public boolean isSingleVolumePage( String urlString ) {
-        if ( urlString.matches( "(?s).*love(?s).*drawing(?s).*" ) ) // ex. http://www.8comic.com/love/drawing-2245.html?ch=51
+        if ( urlString.matches( "(?s).*/love/(?s).*" ) ) // ex. http://www.8comic.com/love/drawing-2245.html?ch=51
         {
             return true;
         } else {
@@ -223,11 +228,16 @@ public class ParseEC extends ParseOnlineComicSite {
 
                 // ex. 2245-49.html
                 String idAndVolume = tempStrings[i].substring( b, e );
+                
+                // ex.cview('104-97.html',8) -> 取8
+                b = tempStrings[i].indexOf( ",", b ) + 1;
+                e = tempStrings[i].indexOf( ")", b ); 
+                String catid = tempStrings[i].substring( b, e ).trim();
 
                 // 取得單集位址
                 String idString = idAndVolume.split( "-|\\." )[0];
                 String volumeNoString = idAndVolume.split( "-|\\." )[1];
-                urlList.add( getSinglePageURL( idString, volumeNoString ) );
+                urlList.add( getSinglePageURL( idString, volumeNoString, catid ) );
                 // 取得單集名稱
                 volumeTitle = getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                         Common.getTraditionalChinese( tempStrings[i + 1].trim() ) ) );
@@ -246,12 +256,19 @@ public class ParseEC extends ParseOnlineComicSite {
     }
 
     // 取得單集頁面的網址
-    public String getSinglePageURL( String idString, String volumeNoString ) {
+    public String getSinglePageURL( String idString, String volumeNoString, String catidString ) {
 
         String baseMainURL = "http://www.8comic.com/love/drawing-";
+        String baseMainURL2 = "http://www.8comic.com/love/free_online_";
         String volumeString = "?ch=" + volumeNoString;
-
-        return baseMainURL + idString + ".html" + volumeString;
+        
+        int catid = Integer.parseInt( catidString );
+        
+        if ( catid==4 || catid==6 || catid==12 ||catid==22 || 
+             catid==1 || catid==17 || catid==19 || catid==21 )
+            return baseMainURL2 + idString + ".html" + volumeString;
+        else
+            return baseMainURL + idString + ".html" + volumeString;
     }
 
     @Override

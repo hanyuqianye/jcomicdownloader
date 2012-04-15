@@ -2,10 +2,11 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/10/25
+Last Modified : 2012/4/10
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
-
+3.12: 1. 修復cococomic因網站改版而無法下載的問題。
+      2. 修復99770因網站改版而無法下載的問題。
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -18,12 +19,12 @@ import java.util.*;
 
 public class ParseNINENINE extends ParseOnlineComicSite {
 
-    private String indexName;
-    private String indexEncodeName;
-    private String jsName;
-    private int serverNo; // 下載伺服器的編號
-    private String baseURL; // 首頁網址 ex. http://dm.99manga.com
-    private String jsURL; // 存放下載伺服器網址的.js檔的網址
+    protected String indexName;
+    protected String indexEncodeName;
+    protected String jsName;
+    protected int serverNo; // 下載伺服器的編號
+    protected String baseURL; // 首頁網址 ex. http://dm.99manga.com
+    protected String jsURL; // 存放下載伺服器網址的.js檔的網址
 
     /**
      *
@@ -137,11 +138,11 @@ public class ParseNINENINE extends ParseOnlineComicSite {
 
         System.out.println( "URL: " + urlString );
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
-
         return Common.getTraditionalChinese( Common.getFileString( SetUp.getTempDirectory(), indexEncodeName ) );
-    }
 
+    }
     @Override // 從網址判斷是否為單集頁面(true) 還是主頁面(false)
     public boolean isSingleVolumePage( String urlString ) {
         if ( urlString.matches( "(?s).*\\.htm\\?s(?s).*" ) ) // ex. dm.99manga.com/manga/4142/61660.htm?s=4
@@ -314,6 +315,24 @@ class Parse99Manga extends ParseNINENINE {
     }
 }
 
+// mh.99770.cc 變繁體版了，所以套用cococomic的方式解析
+class ParseMh99770 extends ParseCoco {
+
+    public ParseMh99770() {
+        super();
+        siteID = Site.NINENINE_MH_99770;
+    }
+
+    @Override
+    public void printLogo() {
+        System.out.println( " ______________________________" );
+        System.out.println( "|                           " );
+        System.out.println( "| Run the mh.99770.cc module: " );
+        System.out.println( "|_______________________________\n" );
+    }
+}
+
+// mh.99770.cc 變繁體版了，所以套用cococomic的方式解析
 class Parse99770 extends ParseNINENINE {
 
     public Parse99770() {
@@ -325,7 +344,7 @@ class Parse99770 extends ParseNINENINE {
     public void printLogo() {
         System.out.println( " ______________________________" );
         System.out.println( "|                           " );
-        System.out.println( "| Run the 99770.cc module: " );
+        System.out.println( "| Run the www.99770.cc module: " );
         System.out.println( "|_______________________________\n" );
     }
 }
@@ -335,7 +354,11 @@ class Parse99Mh extends ParseNINENINE {
     public Parse99Mh() {
         super();
         siteID = Site.NINENINE_MH;
+        
+        jsURL = "http://mh.99770.cc/script/ds.js";
     }
+    
+
 
     @Override
     public void printLogo() {
@@ -346,11 +369,155 @@ class Parse99Mh extends ParseNINENINE {
     }
 }
 
+// cococomic變繁體版了，解析方法全面翻新
 class ParseCoco extends ParseNINENINE {
 
     public ParseCoco() {
         super();
         siteID = Site.NINENINE_COCO;
+        
+        jsURL = "http://www.cococomic.com/script/ds.js";
+    }
+    
+    @Override // 下載網址指向的網頁，全部存入String後回傳
+    public String getAllPageString( String urlString ) {
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_encode_", "html" );
+
+        System.out.println( "URL: " + urlString );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        
+        // 網頁為繁體版utf8，無須轉碼
+        return Common.getTraditionalChinese( Common.getFileString( SetUp.getTempDirectory(), indexName ) );
+
+    }
+    
+    @Override // 從網址判斷是否為單集頁面(true) 還是主頁面(false)
+    public boolean isSingleVolumePage( String urlString ) {
+        // ex. http://www.cococomic.com/comic/6613/89503/
+        if ( Common.getAmountOfString( urlString, "/" ) > 5 )
+        {
+            return true;
+        } else // ex. http://www.cococomic.com/comic/6613/
+        {
+            return false;
+        }
+    }
+    
+    @Override // 從主頁面取得title(作品名稱)
+    public String getTitleOnMainPage( String urlString, String allPageString ) {
+        Common.debugPrintln( "開始由主頁面位址取得title：" );
+
+        int beginIndex = allPageString.indexOf( "class=\"cTitle\"" );
+        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "<", beginIndex );
+
+        title = allPageString.substring( beginIndex, endIndex ).trim().split( "\\s" )[0];
+
+
+        return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
+    }
+    
+    @Override // 從主頁面取得所有集數名稱和網址
+    public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString ) {
+        
+        List<List<String>> combinationList = new ArrayList<List<String>>();
+        List<String> urlList = new ArrayList<String>();
+        List<String> volumeList = new ArrayList<String>();
+        
+        int beginIndex = allPageString.indexOf( "class=\"cVol\"" );
+        int endIndex = allPageString.indexOf( "class=\"cAreaTitle\"", beginIndex );
+
+        String tempString = allPageString.substring( beginIndex, endIndex );
+        
+        totalVolume = tempString.split( "href=" ).length - 1;
+
+        beginIndex = endIndex = 0;
+        for ( int count = 0 ; count < totalVolume ; count++ ) {
+
+            beginIndex = tempString.indexOf( "href=", beginIndex );
+            beginIndex = tempString.indexOf( "'", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "'", beginIndex );
+            urlList.add( tempString.substring( beginIndex, endIndex ) );
+
+            beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "<", beginIndex );
+            String title = tempString.substring( beginIndex, endIndex );
+
+            volumeList.add( getVolumeWithFormatNumber( 
+                    Common.getStringRemovedIllegalChar( title.trim() ) ) );
+        }
+
+        combinationList.add( volumeList );
+        combinationList.add( urlList );
+
+        return combinationList;
+    }
+    
+    @Override
+    public void setParameters() { // let all the non-set attributes get values
+
+        Common.debugPrintln( "開始解析各參數 :" );
+
+        Common.debugPrintln( "基本位址: " + baseURL );
+        Common.debugPrintln( "JS檔位址: " + jsURL );
+
+
+        Common.debugPrintln( "開始解析title和wholeTitle :" );
+
+
+        Common.debugPrintln( "作品名稱(title) : " + getTitle() );
+
+
+        Common.debugPrintln( "作品+章節名稱(wholeTitle) : " + getWholeTitle() );
+
+
+    }
+    
+    @Override
+    public void parseComicURL() { // parse URL and save all URLs in comicURL
+        // 先取得後面的下載伺服器網址
+        
+        String allPageString = getAllPageString( webSite );
+        
+        int beginIndex = 0;
+        int endIndex = 0;
+        
+        beginIndex = allPageString.indexOf( "var sFiles" );
+        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( "\"", beginIndex );
+        
+        String tempString = allPageString.substring( beginIndex, endIndex );
+        String[] urlTokens = tempString.split( "\\|" );
+        
+        // 取得頁數
+        comicURL = new String[urlTokens.length];
+        
+        
+        // 再取得後面的下載伺服器網址
+        beginIndex = allPageString.indexOf( "var sPath", beginIndex );
+        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( "\"", beginIndex );
+        serverNo = Integer.parseInt( 
+            allPageString.substring( beginIndex, endIndex ) );
+
+        Common.downloadFile( jsURL, SetUp.getTempDirectory(), jsName, false, "" );
+        String allJsString = Common.getFileString( SetUp.getTempDirectory(), jsName );
+
+        beginIndex = allJsString.indexOf( "\"" ) + 1;
+        endIndex = allJsString.indexOf( "\"", beginIndex );
+        
+        tempString = allJsString.substring( beginIndex, endIndex );
+        String[] serverTokens = tempString.split( "\\|" );
+        baseURL = serverTokens[serverNo - 1];
+        
+        Common.debugPrintln( "下載伺服器位址: " + baseURL );
+
+        for ( int i = 0 ; i < comicURL.length ; i++ ) {
+            comicURL[i] = baseURL + urlTokens[i];
+            //Common.debugPrintln( i + " : " + comicURL[i] ) ;
+        }
+        //System.exit(0);
     }
 
     @Override

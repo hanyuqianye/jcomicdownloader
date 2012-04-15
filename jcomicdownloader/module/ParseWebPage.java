@@ -29,12 +29,12 @@ public class ParseWebPage {
         this();
         this.webSite = webSite;
 
-        parseSiteID( webSite );
+        parseSiteID();
     }
 
     private void downFile() {}
 
-    private void parseSiteID( String webSite ) {
+    private void parseSiteID() {
         if ( webSite.matches( "(?s).*89890.com(?s).*" ) )
             siteID = Site.CC;
         else if ( webSite.matches( "(?s).*kukudm.com(?s).*" ) ||
@@ -51,6 +51,8 @@ public class ParseWebPage {
             siteID = Site.NINENINE_COMIC;
         else if ( webSite.matches( "(?s).*99mh.com(?s).*" ) )
             siteID = Site.NINENINE_MH;
+        else if ( webSite.matches( "(?s).*mh.99770.cc(?s).*" ) )
+            siteID = Site.NINENINE_MH_99770;
         else if ( webSite.matches( "(?s).*99770.cc(?s).*" ) )
             siteID = Site.NINENINE_99770;
         else if ( webSite.matches( "(?s).*cococomic.com(?s).*" ) )
@@ -75,7 +77,7 @@ public class ParseWebPage {
             siteID = Site.DMEDEN;
         else if ( webSite.matches( "(?s).*\\.jumpcn.com/(?s).*" ) )
             siteID = Site.JUMPCN;
-        else if ( webSite.matches( "(?s).*\\.mangafox.com/(?s).*" ) )
+        else if ( webSite.matches( "(?s).*mangafox.me/(?s).*" ) )
             siteID = Site.MANGAFOX;
         else if ( webSite.matches( "(?s).*\\.manmankan.com/(?s).*" ) )
             siteID = Site.MANMANKAN;
@@ -113,6 +115,10 @@ public class ParseWebPage {
             siteID = Site.CK; 
         else if ( webSite.matches( "(?s).*tuku.cc(?s).*" ) ) 
             siteID = Site.TUKU; 
+        else if ( webSite.matches( "(?s).*hhcomic.com(?s).*" ) ) 
+            siteID = Site.HH; 
+        else if ( webSite.matches( "(?s).*iask.sina.com(?s).*" ) ) 
+            siteID = Site.IASK; 
                     
         else
             siteID = Site.UNKNOWN;
