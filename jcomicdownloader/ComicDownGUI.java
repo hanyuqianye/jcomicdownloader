@@ -4,7 +4,7 @@
  Program Name : JComicDownloader
  Authors  : surveyorK
  Version  : v3.13
- Last Modified : 2012/4/10
+ Last Modified : 2012/4/15
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  3.13: 1. 增加簡體中文的選項。

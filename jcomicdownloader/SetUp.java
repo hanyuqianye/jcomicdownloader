@@ -2,7 +2,7 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2011/12/5
+ Last Modified : 2012/4/15
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  2.03: 增加下載失敗後重新嘗試次數(retryTimes)的選項
@@ -17,6 +17,7 @@ import java.awt.Font;
 import jcomicdownloader.tools.*;
 
 import java.io.*;
+import java.util.Locale;
 import jcomicdownloader.enums.LanguageEnum;
 import jcomicdownloader.frame.OptionFrame;
 
@@ -195,7 +196,10 @@ public class SetUp { // read setup file, and then setup
         compressFormat = "zip";
         
          // 預設介面語言
-        defaultLanguage = 0; // 預設正體中文
+        if ( Locale.getDefault().getCountry() .matches( "CN" ) ) // 國家為中國
+            defaultLanguage = 1; // 預設簡體中文
+        else
+            defaultLanguage = 0; // 預設正體中文
     }
 
     // 將目前的設定寫入到設定檔(set.ini)
