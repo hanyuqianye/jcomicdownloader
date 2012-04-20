@@ -213,6 +213,8 @@ public class BackgroundSettingFrame extends JFrame
     }
 
     private JLabel getLabel( String string ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JLabel label = new JLabel( string );
         label.setFont( SetUp.getDefaultFont() );
 
@@ -220,6 +222,8 @@ public class BackgroundSettingFrame extends JFrame
     }
 
     private JButton getButton( String string ) {
+        string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
+        
         JButton button = new JButton( string );
         button.setFont( SetUp.getDefaultFont( 0 ) );
         button.addActionListener( this );

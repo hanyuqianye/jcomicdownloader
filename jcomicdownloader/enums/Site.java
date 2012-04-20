@@ -57,4 +57,5 @@ public class Site {
     public final static int HH = 39;
     public final static int IASK = 40;
     public final static int NINENINE_MH_99770 = 41;
+    public final static int JM = 42;
 }

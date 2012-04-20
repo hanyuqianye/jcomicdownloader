@@ -119,6 +119,8 @@ public class ParseWebPage {
             siteID = Site.HH; 
         else if ( webSite.matches( "(?s).*iask.sina.com(?s).*" ) ) 
             siteID = Site.IASK; 
+		else if ( webSite.matches( "(?s).*jmymh.com(?s).*" ) ) 
+            siteID = Site.JM; 	
                     
         else
             siteID = Site.UNKNOWN;

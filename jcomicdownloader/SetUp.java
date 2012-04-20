@@ -205,8 +205,7 @@ public class SetUp { // read setup file, and then setup
     // 將目前的設定寫入到設定檔(set.ini)
     public static void writeSetFile() {
         Common.debugPrintln( "寫入新的設定檔" );
-        String setString;
-        setString = "\n# 下載位置"
+        String setString = "\n# 下載位置"
             + "\ndownloadDirectory = " + originalDownloadDirectory
             + "\n# 暫存檔位置"
             + "\ntempDirectory = " + tempDirectory

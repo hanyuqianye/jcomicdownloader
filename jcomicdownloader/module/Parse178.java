@@ -226,7 +226,7 @@ public class Parse178 extends ParseOnlineComicSite {
         File decodeFile = new File( Common.getNowAbsolutePath() + "UTF8toGB.txt" );
         Common.debugPrintln( "檔案大小：" + decodeFile.length() );
 
-        if ( !decodeFile.exists() || decodeFile.length() < 334478 ) {
+        if ( !decodeFile.exists() || decodeFile.length() < 334520 ) {
             Common.debugPrintln( "同資料夾內沒有發現UTF8toGB.txt或尺寸不符，重新下載此檔" );
             String downloadURL = "https://sites.google.com/site/jcomicdownloader/release/UTF8toGB.txt?attredirects=0&d=1";
             Common.downloadFile( downloadURL, Common.getNowAbsolutePath(), "UTF8toGB.txt", false, null );

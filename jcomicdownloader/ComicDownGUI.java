@@ -3,10 +3,14 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v3.13
- Last Modified : 2012/4/15
+ Version  : v3.15
+ Last Modified : 2012/4/20
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 3.15: 1. 新增對jmymh.com的支援。
+ 3.14: 1. 修復178部分漫畫解析錯誤的問題。
+          2. 修復部分標題名稱出現unicode代碼的問題。
+          3. 完善簡體中文介面。
  3.13: 1. 增加簡體中文的選項。
          2. 修復comic.ck101.com無法下載的問題。
  3.12: 1. 修復cococomic因網站改版而無法下載的問題。
@@ -315,7 +319,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v3.13";
+    public static String versionString = "JComicDownloader  v3.15";
 
     public ComicDownGUI() {
         super( versionString );

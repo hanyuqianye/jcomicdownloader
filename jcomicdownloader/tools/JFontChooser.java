@@ -232,7 +232,7 @@ public class JFontChooser extends JComponent {
         //        GridBagConstraints.WEST, GridBagConstraints.NONE,
         //        ins, 0, 0 ) );
 
-        previewLabel = new JLabel( "預覽字體區" );
+        previewLabel = new JLabel( Common.getStringUsingDefaultLanguage( "預覽字體區" ) );
         previewLabel.setHorizontalAlignment( JLabel.CENTER );
         previewLabel.setVerticalAlignment( JLabel.CENTER );
         add( new JScrollPane( previewLabel ), new GridBagConstraints( 0, 3, 2, 1, 1, 1,

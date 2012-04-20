@@ -178,8 +178,12 @@ public class Zhcode extends Encoding {
 		 target_encoding == UTF8T ||
 		 target_encoding == ISO2022CN_CNS)) {
 		if (s2thash.containsKey(currchar) == true) {
+                        //System.out.println( lineindex + " " + dataline.charAt( lineindex ) + " [" + dataline + "]" );
 		    dataline.replace(lineindex, lineindex+1, s2thash.get(currchar));
 		}
+                    else {
+                        //System.out.println( lineindex + " " + dataline.charAt( lineindex ) + " [" + dataline + "] not found" );
+                    }
 	    } else if ((source_encoding == BIG5 || source_encoding == CNS11643 ||
 			source_encoding == UNICODET ||
 			source_encoding == UTF8 || source_encoding == UTF8T ||
@@ -215,7 +219,8 @@ public class Zhcode extends Encoding {
 		    dataline.replace(i, i+1, "&#x" + Integer.toHexString((int)dataline.charAt(i)) + ";");
 		} else if (unsupportedStrategy == UNIESC) {
 		    // Unicode Escape \\uNNNN
-		    dataline.replace(i, i+1, "\\u" + Integer.toHexString((int)dataline.charAt(i)));
+                        // 以下此行註解掉，才不會將無法轉碼的字元轉為\\u代碼 
+		    //dataline.replace(i, i+1, "\\u" + Integer.toHexString((int)dataline.charAt(i)));
 		} else if (unsupportedStrategy == QUESTIONMARK) {
 		    // Unicode Escape \\uNNNN
 		    dataline.replace(i, i+1, "?");

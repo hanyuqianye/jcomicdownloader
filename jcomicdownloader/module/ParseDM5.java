@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import jcomicdownloader.ComicDownGUI;
 import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Encoding;
 
@@ -406,6 +407,15 @@ public class ParseDM5 extends ParseOnlineComicSite {
         beginIndex = allPageString.indexOf( "id=\"cbc" );
         endIndex = allPageString.lastIndexOf( "id=\"cbc" );
         endIndex = allPageString.indexOf( "</ul>", endIndex );
+        
+        if ( beginIndex < 0 ) {
+            // 無法下載的檔案(過激漫畫....)
+            if ( allPageString.indexOf( "id=\"checkAdult" ) > 0 ) {
+                CommonGUI.showMessageDialog( ComicDownGUI.mainFrame, 
+                      "[" +  title + "] 為限制漫畫，無法下載",
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            }
+        }
 
         // 存放集數頁面資訊的字串
         tempString = allPageString.substring( beginIndex, endIndex );
@@ -432,9 +442,9 @@ public class ParseDM5 extends ParseOnlineComicSite {
 
                 // 取得單集名稱
                 beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "</li>", beginIndex );
+                endIndex = tempString.indexOf( "</a>", beginIndex );
                 volumeTitle = tempString.substring( beginIndex, endIndex );
-                volumeTitle = volumeTitle.replaceFirst( "</a>", "" );
+                //volumeTitle = volumeTitle.replaceFirst( "</a>", "" );
                 volumeTitle = volumeTitle.replaceFirst( "<span\\s+class.*>", "" );
 
 

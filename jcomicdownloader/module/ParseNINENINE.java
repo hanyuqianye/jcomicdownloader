@@ -16,6 +16,7 @@ import jcomicdownloader.enums.*;
 import jcomicdownloader.*;
 
 import java.util.*;
+import jcomicdownloader.encode.Zhcode;
 
 public class ParseNINENINE extends ParseOnlineComicSite {
 
@@ -139,8 +140,8 @@ public class ParseNINENINE extends ParseOnlineComicSite {
         System.out.println( "URL: " + urlString );
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
-        return Common.getTraditionalChinese( Common.getFileString( SetUp.getTempDirectory(), indexEncodeName ) );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Zhcode.GBK );
+        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
 
     }
     @Override // 從網址判斷是否為單集頁面(true) 還是主頁面(false)
@@ -252,7 +253,8 @@ public class ParseNINENINE extends ParseOnlineComicSite {
             String title = allPageString.substring( volumeBeginIndex, volumeEndIndex );
 
             volumeList.add( getVolumeWithFormatNumber( 
-                    Common.getStringRemovedIllegalChar( title ) ) );
+                    Common.getStringRemovedIllegalChar( 
+                        Common.getTraditionalChinese( title ) ) ) );
 
             index = volumeEndIndex;
         }
@@ -388,7 +390,7 @@ class ParseCoco extends ParseNINENINE {
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
         
         // 網頁為繁體版utf8，無須轉碼
-        return Common.getTraditionalChinese( Common.getFileString( SetUp.getTempDirectory(), indexName ) );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
 
     }
     
