@@ -18,6 +18,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import jcomicdownloader.ComicDownGUI;
 import jcomicdownloader.SetUp;
+import jcomicdownloader.enums.Site;
 import jcomicdownloader.tools.Common;
 import jcomicdownloader.tools.CommonGUI;
 
@@ -38,6 +39,7 @@ abstract public class ParseOnlineComicSite {
     protected String indexEncodeName; // temp stored file encoding to UTF-8
     protected String downloadDirectory;
     protected int runMode; // 只分析、只下載或分析加下載
+    protected String textFilePath; // 小說檔案完整目錄位置，包含檔名（只有下載小說時才有用）
 
     abstract public void setParameters(); // 須取得title和wholeTitle（title可用getTitle()）
 
@@ -150,9 +152,9 @@ abstract public class ParseOnlineComicSite {
     
     // 用最簡單的方式下載 使用Common.simpleDownloadFile
     protected void singlePageDownloadUsingSimple( String title, String wholeTitle, String url, 
-        int totalPage, int nowPageNumber ) {
+        int totalPage, int nowPageNumber, String referURL ) {
         singlePageDownload( title, wholeTitle, url, totalPage, nowPageNumber, 
-            0, false, "", "", true );
+            0, false, "", referURL, true );
     }
 
     // 只下載單一張圖片（因應部份網站無法一次解得所有圖片網址，只能每下載一張網頁，從中解析得到網址才下載）
@@ -175,7 +177,13 @@ abstract public class ParseOnlineComicSite {
         if ( url.matches( "(?s).*\\.\\w+" ) ) {
             extensionName = url.split( "\\." )[url.split( "\\." ).length - 1]; // 取得圖片附檔名
         } else {
-            extensionName = "jpg"; // 因應WY沒有附檔名，只好都給jpg
+            if ( this.siteID == Site.CK_NOVEL || 
+                 this.siteID == Site.MYBEST ) {
+                extensionName = "html"; // 因為是小說，所以副檔名給txt
+            }
+            else {
+                extensionName = "jpg"; // 因應WY沒有附檔名，只好都給jpg
+            }
         }
         NumberFormat formatter = new DecimalFormat( Common.getZero() );
         String fileName = formatter.format( nowPageNumber ) + "." + extensionName;
@@ -187,7 +195,7 @@ abstract public class ParseOnlineComicSite {
         if ( !new File( getDownloadDirectory() + fileName ).exists() ||
              !new File( getDownloadDirectory() + nextFileName ).exists()) {
             if ( simpleDownload ) {
-                Common.simpleDownloadFile( url, getDownloadDirectory(), fileName );
+                Common.simpleDownloadFile( url, getDownloadDirectory(), fileName, referURL );
             }
             else if ( delayTime == 0 ) {
                 //Common.print( url, getDownloadDirectory(), fileName, needCookie + "", cookieString );

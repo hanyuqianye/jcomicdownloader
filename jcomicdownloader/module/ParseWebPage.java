@@ -45,9 +45,13 @@ public class ParseWebPage {
             siteID = Site.EH;
         else if ( webSite.matches( "(?s).*exhentai.org(?s).*" ) )
             siteID = Site.EX;
+        else if ( webSite.matches( "(?s).*dm.99manga.com(?s).*" ) )
+            siteID = Site.NINENINE_MANGA_TC;
         else if ( webSite.matches( "(?s).*99manga.com(?s).*" ) )
             siteID = Site.NINENINE_MANGA;
-        else if ( webSite.matches( "(?s).*99comic.com(?s).*" ) )
+        else if ( webSite.matches( "(?s).*www.99comic.com(?s).*" ) )
+            siteID = Site.NINENINE_COMIC_TC;
+        else if ( webSite.matches( "(?s).*/99comic.com(?s).*" ) )
             siteID = Site.NINENINE_COMIC;
         else if ( webSite.matches( "(?s).*99mh.com(?s).*" ) )
             siteID = Site.NINENINE_MH;
@@ -109,7 +113,7 @@ public class ParseWebPage {
             siteID = Site.EMLAND; 
         else if ( webSite.matches( "(?s).*game.mop.com(?s).*" ) ) 
             siteID = Site.MOP; 
-        else if ( webSite.matches( "(?s).*dm5.com(?s).*" ) ) 
+        else if ( webSite.matches( "(?s).*dm5.com(?).*" ) ) 
             siteID = Site.DM5; 
         else if ( webSite.matches( "(?s).*comic.ck101.com(?s).*" ) ) 
             siteID = Site.CK; 
@@ -119,8 +123,19 @@ public class ParseWebPage {
             siteID = Site.HH; 
         else if ( webSite.matches( "(?s).*iask.sina.com(?s).*" ) ) 
             siteID = Site.IASK; 
-		else if ( webSite.matches( "(?s).*jmymh.com(?s).*" ) ) 
+        else if ( webSite.matches( "(?s).*jmymh.com(?s).*" ) ) 
             siteID = Site.JM; 	
+        else if ( webSite.matches( "(?s).*mangawindow.com(?s).*" ) ) 
+            siteID = Site.MANGA_WINDOW; 
+        else if ( webSite.matches( "(?s).*ck101.com(?s).*" ) ) 
+            siteID = Site.CK_NOVEL; 
+        else if ( webSite.matches( "(?s).*mybest.com(?s).*" ) ||
+                  webSite.matches( "(?s).*catcatbox.com(?s).*" ) ) 
+            siteID = Site.MYBEST; 
+        else if ( webSite.matches( "(?s).*imanhua.com(?s).*" ) ) 
+            siteID = Site.IMANHUA; 
+        else if ( webSite.matches( "(?s).*veryim.com(?s).*" ) ) 
+            siteID = Site.VERYIM; 
                     
         else
             siteID = Site.UNKNOWN;

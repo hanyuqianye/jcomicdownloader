@@ -58,4 +58,12 @@ public class Site {
     public final static int IASK = 40;
     public final static int NINENINE_MH_99770 = 41;
     public final static int JM = 42;
+    public final static int DM5_ENGLISH = 43;
+    public final static int NINENINE_COMIC_TC = 44;
+    public final static int NINENINE_MANGA_TC = 45;
+    public final static int MANGA_WINDOW = 46;
+    public final static int CK_NOVEL = 47;
+    public final static int MYBEST = 48;
+    public final static int IMANHUA = 49;
+    public final static int VERYIM = 50;
 }

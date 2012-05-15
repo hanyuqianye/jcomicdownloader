@@ -30,7 +30,7 @@ public class ParseMangaFox extends ParseOnlineComicSite {
      * @author user
      */
     public ParseMangaFox() {
-        siteID = Site.DMEDEN;
+        siteID = Site.MANGAFOX;
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mangaFox_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mangaFox_encode_parse_", "html" );
 
@@ -124,8 +124,6 @@ public class ParseMangaFox extends ParseOnlineComicSite {
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
 
-        String[] tokens = allPageString.split( ">|<" );
-
         int beginIndex = allPageString.indexOf( "<title>" ) + 7;
         int endIndex = allPageString.indexOf( "-", beginIndex );
         String englishTitle = allPageString.substring( beginIndex, endIndex ).trim();
@@ -142,15 +140,17 @@ public class ParseMangaFox extends ParseOnlineComicSite {
         List<List<String>> combinationList = new ArrayList<List<String>>();
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
-
+       
+        
         int totalVolume = allPageString.split( "class=\"tips\"" ).length - 1;
         Common.debugPrintln( "共有" + totalVolume + "集" );
+        
+        
 
         if ( totalVolume <= 0 ) {
             combinationList = null;
         }
         else {
-
 
             int beginIndex = allPageString.indexOf( "<h3 " );
             int endIndex = allPageString.indexOf( "id=\"discussion\"", beginIndex );

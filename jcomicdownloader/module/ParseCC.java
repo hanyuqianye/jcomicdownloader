@@ -17,6 +17,8 @@ import jcomicdownloader.*;
 import java.io.*;
 import java.util.*;
 import java.text.*;
+import jcomicdownloader.encode.Encoding;
+import jcomicdownloader.encode.Zhcode;
 
 public class ParseCC extends ParseOnlineComicSite {
     private int radixNumber; // use to figure out the name of pic
@@ -134,7 +136,7 @@ public class ParseCC extends ParseOnlineComicSite {
         String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_CC_encode_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Zhcode.GB2312 );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }

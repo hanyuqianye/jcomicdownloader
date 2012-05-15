@@ -3,10 +3,25 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v3.15
- Last Modified : 2012/4/20
+ Version  : v4.0
+ Last Modified : 2012/5/13
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 4.0 : 1. 新增對imanhua的支援。
+       2. 新增對veryim的支援。
+       3. 翻新178的解析方式，直接轉碼而非參照字典檔。
+ 3.19: 1. 新增對ck101的支援。
+       2. 新增對mybest的支援。
+       3. 修復99manga繁體版因改版而解析錯誤的問題。
+ 3.18: 1. 新增對mangawindow.com的支援。
+       2. 修復在不支援trayIcon系統下無法執行的bug。
+       3. 修復hhcomic因網站改版而下載錯誤的問題。
+ 3.17: 1. 修復99770和cococomic繁體版頁面的集數解析問題。
+       2. 修復99manga簡體版和繁體版頁面的集數解析問題。
+       3. 修復1mh的集數解析問題。
+       4. 修復dmeden標題名稱解析錯誤的問題。
+ 3.16: 1. 新增對www.99comic.com繁體版的支援。
+       2. 修復178部分漫畫解析錯誤的問題。
  3.15: 1. 新增對jmymh.com的支援。
  3.14: 1. 修復178部分漫畫解析錯誤的問題。
           2. 修復部分標題名稱出現unicode代碼的問題。
@@ -201,12 +216,11 @@
  */
 package jcomicdownloader;
 
+//import java.awt.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.io.File;
+import java.io.IOException;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -319,7 +333,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v3.15";
+    public static String versionString = "JComicDownloader  v4.0";
 
     public ComicDownGUI() {
         super( versionString );
@@ -1080,6 +1094,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
      */
     public static void main( String[] args ) {
         Common.debugPrintln( "JComicDownloader start ..." );
+
         SetUp set = new SetUp();
         set.readSetFile(); // 讀入設置檔的設置參數
 
@@ -1135,7 +1150,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
 
             public void windowIconified( WindowEvent e ) {
-                if ( SystemTray.isSupported() && Common.isWindows() ) {
+                if ( Common.isWindows() ) {
                     setVisible( false );
                     minimizeToTray();
                 }
@@ -1149,13 +1164,19 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     public void minimizeToTray() {
-        SystemTray tray = SystemTray.getSystemTray();
-        try {
-            tray.add( this.trayIcon );
+        
+        if ( SystemTray.isSupported() ) {
+            SystemTray tray = SystemTray.getSystemTray();
+            try {
+                tray.add( this.trayIcon );
+            }
+            catch ( AWTException ex ) {
+                System.err.println( "無法加入系統工具列圖示" );
+                ex.printStackTrace();
+            }
         }
-        catch ( AWTException ex ) {
-            System.err.println( "無法加入系統工具列圖示" );
-            ex.printStackTrace();
+        else {
+            setState( Frame.ICONIFIED ); // 若系統沒有支援縮進系統框，就只好縮小到下方列。
         }
 
 
@@ -1163,43 +1184,50 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     // 設置縮小到系統框的圖示
     private void inittrayIcon() {
-        //Image image = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("resource\\system_tray_ico.gif"));
-        Image image;
+        if ( SystemTray.isSupported() ) {
+        
+            Image image;
 
-        if ( Common.isUnix() ) {
-            image = new CommonGUI().getImage( "tray_icon_for_linux.png" );
-        }
-        else {
-            image = new CommonGUI().getImage( "main_icon.png" );
-        }
+            if ( Common.isUnix() ) {
+                image = new CommonGUI().getImage( "tray_icon_for_linux.png" );
+            }
+            else {
+                image = new CommonGUI().getImage( "main_icon.png" );
+            }
 
-        trayExitItem = new MenuItem( "Exit Application" );
-        trayExitItem.addActionListener( this );
-        trayStartItem = new MenuItem( "Start Mission" );
-        trayStartItem.addActionListener( this );
-        trayStopItem = new MenuItem( "Stop Mission" );
-        trayStopItem.addActionListener( this );
-        trayShowItem = new MenuItem( "Open Window" );
-        trayShowItem.addActionListener( this );
+            trayExitItem = new MenuItem( "Exit Application" );
+            trayExitItem.addActionListener( this );
+            trayStartItem = new MenuItem( "Start Mission" );
+            trayStartItem.addActionListener( this );
+            trayStopItem = new MenuItem( "Stop Mission" );
+            trayStopItem.addActionListener( this );
+            trayShowItem = new MenuItem( "Open Window" );
+            trayShowItem.addActionListener( this );
 
-        trayPopup = new PopupMenu();
-        trayPopup.add( trayExitItem );
-        trayPopup.add( trayStopItem );
-        trayPopup.add( trayStartItem );
-        trayPopup.add( trayShowItem );
+            trayPopup = new PopupMenu();
+            trayPopup.add( trayExitItem );
+            trayPopup.add( trayStopItem );
+            trayPopup.add( trayStartItem );
+            trayPopup.add( trayShowItem );
 
-        //
+            //
 
-        if ( image != null ) {
-            // 原本的系統列
-            //trayIcon_old = new trayIcon_old( image, "JComicDownloader", null );
-            //trayIcon_old.addMouseListener( this );
+            if ( image != null ) {
+                // 原本的系統列
+                //trayIcon_old = new trayIcon_old( image, "JComicDownloader", null );
+                //trayIcon_old.addMouseListener( this );
 
-            trayIcon = new TrayIcon( image, "JComicDownloader", trayPopup );
-            trayIcon.addMouseListener( this );
+                trayIcon = new TrayIcon( image, "JComicDownloader", trayPopup );
+                trayIcon.setImageAutoSize(true);
+                trayIcon.addMouseListener( this );
+            }
+            else {
+                trayIcon = null;
+            }
         }
         else {
             trayIcon = null;
+            Common.debugPrintln( "系統不支援trayIcon！" );
         }
 
     }
@@ -2056,7 +2084,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         }
                         String title = String.valueOf( downTableModel.getRealValueAt( i, DownTableEnum.TITLE ) );
 
-                        if ( SetUp.getShowDoneMessageAtSystemTray() ) {
+                        if ( SetUp.getShowDoneMessageAtSystemTray() && trayIcon != null ) {
                             trayIcon.displayMessage( "JComicDownloader Message", title + "下載完畢! ", TrayIcon.MessageType.INFO );
                             if ( SetUp.getPlaySingleDoneAudio() ) {
                                 Common.playSingleDoneAudio(); // 播放單一任務完成音效
@@ -2076,7 +2104,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     if ( SetUp.getPlayAllDoneAudio() ) {
                         Common.playAllDoneAudio(); // 播放全部任務完成音效
                     }
-                    if ( SetUp.getShowDoneMessageAtSystemTray() ) {
+                    if ( SetUp.getShowDoneMessageAtSystemTray() && trayIcon != null ) {
                         trayIcon.displayMessage( "JComicDownloader Message", countOfChoiceMission + "個任務全部下載完畢! ", TrayIcon.MessageType.INFO );
                     }
                     trayIcon.setToolTip( "JComicDownloader" );
@@ -2709,6 +2737,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             public void run() {
 
                 Run.isAlive = true;
+                
+                String testURL2 = "";
 
                 String picURL = "http://pic1.tuku.cc/100/%E5%85%A8%E8%81%8C%E7%8C%8E%E4%BA%BA/%E7%AC%AC297%E8%AF%9D/001.jpg";
                 String pageURL = "http://mh2.xindm.cn/display.asp?id=62304";
@@ -2727,12 +2757,18 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 //Common.simpleDownloadFile( testURL, "", "test1.html" );
                 //Common.urlConnection( testURL );
  
-                pageURL = "http://comic.xxbh.net/201204/220771.html";
-                testURL = "http://222.218.156.59/h26/201204/2012040500054142384238.jpg";
-                    cookie = "cpro_id=u762406; "  + Common.getCookieString( pageURL );
-                    referURL = pageURL;
-                Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
+                pageURL = "http://www.imanhua.com/comic/3523/";
+                testURL = "http://t4.imanhua.com/Files/Images/1119/67898/011.png";
+                testURL2 = "http://img1.veryim.com/Y/yinhun/ch_399/011.png";
+                //cookie = Common.getCookieString( pageURL );
+                referURL = testURL;
+                Common.simpleDownloadFile( testURL, "", "test1.jpg", referURL );
+                referURL = testURL2;
+                Common.simpleDownloadFile( testURL2, "", "test2.jpg", referURL );
+                //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
 
+                //Common.testConnection( testURL );
+                
                 System.out.println( "OVER" );
 
             }

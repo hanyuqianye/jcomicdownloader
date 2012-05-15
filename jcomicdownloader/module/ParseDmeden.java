@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/11/2
+Last Modified : 2012/5/7
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+3.17: 1. 修復dmeden標題名稱解析錯誤的問題。
 3.09: 1. 修復對dmeden.net的支援。
 3.04: 1. 修復dmeden標題名稱解析不全的bug。
 2.03: 1. 對於dmeden轉移位址後做解析修正（dmeden.net <-> www.dmeden.com）
@@ -173,7 +174,8 @@ public class ParseDmeden extends ParseOnlineComicSite {
     public String getTitleOnMainPage( String urlString, String allPageString ) {
 
         int beginIndex = allPageString.indexOf( "<h1>" ) + 4;
-        int endIndex = allPageString.indexOf( "</h1>", beginIndex );
+        int endIndex = Common.getSmallerIndexOfTwoKeyword( 
+            allPageString, beginIndex, "</h1>", "<div" );
         String tempTitleString = allPageString.substring( beginIndex, endIndex );
 
         //System.out.println( tempTitleString );

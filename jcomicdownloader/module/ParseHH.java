@@ -5,6 +5,7 @@
  Last Modified : 2012/2/13
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+    3.18: 1. 修復hhcomic因網站改版而下載錯誤的問題。
  *  3.06: 1. 新增對hhcomic.com的支援。
  ----------------------------------------------------------------------------------------------------
  */
@@ -206,7 +207,7 @@ public class ParseHH extends ParseOnlineComicSite {
             beginIndex = tempString.indexOf( "href=", beginIndex );
             beginIndex = tempString.indexOf( "=", beginIndex ) + 1;
             endIndex = tempString.indexOf( " ", beginIndex );
-            urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
+            urlList.add( tempString.substring( beginIndex, endIndex ) );
 
             // 取得單集名稱
             beginIndex = tempString.indexOf( ">", beginIndex ) + 1;

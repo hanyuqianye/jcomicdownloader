@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2011/12/25
+ Last Modified : 2012/5/13
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+    4.0 : 1. 翻新178的解析方式，直接轉碼而非參照字典檔。
  *  2.17: 1. 修復檔名含有中文就會解析錯誤的bug。
  *  2.16: 1. 修復少數檔名解析錯誤的bug。
  *  2.11: 1. 修復有時候下載網頁發生錯誤的問題。
@@ -110,6 +111,9 @@ public class Parse178 extends ParseOnlineComicSite {
         firstPicURL = firstPicURL.replaceAll( "\\\\", "" );
         
         Common.debugPrintln( "第一張圖片網址：" + firstPicURL );
+        
+        
+        //System.exit( 0 );
 
         String[] picNames = new String[totalPage];
         for ( int i = 0; i < picNames.length; i++ ) {
@@ -132,110 +136,46 @@ public class Parse178 extends ParseOnlineComicSite {
 
         //System.exit( 0 ); // debug
     }
+    
+    // 回傳utf8編碼的十進位數字
+    // ex. 0030 -> 48
+    private char getUtf8Char( String code ) {
+        int number = 0; 
+        
+        // 十六位元數字的字串
+        String hexString = code.substring( 2, code.length() ); // 去對前面的\\u
 
+        return (char) Integer.parseInt( hexString,16 );
+    }
+    
+    // 解析網址 
+    // ex. 將t\/THREAD\/\u7b2c01\u8bdd\/001.jpg解析為正常網址
     private String getDecodeURL( String code ) {
+        
+        int beginIndex = 0;
+        int endIndex = 0;
+        
+        char ch = ' ';
+        String singleCode = ""; // 單一字的編碼
 
-        StringBuilder decodeBuilder = new StringBuilder();
-        int charCode = 0;
-        String[] urltokens = code.split( "\\\\" );
-        String urltoken = "";
-        String utf8 = "";
-        String gb = "";
-
-        // 不含中文編碼字串
-        if ( !code.matches( ".*\\\\u.*" ) ) {
-            //Common.debugPrintln( "不用比對：" + code );
-            return code;
-        }
-
-        // 因為若是\開頭的字串以\作分割，第一個位置都是空字串
-        // 若遇到這種情形，則從第二個位置開始
-        int j = urltokens[0].matches( "" ) ? 1 : 0;
-
-        boolean totalDecode = true; // 是否全部都解碼了
-        //Common.debugPrintln( "先從之前找過的開始比對：" );
-        for ( ; j < urltokens.length; j++ ) {
-            //Common.debugPrintln( "原始編碼" + urltokens[j] );
-            boolean found = false;
-            urltoken = "\\" + urltokens[j];
-            for ( int i = 0; i < codeList.size(); i++ ) {
-                if ( urltoken.matches( ".*\\" + codeList.get( i ) + ".*" ) ) {
-                    //Common.debugPrintln(urltoken + " -> GB: " + decodeList.get(i));
-                    found = true;
-
-                    decodeBuilder.append( decodeList.get( i )
-                        + urltoken.replaceAll( "\\" + codeList.get( i ), "" ) );
-                    break;
-
-                }
-            }
-            if ( urltoken.matches( ".*\\\\u.*" ) && !found ) {
-                Common.debugPrintln( "找到這邊為止" );
-                totalDecode = false;
-                break;
+        while ( true ) {
+            beginIndex = code.indexOf( "\\u" );
+            if ( beginIndex < 0 ) { 
+                break; // 已找不到需要解碼的部份，跳出迴圈
             }
             else {
-                if ( !found ) {
-                    decodeBuilder.append( urltokens[j] );
-                }
+                endIndex = beginIndex + 6;
+                singleCode = code.substring( beginIndex, endIndex );
+                ch = getUtf8Char( singleCode ); // 取得utf8原始字
+
+                code = code.replace( singleCode, String.valueOf( ch ) ); // 替代該字
+                System.out.println( beginIndex + " " + endIndex + "\t: " + code );
             }
         }
 
-
-        // 因為沒有全部解碼，所以還是要檢查對照文件檔
-        if ( !totalDecode ) {
-            Common.debugPrintln( "再以編碼文件繼續比對：" );
-            String[] decodeLines = getUTF8toGBDataStrings();
-
-            for ( ; j < urltokens.length; j++ ) {
-                boolean found = false;
-                urltoken = "\\" + urltokens[j];
-                for ( int i = 0; i < decodeLines.length; i++ ) {
-
-                    utf8 = decodeLines[i].split( "	--->	" )[0];
-                    gb = decodeLines[i].split( "	--->	" )[1];
-                    //System.out.print( utf8 + " " + gb );
-                    if ( urltoken.matches( ".*\\" + utf8 + ".*" ) ) {
-                        Common.debugPrintln( urltoken + " -> GB: " + gb );
-                        found = true;
-                        decodeBuilder.append( gb + urltoken.replaceAll( "\\" + utf8, "" ) );
-
-                        // 存入已經解碼的字
-                        codeList.add( utf8 );
-                        decodeList.add( gb );
-                        break;
-
-                    }
-                }
-                if ( urltoken.matches( ".*\\\\u.*" ) && !found ) {
-                    Common.debugPrintln( "比對失敗：" + urltoken );
-                }
-
-                if ( !found ) {
-                    decodeBuilder.append( urltokens[j] );
-                }
-            }
-        }
-        Common.debugPrintln( "最終網址：" + decodeBuilder.toString() );
-
-
-        return decodeBuilder.toString();
+        return code;
     }
 
-    private String[] getUTF8toGBDataStrings() {
-        File decodeFile = new File( Common.getNowAbsolutePath() + "UTF8toGB.txt" );
-        Common.debugPrintln( "檔案大小：" + decodeFile.length() );
-
-        if ( !decodeFile.exists() || decodeFile.length() < 334520 ) {
-            Common.debugPrintln( "同資料夾內沒有發現UTF8toGB.txt或尺寸不符，重新下載此檔" );
-            String downloadURL = "https://sites.google.com/site/jcomicdownloader/release/UTF8toGB.txt?attredirects=0&d=1";
-            Common.downloadFile( downloadURL, Common.getNowAbsolutePath(), "UTF8toGB.txt", false, null );
-        }
-
-        String[] decodeLines = Common.getFileStrings( Common.getNowAbsolutePath(), "UTF8toGB.txt" );
-
-        return decodeLines;
-    }
 
     public void showParameters() { // for debug
         Common.debugPrintln( "----------" );

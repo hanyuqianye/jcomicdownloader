@@ -102,7 +102,7 @@ public class Common {
 
     public static void debugPrintln( String print ) { // for debug
         print = Common.getStringUsingDefaultLanguage( print ); // 使用預設語言 
-        
+
         if ( Debug.debugMode ) {
             System.out.println( print );
         }
@@ -110,7 +110,7 @@ public class Common {
 
     public static void debugPrint( String print ) { // for debug
         print = Common.getStringUsingDefaultLanguage( print ); // 使用預設語言 
-        
+
         if ( Debug.debugMode ) {
             System.out.print( print );
         }
@@ -162,7 +162,7 @@ public class Common {
                     CommonGUI.stateBarDetailMessage = "  :  " + "共" + webSite.length + "頁"
                         + "，第" + i + "頁下載中";
 
-                    if ( Common.withGUI() ) {
+                    if ( Common.withGUI() && ComicDownGUI.trayIcon != null ) {
                         ComicDownGUI.trayIcon.setToolTip( CommonGUI.stateBarMainMessage
                             + CommonGUI.stateBarDetailMessage );
                     }
@@ -299,6 +299,37 @@ public class Common {
         downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, "", true, SetUp.getRetryTimes(), false, false );
     }
 
+    // 查看此url是否有轉向其他url
+    public static void testConnection( String url ) {
+        try {
+            URLConnection con = new URL( url ).openConnection();
+            System.out.println( "orignal url: " + con.getURL() );
+            con.connect();
+            System.out.println( "connected url: " + con.getURL() );
+            InputStream is = con.getInputStream();
+            System.out.println( "redirected url: " + con.getURL() );
+            is.close();
+        }
+        catch ( Exception ex ) {
+            Logger.getLogger( Common.class.getName() ).log( Level.SEVERE, null, ex );
+        }
+
+
+        try {
+            HttpURLConnection con = ( HttpURLConnection ) ( new URL( url ).openConnection() );
+            con.setInstanceFollowRedirects( false );
+            con.connect();
+            int responseCode = con.getResponseCode();
+            System.out.println( responseCode );
+            String location = con.getHeaderField( "Location" );
+            System.out.println( location );
+        }
+        catch ( Exception ex ) {
+            Logger.getLogger( Common.class.getName() ).log( Level.SEVERE, null, ex );
+        }
+
+    }
+
     public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
         boolean needCookie, String cookieString, String referURL, boolean fastMode, int retryTimes,
         boolean gzipEncode, boolean forceDownload ) {
@@ -315,7 +346,7 @@ public class Common {
             try {
 
                 ComicDownGUI.stateBar.setText( webSite + " 連線中..." );
-                
+
                 // google圖片下載時因為有些連線很久沒回應，所以要設置計時器，預防連線時間過長
                 Timer timer = new Timer();
                 if ( SetUp.getTimeoutTimer() > 0 ) {
@@ -327,19 +358,22 @@ public class Common {
                 HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
 
                 // 偽裝成瀏覽器
-                connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)");
+                connection.setRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)" );
                 //connection.setRequestProperty( "User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
 
                 // connection.setRequestMethod( "GET" ); // 默认是GET 
                 //connection.setRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)" );
                 //connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; InfoPath.1; CIBA)");
-                connection.setFollowRedirects( true );
+                //connection.setFollowRedirects( true );
                 //connection.setDoOutput( true ); // 需要向服务器写数据
                 connection.setDoInput( true ); //
 
                 // dm5加這一行無法下載...
                 //connection.setUseCaches( false ); // // Post 请求不能使用缓存 
                 connection.setAllowUserInteraction( false );
+
+                //connection.setInstanceFollowRedirects( false ); // 不轉址
+
 
                 if ( referURL != null && !referURL.equals( "" ) ) {
                     //Common.debugPrintln( "設置Referer=" + referURL );
@@ -373,7 +407,7 @@ public class Common {
                     || ( fastMode && connection.getContentLength() == 10771 ) ) {
                     return;
                 }
-                
+
                 tryConnect( connection );
 
 
@@ -582,18 +616,18 @@ public class Common {
     }
 
     public static boolean isLegalURL( String webSite ) {
-        
+
         boolean theURLisLegal = true;
-       
+
         try {
             URL url = new URL( webSite );
         }
         catch ( MalformedURLException ex ) {
             theURLisLegal = false;
         }
-        
+
         //String regex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+\\+&@!#/%=~_|]";
-        
+
         if ( theURLisLegal ) {
             return true;
         }
@@ -804,7 +838,7 @@ public class Common {
     public static boolean isNeedConvert( char para ) {
         return ( ( para & ( 0x00FF ) ) != para );
     }
-    
+
     public static String getStringUsingDefaultLanguage( String string ) {
         if ( SetUp.getDefaultLanguage() == LanguageEnum.TRADITIONAL_CHINESE ) {
             return string;
@@ -812,8 +846,9 @@ public class Common {
         else if ( SetUp.getDefaultLanguage() == LanguageEnum.SIMPLIFIED_CHINESE ) {
             return Common.getSimplifiedChinese( string );
         }
-        else
+        else {
             return string;
+        }
     }
 
     public static String getTraditionalChinese( String gbString ) {
@@ -831,7 +866,7 @@ public class Common {
     public static String getSimplifiedChinese( String big5String ) {
         Zhcode mycode = new Zhcode();
         String gbString = mycode.convertString( big5String, mycode.BIG5, mycode.GB2312 );
-        return gbString.replace(  "\\u51ea", "止" ).replace( "\\u9ed2", "黑" );
+        return gbString.replace( "\\u51ea", "止" ).replace( "\\u9ed2", "黑" );
     }
 
     public static String getUtf8toUnicode( String utf8 ) {
@@ -860,14 +895,12 @@ public class Common {
     }
 
     public static void newEncodeFile( String directory, String fileName, String encodeFileName ) {
-        Zhcode mycode = new Zhcode();
-        mycode.convertFile( directory + fileName,
-            directory + encodeFileName,
-            mycode.GB2312,
-            mycode.UTF8 );
+        Common.newEncodeFile( directory, fileName, encodeFileName, Zhcode.GB2312 );
     }
 
     public static void newEncodeFile( String directory, String fileName, String encodeFileName, int encode ) {
+
+
         Zhcode mycode = new Zhcode();
         mycode.convertFile( directory + fileName,
             directory + encodeFileName,
@@ -1579,10 +1612,11 @@ public class Common {
             else {
                 String[] picList = new File( file + Common.getSlash() + fileList[0] ).list();
                 String firstPicFileInFirstVolume = "";
-                
-                if ( picList != null )
+
+                if ( picList != null ) {
                     firstPicFileInFirstVolume = picList[0];
-                
+                }
+
                 path = file + Common.getSlash() + fileList[0]
                     + Common.getSlash() + firstPicFileInFirstVolume;
             }
@@ -1698,7 +1732,7 @@ public class Common {
 
                 connection.setRequestProperty( "Content-Type",
                     "application/x-www-form-urlencoded" );
-                
+
 
                 connection.setRequestProperty( "Content-Length", String.valueOf( postString.getBytes().length ) );
 
@@ -1709,17 +1743,17 @@ public class Common {
                     // 預設(getTimeoutTimer()*1000)秒會timeout
                     timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 );
                 }
-                
+
                 Common.checkDirectory( outputDirectory ); // 檢查有無目標資料夾，若無則新建一個　
-                
+
                 //OutputStream os = response.getOutputStream();
                 OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
                 InputStream is = null;
-                
-                
+
+
                 java.io.DataOutputStream dos = new java.io.DataOutputStream(
-                    connection.getOutputStream()); 
-                dos.writeBytes(postString); 
+                    connection.getOutputStream() );
+                dos.writeBytes( postString );
                 dos.close();
 
                 //tryConnect( connection );
@@ -1731,7 +1765,7 @@ public class Common {
                     return;
                 }
 
-                is = connection.getInputStream(); 
+                is = connection.getInputStream();
 
                 int fileSize = connection.getContentLength() / 1000;
                 Common.debugPrint( "(" + fileSize + " k) " );
@@ -1850,15 +1884,22 @@ public class Common {
         }
 
     }
-
+    
     public static void simpleDownloadFile( String webSite,
         String outputDirectory, String outputFileName ) {
+        simpleDownloadFile( webSite, outputDirectory, outputFileName, null );
+    }
+
+    public static void simpleDownloadFile( String webSite,
+        String outputDirectory, String outputFileName, String referString ) {
         try {
             URL url = new URL( webSite );
             HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
             connection.setRequestMethod( "GET" );
             connection.setDoOutput( true );
-            //connection.setRequestProperty( "Referer", "http://www.dm5.com/manhua-yaolinvshen/" );
+            
+            if ( referString != null && !"".equals( referString ) )
+                connection.setRequestProperty( "Referer", referString );
 
             ComicDownGUI.stateBar.setText( webSite + " 連線中..." );
 

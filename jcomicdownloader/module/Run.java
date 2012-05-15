@@ -138,8 +138,16 @@ public class Run extends Thread { // main class to run whole program
                 ParseOnlineComicSite parse = new Parse99Comic();
                 runSingleParseModule( parse );
             }
+            else if ( pw.getSiteID() == Site.NINENINE_COMIC_TC ) {
+                ParseOnlineComicSite parse = new Parse99ComicTC();
+                runSingleParseModule( parse );
+            }
             else if ( pw.getSiteID() == Site.NINENINE_MANGA ) {
                 ParseOnlineComicSite parse = new Parse99Manga();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.NINENINE_MANGA_TC ) {
+                ParseOnlineComicSite parse = new Parse99MangaTC();
                 runSingleParseModule( parse );
             }
             else if ( pw.getSiteID() == Site.NINENINE_99770 ) {
@@ -284,6 +292,26 @@ public class Run extends Thread { // main class to run whole program
                 ParseOnlineComicSite parse = new ParseJM();
                 runSingleParseModule( parse );
             }
+            else if ( pw.getSiteID() == Site.MANGA_WINDOW ) {
+                ParseOnlineComicSite parse = new ParseMangaWindow();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.CK_NOVEL ) {
+                ParseOnlineComicSite parse = new ParseCKNovel();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.MYBEST ) {
+                ParseOnlineComicSite parse = new ParseMyBest();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.IMANHUA ) {
+                ParseOnlineComicSite parse = new ParseImanhua();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.VERYIM ) {
+                ParseOnlineComicSite parse = new ParseVeryim();
+                runSingleParseModule( parse );
+            }
             
             else // Site.UNKNOWN
                 Common.urlIsUnknown = true;
@@ -304,3 +332,6 @@ public class Run extends Thread { // main class to run whole program
 
     }
 }
+
+
+
