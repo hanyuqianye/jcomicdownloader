@@ -59,6 +59,8 @@ public class ParseWebPage {
             siteID = Site.NINENINE_MH_99770;
         else if ( webSite.matches( "(?s).*99770.cc(?s).*" ) )
             siteID = Site.NINENINE_99770;
+        else if ( webSite.matches( "(?s).*www.cococomic.com(?s).*" ) )
+            siteID = Site.NINENINE_COCO_TC;
         else if ( webSite.matches( "(?s).*cococomic.com(?s).*" ) )
             siteID = Site.NINENINE_COCO;
         else if ( webSite.matches( "(?s).*1mh.com(?s).*" ) )
@@ -85,8 +87,8 @@ public class ParseWebPage {
             siteID = Site.MANGAFOX;
         else if ( webSite.matches( "(?s).*\\.manmankan.com/(?s).*" ) )
             siteID = Site.MANMANKAN;
-        else if ( webSite.matches( "(?s).*xindm.cn/(?s).*" ) )
-            siteID = Site.XINDM;
+        //else if ( webSite.matches( "(?s).*xindm.cn/(?s).*" ) )
+       //     siteID = Site.XINDM;
         else if ( webSite.matches( "(?s).*google.com(?s).*" ) ) 
             siteID = Site.GOOGLE_PIC;
         else if ( webSite.matches( "(?s).*nanadm.com(?s).*" ) ) 
@@ -136,6 +138,18 @@ public class ParseWebPage {
             siteID = Site.IMANHUA; 
         else if ( webSite.matches( "(?s).*veryim.com(?s).*" ) ) 
             siteID = Site.VERYIM; 
+        else if ( webSite.matches( "(?s).*wenku.com(?s).*" ) ) 
+            siteID = Site.WENKU; 
+        else if ( webSite.matches( "(?s).*fumanhua.com(?s).*" ) ) 
+            siteID = Site.FUMANHUA; 
+        else if ( webSite.matches( "(?s).*6manga.com(?s).*" ) ) 
+            siteID = Site.SIX_MANGA; 
+        else if ( webSite.matches( "(?s).*xxbh.net(?s).*" ) ) 
+            siteID = Site.XXBH; 
+        else if ( webSite.matches( "(?s).*comic.131.com(?s).*" ) ) 
+            siteID = Site.COMIC_131; 
+        else if ( webSite.matches( "(?s).*blogspot.com(?s).*" ) ) 
+            siteID = Site.BLOGSPOT; 
                     
         else
             siteID = Site.UNKNOWN;

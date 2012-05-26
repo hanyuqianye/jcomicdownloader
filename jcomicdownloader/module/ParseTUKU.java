@@ -120,7 +120,7 @@ public class ParseTUKU extends ParseOnlineComicSite {
         String fileName = "";
 
         int p = 0; // 目前頁數
-        for ( int i = 1; i <= totalPage; i++ ) {
+        for ( int i = 1; i <= totalPage && Run.isAlive; i++ ) {
             comicURL[p++] = baseURL2 + picMidURL1
                 + Common.getFixedChineseURL( picMidURL2 )
                 + formatter.format( i ) + "." + "jpg"; // 存入每一頁的網頁網址

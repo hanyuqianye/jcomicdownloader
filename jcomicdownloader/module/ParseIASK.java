@@ -96,7 +96,7 @@ public class ParseIASK extends ParseOnlineComicSite {
         String fileName = "";
         int filePrice = 0;
 
-        for ( int i = 0; i < pageAmount; i++ ) {
+        for ( int i = 0; i < pageAmount && Run.isAlive; i++ ) {
             allPageString = getAllPageString( webSite + "&page=" + i );
 
             beginIndex = allPageString.indexOf( "class=\"ml20\"" );
@@ -129,7 +129,7 @@ public class ParseIASK extends ParseOnlineComicSite {
                 filePrice = Integer.parseInt( 
                     tempString.substring( beginIndex, endIndex ).trim() );
 
-                if ( filePrice <= 0 && !new File( getDownloadDirectory() + fileName ).exists() )
+                if ( filePrice <= 0 && Run.isAlive && !new File( getDownloadDirectory() + fileName ).exists() )
                     downloadIASK( fileName, fileURL, p ); // 下載主函式 
                 
                 p ++;  

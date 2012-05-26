@@ -140,7 +140,7 @@ public class ParseBAIDU extends ParseOnlineComicSite {
             String[] comicURL = tempComicURL.split( "####" );
             Common.debugPrintln( "此頁面解析得" + comicURL.length + "張圖" );
             int tempTotalPage = comicURL.length + pageCount;
-            for ( int j = 0 ; j < comicURL.length ; j++ ) {
+            for ( int j = 0 ; j < comicURL.length && Run.isAlive; j++ ) {
                 Common.debugPrint( " " + pageCount + " " );
                 singlePageDownload( getTitle(), getWholeTitle(), comicURL[j], tempTotalPage, pageCount + 1, 0 );
 

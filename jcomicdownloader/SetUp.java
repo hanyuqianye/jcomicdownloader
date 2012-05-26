@@ -55,6 +55,7 @@ public class SetUp { // read setup file, and then setup
     private static int timeoutTimer; // 逾時計時器的倒數時間
     private static int retryTimes; // 下載失敗重試次數
     private static String openPicFileProgram; // 預設開啟圖片檔的程式
+    private static String openTextFileProgram; // 預設開啟文件檔的程式
     private static String openZipFileProgram; // 預設開啟壓縮檔的程式
     public static boolean assignDownloadPath;
     public static boolean autoCompress;
@@ -139,6 +140,7 @@ public class SetUp { // read setup file, and then setup
         choiceAllVolume = false; // 是否預設勾選全部集數
         retryTimes = 0;
         openPicFileProgram = ""; // 預設開啟圖片檔的程式
+        openTextFileProgram = ""; // 預設開啟文件檔的程式
         openZipFileProgram = ""; // 預設開啟壓縮檔的程式
 
         proxyServer = ""; // 預設沒有掛上代理伺服器
@@ -257,6 +259,8 @@ public class SetUp { // read setup file, and then setup
             + "\nretryTimes = " + retryTimes
             + "\n# 預設開啟圖片檔的程式"
             + "\nopenPicFileProgram = " + openPicFileProgram
+            + "\n# 預設開啟文件檔的程式"
+            + "\nopenTextFileProgram = " + openTextFileProgram
             + "\n# 預設開啟壓縮檔的程式"
             + "\nopenZipFileProgram = " + openZipFileProgram
             + "\n# 是否播放全部任務完成音效"
@@ -348,6 +352,7 @@ public class SetUp { // read setup file, and then setup
         Common.debugPrintln( "timeoutTimer = " + timeoutTimer );
         Common.debugPrintln( "retryTimes = " + retryTimes );
         Common.debugPrintln( "openPicFileProgram = " + openPicFileProgram );
+        Common.debugPrintln( "openTextFileProgram = " + openTextFileProgram );
         Common.debugPrintln( "openZipFileProgram = " + openZipFileProgram );
         Common.debugPrintln( "playSingleDoneAudio = " + playSingleDoneAudio );
         Common.debugPrintln( "playAllDoneAudio = " + playAllDoneAudio );
@@ -416,6 +421,7 @@ public class SetUp { // read setup file, and then setup
         boolean existChoiceAllVolume = false;
         boolean existRetryTimes = false;
         boolean existOpenPicFileProgram = false;
+        boolean existOpenTextFileProgram = false;
         boolean existOpenZipFileProgram = false;
         boolean existPlayAllDoneAudio = false;
         boolean existPlaySingleDoneAudio = false;
@@ -654,6 +660,13 @@ public class SetUp { // read setup file, and then setup
                         if ( split.length > 1 ) {
                             setOpenPicFileProgram( split[1] );
                             existOpenPicFileProgram = true;
+                        }
+                    }
+                    else if ( split[0].equals( "openTextFileProgram" ) ) {
+
+                        if ( split.length > 1 ) {
+                            setOpenTextFileProgram( split[1] );
+                            existOpenTextFileProgram = true;
                         }
                     }
                     else if ( split[0].equals( "openZipFileProgram" ) ) {
@@ -931,7 +944,7 @@ public class SetUp { // read setup file, and then setup
             && existEhMemberID && existEhMemberPasswordHash
             && existSettingFileDirectory && existTimeoutTimer
             && existChoiceAllVolume && existRetryTimes
-            && existOpenPicFileProgram && existOpenZipFileProgram
+            && existOpenPicFileProgram && existOpenZipFileProgram && existOpenTextFileProgram
             && existPlayAllDoneAudio
             && existPlaySingleDoneAudio
             && existAllDoneAudioFile
@@ -1212,6 +1225,14 @@ public class SetUp { // read setup file, and then setup
 
     public static void setOpenPicFileProgram( String program ) {
         openPicFileProgram = program;
+    }
+    
+    public static String getOpenTextFileProgram() {
+        return openTextFileProgram;
+    }
+
+    public static void setOpenTextFileProgram( String program ) {
+        openTextFileProgram = program;
     }
 
     public static String getOpenZipFileProgram() {

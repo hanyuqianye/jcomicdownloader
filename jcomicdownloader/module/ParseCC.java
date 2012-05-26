@@ -5,8 +5,8 @@
  Last Modified : 2011/12/16
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
-2.08: 修復部份89890解析錯誤的bug。
-----------------------------------------------------------------------------------------------------
+ 2.08: 修復部份89890解析錯誤的bug。
+ ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
 
@@ -21,6 +21,7 @@ import jcomicdownloader.encode.Encoding;
 import jcomicdownloader.encode.Zhcode;
 
 public class ParseCC extends ParseOnlineComicSite {
+
     private int radixNumber; // use to figure out the name of pic
     private String volpic; // pic url: http://~/2011/111/dagui/06/
     private int tpf2; // pic url: http://pic"tpf2".89890.com/~
@@ -31,9 +32,8 @@ public class ParseCC extends ParseOnlineComicSite {
     protected String baseURL;
 
     /**
- *
- * @author user
- */
+     @author user
+     */
     public ParseCC() {
         siteID = Site.CC;
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kuku_parse_", "html" );
@@ -41,7 +41,7 @@ public class ParseCC extends ParseOnlineComicSite {
 
         jsName = "index_cc.js";
         radixNumber = 18527; // 大部份的值，後來也發現有少數19527
-        
+
         baseURL = "http://www.89890.com";
     }
 
@@ -51,13 +51,12 @@ public class ParseCC extends ParseOnlineComicSite {
         this.title = titleName;
     }
 
-
     @Override
     public void setParameters() { // let all the non-set attributes get values
         Common.debugPrintln( "開始解析各參數 :" );
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
-        
+
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             Common.debugPrintln( "開始解析title和wholeTitle :" );
             String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
@@ -67,9 +66,9 @@ public class ParseCC extends ParseOnlineComicSite {
             String tempTitleString = allPageString.substring( beginIndex, endIndex ).trim();
 
             tempTitleString = tempTitleString.replaceAll( "<span>|</span>", "" );
-            
+
             setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                    Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
+                Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
         }
 
         Common.debugPrintln( "作品名稱(title) : " + getTitle() );
@@ -82,42 +81,81 @@ public class ParseCC extends ParseOnlineComicSite {
 
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
-        
+
         int beginIndex = 0, endIndex = 0;
-        
+
         // 先找出comicid
         beginIndex = allPageString.indexOf( "var comicid" );
         beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
         endIndex = allPageString.indexOf( "'", beginIndex );
         String comicid = allPageString.substring( beginIndex, endIndex );
-        
+
         // 找出chapterid
         beginIndex = allPageString.indexOf( "var chapterid", beginIndex );
         beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
         endIndex = allPageString.indexOf( "'", beginIndex );
         String chapterid = allPageString.substring( beginIndex, endIndex );
-        
+
         // 找出pics
         beginIndex = allPageString.indexOf( "var pics", beginIndex );
         beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
         endIndex = allPageString.indexOf( "'", beginIndex );
         String pics = allPageString.substring( beginIndex, endIndex );
+
+        // 找出副檔名
+        int pictype = 0; // 預設值0，也就是jpg
+        beginIndex = allPageString.indexOf( "var pictype", beginIndex );
         
+        if ( beginIndex > 0 ) {
+            beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "'", beginIndex );
+            pictype = Integer.parseInt(
+                allPageString.substring( beginIndex, endIndex ).trim() );
+        }
+
+        String extension = getExtension( pictype ); // 取得副檔名
+
         String id = "" + ( Integer.parseInt( comicid ) / 1000 );
         String basePicURL = "http://pics1.89890.com";
-        
-        totalPage = Integer.parseInt( pics.trim() );
-        comicURL = new String [totalPage];
-        
-        for ( int i = 1; i <= totalPage; i ++ ) {
 
-            comicURL[i-1] = basePicURL + "/" + 
-                            id + "/" + 
-                            comicid + "/" + 
-                            chapterid + "/" + i + ".jpg";
+        totalPage = Integer.parseInt( pics.trim() );
+        comicURL = new String[totalPage];
+
+        for ( int i = 1; i <= totalPage && Run.isAlive; i++ ) {
+
+            comicURL[i - 1] = basePicURL + "/"
+                + id + "/"
+                + comicid + "/"
+                + chapterid + "/" + i + "." + extension;
             //Common.debugPrintln( comicURL[i-1] );
         }
         //System.exit( 1 );
+    }
+
+    // 從pictype值取得副檔名
+    private String getExtension( int pictype ) {
+        String mame = "jpg";
+        if ( pictype != 0 ) {
+            switch ( pictype ) {
+                case 1:
+                    mame = "jpeg";
+                    break;
+                case 2:
+                    mame = "gif";
+                    break;
+                case 3:
+                    mame = "png";
+                    break;
+                case 4:
+                    mame = "bmp";
+                    break;
+                default:
+                    mame = "jpg";
+                    break;
+            }
+        }
+
+        return mame;
     }
 
     public void showParameters() { // for debug
@@ -143,10 +181,13 @@ public class ParseCC extends ParseOnlineComicSite {
 
     @Override
     public boolean isSingleVolumePage( String urlString ) {
-        if ( urlString.split( "/" ).length == 6  ) // ex. http://www.89890.com/comic/7953/
+        if ( urlString.split( "/" ).length == 6 ) // ex. http://www.89890.com/comic/7953/
+        {
             return true;
-        else
+        }
+        else {
             return false;
+        }
     }
 
     @Override
@@ -154,8 +195,9 @@ public class ParseCC extends ParseOnlineComicSite {
         String[] splitURL = urlString.split( "/" );
 
         String newUrlString = "";
-        for ( int i = 0; i < 5; i ++ )
+        for ( int i = 0; i < 5; i++ ) {
             newUrlString += splitURL[i] + "/";
+        }
 
         return getTitleOnMainPage( urlString, getAllPageString( newUrlString ) );
     }
@@ -167,8 +209,9 @@ public class ParseCC extends ParseOnlineComicSite {
         String[] lines = allPageString.split( "\n" );
 
         int titleIndex = 0;
-        while ( !lines[titleIndex].matches( "(?s).*title(?s).*" ) )
-            titleIndex ++;
+        while ( !lines[titleIndex].matches( "(?s).*title(?s).*" ) ) {
+            titleIndex++;
+        }
 
         int beginIndex = lines[titleIndex].indexOf( "<title>", 1 );
         int endIndex = lines[titleIndex].indexOf( "_", beginIndex );
@@ -192,23 +235,23 @@ public class ParseCC extends ParseOnlineComicSite {
         String tempURL = "";
         String tempVolume = "";
 
-        for ( int i = 0 ; i < volumeCount ; i++ ) {
-            
+        for ( int i = 0; i < volumeCount; i++ ) {
+
             // 取得單集位址
             beginIndex = allPageString.indexOf( " href=", beginIndex );
             beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
             endIndex = allPageString.indexOf( "\"", beginIndex );
             tempURL = baseURL + allPageString.substring( beginIndex, endIndex );
             urlList.add( tempURL.trim() );
-            
-            
-             // 取得單集名稱
+
+
+            // 取得單集名稱
             beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
             endIndex = allPageString.indexOf( "<", beginIndex );
             tempVolume = allPageString.substring( beginIndex, endIndex );
             volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( tempVolume.trim() ) ) ) );
-            
+                Common.getTraditionalChinese( tempVolume.trim() ) ) ) );
+
             //Common.debugPrintln( i + " : " + tempVolume );
         }
 
@@ -226,10 +269,10 @@ public class ParseCC extends ParseOnlineComicSite {
         Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
         Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
     }
-    
+
     @Override
     public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
+        return new String[]{indexName, indexEncodeName, jsName};
     }
 
     @Override

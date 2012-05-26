@@ -958,6 +958,7 @@ public class Common {
         string = string.replace( "&amp;", "&" );
         string = string.replace( "&nbsp;", "　" );
         string = string.replace( "&quot;", "''" );
+        string = string.replaceAll( "&#8226;", "•" );
         return string;
     }
 
@@ -1652,6 +1653,8 @@ public class Common {
                 "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
         }
+        
+        file = "\"" + file + "\"";
 
         String[] cmd = new String[]{program, file};
         Map<String, String> newEnv = new HashMap<String, String>();
@@ -1897,7 +1900,7 @@ public class Common {
             HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
             connection.setRequestMethod( "GET" );
             connection.setDoOutput( true );
-            
+
             if ( referString != null && !"".equals( referString ) )
                 connection.setRequestProperty( "Referer", referString );
 

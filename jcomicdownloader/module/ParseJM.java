@@ -5,6 +5,7 @@
  Last Modified : 2012/4/20
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+    4.01: 1. 修復jmymh無法下載的問題。（加入伺服器檢查機制）
  *  3.15: 1. 新增對www.jmymh.com的支援。
  ----------------------------------------------------------------------------------------------------
  */
@@ -102,12 +103,29 @@ public class ParseJM extends ParseOnlineComicSite {
 		String midPicURL = allPageString.substring( beginIndex, endIndex );
 		
 		// 設定伺服器位址
-		String serverURL = "http://zj.jmydm.net/";
+		String serverURL = "http://comic.jmymh.com:2012/";
+        String serverURL1 = "http://comic.jmydm.net/";
+        String serverURL2 = "http://zj.jmydm.net/";
+        String serverURL3 = "http://wt.jmydm.net:2012/";
+        String nowServerURL = ""; // 這次要使用的伺服器
+        
+        if ( Common.urlIsOK( serverURL + midPicURL + urlStrings[0] ) ) {
+            nowServerURL = serverURL;
+        }
+        else if ( Common.urlIsOK( serverURL1 + midPicURL + urlStrings[0] ) ) {
+            nowServerURL = serverURL1;
+        }
+        else if ( Common.urlIsOK( serverURL2 + midPicURL + urlStrings[0] ) ) {
+            nowServerURL = serverURL2;
+        }
+        else if ( Common.urlIsOK( serverURL3 + midPicURL + urlStrings[0] ) ) {
+            nowServerURL = serverURL3;
+        }
 
 
         int p = 0; // 目前頁數
-        for ( int i = 1; i <= totalPage; i++ ) {
-            comicURL[p++] = serverURL + midPicURL + urlStrings[i-1]; // 存入每一頁的網頁網址
+        for ( int i = 1; i <= totalPage && Run.isAlive; i++ ) {
+            comicURL[p++] = nowServerURL + midPicURL + urlStrings[i-1]; // 存入每一頁的網頁網址
             //Common.debugPrintln( p + " " + comicURL[p - 1] ); // debug
 
         }

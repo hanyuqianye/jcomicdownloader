@@ -92,7 +92,7 @@ public class ParseKUKU extends ParseOnlineComicSite {
     public synchronized void parseComicURL() {
         System.out.print( "parse the pic URL:" );
 
-        for ( int i = 0; i < totalPage; i ++ ) {
+        for ( int i = 0; i < totalPage && Run.isAlive; i ++ ) {
             // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
             if ( !Common.existPicFile( getDownloadDirectory(), i + 2 ) ) {
                 int endIndex = webSite.lastIndexOf( "/" );
@@ -104,7 +104,7 @@ public class ParseKUKU extends ParseOnlineComicSite {
                 String tempStr = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
                 String[] lines = tempStr.split( "\n" );
 
-                for ( int count = 0; count < lines.length; count ++ ) {
+                for ( int count = 0; count < lines.length && Run.isAlive; count ++ ) {
                     String line = lines[count];
 
                     if ( line.matches( "(?s).*document.write(?s).*" ) ) {

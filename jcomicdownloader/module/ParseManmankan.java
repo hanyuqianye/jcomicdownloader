@@ -77,7 +77,7 @@ public class ParseManmankan extends ParseOnlineComicSite {
         // ex. http://76.manmankan.com/2011/201111/1916/43124/001.jpg
         String baseURL = "http://76.manmankan.com";
         
-        for ( int i = 0; i < urlListTokes.length; i ++ ) {
+        for ( int i = 0; i < urlListTokes.length && Run.isAlive; i ++ ) {
             String fontURL = urlListTokes[i].trim().substring( 1, urlListTokes[i].length() - 1 );
             comicURL[i] = baseURL + fontURL;
             //Common.debugPrintln( ( i + 1 ) + " " + comicURL[i] ); // debug

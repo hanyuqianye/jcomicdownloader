@@ -76,7 +76,7 @@ public class ParseMangaFox extends ParseOnlineComicSite {
         endIndex = webSite.lastIndexOf( "/" ) + 1;
         String baseURL = webSite.substring( 0, endIndex );
 
-        for ( int p = 1 ; p <= totalPage ; p++ ) {
+        for ( int p = 1 ; p <= totalPage && Run.isAlive; p++ ) {
             // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
                 allPageString = getAllPageString( baseURL + p + ".html" );

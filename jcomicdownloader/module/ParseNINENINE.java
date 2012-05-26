@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2012/5/03
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+4.01: 1. 修復cococomic簡體版頁面的集數解析問題。
 3.19: 1. 修復99manga繁體版因改版而解析錯誤的問題。
 3.17: 1. 修復99770和cococomic繁體版頁面的集數解析問題。
       2. 修復99manga簡體版和繁體版頁面的集數解析問題。
@@ -81,7 +82,7 @@ public class ParseNINENINE extends ParseOnlineComicSite {
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             String[] tokens = allString.split( "\"|," );
 
-            for ( int i = 0 ; i < tokens.length ; i++ ) {
+            for ( int i = 0 ; i < tokens.length && Run.isAlive; i++ ) {
                 if ( tokens[i].equals( "keywords" ) ) {
                     wholeTitle = Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( tokens[i + 2].trim() ) );
                     break;
@@ -130,7 +131,7 @@ public class ParseNINENINE extends ParseOnlineComicSite {
         String[] specificDownloadURL = tempString.split( "\\|" );
 
 
-        for ( int i = 0 ; i < comicURL.length ; i++ ) {
+        for ( int i = 0 ; i < comicURL.length && Run.isAlive; i++ ) {
             comicURL[i] = baseDownloadURL + specificDownloadURL[i];
             //Common.debugPrintln( i + " : " + comicURL[i] ) ;
         }
@@ -392,7 +393,7 @@ class Parse99Manga extends ParseNINENINE {
 }
 
 // www.99comic.com 變繁體版了，所以套用cococomic的方式解析
-class Parse99ComicTC extends ParseCoco {
+class Parse99ComicTC extends ParseCocoTC {
 
     public Parse99ComicTC() {
         super();
@@ -540,7 +541,7 @@ class Parse99ComicTC extends ParseCoco {
 }
 
 // mh.99770.cc 變繁體版了，所以套用cococomic的方式解析
-class ParseMh99770 extends ParseCoco {
+class ParseMh99770 extends ParseCocoTC {
 
     public ParseMh99770() {
         super();
@@ -592,12 +593,32 @@ class Parse99Mh extends ParseNINENINE {
     }
 }
 
-// cococomic變繁體版了，解析方法全面翻新
 class ParseCoco extends ParseNINENINE {
 
     public ParseCoco() {
         super();
         siteID = Site.NINENINE_COCO;
+        
+        jsURL = "http://cococomic.com/v3/i3.js";
+    }
+    
+
+
+    @Override
+    public void printLogo() {
+        System.out.println( " ___________________________" );
+        System.out.println( "|                         " );
+        System.out.println( "| Run the cococomic module: " );
+        System.out.println( "|____________________________\n" );
+    }
+}
+
+// cococomic變繁體版了，解析方法全面翻新
+class ParseCocoTC extends ParseNINENINE {
+
+    public ParseCocoTC() {
+        super();
+        siteID = Site.NINENINE_COCO_TC;
         
         jsURL = "http://www.cococomic.com/script/ds.js";
     }
@@ -750,7 +771,7 @@ class ParseCoco extends ParseNINENINE {
     public void printLogo() {
         System.out.println( " ________________________________" );
         System.out.println( "|                             " );
-        System.out.println( "| Run the cococomic module: " );
+        System.out.println( "| Run the cococomic TC module: " );
         System.out.println( "|_________________________________\n" );
     }
 }

@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/1/10
+ Last Modified : 2012/5/24
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+    4.02: 1. 修復dm5新集數無法下載的問題。
  *  2.17: 1. 新增對dm.game.mop.com的支援。
  ----------------------------------------------------------------------------------------------------
  */
@@ -109,7 +110,7 @@ public class ParseDM5 extends ParseOnlineComicSite {
 
 
         String dm5Key = "";
-        beginIndex = allPageString.indexOf( "eval(" );
+        beginIndex = allPageString.indexOf( "eval(function" );
         if ( beginIndex > 0 ) {
             endIndex = allPageString.indexOf( "</script>", beginIndex );
             tempString = allPageString.substring( beginIndex, endIndex );
@@ -141,7 +142,7 @@ public class ParseDM5 extends ParseOnlineComicSite {
         }
 
         String picURL = "";
-        for ( int p = 0; p < comicURL.length; ) {
+        for ( int p = 0; p < comicURL.length && Run.isAlive; ) {
             Common.debugPrintln( p + "" );
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 )
                 || !Common.existPicFile( getDownloadDirectory(), p + 2 ) ) {
@@ -161,7 +162,7 @@ public class ParseDM5 extends ParseOnlineComicSite {
                 String[] picNames = allPageString.substring(
                     beginIndex, endIndex ).split( "," );
 
-                for ( int i = 0; i < picNames.length && p < comicURL.length; i++ ) {
+                for ( int i = 0; i < picNames.length && p < comicURL.length && Run.isAlive; i++ ) {
                     comicURL[p] = Common.getFixedChineseURL(
                         frontURL + picNames[i].replaceAll( "\"|\\]|\\[", "" ) );
 
@@ -207,7 +208,7 @@ public class ParseDM5 extends ParseOnlineComicSite {
         endIndex += 3;
 
         String tempString = scriptString.substring( beginIndex, endIndex );
-
+        Common.debugPrintln( "dm5 key: " + tempString );
 
         /*
          // 如果/'+/'就沒轍了，譬如http://www.dm5.com/m9701/
@@ -218,7 +219,7 @@ public class ParseDM5 extends ParseOnlineComicSite {
          }
          */
 
-        System.out.println( "----------" );
+        Common.debugPrintln( "----------" );
         List<String> indexList = new ArrayList<String>();
         tempString = tempString.replaceAll( "\\'", "" ).replaceAll( "\\\\", "" );
 
@@ -231,7 +232,7 @@ public class ParseDM5 extends ParseOnlineComicSite {
             indexList.add( String.valueOf( tempString.charAt( i ) ) );
         }
 
-        System.out.println( indexList.toString() );
+        Common.debugPrintln( indexList.toString() );
 
         // 將ArrayList轉給String[]
         String[] indexStrings = new String[indexList.size()];
@@ -441,12 +442,10 @@ public class ParseDM5 extends ParseOnlineComicSite {
                 urlList.add( tempURL );
 
                 // 取得單集名稱
-                beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "</a>", beginIndex );
+                beginIndex = tempString.indexOf( "title=", beginIndex ) + 1;
+                beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
+                endIndex = tempString.indexOf( "\"", beginIndex );
                 volumeTitle = tempString.substring( beginIndex, endIndex );
-                //volumeTitle = volumeTitle.replaceFirst( "</a>", "" );
-                volumeTitle = volumeTitle.replaceFirst( "<span\\s+class.*>", "" );
-
 
                 volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                     Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );

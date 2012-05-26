@@ -97,7 +97,7 @@ public class ParseIIBQ extends ParseOnlineComicSite {
         endIndex = allPageString.indexOf( "\"", beginIndex );
         String middleURL = allPageString.substring( beginIndex, endIndex );
 
-        for ( int p = 1 ; p <= totalPage ; p++ ) {
+        for ( int p = 1 ; p <= totalPage && Run.isAlive; p++ ) {
             comicURL[p - 1] = thirdServerURL + middleURL + urlTokens[p-1];
             //System.out.println( comicURL[p - 1] ); // debug
         }

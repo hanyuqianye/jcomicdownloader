@@ -95,7 +95,7 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
         Common.downloadFile( webSite + "index.js", SetUp.getTempDirectory(), jsName, false, "" );
         String allJsPageString = Common.getFileString( SetUp.getTempDirectory(), jsName );
         String[] jsTokens = allJsPageString.split( "=|;" ); // ex. var total=23;
-        for ( int i = 0; i < jsTokens.length; i ++ ) {
+        for ( int i = 0; i < jsTokens.length && Run.isAlive; i ++ ) {
             if ( jsTokens[i].matches( "(?s).*total" ) ) {
                 totalPage = Integer.parseInt( jsTokens[i+1] );
                 Common.debugPrintln( "共 " + totalPage + " 頁" );

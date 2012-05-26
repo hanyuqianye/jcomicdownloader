@@ -106,7 +106,7 @@ public class ParseNANA extends ParseOnlineComicSite {
         String extensionName = firstPageURL.split( "\\." )[firstPageURL.split( "\\." ).length - 1]; // 取得檔案副檔名
         NumberFormat formatter = new DecimalFormat( "000" ); // 預設001.jpg ~ xxx.jpg
 
-        for ( int p = 1 ; p <= totalPage ; p++ ) {
+        for ( int p = 1 ; p <= totalPage && Run.isAlive; p++ ) {
             String fileNameBefore = formatter.format( p - 1 ) + "." + extensionName;
             String fileName = formatter.format( p ) + "." + extensionName;
             firstPageURL = comicURL[p - 1] = firstPageURL.replaceAll( fileNameBefore, fileName );

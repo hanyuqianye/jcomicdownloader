@@ -98,7 +98,7 @@ public class ParseKKKMH extends ParseOnlineComicSite {
         String[] codeTokens = allCodeString.split( "'" );
         
         int p = 0; // 目前頁數
-        for ( int i = 0 ; i < codeTokens.length ; i++ ) {
+        for ( int i = 0 ; i < codeTokens.length && Run.isAlive; i++ ) {
             //System.out.println( "CODE: " + codeTokens[i] );
             if ( !codeTokens[i].matches( "(?s).*\\[\\d+\\](?s).*" ) ) {
                 //Common.debugPrintln( "CODE: " + codeTokens[i] ); // debug

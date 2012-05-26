@@ -41,6 +41,8 @@ public class ParseMyBest extends ParseCKNovel {
         radixNumber = 151261; // default value, not always be useful!!
 
         baseURL = "http://mybest.com.hk";
+        
+        floorCountInOnePage = 10; // 一頁有幾層樓
     }
 
     public ParseMyBest( String webSite, String titleName ) {
@@ -55,14 +57,16 @@ public class ParseMyBest extends ParseCKNovel {
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
         // 先取得前面的下載伺服器網址
 
-        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.BIG5 );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
         int beginIndex = 0, endIndex = 0;
         
         beginIndex = allPageString.indexOf( "class=\"last\"" );
 
-        if ( beginIndex > 0 ) { // 代表超過一頁
+        if ( beginIndex > 0 ) { // 代表超過一面( > 10 )
             beginIndex = allPageString.indexOf( " ", beginIndex ) + 1;
             endIndex = allPageString.indexOf( "<", beginIndex );
             String tempString = allPageString.substring( beginIndex, endIndex ).trim();
@@ -71,15 +75,20 @@ public class ParseMyBest extends ParseCKNovel {
         else {
             beginIndex = allPageString.indexOf( "class=\"pgt\"" );
             endIndex = allPageString.indexOf( "class=\"nxt\"", beginIndex );
-            String tempString = allPageString.substring( beginIndex, endIndex );
-            totalPage = tempString.split( "a href=" ).length - 1;
+            
+            if ( endIndex > 0 ) { // 超過一頁
+                String tempString = allPageString.substring( beginIndex, endIndex );
+                totalPage = tempString.split( "a href=" ).length - 1;
+            }
+            else
+                totalPage = 1; // 只有一頁
         }
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
 
         String pageURL = webSite + "&extra=&page=";
         int p = 1; // 目前頁數
-        for ( int i = 0 ; i < totalPage ; i++ ) {
+        for ( int i = 0 ; i < totalPage && Run.isAlive; i++ ) {
             comicURL[i] = pageURL + p;
             //Common.debugPrintln( i + " " + comicURL[i] ); // debug
             
@@ -113,7 +122,7 @@ public class ParseMyBest extends ParseCKNovel {
             allPageString = Common.getFileString( getDownloadDirectory(), "utf8_" + fileList[i] );
             Common.deleteFile( getDownloadDirectory(), "utf8_" + fileList[i] ); // 刪掉utf8編碼的暫存檔
             
-            allNovelText += getRegularNovel( allPageString ); // 每一頁處理過都加總起來 
+            allNovelText += getRegularNovel( allPageString, i ); // 每一頁處理過都加總起來 
             
             ComicDownGUI.stateBar.setText( getTitle() + 
                 "合併中: " + ( i + 1 ) + " / " + fileList.length );
@@ -140,10 +149,10 @@ public class ParseMyBest extends ParseCKNovel {
     
     
 
-    @Override // 因為原檔就是utf8了，所以無須轉碼
+    @Override // 
     public String getAllPageString( String urlString ) {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mybest_", "html" );
-        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mybest_encode_parse", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mybest_encode_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.BIG5 );

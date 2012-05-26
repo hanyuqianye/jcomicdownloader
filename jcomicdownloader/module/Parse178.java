@@ -128,7 +128,7 @@ public class Parse178 extends ParseOnlineComicSite {
         endIndex = firstPicURL.lastIndexOf( "/" ) + 1;
         String parentPicURL = firstPicURL.substring( 0, endIndex );
 
-        for ( int i = 0; i < codeTokens.length; i++ ) {
+        for ( int i = 0; i < codeTokens.length && Run.isAlive; i++ ) {
             comicURL[i] = parentPicURL + picNames[i]; // 存入每一頁的網頁網址
             //Common.debugPrintln( ( i + 1 ) + " " + comicURL[i]  ); // debug
 

@@ -182,7 +182,7 @@ public class ParseImanhua extends ParseOnlineComicSite {
         comicURL = new String[totalPage];
 
         int p = 0; // 目前頁數
-        for ( int i = 0; i < totalPage; i++ ) {
+        for ( int i = 0; i < totalPage && Run.isAlive; i++ ) {
             if ( picNames[i].matches( ".*/.*" ) ) { // 檔名已包含後方位址
                 // ex. http://www.imanhua.com/comic/69/list_5707.html
                 comicURL[i] = baseURL1 + picNames[i];

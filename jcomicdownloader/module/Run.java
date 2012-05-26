@@ -166,6 +166,10 @@ public class Run extends Thread { // main class to run whole program
                 ParseOnlineComicSite parse = new ParseCoco();
                 runSingleParseModule( parse );
             }
+            else if ( pw.getSiteID() == Site.NINENINE_COCO_TC ) {
+                ParseOnlineComicSite parse = new ParseCocoTC();
+                runSingleParseModule( parse );
+            }
             else if ( pw.getSiteID() == Site.NINENINE_1MH ) {
                 ParseOnlineComicSite parse = new Parse1Mh();
                 runSingleParseModule( parse );
@@ -310,6 +314,30 @@ public class Run extends Thread { // main class to run whole program
             }
             else if ( pw.getSiteID() == Site.VERYIM ) {
                 ParseOnlineComicSite parse = new ParseVeryim();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.WENKU ) {
+                ParseOnlineComicSite parse = new ParseWenku();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.FUMANHUA ) {
+                ParseOnlineComicSite parse = new ParseFumanhua();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.SIX_MANGA ) {
+                ParseOnlineComicSite parse = new ParseSixManga();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.XXBH ) {
+                ParseOnlineComicSite parse = new ParseXXBH();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.COMIC_131 ) {
+                ParseOnlineComicSite parse = new Parse131();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.BLOGSPOT ) {
+                ParseOnlineComicSite parse = new ParseBlogspot();
                 runSingleParseModule( parse );
             }
             

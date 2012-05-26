@@ -80,7 +80,7 @@ public class ParseJumpcn extends ParseOnlineComicSite {
         // ex.http://www.jumpcn.com/m/du-bo-zhui-tian-lv-he-ye/24/
         String volumeURL = webSite.substring( 0, webSite.length() - 2 );
 
-        for ( int p = 1 ; p <= totalPage ; p++ ) {
+        for ( int p = 1 ; p <= totalPage && Run.isAlive; p++ ) {
             // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
                 allPageString = getAllPageString( volumeURL + p + "/" );

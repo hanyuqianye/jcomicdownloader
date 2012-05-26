@@ -3,10 +3,26 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v4.0
- Last Modified : 2012/5/13
+ Version  : v4.03
+ Last Modified : 2012/5/27
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 4.03: 1. 新增對xxbh的支援。 
+ *       2. 新增對blogspot.com的支援（只支援基本範本）。
+ *       3. 更新對於html的tag和NCR（Numeric character reference）的替換機制，使輸出文字檔更趨自然。
+ *       4. 修改Wenku模組，使其可輸出單回文字檔與合併文字檔。
+ 4.02: 1. 新增對comic.131.com的支援。
+       2. 修復部份網站按停止無法立刻停止的bug。
+       3. 修復dm5新集數無法下載的問題。
+       4. 修復dm5集數名稱格式不一的問題。
+       5. 修復fumanhua解析集數錯誤的問題。
+ 4.01: 1. 新增對fumanhua的支援。
+       2. 新增對6manga的支援。
+       3. 新增對Wenku的支援。
+       4. 增加開啟文件檔的功能選項。
+       5. 修復jmymh無法下載的問題。（加入伺服器檢查機制）
+       6. 修復cococomic簡體版頁面的集數解析問題。
+       7. 修復89890部份集數無法下載的問題。
  4.0 : 1. 新增對imanhua的支援。
        2. 新增對veryim的支援。
        3. 翻新178的解析方式，直接轉碼而非參照字典檔。
@@ -333,7 +349,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v4.0";
+    public static String versionString = "JComicDownloader  v4.03";
 
     public ComicDownGUI() {
         super( versionString );
@@ -1858,7 +1874,23 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         Common.debugPrintln( "以外部程式開啟" + title + "的下載資料夾或壓縮檔" );
 
-        if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" ) ) {
+        if ( url.matches( "(?s).*ck101.com(?s).*" ) || 
+             url.matches( "(?s).*catcatbox.com(?s).*" ) || 
+            url.matches( "(?s).*mybest.com(?s).*" ) || 
+            url.matches( "(?s).*wenku.com(?s).*" ) ) {
+            String cmd = SetUp.getOpenTextFileProgram();
+            String path = "";
+            
+            boolean existTextFile = false;
+            if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".txt" ).exists() )
+                existTextFile = true;
+            if ( existTextFile ) {
+                path = SetUp.getOriginalDownloadDirectory() + title + ".txt";
+                Common.debugPrintln( "開啟命令：" + cmd + " " + path );
+                Common.runUnansiCmd( cmd, path );
+            }
+        }
+        else if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" ) ) {
             String cmd = SetUp.getOpenZipFileProgram();
             String path = "";
 
@@ -1939,7 +1971,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         Common.debugPrintln( "開啟" + title + "的下載資料夾" );
 
-        if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" ) ) {
+        if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" ) ||  
+             url.matches( "(?s).*ck101.com(?s).*" ) || 
+             url.matches( "(?s).*catcatbox.com(?s).*" ) || 
+            url.matches( "(?s).*mybest.com(?s).*" ) || 
+            url.matches( "(?s).*wenku.com(?s).*" ) ) {
             if ( Common.isWindows() ) {
                 if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".zip" ).exists() ) {
                     // 開啟資料夾並將指定的檔案反白
@@ -1948,6 +1984,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 else if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".cbz" ).exists() ) {
                     // 開啟資料夾並將指定的檔案反白
                     Common.runUnansiCmd( "explorer /select, ", SetUp.getOriginalDownloadDirectory() + title + ".cbz" );
+                }
+                else if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".txt" ).exists() ) {
+                    // 開啟資料夾並將指定的檔案反白
+                    Common.runUnansiCmd( "explorer /select, ", SetUp.getOriginalDownloadDirectory() + title + ".txt" );
                 }
                 else if ( new File( SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() ).exists() ) {
                     // 開啟資料夾並將指定的資料夾反白
@@ -2757,25 +2797,28 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 //Common.simpleDownloadFile( testURL, "", "test1.html" );
                 //Common.urlConnection( testURL );
  
-                pageURL = "http://www.imanhua.com/comic/3523/";
-                testURL = "http://t4.imanhua.com/Files/Images/1119/67898/011.png";
-                testURL2 = "http://img1.veryim.com/Y/yinhun/ch_399/011.png";
+                pageURL = "http://comic.xxbh.net/201205/224133.html?page=1";
+                testURL = "http://222.218.156.59/h28/201205/20120526102506tyuudll05s3.jpg";
+                testURL2 = "http://222.218.156.16/coojs/201205/32ca0894.js";
                 //cookie = Common.getCookieString( pageURL );
-                referURL = testURL;
-                Common.simpleDownloadFile( testURL, "", "test1.jpg", referURL );
-                referURL = testURL2;
-                Common.simpleDownloadFile( testURL2, "", "test2.jpg", referURL );
+                referURL = pageURL;
+                //System.out.println( cookie );
+                Common.simpleDownloadFile( testURL2, "", "test.txt", referURL );
+                Common.simpleDownloadFile( testURL, "", "test.jpg", pageURL );
+                //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
+                //Common.downloadFile( testURL, "", "test_0.txt", true, cookie, referURL );
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
 
                 //Common.testConnection( testURL );
                 
                 System.out.println( "OVER" );
+                
+                char a = 65072;
+                System.out.println( a );
 
             }
         } );
         //downThread.start();
     }
-    
-    
-    
+
 }

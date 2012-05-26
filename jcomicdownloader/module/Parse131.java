@@ -2,21 +2,23 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/1/10
+ Last Modified : 2012/5/24
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
- *  2.17: 1. 新增對dm.game.mop.com的支援。
+ *  4.02: 1. 新增對comic.131.com的支援。
  ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
 import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Encoding;
 
-public class ParseMOP extends ParseOnlineComicSite {
+public class Parse131 extends ParseOnlineComicSite {
 
     private int radixNumber; // use to figure out the name of pic
     private String jsName;
@@ -25,21 +27,21 @@ public class ParseMOP extends ParseOnlineComicSite {
     protected String baseURL;
 
     /**
-     *
-     * @author user
-     */
-    public ParseMOP() {
-        siteID = Site.MOP;
-        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mop_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mop_encode_parse_", "html" );
 
-        jsName = "index_mop.js";
+     @author user
+     */
+    public Parse131() {
+        siteID = Site.COMIC_131;
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_131_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_131_encode_parse_", "html" );
+
+        jsName = "index_131.js";
         radixNumber = 15221471; // default value, not always be useful!!
 
-        baseURL = "http://dm.game.mop.com";
+        baseURL = "http://comic.131.com";
     }
 
-    public ParseMOP( String webSite, String titleName ) {
+    public Parse131( String webSite, String titleName ) {
         this();
         this.webSite = webSite;
         this.title = titleName;
@@ -55,8 +57,8 @@ public class ParseMOP extends ParseOnlineComicSite {
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
-            int beginIndex = allPageString.indexOf( "<title>" ) + 7;
-            int endIndex = allPageString.indexOf( "|", beginIndex );
+            int beginIndex = allPageString.indexOf( "title=\"" ) + 7;
+            int endIndex = allPageString.indexOf( "\"", beginIndex );
             String tempTitleString = allPageString.substring( beginIndex, endIndex ).trim();
 
             setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
@@ -74,44 +76,72 @@ public class ParseMOP extends ParseOnlineComicSite {
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        int beginIndex = allPageString.indexOf( "name=\"selectb\"" );
-        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "</select>", beginIndex );
-
+        int beginIndex = allPageString.indexOf( "</em>/" ) + 5;
+        beginIndex = allPageString.indexOf( "/", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "</p>", beginIndex );
         String tempString = allPageString.substring( beginIndex, endIndex );
 
-        totalPage = tempString.split( "<option" ).length - 1;
+        totalPage = Integer.parseInt( tempString );
         Common.debugPrintln( "共 " + totalPage + " 頁" );
-        comicURL = new String[totalPage];
+        comicURL = new String[totalPage + 1];
 
-        String[] comicPageURL = new String[totalPage];
+        // 取得當前網頁目錄
+        endIndex = webSite.lastIndexOf( "/" ) + 1;
+        String volumeURL = webSite.substring( 0, endIndex );
+
+        String pageURL = ""; // 每一頁的網址
         beginIndex = endIndex = 0;
-        for ( int i = 0; i < totalPage && Run.isAlive; i++ ) {
-            beginIndex = allPageString.indexOf( "value=", beginIndex );
-            beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
-            endIndex = allPageString.indexOf( "\"", beginIndex );
+        String picURL = ""; // 圖片網址
+        for ( int i = 0; i < totalPage && Run.isAlive; ) {
+            if ( !Common.existPicFile( getDownloadDirectory(), i + 1 )
+                || !Common.existPicFile( getDownloadDirectory(), i + 2 ) ) {
 
-            comicPageURL[i] = baseURL + allPageString.substring( beginIndex, endIndex );
-        }
+                pageURL = volumeURL + ( i + 1 ) + ".html";
+                allPageString = getAllPageString( pageURL );
 
-        String picURL = "";
-        for ( int p = 0; p < totalPage; p++ ) {
-            if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) || 
-                 !Common.existPicFile( getDownloadDirectory(), p + 2 ) ) {
-                allPageString = getAllPageString( comicPageURL[p] );
-
-                beginIndex = allPageString.indexOf( "id=picwin" );
-                beginIndex = allPageString.indexOf( "src=", beginIndex );
-                beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+                // 開始解析第一張圖片網址
+                beginIndex = allPageString.indexOf( "img=" );
+                beginIndex = allPageString.indexOf( "=", beginIndex ) + 1;
                 endIndex = allPageString.indexOf( "\"", beginIndex );
+                picURL = allPageString.substring( beginIndex, endIndex );
 
-                comicURL[p] = Common.getFixedChineseURL( 
-                    allPageString.substring( beginIndex, endIndex ) );
+                comicURL[i++] = Common.getFixedChineseURL( picURL );
+                // 每解析一個網址就下載一張圖
+                singlePageDownload( getTitle(), getWholeTitle(), comicURL[i - 1], totalPage, i, 0 );
                 //Common.debugPrintln( ( p + 1 ) + " " + comicURL[p] ); // debug
 
-                // 每解析一個網址就下載一張圖
-                singlePageDownload( getTitle(), getWholeTitle(), comicURL[p], totalPage, p + 1, 0 );
+                // 檢查有無後面兩張圖片
+                if ( allPageString.indexOf( "src=\"\"" ) < 0 ) {
+                    beginIndex = allPageString.indexOf( "var comicurl" );
+                    beginIndex = allPageString.indexOf( "<img src=", beginIndex ) + 1;
+                    beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+                    endIndex = allPageString.indexOf( "\"", beginIndex );
+                    picURL = allPageString.substring( beginIndex, endIndex );
+
+                    if ( i < totalPage ) {
+                        comicURL[i++] = Common.getFixedChineseURL( picURL );
+                        // 每解析一個網址就下載一張圖
+                        singlePageDownload( getTitle(), getWholeTitle(), comicURL[i - 1], totalPage, i, 0 );
+                        //Common.debugPrintln( ( p + 1 ) + " " + comicURL[p] ); // debug
+                    }
+
+                    beginIndex = allPageString.indexOf( "<img src=", beginIndex ) + 1;
+                    beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+                    endIndex = allPageString.indexOf( "\"", beginIndex );
+                    picURL = allPageString.substring( beginIndex, endIndex );
+
+                    if ( i < totalPage ) {
+                        comicURL[i++] = Common.getFixedChineseURL( picURL );
+                        // 每解析一個網址就下載一張圖
+                        singlePageDownload( getTitle(), getWholeTitle(), comicURL[i - 1], totalPage, i, 0 );
+                        //Common.debugPrintln( ( p + 1 ) + " " + comicURL[p] ); // debug
+                    }
+                }
             }
+            else {
+                i++;
+            }
+
         }
 
         //System.exit( 0 ); // debug
@@ -126,20 +156,17 @@ public class ParseMOP extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mop_parse", "html" );
-        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mop_encode_parse", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_131_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GBK );
 
-        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override
     public boolean isSingleVolumePage( String urlString ) {
-        // ex. http://dm.game.mop.com/primary/45489.html#pic
-
-        if ( urlString.matches( ".*/primary/.*" ) ) {
+        // ex. http://comic.131.com/content/15798/152652/1.html
+        if ( Common.getAmountOfString( urlString, "/" ) > 5 ) {
             return true;
         }
         else {
@@ -148,19 +175,16 @@ public class ParseMOP extends ParseOnlineComicSite {
     }
 
     public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
-        // ex. http://dm.game.mop.com/primary/45489.html#pic或
-        //     http://dm.game.mop.com/primary/45489/1.html#pic轉為
-        //     http://dm.game.mop.com/fengmian/4827.html
+        // ex. http://comic.131.com/content/15798/152652/1.html轉為
+        //     http://comic.131.com/content/shaonian/15798.html
 
+        String allPageString = getAllPageString( volumeURL );
+        int beginIndex = allPageString.indexOf( "class=\"mh_szwz2\"" );
+        beginIndex = allPageString.indexOf( "href=\"http", beginIndex );
+        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "\"", beginIndex );
 
-        int beginIndex = volumeURL.indexOf( "primary" );
-        beginIndex = volumeURL.indexOf( "/", beginIndex ) + 1;
-        int endIndex = volumeURL.indexOf( "/", beginIndex );
-        if ( endIndex < 0 ) {
-            endIndex = volumeURL.indexOf( "/", beginIndex );
-        }
-
-        String mainPageURL = volumeURL.substring( 0, endIndex ) + ".html";
+        String mainPageURL = allPageString.substring( beginIndex, endIndex );
 
         Common.debugPrintln( "MAIN_URL: " + mainPageURL );
 
@@ -177,23 +201,10 @@ public class ParseMOP extends ParseOnlineComicSite {
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         int beginIndex, endIndex;
-        
-        beginIndex = urlString.indexOf( "mop" );
-        beginIndex = urlString.indexOf( "/", beginIndex ) + 1;
-        
-        String backMainURL = "";
-        if ( urlString.matches( ".*\\?id=.*" ) ) {
-            String tempString = urlString.substring( beginIndex, urlString.length() );
-            tempString = tempString.replaceAll( "\\.jsp\\?id=", "/" );
-            
-            backMainURL = tempString + ".html";
-        }
-        else
-            backMainURL = urlString.substring( beginIndex, urlString.length() );
 
-        beginIndex = allPageString.indexOf( backMainURL + "\"" );
+        beginIndex = allPageString.indexOf( "<h1>" );
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        endIndex = allPageString.indexOf( "<", beginIndex );
+        endIndex = allPageString.indexOf( "</h1>", beginIndex );
         String title = allPageString.substring( beginIndex, endIndex ).trim();
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
@@ -210,28 +221,32 @@ public class ParseMOP extends ParseOnlineComicSite {
         String tempString = "";
         int beginIndex, endIndex;
 
-        beginIndex = allPageString.indexOf( "class=\"plie\"" );
-        endIndex = allPageString.indexOf( "</ul>", beginIndex );
+        beginIndex = allPageString.indexOf( "class=\"mh_fj\"" );
+        endIndex = allPageString.indexOf( "id=\"iframe_comment\"", beginIndex );
 
         // 存放集數頁面資訊的字串
         tempString = allPageString.substring( beginIndex, endIndex );
 
-        int volumeCount = tempString.split( "href=" ).length - 1;
+        int volumeCount = tempString.split( " href=" ).length - 1;
 
         String volumeTitle = "";
         beginIndex = endIndex = 0;
         for ( int i = 0; i < volumeCount; i++ ) {
             // 取得單集位址
-            beginIndex = tempString.indexOf( "href=", beginIndex );
+            beginIndex = tempString.indexOf( " href=", beginIndex );
             beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
             endIndex = tempString.indexOf( "\"", beginIndex );
             urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
 
             // 取得單集名稱
             beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
-            endIndex = tempString.indexOf( "</a>", beginIndex );
+            endIndex = tempString.indexOf( "<", beginIndex );
+            if ( beginIndex == endIndex ) {
+                endIndex = tempString.indexOf( "<", endIndex + 1 );
+            }
             volumeTitle = tempString.substring( beginIndex, endIndex );
-            volumeTitle = volumeTitle.replaceFirst( "<br\\s+/{0,1}>", "" );
+            volumeTitle = volumeTitle.replaceFirst( "<font.*>", "" );
+            volumeTitle = volumeTitle.replaceFirst( "<img.*>", "" );
 
             volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                 Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
@@ -262,7 +277,7 @@ public class ParseMOP extends ParseOnlineComicSite {
     public void printLogo() {
         System.out.println( " ______________________________" );
         System.out.println( "|                            " );
-        System.out.println( "| Run the MOP module:     " );
+        System.out.println( "| Run the 131 module:     " );
         System.out.println( "|_______________________________\n" );
     }
 }

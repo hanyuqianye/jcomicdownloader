@@ -96,7 +96,7 @@ public class ParseSF extends ParseOnlineComicSite {
         String[] urlTokens = tempString.split( "\"" );
         
         int p = 0; // 目前頁數
-        for ( int i = 0 ; i < urlTokens.length ; i++ ) {
+        for ( int i = 0 ; i < urlTokens.length && Run.isAlive; i++ ) {
             if ( urlTokens[i].matches( "http://(?s).*" ) ) {
                 comicURL[p++] = urlTokens[i]; // 存入每一頁的網頁網址
                 //Common.debugPrintln( p + " " + comicURL[p-1]  ); // debug

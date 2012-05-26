@@ -155,7 +155,7 @@ public class ParseEH extends ParseOnlineComicSite {
                 String line = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
                 lines = line.split( "\"" );
-                for ( int j = 0 ; j < lines.length ; j++ ) {
+                for ( int j = 0 ; j < lines.length && Run.isAlive; j++ ) {
 
                     if ( lines[j].matches( "(?s).*http://\\d+.\\d+.\\d+.\\d+(?s).*" ) ) {
 

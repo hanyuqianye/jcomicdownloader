@@ -126,7 +126,7 @@ public class ParseEC extends ParseOnlineComicSite {
 
         // 完全引用網頁上的javascript碼
         String img = "";
-        for ( int p = 1 ; p <= totalPage ; p++ ) {
+        for ( int p = 1 ; p <= totalPage && Run.isAlive; p++ ) {
             if ( p < 10 ) {
                 img = "00" + p;
             } else if ( p < 100 ) {

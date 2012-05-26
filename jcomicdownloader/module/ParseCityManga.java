@@ -96,7 +96,7 @@ public class ParseCityManga extends ParseOnlineComicSite {
             }
         }
 
-        for ( int p = 1 ; p <= totalPage ; p++ ) {
+        for ( int p = 1 ; p <= totalPage && Run.isAlive; p++ ) {
             // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
                 Common.downloadFile( pageURL[p - 1], SetUp.getTempDirectory(), indexName, false, "" );

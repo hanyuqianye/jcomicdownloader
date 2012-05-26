@@ -66,4 +66,11 @@ public class Site {
     public final static int MYBEST = 48;
     public final static int IMANHUA = 49;
     public final static int VERYIM = 50;
+    public final static int WENKU = 51;
+    public final static int FUMANHUA = 52;
+    public final static int SIX_MANGA = 53;
+    public final static int NINENINE_COCO_TC = 54;
+    public final static int XXBH = 55;
+    public final static int COMIC_131 = 56; 
+    public final static int BLOGSPOT = 57; // 
 }

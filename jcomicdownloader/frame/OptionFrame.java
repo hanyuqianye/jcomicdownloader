@@ -92,7 +92,10 @@ public class OptionFrame extends JFrame implements MouseListener {
     private String tabLogoName = "tab_option.png";
     private JLabel viewPicFileLabel;
     private JTextField viewPicFileTextField;
+    private JLabel viewTextFileLabel;
+    private JTextField viewTextFileTextField;
     private JButton viewPicFileButton;
+    private JButton viewTextFileButton;
     private JLabel viewZipFileLabel;
     private JTextField viewZipFileTextField;
     private JButton viewZipFileButton;
@@ -457,11 +460,26 @@ public class OptionFrame extends JFrame implements MouseListener {
         viewZipFilePanelHorizontal.add( viewZipFileLabel );
         viewZipFilePanelHorizontal.add( viewZipFileButton );
         viewZipFilePanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+        
+        
+        viewTextFileLabel = getLabel( "預設開啟文件的程式：       " );
+
+        viewTextFileTextField = getTextField( SetUp.getOpenTextFileProgram() );
+
+        viewTextFileButton = getButton( "選擇新程式" );
+        CommonGUI.setToolTip( viewTextFileButton, "選擇偏好的文字編輯器" );
+
+        JPanel viewTextFIlePanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        viewTextFIlePanelHorizontal.add( viewTextFileLabel );
+        viewTextFIlePanelHorizontal.add( viewTextFileButton );
+        viewTextFIlePanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
 
 
         JPanel viewPanel = new JPanel( new GridLayout( 6, 1, 2, 2 ) );
         viewPanel.add( viewPicFIlePanelHorizontal );
         viewPanel.add( viewPicFileTextField );
+        viewPanel.add( viewTextFIlePanelHorizontal );
+        viewPanel.add( viewTextFileTextField );
         //viewPanel.add( viewZipFilePanelHorizontal );
         //viewPanel.add( viewZipFileTextField );
         viewPanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
@@ -951,6 +969,10 @@ public class OptionFrame extends JFrame implements MouseListener {
                 CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.FILES_ONLY,
                         "選擇可瀏覽圖片的程式", viewPicFileTextField, SetUp.getOpenPicFileProgram() );
             }
+            else if ( event.getSource() == viewTextFileButton ) {
+                CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.FILES_ONLY,
+                        "選擇可瀏覽文件檔的程式", viewTextFileTextField, SetUp.getOpenTextFileProgram() );
+            }
             else if ( event.getSource() == viewZipFileButton ) {
                 CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.FILES_ONLY,
                         "選擇可瀏覽壓縮檔的程式", viewZipFileTextField, SetUp.getOpenZipFileProgram() );
@@ -999,6 +1021,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                 SetUp.setTempDirectory( tempDirTextField.getText() ); // 紀錄到設定值
 
                 SetUp.setOpenPicFileProgram( viewPicFileTextField.getText() ); // 紀錄到設定值
+                SetUp.setOpenTextFileProgram( viewTextFileTextField.getText() ); // 紀錄到設定值
                 SetUp.setOpenZipFileProgram( viewPicFileTextField.getText() ); // 紀錄到設定值
                 SetUp.setRecordFileDirectory( recordDirTextField.getText() ); // 紀錄到設定值
 

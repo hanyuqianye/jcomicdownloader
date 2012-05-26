@@ -11,8 +11,6 @@
 package jcomicdownloader.module;
 
 import java.io.File;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
@@ -27,6 +25,7 @@ public class ParseCKNovel extends ParseOnlineComicSite {
     protected String indexName;
     protected String indexEncodeName;
     protected String baseURL;
+    protected int floorCountInOnePage; // 一頁有幾層樓
 
     /**
 
@@ -41,6 +40,8 @@ public class ParseCKNovel extends ParseOnlineComicSite {
         radixNumber = 151261; // default value, not always be useful!!
 
         baseURL = "http://ck101.com";
+        
+        floorCountInOnePage = 10; // 一頁有幾層樓
     }
 
     public ParseCKNovel( String webSite, String titleName ) {
@@ -52,25 +53,31 @@ public class ParseCKNovel extends ParseOnlineComicSite {
     @Override
     public void setParameters() {
         Common.debugPrintln( "開始解析各參數 :" );
-        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        
 
         Common.debugPrintln( "作品名稱(title) : " + getTitle() );
         Common.debugPrintln( "章節名稱(wholeTitle) : " + getWholeTitle() );
 
+        
     }
 
     @Override
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
         // 先取得前面的下載伺服器網址
 
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
+        
+        // 將
+        //setDownloadDirectory( SetUp.getOriginalDownloadDirectory() + getTitle() + Common.getSlash() );
+        System.out.println( getDownloadDirectory() );
 
         int beginIndex = 0, endIndex = 0;
 
         beginIndex = allPageString.indexOf( "class=\"last\"" );
 
-        if ( beginIndex > 0 ) { // 代表超過一頁
+        if ( beginIndex > 0 ) { // 代表超過一面( > 10 )
             beginIndex = allPageString.indexOf( " ", beginIndex ) + 1;
             endIndex = allPageString.indexOf( "<", beginIndex );
             String tempString = allPageString.substring( beginIndex, endIndex ).trim();
@@ -79,15 +86,20 @@ public class ParseCKNovel extends ParseOnlineComicSite {
         else {
             beginIndex = allPageString.indexOf( "class=\"pgt\"" );
             endIndex = allPageString.indexOf( "class=\"nxt\"", beginIndex );
-            String tempString = allPageString.substring( beginIndex, endIndex );
-            totalPage = tempString.split( "a href=" ).length - 1;
+            
+            if ( endIndex > 0 ) { // 超過一頁
+                String tempString = allPageString.substring( beginIndex, endIndex );
+                totalPage = tempString.split( "a href=" ).length - 1;
+            }
+            else
+                totalPage = 1; // 只有一頁
         }
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
 
         String pageURL = webSite;
         int p = 1; // 目前頁數
-        for ( int i = 0; i < totalPage; i++ ) {
+        for ( int i = 0; i < totalPage && Run.isAlive; i++ ) {
             pageURL = pageURL.replaceAll( "-" + i + "-", "-" + p + "-" );
 
             comicURL[i] = pageURL;
@@ -118,7 +130,7 @@ public class ParseCKNovel extends ParseOnlineComicSite {
             Common.debugPrintln( "處理第" + ( i + 1 ) + "頁: " + fileList[i] );
             allPageString = Common.getFileString( getDownloadDirectory(), fileList[i] );
 
-            allNovelText += getRegularNovel( allPageString ); // 每一頁處理過都加總起來 
+            allNovelText += getRegularNovel( allPageString, i ); // 每一頁處理過都加總起來 
         
             ComicDownGUI.stateBar.setText( getTitle() + 
                 "合併中: " + ( i + 1 ) + " / " + fileList.length );
@@ -142,7 +154,7 @@ public class ParseCKNovel extends ParseOnlineComicSite {
     }
 
     // 處理小說網頁，將標籤去除
-    public String getRegularNovel( String allPageString ) {
+    public String getRegularNovel( String allPageString, int nowPage ) {
         int beginIndex = 0;
         int endIndex = 0;
         int amountOfFloor = 10; // 一頁有幾樓
@@ -162,7 +174,8 @@ public class ParseCKNovel extends ParseOnlineComicSite {
                 //Common.debugPrintln( oneFloorText );
 
                 allFloorText += oneFloorText + 
-                    "\n\n--------------------------------------------\n"; // 每一樓的文字加總起來
+                    "\n\n--------------------------------------------" + 
+                        ( i + nowPage * floorCountInOnePage ) + "\n"; // 每一樓的文字加總起來
 
                 Common.debugPrint( i + " " );
 
@@ -171,21 +184,7 @@ public class ParseCKNovel extends ParseOnlineComicSite {
         return allFloorText;
     }
 
-    public String replaceProcess( String text ) {
-        text = text.replaceAll( "<br />", "" );
-        text = text.replaceAll( "<.strong>", "" );
-        text = text.replaceAll( "</font>", "" );
-        text = text.replaceAll( "<.*>", "" );
-        text = text.replaceAll( "&nbsp;", "" );
-        text = text.replaceAll( "&quot;", "" );
-        text = text.replaceAll( "&#40637", "麼" ); //
-        text = text.replaceAll( "&#39393;", "罵" );
-        text = text.replaceAll( "&#25825;", "抬" );
-        text = text.replaceAll( "�", "裡" );
-        //text = text.replaceAll( "\n", "\r\n" );
-
-        return text;
-    }
+    
 
     public void showParameters() { // for debug
         Common.debugPrintln( "----------" );

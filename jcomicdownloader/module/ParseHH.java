@@ -117,7 +117,7 @@ public class ParseHH extends ParseOnlineComicSite {
 
 
         int p = 0; // 目前頁數
-        for ( int i = 1; i <= totalPage; i++ ) {
+        for ( int i = 1; i <= totalPage && Run.isAlive; i++ ) {
             comicURL[p++] = serverURL + urlStrings[i-1]; // 存入每一頁的網頁網址
             //Common.debugPrintln( p + " " + comicURL[p - 1] ); // debug
 

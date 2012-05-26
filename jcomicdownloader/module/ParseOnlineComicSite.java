@@ -178,7 +178,7 @@ abstract public class ParseOnlineComicSite {
             extensionName = url.split( "\\." )[url.split( "\\." ).length - 1]; // 取得圖片附檔名
         } else {
             if ( this.siteID == Site.CK_NOVEL || 
-                 this.siteID == Site.MYBEST ) {
+                 this.siteID == Site.MYBEST || this.siteID == Site.BLOGSPOT ) {
                 extensionName = "html"; // 因為是小說，所以副檔名給txt
             }
             else {
@@ -192,8 +192,12 @@ abstract public class ParseOnlineComicSite {
         CommonGUI.stateBarDetailMessage += ": [" + fileName + "]";
 
         // 下載第n張之前，先檢查第n+1張圖是否存在，若是則跳下一張
-        if ( !new File( getDownloadDirectory() + fileName ).exists() ||
-             !new File( getDownloadDirectory() + nextFileName ).exists()) {
+        
+        if ( Run.isAlive && 
+            ( !new File( getDownloadDirectory() + fileName ).exists() ||
+             !new File( getDownloadDirectory() + nextFileName ).exists() ) ) {
+            Common.debugPrint( nowPageNumber + " " );
+            
             if ( simpleDownload ) {
                 Common.simpleDownloadFile( url, getDownloadDirectory(), fileName, referURL );
             }
@@ -297,6 +301,69 @@ abstract public class ParseOnlineComicSite {
         }
 
         return formatVolume;
+    }
+    
+    //  將numeric character references全部還原
+    public String replaceNCR( String text ) {
+        int beginIndex = 0;
+        int endIndex = 0;
+        
+        // 先將非數字的character references進行替換
+        text = text.replaceAll( "&nbsp;", " " );
+        text = text.replaceAll( "&quot;", "\"" );
+        text = text.replaceAll( "&amp;", "&" );
+
+        String ncrString = ""; // 存放numeric character references字串 ex. &#65289;
+        String numberString = ""; // 存放numeric character references的數字部份 ex. 65289
+        String decode = ""; // 存放已經解碼的字元 ex. ）
+
+        while ( true ) {
+            beginIndex = text.indexOf( "&#", beginIndex );
+            endIndex = text.indexOf( ";", beginIndex ) + 1;
+
+            if ( beginIndex >= 0 && endIndex >= 0 ) {
+                ncrString = text.substring( beginIndex, endIndex );
+                numberString = ncrString.substring( 2, ncrString.length() - 1 );
+                //Common.debugPrint( "轉換前：" + ncrString );
+
+                if ( numberString.matches( "\\d+" ) ) {
+                    char decodeChar = (char) Integer.parseInt( numberString );
+                    decode = String.valueOf( decodeChar );
+                    //Common.debugPrintln( "　轉換後：" + decode );
+                    
+                    text = text.replaceAll( ncrString, decode );
+                }
+            }
+            else {
+                break;
+            }
+
+        }
+        
+        return text;
+    }
+    
+    // 將換行tag轉換為換行字元
+    public String replaceNewLine( String text ) {
+        text = text.replaceAll( "\r\n", "" ); // 若原始檔為big5編碼，可能換行是採用\r\n的格式（windows換行機制）
+        text = text.replaceAll( "\n", "" ); // 拿掉非windows換行機制的換行字元
+        
+        // 開始替換
+        text = text.replaceAll( "<br />", "\r\n" );
+        text = text.replaceAll( "<br>", "\r\n" );
+        text = text.replaceAll( "</p>", "\r\n" );
+        text = text.replaceAll( "</h1>", "\r\n" );
+        
+        return text;
+    }
+
+    // 將html的tag拿掉，且將numeric character references還原回原本的字元。
+    public String replaceProcess( String text ) {
+        text = replaceNCR( text ); //  將numeric character references全部還原
+        text = replaceNewLine( text ); // 將換行tag轉換為換行字元
+        text = text.replaceAll( "<[^<>]+>", "" ); // 將所有標籤去除
+
+        return text;
     }
 }
 // http://ascrsbdfdb.kukudm.net:81/kuku8comic8/201110/20111029/%E9%BC%A0%E7%B9%AA%E6%BC%A2%E5%8C%96%E7%BE%8E%E9%A3%9F163/Comic.kukudm.com_0103S.jpg

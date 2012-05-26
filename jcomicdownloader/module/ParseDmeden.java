@@ -97,7 +97,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
         String fontURL = webSite.substring( 0, endIndex );
         String backURL = webSite.substring( beginIndex, webSite.length() );
 
-        for ( int p = 1 ; p <= totalPage ; p++ ) {
+        for ( int p = 1 ; p <= totalPage && Run.isAlive; p++ ) {
             // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
                 String url = fontURL + p + backURL;
@@ -110,7 +110,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
 
                 String[] urlTokens = tempUrlString.split( "\"" );
 
-                for ( int i = 0 ; i < urlTokens.length ; i++ ) {
+                for ( int i = 0 ; i < urlTokens.length && Run.isAlive; i++ ) {
                     if ( urlTokens[i].matches( "\\s*src=\\s*" ) ) {
                         comicURL[p - 1] = Common.getFixedChineseURL( urlTokens[i + 1] );
                         // 每解析一個網址就下載一張圖

@@ -113,7 +113,7 @@ public class ParseXindm extends ParseOnlineComicSite {
         cookieString = cookies[0] + "; " + cookies[1];
         Common.debugPrintln( "取得cookies：" + cookieString );
         
-        for ( int p = 1; p <= totalPage; p++ ) {
+        for ( int p = 1; p <= totalPage && Run.isAlive; p++ ) {
 
             // 原本想用這種方法比較有彈性，但問題是最後一頁都會錯誤（500），只好放棄......
             allPageString = getAllPageString( webSite + "&page=" + p );

@@ -101,7 +101,7 @@ public class ParseBengou extends ParseOnlineComicSite {
         
         String picURL = "";
         int p = 0; // 目前頁數
-        for ( int i = 0 ; i < urlTokens.length ; i++ ) {
+        for ( int i = 0 ; i < urlTokens.length && Run.isAlive; i++ ) {
             picURL = basePicURL + urlTokens[i].replaceAll( "'|\\.html", "" ) + "." + extensionName;;
             if ( !Common.urlIsOK( picURL ) ) // 只猜jpg和png兩種，若有其他種副檔名就會下載失敗......
                 picURL = picURL.replaceAll( "\\.jpg", ".png" );

@@ -82,7 +82,7 @@ public class ParseCK extends ParseOnlineComicSite {
 
         String picURL = "";
         int p = 0; // 目前頁數
-        for ( int i = 0 ; i < totalPage ; i++ ) {
+        for ( int i = 0 ; i < totalPage && Run.isAlive; i++ ) {
             beginIndex = allPageString.indexOf( "<img id" );
             beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
             endIndex = allPageString.indexOf( "\"", beginIndex );

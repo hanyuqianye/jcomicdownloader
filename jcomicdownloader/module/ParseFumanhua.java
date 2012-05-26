@@ -2,10 +2,11 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/12/23
+Last Modified : 2012/5/24
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
- *  2.11: 1. 新增對www.kangdm.com的支援。
+    4.02: 1. 修復fumanhua解析集數錯誤的問題。
+ *  4.01: 1. 新增對fumanhua的支援。
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -16,9 +17,10 @@ import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
 import jcomicdownloader.SetUp;
+import jcomicdownloader.encode.Encoding;
 import jcomicdownloader.encode.Zhcode;
 
-public class ParseKangdm extends ParseOnlineComicSite {
+public class ParseFumanhua extends ParseOnlineComicSite {
 
     private int radixNumber; // use to figure out the name of pic
     private String jsName;
@@ -27,21 +29,21 @@ public class ParseKangdm extends ParseOnlineComicSite {
     protected String baseURL;
 
     /**
-     *
-     * @author user
+    
+    @author user
      */
-    public ParseKangdm() {
-        siteID = Site.KANGDM;
-        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kangdm_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kangdm_encode_parse_", "html" );
+    public ParseFumanhua() {
+        siteID = Site.FUMANHUA;
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_fumanhua_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_fumanhua_encode_parse_", "html" );
 
-        jsName = "index_kangdm.js";
+        jsName = "index_fumanhua.js";
         radixNumber = 1591371; // default value, not always be useful!!
 
-        baseURL = "http://1.kangdm.com/comic_img/";
+        baseURL = "http://www.fumanhua.com";
     }
 
-    public ParseKangdm( String webSite, String titleName ) {
+    public ParseFumanhua( String webSite, String titleName ) {
         this();
         this.webSite = webSite;
         this.title = titleName;
@@ -50,19 +52,19 @@ public class ParseKangdm extends ParseOnlineComicSite {
     @Override
     public void setParameters() {
         Common.debugPrintln( "開始解析各參數 :" );
-
         Common.debugPrintln( "開始解析title和wholeTitle :" );
+
+        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
 
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             // 因為正常解析不需要用到單集頁面，所以給此兩行放進來
-            Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
-            Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
-
             String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
 
-            int beginIndex = allPageString.indexOf( "<title>" ) + 7;
-            int endIndex = allPageString.indexOf( "</title>", beginIndex );
-            String tempTitleString = allPageString.substring( beginIndex, endIndex ).replaceAll( "&nbsp;", "" );
+            int beginIndex = allPageString.indexOf( "href='/comic" );
+            beginIndex = allPageString.indexOf( "〉", beginIndex ) + 1;
+            int endIndex = allPageString.indexOf( "<", beginIndex );
+            String tempTitleString = allPageString.substring( beginIndex, endIndex ).trim();
 
             setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                     Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
@@ -74,42 +76,47 @@ public class ParseKangdm extends ParseOnlineComicSite {
 
     @Override
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
-        // 先取得前面的下載伺服器網址
 
-        if ( !webSite.matches( "(?s).*/" ) ) {
-            webSite += "/";
-        }
+        // 先取得所有的下載伺服器網址
+        int beginIndex = 0, endIndex = 0;
+        String tempString = "";
 
-        String allPageString = getAllPageString( webSite + "index.js" );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
 
-        String[] tokens = allPageString.split( "=|;" );
-
-        String picMidURL = ""; // 圖片網址中間的部份
-        int zeroAmount = 0; // 正規化檔名中補零的數量
-
-        for ( int i = 0 ; i < tokens.length ; i++ ) {
-            if ( tokens[i].matches( "(?s).*var\\s*total\\s*" ) ) {
-                totalPage = Integer.parseInt( tokens[i + 1].trim() );
-            } else if ( tokens[i].matches( "(?s).*var\\s*volpic\\s*" ) ) {
-                picMidURL = tokens[i + 1].trim().replaceAll( "'", "" );
-            } else if ( tokens[i].matches( "(?s).*var\\s*tpf\\s*" ) ) {
-                zeroAmount = Integer.parseInt( tokens[i + 1].trim() );
-            }
-        }
-
+        totalPage = allPageString.split( "</option>" ).length - 1;
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
+        
+        // 設定伺服器位址
+        String serverURL1 = "http://img.kkcomic.com";
+        String serverURL2 = "http://img1.kkcomic.com";
+        String serverURL3 = "http://img2.kkcomic.com";
 
-        NumberFormat formatter = new DecimalFormat( Common.getZero( zeroAmount + 1 ) );
-        String fileName = "";
+        // 開始第一張圖片位址
+        beginIndex = allPageString.indexOf( "var imgurl" );
+        beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( "'", beginIndex );
+        String firstPicURL = serverURL1 + allPageString.substring( beginIndex, endIndex );
+        Common.debugPrintln( "第一張圖片位址：" + firstPicURL );
+        
+        // 取得圖片副檔名
+        beginIndex = firstPicURL.lastIndexOf( "." ) + 1;
+        String extension = firstPicURL.substring( beginIndex, firstPicURL.length() );
+        Common.debugPrintln( "圖片副檔名：" + extension );
+        
+        NumberFormat formatter = new DecimalFormat( "000" ); // 此站預設三個零，之後若有變數再說
 
         int p = 0; // 目前頁數
+        String picURL = firstPicURL; // 每張圖片位址
         for ( int i = 1 ; i <= totalPage && Run.isAlive; i++ ) {
-            comicURL[p++] = baseURL + Common.getFixedChineseURL( picMidURL )
-                    + formatter.format( i ) + "." + "jpg"; // 存入每一頁的網頁網址
+            String nowFileName = formatter.format( i ) + "." + extension;
+            String nextFileName = formatter.format( i + 1 ) + "." + extension;
+
+            comicURL[p++] = picURL; // 存入每一頁的網頁網址
             //Common.debugPrintln( p + " " + comicURL[p - 1] ); // debug
 
+            picURL = picURL.replaceAll( nowFileName, nextFileName ); // 換下一張圖片
         }
         //System.exit( 0 ); // debug
     }
@@ -123,31 +130,38 @@ public class ParseKangdm extends ParseOnlineComicSite {
 
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kangdm_", "html" );
-        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kangdm_encode_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_fumanhua_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_fumanhua_encode_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }
 
     @Override
     public boolean isSingleVolumePage( String urlString ) {
-        // ex. http://www.kangdm.com/comic/10256/siwangbijitongren/
-        if ( Common.getAmountOfString( urlString, "/" ) > 5 ) {
+        // ex. http://www.fumanhua.com/comic-view-248380.html
+        if ( urlString.matches( "(?s).*\\.html(?s).*" ) ) {
             return true;
-        } else {
+        }
+        else // ex. http://www.fumanhua.com/comic-1631.html
+        {
             return false;
         }
     }
 
     public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
-        // ex. http://www.kangdm.com/comic/10256/siwangbijitongren/轉為
-        //    http://www.kangdm.com/comic/10256/
+        // ex. http://www.fumanhua.com/comic-view-248380.html轉為
+        //    http://www.fumanhua.com/comic-1631.html
 
-        int endIndex = volumeURL.substring( 0, volumeURL.length() - 1 ).lastIndexOf( "/" ) + 1;
-        String mainPageURL = volumeURL.substring( 0, endIndex );
+        String allPageString = getAllPageString( volumeURL );
+
+        int beginIndex = allPageString.indexOf( "href='/comic" );
+        beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "'", beginIndex );
+
+        String mainPageURL = baseURL + allPageString.substring( beginIndex, endIndex );
 
         Common.debugPrintln( "MAIN_URL: " + mainPageURL );
 
@@ -163,12 +177,10 @@ public class ParseKangdm extends ParseOnlineComicSite {
 
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
-        int beginIndex = allPageString.indexOf( "id=\"mhtitle\"" );
+        int beginIndex = allPageString.indexOf( "<h1>" );
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        int endIndex = Common.getSmallerIndexOfTwoKeyword( allPageString, beginIndex, "<", "-" );
-        String title = allPageString.substring( beginIndex, endIndex );
-
-        System.out.println( "XXXX:" + title );
+        int endIndex = allPageString.indexOf( "</h1>", beginIndex );
+        String title = allPageString.substring( beginIndex, endIndex ).trim();
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
     }
@@ -181,33 +193,28 @@ public class ParseKangdm extends ParseOnlineComicSite {
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
-        int beginIndex = allPageString.indexOf( "id=\"djydmhzj\"" );
-        int endIndex = allPageString.indexOf( "<!--", beginIndex );
-
+        int beginIndex = allPageString.indexOf( "class=\"plist pnormal\"" );
+        int endIndex = allPageString.indexOf( "class=\"blank_8\"", beginIndex );
         String tempString = allPageString.substring( beginIndex, endIndex );
 
-        int volumeCount = tempString.split( "href=\"" ).length - 1;
-
-        if ( !urlString.matches( "(?s).*/" ) ) {
-            urlString += "/";
-        }
+        int volumeCount = tempString.split( " href=" ).length - 1;
 
         String volumeTitle = "";
         beginIndex = endIndex = 0;
         for ( int i = 0 ; i < volumeCount ; i++ ) {
+
             // 取得單集位址
-            beginIndex = tempString.indexOf( "href=\"", beginIndex ) + 6;
+            beginIndex = tempString.indexOf( " href=", beginIndex );
+            beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
             endIndex = tempString.indexOf( "\"", beginIndex );
-            urlList.add( urlString + tempString.substring( beginIndex, endIndex ) );
+            urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
 
             // 取得單集名稱
             beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
             endIndex = tempString.indexOf( "<", beginIndex );
             volumeTitle = tempString.substring( beginIndex, endIndex );
-
             volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                     Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
-
         }
 
         totalVolume = volumeCount;
@@ -234,7 +241,7 @@ public class ParseKangdm extends ParseOnlineComicSite {
     public void printLogo() {
         System.out.println( " ______________________________" );
         System.out.println( "|                            " );
-        System.out.println( "| Run the Kangdm module:     " );
+        System.out.println( "| Run the Fumanhua module:     " );
         System.out.println( "|_______________________________\n" );
     }
 }
