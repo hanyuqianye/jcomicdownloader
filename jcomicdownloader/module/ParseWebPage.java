@@ -87,8 +87,8 @@ public class ParseWebPage {
             siteID = Site.MANGAFOX;
         else if ( webSite.matches( "(?s).*\\.manmankan.com/(?s).*" ) )
             siteID = Site.MANMANKAN;
-        //else if ( webSite.matches( "(?s).*xindm.cn/(?s).*" ) )
-       //     siteID = Site.XINDM;
+       // else if ( webSite.matches( "(?s).*xindm.cn/(?s).*" ) )
+      //      siteID = Site.XINDM;
         else if ( webSite.matches( "(?s).*google.com(?s).*" ) ) 
             siteID = Site.GOOGLE_PIC;
         else if ( webSite.matches( "(?s).*nanadm.com(?s).*" ) ) 

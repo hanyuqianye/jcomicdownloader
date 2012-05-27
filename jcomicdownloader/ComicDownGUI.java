@@ -9,8 +9,9 @@
  ChangeLog:
  4.03: 1. 新增對xxbh的支援。 
  *       2. 新增對blogspot.com的支援（只支援基本範本）。
- *       3. 更新對於html的tag和NCR（Numeric character reference）的替換機制，使輸出文字檔更趨自然。
- *       4. 修改Wenku模組，使其可輸出單回文字檔與合併文字檔。
+ *       3. 修復imanhua部份下載錯誤的問題。
+ *       4. 更新對於html的tag和NCR（Numeric character reference）的替換機制，使輸出文字檔更趨自然。
+ *       5. 修改Wenku模組，使其可輸出單回文字檔與合併文字檔。
  4.02: 1. 新增對comic.131.com的支援。
        2. 修復部份網站按停止無法立刻停止的bug。
        3. 修復dm5新集數無法下載的問題。
@@ -237,6 +238,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -2797,25 +2800,29 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 //Common.simpleDownloadFile( testURL, "", "test1.html" );
                 //Common.urlConnection( testURL );
  
-                pageURL = "http://comic.xxbh.net/201205/224133.html?page=1";
-                testURL = "http://222.218.156.59/h28/201205/20120526102506tyuudll05s3.jpg";
-                testURL2 = "http://222.218.156.16/coojs/201205/32ca0894.js";
+                pageURL = "http://mh2.xindm.cn/display.asp?id=67542&page=2";
+                testURL = "http://mh2.xindm.cn/book2/r/rgwlndh/00/xindm_cn_001002.jpg";
+                //testURL2 = "http://222.218.156.16/coojs/201205/32ca0894.js";
                 //cookie = Common.getCookieString( pageURL );
+                cookie = "virtualwall=vsid=0face1d749c832fe940a86c5e6df79e5; ASPSESSIONIDCQCBBRSR=FEHBEMJABBFMKIJNBHGHHMPD";
                 referURL = pageURL;
                 //System.out.println( cookie );
-                Common.simpleDownloadFile( testURL2, "", "test.txt", referURL );
-                Common.simpleDownloadFile( testURL, "", "test.jpg", pageURL );
+                //Common.simpleDownloadFile( testURL2, "", "test.txt", referURL );
+      
+                //Common.simpleDownloadFile( testURL, "", "test.jpg", cookie, pageURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
-                //Common.downloadFile( testURL, "", "test_0.txt", true, cookie, referURL );
+                //Common.downloadFile( testURL, "", "test_0.jpg", true, cookie, referURL );
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
 
                 //Common.testConnection( testURL );
                 
                 System.out.println( "OVER" );
                 
-                char a = 65072;
-                System.out.println( a );
-
+                int a = "a".hashCode();
+                int b = "A".hashCode();
+                int c = "9".hashCode();
+                
+                System.out.println( a + " " + b + " " + c + " " + ( b - a ) );
             }
         } );
         //downThread.start();

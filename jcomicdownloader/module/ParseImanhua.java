@@ -1,12 +1,13 @@
 /*
- ----------------------------------------------------------------------------------------------------
- Program Name : JComicDownloader
- Authors  : surveyorK
- Last Modified : 2012/5/13
- ----------------------------------------------------------------------------------------------------
- ChangeLog:
+----------------------------------------------------------------------------------------------------
+Program Name : JComicDownloader
+Authors  : surveyorK
+Last Modified : 2012/5/13
+----------------------------------------------------------------------------------------------------
+ChangeLog:
+ *  4.03: 1. 修復imanhua部份下載錯誤的問題。
  *  4.0: 1. 新增對imanhua的支援。
- ----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
 
@@ -27,8 +28,8 @@ public class ParseImanhua extends ParseOnlineComicSite {
     protected String baseURL;
 
     /**
-
-     @author user
+    
+    @author user
      */
     public ParseImanhua() {
         siteID = Site.IMANHUA;
@@ -65,7 +66,7 @@ public class ParseImanhua extends ParseOnlineComicSite {
             String tempTitleString = allPageString.substring( beginIndex, endIndex ).replaceAll( "&nbsp;", "" );
 
             setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
+                    Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
         }
 
         Common.debugPrintln( "作品名稱(title) : " + getTitle() );
@@ -78,7 +79,8 @@ public class ParseImanhua extends ParseOnlineComicSite {
 
         int beginIndex = 0;
         int endIndex = 0;
-        
+        String tempString = "";
+
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
@@ -86,68 +88,54 @@ public class ParseImanhua extends ParseOnlineComicSite {
 
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        beginIndex = allPageString.indexOf( "[\"", beginIndex ) + 2;
+
 
         String[] picNames; // 存放此集所有圖片檔名
-        if ( allPageString.indexOf( "|", beginIndex ) > 0 ) {
+
+        if ( allPageString.indexOf( "|" ) > 0 ) {
             // 第一種格式，副檔名與檔名分開
             // ex. http://www.imanhua.com/comic/1034/list_33255.html
 
-            // 先取得副檔名
-            endIndex = allPageString.indexOf( "|", beginIndex );
-            beginIndex = allPageString.lastIndexOf( "'", endIndex ) + 1;
-            String extention = allPageString.substring( beginIndex, endIndex );
-            
-            // ex. http://www.imanhua.com/comic/69/list_5701.html
-            if ( !extention.matches( "[a-zA-Z]+" ) ) {
-                if ( allPageString.indexOf( "jpg" ) > 0 ) {
-                    extention = "jpg";
-                }
-                else {
-                    extention = "png";
-                }
+            // 先找每張圖片的位置
+            beginIndex = allPageString.indexOf( "[\"", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "\"]", beginIndex ) + 1;
+            tempString = allPageString.substring( beginIndex, endIndex );
+            String[] strings = tempString.split( "," );
+
+            int[] indexList = getPicIndexList( strings ); // 取得圖片位置陣列
+            int[] extensionList = getExtensionList( strings ); // 取得副檔名類別陣列
+
+            // 再擷取檔名表
+            beginIndex = allPageString.indexOf( "|", beginIndex );
+            beginIndex = allPageString.lastIndexOf( "'", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "'.split", beginIndex );
+            tempString = allPageString.substring( beginIndex, endIndex );
+            String[] picList = tempString.split( "\\|" ); // 取得圖片檔名表列
+
+            picNames = new String[indexList.length];
+            for ( int i = 0 ; i < indexList.length ; i++ ) {
+                picNames[i] = picList[indexList[i]] + "." + picList[extensionList[i]];
+                //Common.debugPrintln( picNames[i] ); // for debug
             }
-            
-            Common.debugPrintln( "副檔名：" + extention );
-
-            // 再取得集數中所有圖片檔名
-            beginIndex = allPageString.indexOf( "|", beginIndex ) + 1;
-            endIndex = allPageString.indexOf( "'", beginIndex );
-            String tempString = allPageString.substring( beginIndex, endIndex );
-            String[] tempPicNames = tempString.split( "\\|" );
-
-            tempString = "";
-            for ( int i = 0; i < tempPicNames.length && Run.isAlive; i++ ) {
-                if ( tempPicNames[i].matches( "\\w+_.*" )
-                    || tempPicNames[i].matches( "\\d+" )
-                    || tempPicNames[i].matches( "\\d+\\w+" ) ) {
-                    tempString += tempPicNames[i] + "." + extention + "|";
-                }
-            }
-
-            picNames = tempString.split( "\\|" );
-            Arrays.sort( picNames ); // 作排序
         }
         else {
-            // 第二種格式，副檔名與檔名合在一起
-            // ex. http://www.imanhua.com/comic/432/list_59406.html
-            endIndex = allPageString.indexOf( "\"]", beginIndex );
-            String tempString = allPageString.substring( beginIndex, endIndex );
-            String[] tempPicNames = tempString.split( "\",\"" );
+            // 第一種格式，副檔名與檔名放在一起
 
-            tempString = "";
-            for ( int i = 0; i < tempPicNames.length; i++ ) {
-                if ( tempPicNames[i].matches( "imanhua_.*" )
-                    || tempPicNames[i].matches( "\\d+\\.\\w+" )
-                    || tempPicNames[i].matches( "\\d+\\w+\\.\\w+" ) 
-                    || tempPicNames[i].matches( ".*/.*.\\w+" ) ) {
-                    tempString += tempPicNames[i] + "|";
-                }
+            beginIndex = allPageString.indexOf( "[\"", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "\"]", beginIndex ) + 1;
+            tempString = allPageString.substring( beginIndex, endIndex );
+            String[] strings = tempString.split( "," );
+            
+            picNames = new String[strings.length];
+            for ( int i = 0; i < strings.length; i ++ ) {
+                picNames[i] = strings[i].replace( "\"", "" );
             }
-
-            picNames = tempString.split( "\\|" );
-            Arrays.sort( picNames ); // 作排序
+            
         }
+
+        totalPage = picNames.length;
+        Common.debugPrintln( "共 " + totalPage + " 頁" );
+        comicURL = new String[totalPage];
 
         Common.debugPrintln( "開始解析中間部份的位址" );
 
@@ -159,7 +147,7 @@ public class ParseImanhua extends ParseOnlineComicSite {
         else {
             midURL = "Files/Images/";
         }
-        
+
         // 先解析第一個數字 
         beginIndex = webSite.indexOf( "comic/" );
         beginIndex = webSite.indexOf( "/", beginIndex ) + 1;
@@ -177,28 +165,109 @@ public class ParseImanhua extends ParseOnlineComicSite {
         String baseURL2 = "http://t5.imanhua.com/";
         String baseURL3 = "http://t6.imanhua.com/";
 
-        totalPage = picNames.length;
-        Common.debugPrintln( "共 " + totalPage + " 頁" );
-        comicURL = new String[totalPage];
 
         int p = 0; // 目前頁數
-        for ( int i = 0; i < totalPage && Run.isAlive; i++ ) {
+        for ( int i = 0 ; i < totalPage && Run.isAlive ; i++ ) {
             if ( picNames[i].matches( ".*/.*" ) ) { // 檔名已包含後方位址
                 // ex. http://www.imanhua.com/comic/69/list_5707.html
                 comicURL[i] = baseURL1 + picNames[i];
             }
             else {
                 comicURL[i] = baseURL1 + midURL
-                    + firstNumber + "/" + secondNumber + "/" + picNames[i];
+                        + firstNumber + "/" + secondNumber + "/" + picNames[i];
             }
 
             // 使用最簡下載協定，加入refer始可下載
             singlePageDownloadUsingSimple( getTitle(), getWholeTitle(),
-                comicURL[i], totalPage, i + 1, comicURL[i] );
+                    comicURL[i], totalPage, i + 1, comicURL[i] );
 
-            //Common.debugPrintln( ( ++ p ) + " " + comicURL[p - 1] ); // debug
+            //Common.debugPrintln( (++p) + " " + comicURL[p - 1] ); // debug
         }
         //System.exit( 0 ); // debug
+    }
+
+    // 取得副檔名類別陣列
+    public int[] getExtensionList( String[] strings ) {
+        int[] list = new int[strings.length];
+
+        String tempString = "";
+        int tempIndex = 0;
+        int beginIndex = 0;
+        int endIndex = 0;
+        for ( int i = 0 ; i < strings.length ; i++ ) {
+            beginIndex = strings[i].indexOf( "." ) + 1;
+            endIndex = strings[i].indexOf( "\"", beginIndex );
+            tempString = strings[i].substring( beginIndex, endIndex ); // 取出extension index字串
+            list[i] = Integer.parseInt( tempString );
+        }
+
+        return list;
+    }
+
+    // 取得位置陣列
+    public int[] getPicIndexList( String[] strings ) {
+        int[] list = new int[strings.length];
+        int aIndex = "a".hashCode();
+        int AIndex = "A".hashCode();
+        int oneIndex = "1".hashCode();
+
+        String tempString = "";
+        int tempIndex = 0;
+        int beginIndex = 0;
+        int endIndex = 0;
+        
+        boolean decimalMode = true; // 十進位表示
+        
+        for ( int i = 0 ; i < strings.length ; i++ ) {
+            if ( strings[i].matches( "\"[a-z]\\.\\d\"") ) {
+                decimalMode = false; // 會有英文字母來表示
+            }
+        }
+        
+        
+        for ( int i = 0 ; i < strings.length ; i++ ) {
+            beginIndex = strings[i].indexOf( "\"" ) + 1;
+            endIndex = strings[i].indexOf( ".", beginIndex );
+            tempString = strings[i].substring( beginIndex, endIndex ); // 取出index字串
+            
+            if ( tempString.matches( "[\\d]+" ) ) { // 全數字
+                int diff = 0; // 需要額外加的數，預設為零
+                if ( !decimalMode && tempString.length() > 1 ) {
+                    int ten = Integer.parseInt( tempString.substring( 0, 1 ) );
+                    diff = ten * 62; 
+                    tempString = tempString.substring( 1, 2 );
+                }
+                
+                list[i] = diff + Integer.parseInt( tempString );
+            }
+            else { // 需轉換為數字
+                int diff = 0; // 需要額外加的數，預設為零
+                if ( tempString.length() > 1 ) {
+                    int ten = Integer.parseInt( tempString.substring( 0, 1 ) );
+                    
+                    diff = ten * 62; 
+                    
+                    tempString = tempString.substring( 1, 2 );
+                }
+                
+                tempIndex = tempString.hashCode();
+
+                if ( tempIndex >= aIndex ) {
+                    list[i] = diff + 10 + tempIndex - aIndex;
+                }
+                else if ( tempIndex >= AIndex ) {
+                    list[i] = diff + 36 + tempIndex - AIndex;
+                    
+                }
+                else if ( tempIndex >= oneIndex ) {
+                    list[i] = tempIndex - oneIndex;
+                }
+                
+               // System.out.println( tempString + " : " + list[i] + "=" + tempIndex + " - " + "" );
+            }
+        }
+
+        return list;
     }
 
     public void showParameters() { // for debug
@@ -278,7 +347,7 @@ public class ParseImanhua extends ParseOnlineComicSite {
 
         String volumeTitle = "";
         beginIndex = endIndex = 0;
-        for ( int i = 0; i < volumeCount; i++ ) {
+        for ( int i = 0 ; i < volumeCount ; i++ ) {
             // 取得單集位址
             beginIndex = tempString.indexOf( " href=", beginIndex );
             beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
@@ -290,7 +359,7 @@ public class ParseImanhua extends ParseOnlineComicSite {
             volumeTitle = tempString.substring( beginIndex, endIndex );
             volumeTitle = volumeTitle.replaceAll( "<.*>", "" );
             volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
+                    Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
         }
 
         combinationList.add( volumeList );
@@ -307,7 +376,7 @@ public class ParseImanhua extends ParseOnlineComicSite {
 
     @Override
     public String[] getTempFileNames() {
-        return new String[]{indexName, indexEncodeName, jsName};
+        return new String[] { indexName, indexEncodeName, jsName };
     }
 
     @Override
