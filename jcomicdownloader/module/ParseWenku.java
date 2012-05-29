@@ -1,13 +1,13 @@
 /*
- ----------------------------------------------------------------------------------------------------
- Program Name : JComicDownloader
- Authors  : surveyorK
- Last Modified : 2012/5/17
- ----------------------------------------------------------------------------------------------------
- ChangeLog:
+----------------------------------------------------------------------------------------------------
+Program Name : JComicDownloader
+Authors  : surveyorK
+Last Modified : 2012/5/17
+----------------------------------------------------------------------------------------------------
+ChangeLog:
  * 4.03: 1. 修改Wenku模組，使其可輸出單回文字檔與合併文字檔。
  *  4.01: 1. 新增對Wenku的支援。
- ----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
 
@@ -31,8 +31,8 @@ public class ParseWenku extends ParseOnlineComicSite {
     protected int floorCountInOnePage; // 一頁有幾層樓
 
     /**
-
-     @author user
+    
+    @author user
      */
     public ParseWenku() {
         siteID = Site.WENKU;
@@ -88,7 +88,7 @@ public class ParseWenku extends ParseOnlineComicSite {
         // 取得漫畫位址
         beginIndex = endIndex = 0;
         String pageURL = webSite;
-        for ( int i = 0; i < totalPage && Run.isAlive; i++ ) {
+        for ( int i = 0 ; i < totalPage && Run.isAlive ; i++ ) {
             beginIndex = tempString.indexOf( " href=", beginIndex );
             beginIndex = tempString.indexOf( "/", beginIndex ) + 1;
             endIndex = tempString.indexOf( ">", beginIndex );
@@ -97,8 +97,8 @@ public class ParseWenku extends ParseOnlineComicSite {
             beginIndex = endIndex + 1;
             endIndex = tempString.indexOf( "</a>", beginIndex );
             titles[i] = Common.getStringRemovedIllegalChar(
-                Common.getTraditionalChinese(
-                tempString.substring( beginIndex, endIndex ).trim() ) ) + ".txt";
+                    Common.getTraditionalChinese(
+                    tempString.substring( beginIndex, endIndex ).trim() ) ) + "." + Common.getDefaultTextExtension();
             // 每解析一個網址就下載一張圖
             if ( !new File( getDownloadDirectory() + titles[i] ).exists() ) {
                 singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage, i + 1, 0 );
@@ -111,24 +111,29 @@ public class ParseWenku extends ParseOnlineComicSite {
 
         }
 
-        handleWholeNovel( titles );
+        handleWholeNovel( titles, webSite );
 
         //System.exit( 0 ); // debug
     }
-    
+
     // 處理全部小說的主函式
-    public void handleWholeNovel( String[] titles ) {
-        String allNovelText = ""; // 全部頁面加起來小說文字
+    public void handleWholeNovel( String[] titles, String url ) {
+        String allNovelText = getInformation( title, url ); // 全部頁面加起來小說文字
+
         Common.debugPrintln( "開始執行合併程序：" );
-        Common.debugPrintln( "共有" + ( titles.length ) + "篇" );
-        for ( int i = 0; i < titles.length; i++ ) {
-            Common.debugPrintln( "合併第" + ( i + 1 ) + "篇: " + titles[i] );
+        Common.debugPrintln( "共有" + (titles.length) + "篇" );
+        for ( int i = 0 ; i < titles.length ; i++ ) {
+            Common.debugPrintln( "合併第" + (i + 1) + "篇: " + titles[i] );
             allNovelText += Common.getFileString( getDownloadDirectory(), titles[i] );
-            
-            allNovelText += "\n\n---------------------------" + ( i + 1 ) + "\n\n";
-        
-            ComicDownGUI.stateBar.setText( getTitle() + 
-                "合併中: " + ( i + 1 ) + " / " + titles.length );
+
+            if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML ) {
+                allNovelText += "<br>" + (i + 1) + "<br><hr><br>"; // 每一樓的文字加總起來
+            }
+            else {
+                allNovelText += "\n\n---------------------------" + (i + 1) + "\n\n";
+            }
+            ComicDownGUI.stateBar.setText( getTitle()
+                    + "合併中: " + (i + 1) + " / " + titles.length );
         }
 
         String tempString = getDownloadDirectory();
@@ -137,10 +142,10 @@ public class ParseWenku extends ParseOnlineComicSite {
 
         String textOutputDirectory = tempString.substring( 0, endIndex ); // 放在外面
 
-        Common.outputFile( allNovelText, textOutputDirectory, getWholeTitle() + ".txt" );
+        Common.outputFile( allNovelText, textOutputDirectory, getWholeTitle() + "." + Common.getDefaultTextExtension() );
 
-        textFilePath = textOutputDirectory + getWholeTitle() + ".txt";
-    } 
+        textFilePath = textOutputDirectory + getWholeTitle() + "." + Common.getDefaultTextExtension();
+    }
 
     // 處理單一本小說主函式
     public void hadleSingleNovel( String fileName, String title ) {
@@ -148,7 +153,7 @@ public class ParseWenku extends ParseOnlineComicSite {
         String allNovelText = ""; // 全部頁面加起來小說文字
 
         Common.newEncodeFile( getDownloadDirectory(),
-            fileName, "utf8_" + fileName, Encoding.GB2312 );
+                fileName, "utf8_" + fileName, Encoding.GB2312 );
 
         allPageString = Common.getFileString( getDownloadDirectory(), "utf8_" + fileName );
         Common.deleteFile( getDownloadDirectory(), fileName ); // 刪掉utf8編碼的暫存檔
@@ -157,13 +162,6 @@ public class ParseWenku extends ParseOnlineComicSite {
         allNovelText = getRegularNovel( allPageString ); // 每一頁處理過都加總起來 
         Common.outputFile( allNovelText, getDownloadDirectory(), title );
 
-
-        //Common.debugPrintln( "OLD: " + getDownloadDirectory() );
-        //Common.debugPrintln( "NEW: " + textOutputDirectory );
-
-        //if ( SetUp.getDeleteOriginalPic() ) { // 若有勾選原檔就刪除原始未合併文件
-        //    Common.deleteFolder( getDownloadDirectory() ); // 刪除存放原始網頁檔的資料夾
-        //}
     }
 
     // 處理小說網頁，將標籤去除
@@ -178,10 +176,13 @@ public class ParseWenku extends ParseOnlineComicSite {
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
         endIndex = allPageString.indexOf( "<div align='center'>", beginIndex );
         oneFloorText = allPageString.substring( beginIndex, endIndex );
-        
 
-        oneFloorText = replaceProcess( oneFloorText );
-        
+        if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML ) {
+            oneFloorText = replaceProcessToHtml( oneFloorText );
+        }
+        else {
+            oneFloorText = replaceProcessToText( oneFloorText );
+        }
         oneFloorText = Common.getTraditionalChinese( oneFloorText ); // 簡轉繁
 
 
@@ -253,7 +254,7 @@ public class ParseWenku extends ParseOnlineComicSite {
         }
 
         return Common.getStringRemovedIllegalChar(
-            Common.getTraditionalChinese( title ) );
+                Common.getTraditionalChinese( title ) );
     }
 
     @Override
@@ -275,7 +276,7 @@ public class ParseWenku extends ParseOnlineComicSite {
             int volumeCount = tempString.split( "href='articleinfo" ).length - 1;
 
             beginIndex = endIndex = 0;
-            for ( int i = 0; i < volumeCount; i++ ) {
+            for ( int i = 0 ; i < volumeCount ; i++ ) {
                 // 取得單集位址
                 beginIndex = tempString.indexOf( "href='articleinfo", beginIndex );
                 beginIndex = tempString.indexOf( "'", beginIndex ) + 1;
@@ -288,7 +289,7 @@ public class ParseWenku extends ParseOnlineComicSite {
                 endIndex = tempString.indexOf( "<", beginIndex );
                 volumeTitle = tempString.substring( beginIndex, endIndex ).trim();
                 volumeList.add( Common.getStringRemovedIllegalChar(
-                    Common.getTraditionalChinese( volumeTitle.trim() ) ) );
+                        Common.getTraditionalChinese( volumeTitle.trim() ) ) );
             }
 
             totalVolume = volumeCount;
@@ -297,7 +298,7 @@ public class ParseWenku extends ParseOnlineComicSite {
             // 取得單集名稱
             volumeTitle = getTitle();
             volumeList.add( Common.getStringRemovedIllegalChar(
-                Common.getTraditionalChinese( volumeTitle.trim() ) ) );
+                    Common.getTraditionalChinese( volumeTitle.trim() ) ) );
 
             // 取得單集位址
             urlList.add( urlString );
@@ -320,7 +321,7 @@ public class ParseWenku extends ParseOnlineComicSite {
 
     @Override
     public String[] getTempFileNames() {
-        return new String[]{indexName, indexEncodeName, jsName};
+        return new String[] { indexName, indexEncodeName, jsName };
     }
 
     @Override

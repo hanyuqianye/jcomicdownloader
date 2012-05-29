@@ -73,4 +73,5 @@ public class Site {
     public final static int XXBH = 55;
     public final static int COMIC_131 = 56; 
     public final static int BLOGSPOT = 57; // 
+    public final static int PIXNET = 58;
 }

@@ -18,6 +18,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import jcomicdownloader.ComicDownGUI;
 import jcomicdownloader.SetUp;
+import jcomicdownloader.enums.FileFormatEnum;
 import jcomicdownloader.enums.Site;
 import jcomicdownloader.tools.Common;
 import jcomicdownloader.tools.CommonGUI;
@@ -178,7 +179,9 @@ abstract public class ParseOnlineComicSite {
             extensionName = url.split( "\\." )[url.split( "\\." ).length - 1]; // 取得圖片附檔名
         } else {
             if ( this.siteID == Site.CK_NOVEL || 
-                 this.siteID == Site.MYBEST || this.siteID == Site.BLOGSPOT ) {
+                 this.siteID == Site.MYBEST || 
+                    this.siteID == Site.BLOGSPOT  || 
+                    this.siteID == Site.PIXNET ) {
                 extensionName = "html"; // 因為是小說，所以副檔名給txt
             }
             else {
@@ -312,6 +315,9 @@ abstract public class ParseOnlineComicSite {
         text = text.replaceAll( "&nbsp;", " " );
         text = text.replaceAll( "&quot;", "\"" );
         text = text.replaceAll( "&amp;", "&" );
+        text = text.replaceAll( "&hellip;", "..." );
+        text = text.replaceAll( "&gt;", ">" );
+        text = text.replaceAll( "&lt;", "<" );
 
         String ncrString = ""; // 存放numeric character references字串 ex. &#65289;
         String numberString = ""; // 存放numeric character references的數字部份 ex. 65289
@@ -321,7 +327,7 @@ abstract public class ParseOnlineComicSite {
             beginIndex = text.indexOf( "&#", beginIndex );
             endIndex = text.indexOf( ";", beginIndex ) + 1;
 
-            if ( beginIndex >= 0 && endIndex >= 0 ) {
+            if ( beginIndex >= 0 && endIndex >= 0 && beginIndex < endIndex ) {
                 ncrString = text.substring( beginIndex, endIndex );
                 numberString = ncrString.substring( 2, ncrString.length() - 1 );
                 //Common.debugPrint( "轉換前：" + ncrString );
@@ -356,14 +362,102 @@ abstract public class ParseOnlineComicSite {
         
         return text;
     }
+    
+    // 將<img.*>標籤拿掉，只保留其中的圖片網址
+    public String replaceImg( String text ) {
+        int start = 0;
+        int beginIndex = 0;
+        int endIndex = 0;
+        String picURL = ""; // 圖片網址
+        String picName = ""; // 圖片名稱
+        while( true ) {
+            start = beginIndex= text.indexOf( "<img ", beginIndex );
+            if ( beginIndex >= 0 ) {
+                beginIndex = text.indexOf( "src=", beginIndex );
+                beginIndex = text.indexOf( "http", beginIndex );
+                endIndex = text.indexOf( " ", beginIndex ) - 1;
+
+                if ( beginIndex > 0 && endIndex > 0 ) {
+                    picURL = text.substring( beginIndex, endIndex );
+                    System.out.println( picURL + " -> " + picName );
+                
+                    text = text.substring( 0, start ) + "\n" + picURL + "\n" + text.substring( start, text.length() );
+                    beginIndex = endIndex + picURL.length();
+                }
+                else {
+                    beginIndex = start += 10;
+                }
+            }
+            else {
+                break;
+            }
+            
+        }
+        
+        return text;
+    }
+    
+     // 拿掉<script 到 </script>之間的內容
+    public String replaceJS( String text ) {
+        int beginIndex = 0;
+        int endIndex = 0;
+        while ( true ) {
+            beginIndex = text.indexOf( "<script", beginIndex );
+            endIndex = text.indexOf( "</script>", beginIndex );
+            endIndex = text.indexOf( ">", endIndex ) + 1;
+
+            if ( beginIndex > 0 && endIndex > 0 ) { // 拿掉中間的部份
+                text = text.substring( 0, beginIndex ) + text.substring( endIndex, text.length() );
+            }
+            else {
+                break;
+            }
+        }
+        return text;
+    }
 
     // 將html的tag拿掉，且將numeric character references還原回原本的字元。
-    public String replaceProcess( String text ) {
+    public String replaceProcessToText( String text ) {
         text = replaceNCR( text ); //  將numeric character references全部還原
         text = replaceNewLine( text ); // 將換行tag轉換為換行字元
+        text = replaceImg( text ); // 將圖片標籤拿掉，只保留圖片網址
+        //text = text.replaceAll( "<script[^(scrpit)]+[(/script>)]{1}", "" ); // 拿掉js
+        text = replaceJS( text ); // 拿掉JS
         text = text.replaceAll( "<[^<>]+>", "" ); // 將所有標籤去除
 
         return text;
+    }
+    
+    // 由純文字轉為html格式
+    public String replaceProcessToHtml( String text ) {
+        text = replaceNCR( text ); //  將numeric character references全部還原
+        text = replaceNewLine( text ); // 將換行tag轉換為換行字元
+       text = replaceJS( text ); // 拿掉JS
+        //text = text.replaceAll( "<[^(img)|^(a)|^(/a)|^(b)|(/b)]{1}[^<>]+>", "" ); // 將所有標籤去除，只保留圖片標籤和超連結
+        //text = text.replaceAll( "<[^(img)|^(a)|^(/a)]{1}[^<>]+>", "" ); // 將所有標籤去除，只保留圖片標籤和超連結
+        //text = text.replaceAll( "</span>|</div>|</wbr>", "" ); // 將多餘的標籤去除
+        text = text.replaceAll( "\n", "<br>" ); // 將換行符號還原回換行標籤
+        
+        return text;
+    }
+    
+    // 取得文章前言，提供標題和網址的資訊
+    public String getInformation( String title, String url ) {
+        String aheadText = ""; // 文章前言，提供標題和網址的資訊
+        
+        if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML ) {
+            aheadText = "<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>";
+            aheadText += "原文標題：" + title.replaceAll( "\\.html", "" ) + "\n";
+            aheadText += "原文地址：" + "<a href=\"" + url + "\" target=_blank>" + url + "</a>";
+            aheadText += "<hr>\n";
+            aheadText = aheadText.replaceAll( "\n", "<br>" );
+        }
+        else {
+            aheadText += "原文標題：" + title.replaceAll( "\\.txt", "" ) + "\r\n";
+            aheadText += "原文地址：" + url + "\r\n\r\n";
+        }
+        
+        return aheadText;
     }
 }
 // http://ascrsbdfdb.kukudm.net:81/kuku8comic8/201110/20111029/%E9%BC%A0%E7%B9%AA%E6%BC%A2%E5%8C%96%E7%BE%8E%E9%A3%9F163/Comic.kukudm.com_0103S.jpg

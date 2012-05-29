@@ -2,10 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2012/5/26
+Last Modified : 2012/5/29
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
- *  4.03: 1. 新增對blogspot.com的支援。
+ *  4.04: 1. 新增對pixnet.net的支援。
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -18,7 +18,7 @@ import jcomicdownloader.enums.*;
 import java.util.*;
 import jcomicdownloader.SetUp;
 
-public class ParseBlogspot extends ParseOnlineComicSite {
+public class ParsePixnet extends ParseOnlineComicSite {
 
     private int radixNumber; // use to figure out the name of pic
     private String jsName;
@@ -31,20 +31,20 @@ public class ParseBlogspot extends ParseOnlineComicSite {
      *
      * @author user
      */
-    public ParseBlogspot() {
-        siteID = Site.BLOGSPOT;
-        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_blogspot_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_blogspot_encode_parse_", "html" );
+    public ParsePixnet() {
+        siteID = Site.PIXNET;
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_pixnet_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_pixnet_encode_parse_", "html" );
 
-        jsName = "index_blogspot.js";
-        radixNumber = 151261; // default value, not always be useful!!
+        jsName = "index_pixnet.js";
+        radixNumber = 15131261; // default value, not always be useful!!
 
-        baseURL = "http://blogspot.com";
+        baseURL = "http://pixnet.net"; // 在之後會被換掉
 
         floorCountInOnePage = 10; // 一頁有幾層樓
     }
 
-    public ParseBlogspot( String webSite, String titleName ) {
+    public ParsePixnet( String webSite, String titleName ) {
         this();
         this.webSite = webSite;
         this.title = titleName;
@@ -77,16 +77,16 @@ public class ParseBlogspot extends ParseOnlineComicSite {
         beginIndex = getWholeTitle().indexOf( "(" ) + 1;
         endIndex = getWholeTitle().indexOf( ")", beginIndex );
         
-        if ( beginIndex > 0 && endIndex > 0 ) {
+        if ( beginIndex > 0 && endIndex > 0 && beginIndex != endIndex ) {
             tempString = getWholeTitle().substring( beginIndex, endIndex );
             totalPage = Integer.parseInt( tempString );
             
             realizeAmountOfPage = true; // 知道有幾頁
         }
-        else { // 不知道有幾頁，只能一步步往後掃描
-            Common.debugPrintln( "標籤無顯示數量，不知道總共幾頁，需一步步往後掃描" );
+        else { 
+            Common.debugPrintln( "標籤無顯示數量！！" );
             totalPage =  0;
-            firstPageCount = allPageString.split( "class='post-title entry-title'" ).length - 1;
+            firstPageCount = allPageString.split( "class=\"article\"" ).length - 1;
         }
 
         Common.debugPrintln( "共 " + totalPage + " 頁" );
@@ -102,28 +102,19 @@ public class ParseBlogspot extends ParseOnlineComicSite {
         
         for ( int p = 0 ; p < totalPage + firstPageCount && Run.isAlive ; ) {
             allPageString = getAllPageString( pageURL );
-            int nowPageCount = allPageString.split( "class='post-title entry-title'" ).length - 1;
-            totalPage += nowPageCount;
+            int nowPageCount = allPageString.split( "class=\"article\"" ).length - 1;
+            
+            if ( firstPageCount != 0 ) // 不知道全部頁面數量才用此招
+                totalPage += nowPageCount;
             
             beginIndex = endIndex = 0;
             for ( int j = 0 ; j < nowPageCount && p < totalPage && Run.isAlive ; j++ ) {
                 // 取得單篇文章網址
-                beginIndex = allPageString.indexOf( "class='post-title entry-title'", beginIndex );
+                beginIndex = allPageString.indexOf( "class=\"article\"", beginIndex );
                 beginIndex = allPageString.indexOf( " href=", beginIndex );
-                beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
-                endIndex = allPageString.indexOf( "'", beginIndex );
+                beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+                endIndex = allPageString.indexOf( "\"", beginIndex );
                 articleURL = allPageString.substring( beginIndex, endIndex );
-                if ( !articleURL.matches( "(?s).*\\.html" ) ) { // 代表連結不是連向文章
-                    int newBeginIndex = beginIndex;
-                    endIndex = allPageString.indexOf( "rel='bookmark'", newBeginIndex );
-                    newBeginIndex = allPageString.lastIndexOf( "href='", endIndex );
-                    newBeginIndex = allPageString.indexOf( "'", newBeginIndex ) + 1;
-                    endIndex = allPageString.indexOf( "'", newBeginIndex );
-
-                    if ( beginIndex > 0 && endIndex > 0 ) {
-                        articleURL = allPageString.substring( newBeginIndex, endIndex );
-                    }
-                }
 
                 //comicURL[p] = articleURL;
                 //Common.debugPrint( ( p + 1 ) + " " + comicURL[p] ); // debug
@@ -132,7 +123,7 @@ public class ParseBlogspot extends ParseOnlineComicSite {
                 beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
                 endIndex = allPageString.indexOf( "</a>", beginIndex );
                 articleTitle = allPageString.substring( beginIndex, endIndex );
-                articleTitle = replaceProcessToText( articleTitle ); // 拿掉html編碼的字元
+                //articleTitle = replaceProcessToText( articleTitle ); // 拿掉html編碼的字元
                 articleTitle = Common.getStringRemovedIllegalChar( 
                         Common.getTraditionalChinese( articleTitle ) ); // 轉為繁體字
 
@@ -154,10 +145,9 @@ public class ParseBlogspot extends ParseOnlineComicSite {
             }
 
             // 取得下一頁的網址
-            beginIndex = allPageString.indexOf( "class='blog-pager-older-link'" );
-            beginIndex = allPageString.indexOf( " href=", beginIndex );
-            beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
-            endIndex = allPageString.indexOf( "'", beginIndex );
+            endIndex = allPageString.indexOf( "class=\"next\"" );
+            endIndex = allPageString.lastIndexOf( "\"", endIndex );
+            beginIndex = allPageString.lastIndexOf( "\"", endIndex - 1 ) + 1;
 
             if ( beginIndex < 0 || endIndex < 0 ) {
                 break;
@@ -192,11 +182,14 @@ public class ParseBlogspot extends ParseOnlineComicSite {
         String oneFloorText = ""; // 單一樓層的文字
         String allFloorText = ""; // 所有樓層的文字加總
         beginIndex = endIndex;
-        beginIndex = allPageString.indexOf( "<div class='post-header-line-1'>", beginIndex );
+        beginIndex = allPageString.indexOf( "<div id=\"article-box\">", beginIndex );
         if ( beginIndex < 0 ) {
-            beginIndex = allPageString.indexOf( "<div id='post-inner'>", beginIndex );
+            beginIndex = allPageString.indexOf( "<div class=\"article-body\">", beginIndex );
         }
-        endIndex = allPageString.indexOf( "<div class='post-footer'>", beginIndex );
+        endIndex = allPageString.indexOf( "<div class=\"forward\">", beginIndex );
+        if ( endIndex < 0 ) {
+            endIndex = allPageString.indexOf( "<div class=\"article-footer\">", beginIndex );
+        }
         
         oneFloorText = allPageString.substring( beginIndex, endIndex );
 
@@ -212,16 +205,9 @@ public class ParseBlogspot extends ParseOnlineComicSite {
         return oneFloorText;
     }
 
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
-
     @Override // 因為原檔就是utf8了，所以無須轉碼
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_blogspot_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_pixnet_", "html" );
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexName );
@@ -248,9 +234,10 @@ public class ParseBlogspot extends ParseOnlineComicSite {
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         int beginIndex, endIndex;
-        beginIndex = allPageString.indexOf( "title=\"" );
+        beginIndex = allPageString.indexOf( "rel=\"search\"" );
+        beginIndex = allPageString.indexOf( "title=", beginIndex );
         beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
-        endIndex = allPageString.indexOf( "- Atom" );
+        endIndex = allPageString.indexOf( "\"", beginIndex );
 
         String title = allPageString.substring( beginIndex, endIndex ).trim();
         title = title.replaceAll( "</a>", "" );
@@ -271,12 +258,15 @@ public class ParseBlogspot extends ParseOnlineComicSite {
         int endIndex = 0;
         String tempString = "";
         String volumeTitle = "";
+        
+        endIndex = Common.getIndexOfOrderKeyword( urlString, "/", 3 );
+        baseURL = urlString.substring( 0, endIndex ); // 取得基本頁面位址
 
-        beginIndex = allPageString.indexOf( "id='Label" );
+        beginIndex = allPageString.indexOf( "id=\"category\"" );
         if ( beginIndex > 0 ) { // 代表有標籤分類
             Common.debugPrintln( "有標籤分類" );
-
-            endIndex = allPageString.indexOf( "class='clear'", beginIndex );
+            beginIndex = allPageString.indexOf( "<ul>", beginIndex );
+            endIndex = allPageString.indexOf( "</ul>", beginIndex );
             tempString = allPageString.substring( beginIndex, endIndex );
             int labelCount = tempString.split( " href=" ).length - 1; //計算有幾種標籤
 
@@ -284,30 +274,14 @@ public class ParseBlogspot extends ParseOnlineComicSite {
             for ( int i = 0 ; i < labelCount ; i++ ) {
                 // 取得單集位址
                 beginIndex = tempString.indexOf( " href=", beginIndex );
-                beginIndex = tempString.indexOf( "'", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "'", beginIndex );
-                urlList.add( tempString.substring( beginIndex, endIndex ) );
+                beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
+                endIndex = tempString.indexOf( "\"", beginIndex );
+                urlList.add( baseURL + "/" + tempString.substring( beginIndex, endIndex ) );
 
                 // 取得單集名稱
                 beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
                 endIndex = tempString.indexOf( "</a>", beginIndex );
                 volumeTitle = tempString.substring( beginIndex, endIndex );
-                System.out.println( volumeTitle );
-
-                // 取得此標籤有幾篇文章
-                int tempBeginIndex = tempString.indexOf( "dir='ltr'", beginIndex );
-                tempBeginIndex = tempString.indexOf( ">", tempBeginIndex ) + 1;
-                int tempEndIndex = tempString.indexOf( "</span>", tempBeginIndex );
-                if ( tempBeginIndex > 0 && tempEndIndex > 0 ) {
-                    volumeTitle += tempString.substring( tempBeginIndex, tempEndIndex );
-                    
-                    beginIndex = tempBeginIndex;
-                }
-                System.out.println( volumeTitle );
-
-                volumeTitle = replaceProcessToText( volumeTitle ); // 拿掉html編碼的字元
-                volumeTitle = Common.getTraditionalChinese( volumeTitle );
-
                 volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
 
                 totalVolume++;
@@ -349,13 +323,13 @@ public class ParseBlogspot extends ParseOnlineComicSite {
                     beginIndex2 = tempString2.lastIndexOf( "'", beginIndex2 ) + 1;
                     endIndex2 = tempString2.indexOf( "'", beginIndex2 );
                     urlList.add( tempString2.substring( beginIndex2, endIndex2 ) );
-                    //Common.debugPrint( tempString2.substring( beginIndex2, endIndex2 ) + " : " );
+                    Common.debugPrint( tempString2.substring( beginIndex2, endIndex2 ) + " : " );
                     
                     // 取得單集名稱
                     beginIndex2 = tempString2.indexOf( ">", beginIndex2 ) + 1;
                     endIndex2 = tempString2.indexOf( "</a>", beginIndex2 );
                     volumeTitle = yearString + "_" + tempString2.substring( beginIndex2, endIndex2 );
-                    //Common.debugPrintln( volumeTitle );
+                    Common.debugPrintln( volumeTitle );
 
                     // 取得此標籤有幾篇文章
                     beginIndex2 = tempString2.indexOf( "dir='ltr'", beginIndex2 );
@@ -420,7 +394,8 @@ public class ParseBlogspot extends ParseOnlineComicSite {
     public void printLogo() {
         System.out.println( " ______________________________" );
         System.out.println( "|                            " );
-        System.out.println( "| Run the Blogspot module:     " );
+        System.out.println( "| Run the Pixnet module:     " );
         System.out.println( "|_______________________________\n" );
     }
 }
+

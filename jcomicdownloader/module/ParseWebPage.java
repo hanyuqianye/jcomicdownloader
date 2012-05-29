@@ -150,6 +150,8 @@ public class ParseWebPage {
             siteID = Site.COMIC_131; 
         else if ( webSite.matches( "(?s).*blogspot.com(?s).*" ) ) 
             siteID = Site.BLOGSPOT; 
+        else if ( webSite.matches( "(?s).*pixnet.net(?s).*" ) ) 
+            siteID = Site.PIXNET;
                     
         else
             siteID = Site.UNKNOWN;

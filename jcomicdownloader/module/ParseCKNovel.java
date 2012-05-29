@@ -112,15 +112,15 @@ public class ParseCKNovel extends ParseOnlineComicSite {
 
         }
 
-        hadleWholeNovel();  // 處理小說主函式
+        hadleWholeNovel( webSite );  // 處理小說主函式
         //System.exit( 0 ); // debug
     }
 
     // 處理小說主函式
-    public void hadleWholeNovel() {
+    public void hadleWholeNovel( String url ) {
         String allPageString = "";
-        String allNovelText = ""; // 全部頁面加起來小說文字
-
+        String allNovelText = getInformation( title, url ); // 全部頁面加起來小說文字
+        
         String[] fileList = new File( getDownloadDirectory() ).list(); // 取得下載資料夾內所有網頁名稱清單
         Arrays.sort( fileList ); // 對檔案清單作排序
 
@@ -148,9 +148,9 @@ public class ParseCKNovel extends ParseOnlineComicSite {
         if ( SetUp.getDeleteOriginalPic() ) { // 若有勾選原檔就刪除原始未合併文件
             Common.deleteFolder( getDownloadDirectory() ); // 刪除存放原始網頁檔的資料夾
         }
-        Common.outputFile( allNovelText, textOutputDirectory, getWholeTitle() + ".txt" );
+        Common.outputFile( allNovelText, textOutputDirectory, getWholeTitle() + "." + Common.getDefaultTextExtension() );
 
-        textFilePath = textOutputDirectory + getWholeTitle() + ".txt";
+        textFilePath = textOutputDirectory + getWholeTitle() + "." + Common.getDefaultTextExtension();
     }
 
     // 處理小說網頁，將標籤去除
@@ -160,6 +160,7 @@ public class ParseCKNovel extends ParseOnlineComicSite {
         int amountOfFloor = 10; // 一頁有幾樓
         String oneFloorText = ""; // 單一樓層的文字
         String allFloorText = ""; // 所有樓層的文字加總
+
         for ( int i = 0; i < amountOfFloor; i++ ) {
             beginIndex = endIndex;
             beginIndex = allPageString.indexOf( "class=\"t_fsz\"", beginIndex );
@@ -168,14 +169,21 @@ public class ParseCKNovel extends ParseOnlineComicSite {
                 endIndex = allPageString.indexOf( "</table>", beginIndex );
                 oneFloorText = allPageString.substring( beginIndex, endIndex );
 
-                oneFloorText = replaceProcess( oneFloorText );
-
+                if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML ) {
+                    oneFloorText = replaceProcessToHtml( oneFloorText );
+                    allFloorText += oneFloorText + 
+                    "<br><br>" + ( i + nowPage * floorCountInOnePage ) + "<br><hr><br>"; // 每一樓的文字加總起來
+                }
+                else {
+                    oneFloorText = replaceProcessToText( oneFloorText );
+                    allFloorText += oneFloorText + 
+                    "\n\n--------------------------------------------" + 
+                        ( i + nowPage * floorCountInOnePage ) + "\n"; // 每一樓的文字加總起來
+                }
                 //Common.debugPrintln( "\n\n第" + i +  "樓\n\n" );
                 //Common.debugPrintln( oneFloorText );
 
-                allFloorText += oneFloorText + 
-                    "\n\n--------------------------------------------" + 
-                        ( i + nowPage * floorCountInOnePage ) + "\n"; // 每一樓的文字加總起來
+                
 
                 Common.debugPrint( i + " " );
 

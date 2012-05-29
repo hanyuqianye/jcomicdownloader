@@ -99,15 +99,15 @@ public class ParseMyBest extends ParseCKNovel {
         }
         
         //System.exit( 0 ); // debug
-        hadleWholeNovel();  // 處理小說主函式
+        hadleWholeNovel( webSite );  // 處理小說主函式
         
     }
     
     // 處理小說主函式
     @Override
-    public void hadleWholeNovel() {
+    public void hadleWholeNovel( String url ) {
         String allPageString = "";
-        String allNovelText = ""; // 全部頁面加起來小說文字
+        String allNovelText = getInformation( title, url ); // 全部頁面加起來小說文字
         
         String[] fileList = new File( getDownloadDirectory() ).list(); // 取得下載資料夾內所有網頁名稱清單
        Arrays.sort( fileList ); // 對檔案清單作排序
@@ -134,17 +134,12 @@ public class ParseMyBest extends ParseCKNovel {
 
         String textOutputDirectory = tempString.substring( 0, endIndex ); // 放在外面
         
-        //Common.debugPrintln( "OLD: " + getDownloadDirectory() );
-        //Common.debugPrintln( "NEW: " + textOutputDirectory );
-        
-        //allNovelText = Common.getBig5toUtf8( allNovelText );
-        
         if ( SetUp.getDeleteOriginalPic() ) { // 若有勾選原檔就刪除原始未合併文件
             Common.deleteFolder( getDownloadDirectory() ); // 刪除存放原始網頁檔的資料夾
         }
-        Common.outputFile(  allNovelText, textOutputDirectory, getWholeTitle() + ".txt" );
+        Common.outputFile(  allNovelText, textOutputDirectory, getWholeTitle() + "." + Common.getDefaultTextExtension() );
         
-        textFilePath = textOutputDirectory + getWholeTitle() + ".txt";
+        textFilePath = textOutputDirectory + getWholeTitle() + "." + Common.getDefaultTextExtension();
     }
     
     

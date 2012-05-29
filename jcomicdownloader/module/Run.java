@@ -340,6 +340,10 @@ public class Run extends Thread { // main class to run whole program
                 ParseOnlineComicSite parse = new ParseBlogspot();
                 runSingleParseModule( parse );
             }
+            else if ( pw.getSiteID() == Site.PIXNET ) {
+                ParseOnlineComicSite parse = new ParsePixnet();
+                runSingleParseModule( parse );
+            }
             
             else // Site.UNKNOWN
                 Common.urlIsUnknown = true;

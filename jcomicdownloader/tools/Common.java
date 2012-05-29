@@ -998,19 +998,19 @@ public class Common {
 
     public static String getReomvedUnnecessaryWord( String title ) {
 
-        if ( title.matches( "(?s).*九九漫畫" ) ) // 拿掉多餘字尾
+        if ( title.matches( "(?s).+九九漫畫" ) ) // 拿掉多餘字尾
         {
             title = title.substring( 0, title.length() - 4 );
         }
-        else if ( title.matches( "(?s).*手機漫畫" ) ) // 拿掉多餘字尾
+        else if ( title.matches( "(?s).+手機漫畫" ) ) // 拿掉多餘字尾
         {
             title = title.substring( 0, title.length() - 4 );
         }
-        else if ( title.matches( "(?s).*第一漫畫" ) ) // 拿掉多餘字尾
+        else if ( title.matches( "(?s).+第一漫畫" ) ) // 拿掉多餘字尾
         {
             title = title.substring( 0, title.length() - 4 );
         }
-        else if ( title.matches( "(?s).*漫畫" ) ) // 拿掉[漫畫]字尾
+        else if ( title.matches( "(?s).+漫畫" ) ) // 拿掉[漫畫]字尾
         {
             title = title.substring( 0, title.length() - 2 );
         }
@@ -1907,6 +1907,7 @@ public class Common {
             connection.setRequestMethod( "GET" );
             connection.setDoOutput( true );
  
+            connection.setRequestProperty( "If-None-Match", "634737568694022579-0-634737559529942483--0-2_20" );
 
             if ( referString != null && !"".equals( referString ) ) { // 設置refer
                 connection.setRequestProperty( "Referer", referString );
@@ -1980,9 +1981,6 @@ public class Common {
             os.flush();
             os.close();
 
-
-
-
             if ( Common.withGUI() ) {
                 ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
                         + CommonGUI.stateBarDetailMessage
@@ -2026,6 +2024,17 @@ public class Common {
         }
 
         System.exit( 0 );
+    }
+    
+    // 回傳文字檔案預設輸出格式的副檔名
+    public static String getDefaultTextExtension() {
+        if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML ) {
+            return "html";
+        }
+        else {
+            return "txt";
+        }
+        
     }
 }
 

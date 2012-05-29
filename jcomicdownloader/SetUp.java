@@ -18,6 +18,7 @@ import jcomicdownloader.tools.*;
 
 import java.io.*;
 import java.util.Locale;
+import jcomicdownloader.enums.FileFormatEnum;
 import jcomicdownloader.enums.LanguageEnum;
 import jcomicdownloader.frame.OptionFrame;
 
@@ -101,6 +102,9 @@ public class SetUp { // read setup file, and then setup
     
     // 預設介面語言
     private static int defaultLanguage;
+    
+    // 預設輸出文字檔格式
+    private static int defaultTextOutputFormat;
 
     /**
 
@@ -202,6 +206,8 @@ public class SetUp { // read setup file, and then setup
             defaultLanguage = 1; // 預設簡體中文
         else
             defaultLanguage = 0; // 預設正體中文
+        
+        defaultTextOutputFormat = FileFormatEnum.HTML; // 預設輸出文字檔格式為.txt
     }
 
     // 將目前的設定寫入到設定檔(set.ini)
@@ -317,8 +323,10 @@ public class SetUp { // read setup file, and then setup
             + "\nchoiceFrameTableMouseEnteredColor = " + choiceFrameTableMouseEnteredColor.toString()
             + "\n# 預設壓縮檔格式"
             + "\ncompressFormat = " + compressFormat
-            + "\n# 預設介面語言"
+            + "\n# 預設介面語言（0: 繁體中文　1: 簡體中文）"
             + "\ndefaultLanguage = " + defaultLanguage
+            + "\n# 預設輸出文字檔格式（0: txt　1: html）"
+            + "\ndefaultTextOutputFormat = " + defaultTextOutputFormat 
             + "\n";
 
         Common.outputFile( setString, Common.getNowAbsolutePath(), Common.setFileName );
@@ -390,7 +398,7 @@ public class SetUp { // read setup file, and then setup
         
         Common.debugPrintln( "CompressFormat = " + compressFormat );
         Common.debugPrintln( "DefaultLanguage = " + defaultLanguage );
-        
+        Common.debugPrintln( "DefaultTextOutputFormat = " + defaultTextOutputFormat );
         
         Common.debugPrintln( "-----------------------" );
     }
@@ -456,11 +464,9 @@ public class SetUp { // read setup file, and then setup
         boolean existMainFrameTableDefaultColor = false;
         boolean existMainFrameMenuItemDefaultColor = false;
 
-        // 預設壓縮格式
-        boolean existCompressFormat = false;
-        
-        // 預設介面語言
-        boolean existDefaultLanguage = false;
+        boolean existCompressFormat = false;  // 預設壓縮格式
+        boolean existDefaultLanguage = false; // 預設介面語言
+        boolean existDefaultTextOutputFormat = false; // 預設輸出文字檔格式
 
 
         for ( int i = 0; i < lines.length; i++ ) {
@@ -927,6 +933,12 @@ public class SetUp { // read setup file, and then setup
                             setDefaultLanguage( Integer.parseInt( split[1] ) );
                         }
                     }
+                    else if ( split[0].equals( "defaultTextOutputFormat" ) ) {
+                        if ( split.length > 1 ) {
+                            existDefaultTextOutputFormat = true;
+                            setDefaultTextOutputFormat( Integer.parseInt( split[1] ) );
+                        }
+                    }
 
                 }
             }
@@ -964,7 +976,7 @@ public class SetUp { // read setup file, and then setup
             && existChoiceFrameOtherDefaultColor
             && existChoiceFrameTableMouseEnteredColor
             && existChoiceFrameTableDefaultColor
-                && existChoiceFrameTableFileExistedColor
+            && existChoiceFrameTableFileExistedColor
             && existOptionFrameOtherMouseEnteredColor
             && existOptionFrameOtherDefaultColor
             && existInformationFrameOtherMouseEnteredColor
@@ -974,8 +986,11 @@ public class SetUp { // read setup file, and then setup
             && existMainFrameTableMouseEnteredColor
             && existMainFrameTableDefaultColor
             && existMainFrameMenuItemDefaultColor
-            && existCompressFormat
-            && existDefaultLanguage ) {
+                
+            && existCompressFormat // 預設壓縮格式
+            && existDefaultLanguage // 預設介面語言
+            && existDefaultTextOutputFormat // 預設文字檔輸出格式 
+                ) {
             Common.debugPrintln( "設定檔全部讀取完畢" );
         }
         else {
@@ -1466,6 +1481,13 @@ public class SetUp { // read setup file, and then setup
     }
     public static void setDefaultLanguage( int language ) {
         defaultLanguage = language;
+    }
+    
+    public static int getDefaultTextOutputFormat() {
+        return defaultTextOutputFormat;
+    }
+    public static void setDefaultTextOutputFormat( int outputFormat ) {
+        defaultTextOutputFormat = outputFormat;
     }
     
     

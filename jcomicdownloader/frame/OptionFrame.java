@@ -114,6 +114,7 @@ public class OptionFrame extends JFrame implements MouseListener {
     private JButton setBackgroundPicOfChoiceFrameButton;
 
     private JRadioButton zipRadioButtion, cbzRadioButtion;
+    private JRadioButton txtRadioButtion, htmlRadioButtion;
 
     /**
     
@@ -502,6 +503,68 @@ public class OptionFrame extends JFrame implements MouseListener {
         compressCheckBox = getCheckBoxBold( "自動產生壓縮檔", SetUp.getAutoCompress() );
         CommonGUI.setToolTip( compressCheckBox, "下載完成後進行壓縮，壓縮檔名與資料夾名稱相同" );
 
+        JPanel compressPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        setCompressPanel( compressPanelHorizontal );
+
+        deleteCheckBox = getCheckBox( "自動刪除圖片檔", SetUp.getDeleteOriginalPic() );
+        CommonGUI.setToolTip( deleteCheckBox, "下載完成後便刪除圖檔，此選項應與『自動產生壓縮檔』搭配使用" );
+
+        urlCheckBox = getCheckBox( "輸出下載位址文件檔", SetUp.getOutputUrlFile() );
+        CommonGUI.setToolTip( urlCheckBox, "解析所有圖片的真實下載位址後彙整輸出為txt文件檔，檔名與資料夾名稱相同" );
+
+        downloadCheckBox = getCheckBoxBold( "分析後下載圖檔（預設）", SetUp.getDownloadPicFile() );
+        CommonGUI.setToolTip( downloadCheckBox, "如果沒有勾選就不會有下載行為，建議要勾選（但若只想輸出真實下載位址，就不要勾選此選項）" );
+
+        
+        
+        JPanel textFormatPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        setTextFormatPanel( textFormatPanelHorizontal );
+        
+
+        JPanel filePanel = new JPanel( new GridLayout( 6, 1, 2, 2 ) );
+        filePanel.add( dirPanelHorizontal );
+        filePanel.add( dirTextField );
+        filePanel.add( compressPanelHorizontal );
+        filePanel.add( textFormatPanelHorizontal );
+        filePanel.add( urlCheckBox );
+        filePanel.add( downloadCheckBox );
+        filePanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+        panel.add( filePanel );
+    }
+    
+    private void setTextFormatPanel( JPanel textFormatPanelHorizontal ) {
+        boolean choiceTxt = false, choiceHtml = false;
+        if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML ) {
+            choiceHtml = true;
+            choiceTxt = false;
+        }
+        else {
+            choiceHtml = false;
+            choiceTxt = true;
+        }
+        
+        txtRadioButtion = getRadioButton( "txt", choiceTxt );
+        CommonGUI.setToolTip( txtRadioButtion, "輸出txt檔" );
+        htmlRadioButtion = getRadioButton( "html", choiceHtml );
+        CommonGUI.setToolTip( htmlRadioButtion, "輸出html檔" );
+        ButtonGroup textFormatGroup = new ButtonGroup();
+        textFormatGroup.add( txtRadioButtion );
+        textFormatGroup.add( htmlRadioButtion );
+        
+        JLabel textFormatLabel = getLabel( "文章輸出格式：", "批次下載網頁（文字檔）時，預設的輸出格式" );
+
+        JPanel textFormatPanel = new JPanel();
+        textFormatPanel.add( textFormatLabel );
+        textFormatPanel.add( txtRadioButtion );
+        textFormatPanel.add( htmlRadioButtion );
+
+        textFormatPanelHorizontal.add( deleteCheckBox );
+        textFormatPanelHorizontal.add( textFormatPanel );
+        textFormatPanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+    }
+    
+    private void setCompressPanel( JPanel compressPanelHorizontal ) {
         boolean choiceZip = false, choiceCbz = false;
         if ( "zip".equals( SetUp.getCompressFormat() ) ) {
             choiceZip = true;
@@ -519,36 +582,18 @@ public class OptionFrame extends JFrame implements MouseListener {
         ButtonGroup compressGroup = new ButtonGroup();
         compressGroup.add( zipRadioButtion );
         compressGroup.add( cbzRadioButtion );
+        
+        JLabel compressLabel = getLabel( "壓縮格式：", "預設的壓縮格式" );
 
         JPanel compressPanel = new JPanel();
+        compressPanel.add( compressLabel );
         compressPanel.add( zipRadioButtion );
         compressPanel.add( cbzRadioButtion );
 
-        JPanel compressPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        
         compressPanelHorizontal.add( compressCheckBox );
         compressPanelHorizontal.add( compressPanel );
         compressPanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
-
-        deleteCheckBox = getCheckBox( "自動刪除圖片檔", SetUp.getDeleteOriginalPic() );
-        CommonGUI.setToolTip( deleteCheckBox, "下載完成後便刪除圖檔，此選項應與『自動產生壓縮檔』搭配使用" );
-
-        urlCheckBox = getCheckBox( "輸出下載位址文件檔", SetUp.getOutputUrlFile() );
-        CommonGUI.setToolTip( urlCheckBox, "解析所有圖片的真實下載位址後彙整輸出為txt文件檔，檔名與資料夾名稱相同" );
-
-        downloadCheckBox = getCheckBoxBold( "分析後下載圖檔（預設）", SetUp.getDownloadPicFile() );
-        CommonGUI.setToolTip( downloadCheckBox, "如果沒有勾選就不會有下載行為，建議要勾選（但若只想輸出真實下載位址，就不要勾選此選項）" );
-
-
-        JPanel filePanel = new JPanel( new GridLayout( 6, 1, 2, 2 ) );
-        filePanel.add( dirPanelHorizontal );
-        filePanel.add( dirTextField );
-        filePanel.add( compressPanelHorizontal );
-        filePanel.add( deleteCheckBox );
-        filePanel.add( urlCheckBox );
-        filePanel.add( downloadCheckBox );
-        filePanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
-
-        panel.add( filePanel );
     }
 
     private void setConnectionTablePanel( JPanel panel ) {
@@ -571,7 +616,6 @@ public class OptionFrame extends JFrame implements MouseListener {
         proxyPortPanel.add( proxyPortLabel );
         proxyPortPanel.add( proxyPortTextField );
         proxyPortPanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
-
 
         retryTimesSlider = new JSlider( JSlider.HORIZONTAL, 0, 5, 1 );
         retryTimesSlider.addChangeListener( new SliderHandler() );
@@ -1056,6 +1100,11 @@ public class OptionFrame extends JFrame implements MouseListener {
                 else
                     compressFormatString = "cbz";
                 SetUp.setCompressFormat( compressFormatString ); // 紀錄到設定值
+                
+                if ( htmlRadioButtion.isSelected() )
+                    SetUp.setDefaultTextOutputFormat( FileFormatEnum.HTML ); // 紀錄到設定值
+                else
+                    SetUp.setDefaultTextOutputFormat( FileFormatEnum.TEXT ); // 紀錄到設定值
 
                 Boolean tempBool = new Boolean( usingBackgroundPicOfMainFrameCheckBox.isSelected() );
                 if ( !tempBool.equals( SetUp.getUsingBackgroundPicOfMainFrame() ) ) {
@@ -1342,7 +1391,8 @@ public class OptionFrame extends JFrame implements MouseListener {
         string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
         
         JRadioButton radioButton = new JRadioButton( string, selected );
-        //button.setFont( SetUp.getDefaultFont() );
+        radioButton.setFont( SetUp.getDefaultFont() );
+        
         if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) { // 若設定為透明，就用預定字體。
             radioButton.setOpaque( false );
             radioButton.setForeground( SetUp.getChoiceFrameOtherDefaultColor() );

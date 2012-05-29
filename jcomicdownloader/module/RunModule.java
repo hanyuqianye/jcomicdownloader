@@ -150,7 +150,7 @@ public class RunModule {
             // 若已存在同檔名壓縮檔，則不解析下載網址
             if ( parse.siteID == Site.CK_NOVEL
                     || parse.siteID == Site.MYBEST || parse.siteID == Site.WENKU
-                    || parse.siteID == Site.BLOGSPOT ) { // 針對小說
+                    || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET ) { // 針對小說
                 if ( !existTextFile( parse.getDownloadDirectory() ) ) {
                     parse.parseComicURL(); // 下載網頁檔
                 }
@@ -173,7 +173,7 @@ public class RunModule {
                 // 基本上，下載小說不會用到downloadManyFile()，故若是小說類就無須檢查
                 if ( parse.siteID != Site.CK_NOVEL
                         || parse.siteID == Site.MYBEST || parse.siteID == Site.WENKU
-                        || parse.siteID == Site.BLOGSPOT ) {
+                        || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET ) {
                     // 如果已經有同檔名壓縮檔存在，就假設已經下載完畢而不下載。
                     if ( !existZipFile( parse.getDownloadDirectory() ) ) {
                         Common.debugPrintln( "開始下載整集：" );
@@ -190,7 +190,7 @@ public class RunModule {
             } else {
                 if ( parse.siteID == Site.CK_NOVEL
                         || parse.siteID == Site.MYBEST || parse.siteID == Site.WENKU
-                        || parse.siteID == Site.BLOGSPOT ) { // 下載小說
+                        || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET ) { // 下載小說
                     if ( !existTextFile( parse.getDownloadDirectory() ) ) { // 已有壓縮檔當然不用產生資料夾
                         Flag.downloadErrorFlag = true; // 發生錯誤
                         Common.errorReport( "ERROR： 沒有產生" + parse.getDownloadDirectory() );
@@ -233,7 +233,8 @@ public class RunModule {
                 || siteID == Site.SIX_MANGA
                 || siteID == Site.COMIC_131
                 || siteID == Site.XXBH
-                || siteID == Site.BLOGSPOT ) {
+                || siteID == Site.BLOGSPOT
+                || siteID == Site.PIXNET ) {
             return true;
         } else {
             return false;
@@ -280,7 +281,7 @@ public class RunModule {
 
             if ( parse.siteID == Site.CK_NOVEL
                     || parse.siteID == Site.MYBEST || parse.siteID == Site.WENKU
-                    || parse.siteID == Site.BLOGSPOT ) {
+                    || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET ) {
                 Common.debugPrintln( "小說類型不產生壓縮檔！" );
             } else {
                 if ( SetUp.getAutoCompress() ) { // compress to zip file or not
