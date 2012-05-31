@@ -1,13 +1,13 @@
 /*
- ----------------------------------------------------------------------------------------------------
- Program Name : JComicDownloader
- Authors  : surveyorK
- Last Modified : 2011/10/25
- ----------------------------------------------------------------------------------------------------
- ChangeLog:
- 1.14: 修復若沒有下載成功仍會產生空壓縮檔的bug。
- 1.12: 部分網站邊解析邊下載，所以不用做最後的整本下載。
- ----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Program Name : JComicDownloader
+Authors  : surveyorK
+Last Modified : 2011/10/25
+----------------------------------------------------------------------------------------------------
+ChangeLog:
+1.14: 修復若沒有下載成功仍會產生空壓縮檔的bug。
+1.12: 部分網站邊解析邊下載，所以不用做最後的整本下載。
+----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
 
@@ -43,7 +43,8 @@ public class RunModule {
                 || urlString.matches( "(?s).*.asp" )
                 || urlString.matches( "(?s).*.jsp" )
                 || urlString.matches( "(?s).*/" )
-                || urlString.matches( "(?s).*\\?(?s).*" ) ); else {
+                || urlString.matches( "(?s).*\\?(?s).*" ) );
+        else {
             urlString += "/";
         }
 
@@ -66,7 +67,8 @@ public class RunModule {
 
                 runSingle( parse, urlString, new String( parse.getTitle() ) );
             }
-        } else { // the urlString is main page
+        }
+        else { // the urlString is main page
             Common.debugPrintln( "全集頁面（main page）" );
             Common.isMainPage = true;
 
@@ -79,9 +81,6 @@ public class RunModule {
                 return;
             }
 
-            // 臨時作法：如果處理EH或EX時已經有標題名稱，就不用再解析標題名稱
-            //if ( ( parse.siteID == Site.EH || parse.siteID == Site.EX ) && parse.getTitle() != null );
-            //else
             if ( parse.getTitle() == null || parse.getTitle().equals( "" ) ) {
                 parse.setTitle( parse.getTitleOnMainPage( urlString, allPageString ) );
             }
@@ -92,11 +91,11 @@ public class RunModule {
             List<List<String>> combinationList = null;
             try {
                 combinationList = parse.getVolumeTitleAndUrlOnMainPage( urlString, allPageString );
-            } catch ( Exception ex ) {
-                Common.errorReport( "\n解析集數失敗！" );
+            }
+            catch ( Exception ex ) {
+                Common.hadleErrorMessage( ex, "解析集數時發生錯誤" );
                 JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "解析集數失敗！",
                         "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-                ex.printStackTrace();
                 return;
             }
             if ( combinationList == null ) {
@@ -135,30 +134,44 @@ public class RunModule {
             parse.setParameters();
 
             if ( parse.siteID == Site.EH || parse.siteID == Site.EX
-                    || parse.siteID == Site.CK_NOVEL || parse.siteID == Site.MYBEST
-                    || parse.siteID == Site.WENKU  ) {
+                    // CK小說規則：唯有當下載單一作品時，才用一層資料夾（此時標題名稱與集數名稱相同）
+                    || ( parse.siteID == Site.CK_NOVEL && parse.getTitle().equals( parse.getWholeTitle() ) ) 
+                    // EYNY小說規則：唯有當下載單一作品時，才用一層資料夾（此時標題名稱與集數名稱相同）
+                    || ( parse.siteID == Site.EYNY_NOVEL && parse.getTitle().equals( parse.getWholeTitle() ) ) 
+                    || parse.siteID == Site.MYBEST
+                    || parse.siteID == Site.WENKU ) {
                 // 下載資料夾只建立一層: 指定下載資料夾 / 標題名稱 /
                 parse.setDownloadDirectory( SetUp.getOriginalDownloadDirectory()
                         + parse.getTitle() + Common.getSlash() );
-            } else {
+            }
+            else {
                 // 下載資料夾建立兩層: 指定下載資料夾 / 標題名稱 / 集數名稱
                 parse.setDownloadDirectory( SetUp.getOriginalDownloadDirectory()
                         + parse.getTitle() + Common.getSlash()
                         + parse.getWholeTitle() + Common.getSlash() );
             }
 
-            // 若已存在同檔名壓縮檔，則不解析下載網址
-            if ( parse.siteID == Site.CK_NOVEL
-                    || parse.siteID == Site.MYBEST || parse.siteID == Site.WENKU
-                    || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET ) { // 針對小說
-                if ( !existTextFile( parse.getDownloadDirectory() ) ) {
-                    parse.parseComicURL(); // 下載網頁檔
+            try {
+                // 若已存在同檔名壓縮檔，則不解析下載網址
+                if ( parse.siteID == Site.CK_NOVEL || parse.siteID == Site.EYNY_NOVEL
+                        || parse.siteID == Site.MYBEST || parse.siteID == Site.WENKU
+                        || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET_BLOG
+                        || parse.siteID == Site.XUITE_BLOG || parse.siteID == Site.YAM_BLOG ) { // 針對小說
+                    if ( !existTextFile( parse.getDownloadDirectory() ) ) {
+                        parse.parseComicURL(); // 下載網頁檔
+                    }
                 }
-            } else { // 針對漫畫
-                if ( !existZipFile( parse.getDownloadDirectory() ) ) {
-                    parse.parseComicURL(); // EH在此已經開始下載了。
+                else { // 針對漫畫
+                    if ( !existZipFile( parse.getDownloadDirectory() ) ) {
+                        parse.parseComicURL(); // EH在此已經開始下載了。
+                    }
                 }
             }
+            catch ( Exception ex ) {
+                Common.hadleErrorMessage( ex, "在解析下載網址或下載過程中發生錯誤" );
+            }
+
+
             String[] urls = parse.getComicURL();
 
             if ( SetUp.getOutputUrlFile() ) {
@@ -171,9 +184,10 @@ public class RunModule {
                 System.out.println( "\nReady to download ...\n" );
 
                 // 基本上，下載小說不會用到downloadManyFile()，故若是小說類就無須檢查
-                if ( parse.siteID != Site.CK_NOVEL
+                if ( parse.siteID != Site.CK_NOVEL || parse.siteID == Site.EYNY_NOVEL
                         || parse.siteID == Site.MYBEST || parse.siteID == Site.WENKU
-                        || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET ) {
+                        || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET_BLOG
+                        || parse.siteID == Site.XUITE_BLOG || parse.siteID == Site.YAM_BLOG ) {
                     // 如果已經有同檔名壓縮檔存在，就假設已經下載完畢而不下載。
                     if ( !existZipFile( parse.getDownloadDirectory() ) ) {
                         Common.debugPrintln( "開始下載整集：" );
@@ -187,15 +201,18 @@ public class RunModule {
             if ( new File( parse.getDownloadDirectory() ).exists() ) // 存在下載圖檔資料夾
             {
                 followingWork( parse );
-            } else {
-                if ( parse.siteID == Site.CK_NOVEL
+            }
+            else {
+                if ( parse.siteID == Site.CK_NOVEL || parse.siteID == Site.EYNY_NOVEL
                         || parse.siteID == Site.MYBEST || parse.siteID == Site.WENKU
-                        || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET ) { // 下載小說
+                        || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET_BLOG
+                        || parse.siteID == Site.XUITE_BLOG || parse.siteID == Site.YAM_BLOG ) { // 下載小說
                     if ( !existTextFile( parse.getDownloadDirectory() ) ) { // 已有壓縮檔當然不用產生資料夾
                         Flag.downloadErrorFlag = true; // 發生錯誤
                         Common.errorReport( "ERROR： 沒有產生" + parse.getDownloadDirectory() );
                     }
-                } else { // 下載漫畫
+                }
+                else { // 下載漫畫
                     if ( !existZipFile( parse.getDownloadDirectory() ) ) { // 已有壓縮檔當然不用產生資料夾
                         Flag.downloadErrorFlag = true; // 發生錯誤
                         Common.errorReport( "ERROR： 沒有產生" + parse.getDownloadDirectory() );
@@ -226,6 +243,7 @@ public class RunModule {
                 || siteID == Site.DM5
                 || siteID == Site.IASK
                 || siteID == Site.CK_NOVEL
+                || siteID == Site.EYNY_NOVEL
                 || siteID == Site.MYBEST
                 || siteID == Site.WENKU
                 || siteID == Site.IMANHUA
@@ -234,9 +252,12 @@ public class RunModule {
                 || siteID == Site.COMIC_131
                 || siteID == Site.XXBH
                 || siteID == Site.BLOGSPOT
-                || siteID == Site.PIXNET ) {
+                || siteID == Site.PIXNET_BLOG
+                || siteID == Site.XUITE_BLOG
+                || siteID == Site.YAM_BLOG ) {
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -245,7 +266,8 @@ public class RunModule {
         String file;
         if ( downloadPicDirectory.lastIndexOf( Common.getSlash() ) == downloadPicDirectory.length() - 1 ) {
             file = downloadPicDirectory.substring( 0, downloadPicDirectory.length() - 1 ) + "." + SetUp.getCompressFormat();
-        } else {
+        }
+        else {
             file = downloadPicDirectory + "." + SetUp.getCompressFormat();
         }
 
@@ -253,7 +275,8 @@ public class RunModule {
         if ( new File( file ).exists() && new File( file ).length() > 1024 ) {
             Common.debugPrintln( file + "已經存在!" );
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -261,16 +284,18 @@ public class RunModule {
     public boolean existTextFile( String downloadPicDirectory ) {
         String file;
         if ( downloadPicDirectory.lastIndexOf( Common.getSlash() ) == downloadPicDirectory.length() - 1 ) {
-            file = downloadPicDirectory.substring( 0, downloadPicDirectory.length() - 1 ) + ".txt";
-        } else {
-            file = downloadPicDirectory + ".txt";
+            file = downloadPicDirectory.substring( 0, downloadPicDirectory.length() - 1 ) + "." + Common.getDefaultTextExtension();
+        }
+        else {
+            file = downloadPicDirectory + "." + Common.getDefaultTextExtension();
         }
 
         //Common.debugPrintln( "將處理的文件檔名稱：" + file );
         if ( new File( file ).exists() && new File( file ).length() > 1024 ) {
             Common.debugPrintln( file + "已經存在!" );
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -279,11 +304,13 @@ public class RunModule {
         if ( Run.isAlive ) {
             File downloadPath = new File( parse.getDownloadDirectory() );
 
-            if ( parse.siteID == Site.CK_NOVEL
+            if ( parse.siteID == Site.CK_NOVEL || parse.siteID == Site.EYNY_NOVEL
                     || parse.siteID == Site.MYBEST || parse.siteID == Site.WENKU
-                    || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET ) {
+                    || parse.siteID == Site.BLOGSPOT || parse.siteID == Site.PIXNET_BLOG
+                    || parse.siteID == Site.XUITE_BLOG || parse.siteID == Site.YAM_BLOG ) {
                 Common.debugPrintln( "小說類型不產生壓縮檔！" );
-            } else {
+            }
+            else {
                 if ( SetUp.getAutoCompress() ) { // compress to zip file or not
 
                     File zipFile = new File( downloadPath.getParent() + "/"
@@ -291,9 +318,11 @@ public class RunModule {
 
                     if ( downloadPath.list().length < 1 ) {
                         Common.debugPrintln( "不產生壓縮檔（" + downloadPath.getAbsolutePath() + "資料夾內沒有任何檔案）" );
-                    } else if ( zipFile.exists() && zipFile.length() > 1024 ) {
+                    }
+                    else if ( zipFile.exists() && zipFile.length() > 1024 ) {
                         Common.debugPrintln( "不產生壓縮檔（" + zipFile.getAbsolutePath() + "已存在）" );
-                    } else {
+                    }
+                    else {
                         Common.compress( downloadPath, zipFile );
                         System.out.println( zipFile.getAbsolutePath() + " made!" );
                     }

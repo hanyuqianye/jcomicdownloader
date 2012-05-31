@@ -73,5 +73,8 @@ public class Site {
     public final static int XXBH = 55;
     public final static int COMIC_131 = 56; 
     public final static int BLOGSPOT = 57; // 
-    public final static int PIXNET = 58;
+    public final static int PIXNET_BLOG = 58;
+    public final static int XUITE_BLOG = 59;
+    public final static int YAM_BLOG = 60;
+    public final static int EYNY_NOVEL = 61;
 }

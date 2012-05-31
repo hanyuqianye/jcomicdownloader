@@ -179,10 +179,13 @@ abstract public class ParseOnlineComicSite {
             extensionName = url.split( "\\." )[url.split( "\\." ).length - 1]; // 取得圖片附檔名
         } else {
             if ( this.siteID == Site.CK_NOVEL || 
+                    this.siteID == Site.CK_NOVEL ||
                  this.siteID == Site.MYBEST || 
                     this.siteID == Site.BLOGSPOT  || 
-                    this.siteID == Site.PIXNET ) {
-                extensionName = "html"; // 因為是小說，所以副檔名給txt
+                    this.siteID == Site.PIXNET_BLOG || 
+                    this.siteID == Site.XUITE_BLOG  || 
+                    this.siteID == Site.YAM_BLOG ) {
+                extensionName = "html"; // 因為是網頁，所以副檔名給html
             }
             else {
                 extensionName = "jpg"; // 因應WY沒有附檔名，只好都給jpg
@@ -299,8 +302,7 @@ abstract public class ParseOnlineComicSite {
 
         } catch ( Exception ex ) {
             formatVolume = volume;
-            Common.errorReport( "集數名稱的數字規格化處理發生錯誤！" );
-            ex.printStackTrace();
+            Common.hadleErrorMessage( ex, "集數名稱的數字規格化處理發生錯誤" );
         }
 
         return formatVolume;
@@ -355,8 +357,9 @@ abstract public class ParseOnlineComicSite {
         text = text.replaceAll( "\n", "" ); // 拿掉非windows換行機制的換行字元
         
         // 開始替換
-        text = text.replaceAll( "<br />", "\r\n" );
-        text = text.replaceAll( "<br>", "\r\n" );
+        //text = text.replaceAll( "<br />", "\r\n" );
+        //text = text.replaceAll( "<br>", "\r\n" );
+        text = text.replaceAll( "<br[^<>]+>", "\r\n" );
         text = text.replaceAll( "</p>", "\r\n" );
         text = text.replaceAll( "</h1>", "\r\n" );
         
@@ -415,6 +418,25 @@ abstract public class ParseOnlineComicSite {
         }
         return text;
     }
+    
+     // 拿掉<style 到 </style>之間的內容
+    public String replaceStyle( String text ) {
+        int beginIndex = 0;
+        int endIndex = 0;
+        while ( true ) {
+            beginIndex = text.indexOf( "<style", beginIndex );
+            endIndex = text.indexOf( "</style>", beginIndex );
+            endIndex = text.indexOf( ">", endIndex ) + 1;
+
+            if ( beginIndex > 0 && endIndex > 0 ) { // 拿掉中間的部份
+                text = text.substring( 0, beginIndex ) + text.substring( endIndex, text.length() );
+            }
+            else {
+                break;
+            }
+        }
+        return text;
+    }
 
     // 將html的tag拿掉，且將numeric character references還原回原本的字元。
     public String replaceProcessToText( String text ) {
@@ -423,6 +445,7 @@ abstract public class ParseOnlineComicSite {
         text = replaceImg( text ); // 將圖片標籤拿掉，只保留圖片網址
         //text = text.replaceAll( "<script[^(scrpit)]+[(/script>)]{1}", "" ); // 拿掉js
         text = replaceJS( text ); // 拿掉JS
+        text = replaceStyle( text ); // 拿掉style
         text = text.replaceAll( "<[^<>]+>", "" ); // 將所有標籤去除
 
         return text;
@@ -433,6 +456,7 @@ abstract public class ParseOnlineComicSite {
         text = replaceNCR( text ); //  將numeric character references全部還原
         text = replaceNewLine( text ); // 將換行tag轉換為換行字元
        text = replaceJS( text ); // 拿掉JS
+       text = replaceStyle( text ); // 拿掉style
         //text = text.replaceAll( "<[^(img)|^(a)|^(/a)|^(b)|(/b)]{1}[^<>]+>", "" ); // 將所有標籤去除，只保留圖片標籤和超連結
         //text = text.replaceAll( "<[^(img)|^(a)|^(/a)]{1}[^<>]+>", "" ); // 將所有標籤去除，只保留圖片標籤和超連結
         //text = text.replaceAll( "</span>|</div>|</wbr>", "" ); // 將多餘的標籤去除

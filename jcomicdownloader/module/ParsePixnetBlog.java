@@ -18,7 +18,7 @@ import jcomicdownloader.enums.*;
 import java.util.*;
 import jcomicdownloader.SetUp;
 
-public class ParsePixnet extends ParseOnlineComicSite {
+public class ParsePixnetBlog extends ParseOnlineComicSite {
 
     private int radixNumber; // use to figure out the name of pic
     private String jsName;
@@ -31,8 +31,8 @@ public class ParsePixnet extends ParseOnlineComicSite {
      *
      * @author user
      */
-    public ParsePixnet() {
-        siteID = Site.PIXNET;
+    public ParsePixnetBlog() {
+        siteID = Site.PIXNET_BLOG;
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_pixnet_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_pixnet_encode_parse_", "html" );
 
@@ -44,7 +44,7 @@ public class ParsePixnet extends ParseOnlineComicSite {
         floorCountInOnePage = 10; // 一頁有幾層樓
     }
 
-    public ParsePixnet( String webSite, String titleName ) {
+    public ParsePixnetBlog( String webSite, String titleName ) {
         this();
         this.webSite = webSite;
         this.title = titleName;
@@ -288,89 +288,6 @@ public class ParsePixnet extends ParseOnlineComicSite {
             }
         }
 
-        beginIndex = allPageString.indexOf( "id='BlogArchive1'" );
-        if ( beginIndex > 0 ) { // 代表有日期存檔
-            Common.debugPrintln( "存檔頁面的第一種解析模式" );
-            Common.debugPrintln( "有月份分類" );
-
-            endIndex = allPageString.indexOf( "class='clear'", beginIndex );
-            tempString = allPageString.substring( beginIndex, endIndex );
-
-            int yearCount = tempString.split( "search\\?updated" ).length - 1; // 計算看看有幾年
-            Common.debugPrintln( "共" + yearCount + "年" );
-            beginIndex = endIndex = 0;
-            String yearString = "";
-            for ( int i = 0 ; i < yearCount ; i++ ) {
-                beginIndex = tempString.indexOf( "search?updated", beginIndex ) + 1;
-                beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "</a>", beginIndex );
-                yearString = tempString.substring( beginIndex, endIndex ); // 取得年份名稱
-                endIndex = tempString.indexOf( "search?updated", beginIndex );
-                if ( endIndex < 0 ) {
-                    endIndex = tempString.length(); // 代表到最後一個了。
-                }
-
-                String tempString2 = tempString.substring( beginIndex, endIndex );
-                int archiveCount = tempString2.split( "archive\\.html" ).length - 1; //計算這一年有幾月
-                Common.debugPrintln( yearString + "中共有" + archiveCount + "個月份有發表文章" );
-
-                int beginIndex2 = 0;
-                int endIndex2 = 0;
-                for ( int j = 0 ; j < archiveCount ; j++ ) {
-
-                    // 取得單集位址
-                    beginIndex2 = tempString2.indexOf( "archive.html", beginIndex2 );
-                    beginIndex2 = tempString2.lastIndexOf( "'", beginIndex2 ) + 1;
-                    endIndex2 = tempString2.indexOf( "'", beginIndex2 );
-                    urlList.add( tempString2.substring( beginIndex2, endIndex2 ) );
-                    Common.debugPrint( tempString2.substring( beginIndex2, endIndex2 ) + " : " );
-                    
-                    // 取得單集名稱
-                    beginIndex2 = tempString2.indexOf( ">", beginIndex2 ) + 1;
-                    endIndex2 = tempString2.indexOf( "</a>", beginIndex2 );
-                    volumeTitle = yearString + "_" + tempString2.substring( beginIndex2, endIndex2 );
-                    Common.debugPrintln( volumeTitle );
-
-                    // 取得此標籤有幾篇文章
-                    beginIndex2 = tempString2.indexOf( "dir='ltr'", beginIndex2 );
-                    beginIndex2 = tempString2.indexOf( ">", beginIndex2 ) + 1;
-                    endIndex2 = tempString2.indexOf( "</span>", beginIndex2 );
-                    if ( beginIndex2 > 0 && endIndex2 > 0 ) {
-                        volumeTitle += tempString2.substring( beginIndex2, endIndex2 );
-                    }
-
-                    volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
-
-                    totalVolume++;
-                }
-            }
-        }
-        else if ( allPageString.indexOf( "class=\"archive-list\"" ) > 0 ) { // 另一種可能，直接顯示月份存檔
-            Common.debugPrintln( "存檔頁面的第二種解析模式" );
-            beginIndex = allPageString.indexOf( "class=\"archive-list\"" );
-            tempString = allPageString.substring( beginIndex, allPageString.length() );
-            int archiveCount = tempString.split( "archive\\.html" ).length - 1; //計算這一年有幾月
-            Common.debugPrintln( "共有" + archiveCount + "個月份有發表文章" );
-            
-            beginIndex = endIndex = 0;
-            for ( int i = 0 ; i < archiveCount ; i++ ) {
-                // 取得單集位址
-                    beginIndex = tempString.indexOf( "archive.html", beginIndex );
-                    beginIndex = tempString.lastIndexOf( "\"", beginIndex ) + 1;
-                    endIndex = tempString.indexOf( "\"", beginIndex );
-                    urlList.add( tempString.substring( beginIndex, endIndex ) );
-
-                    // 取得單集名稱
-                    beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
-                    endIndex = tempString.indexOf( "</a>", beginIndex );
-                    volumeTitle = tempString.substring( beginIndex, endIndex );
-                    
-                    volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
-                    totalVolume++;
-            }
-            
-        }
-
         Common.debugPrintln( "共有" + totalVolume + "集" );
 
         combinationList.add( volumeList );
@@ -394,7 +311,7 @@ public class ParsePixnet extends ParseOnlineComicSite {
     public void printLogo() {
         System.out.println( " ______________________________" );
         System.out.println( "|                            " );
-        System.out.println( "| Run the Pixnet module:     " );
+        System.out.println( "| Run the Pixnet Blog module:     " );
         System.out.println( "|_______________________________\n" );
     }
 }

@@ -108,6 +108,7 @@ public class CommonGUI {
             icon = new ImageIcon( img );
         }
         catch ( Exception ex ) {
+            //Common.hadleErrorMessage( ex, "找不到此資源：" + resourceFolder + picName );
             Common.errorReport( "找不到此資源：" + resourceFolder + picName );
         }
 

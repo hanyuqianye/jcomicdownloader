@@ -350,7 +350,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
                                     InformationFrame.thisFrame.wait();
                                 }
                                 catch ( InterruptedException ex ) {
-                                    ex.printStackTrace();
+                                    Common.hadleErrorMessage( ex,  "無法讓informationFrame等待（wait）"  );
                                 }
                             }
                             Common.debugPrintln( "OK" );

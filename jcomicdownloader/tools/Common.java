@@ -5,7 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/12/25
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
-2.11: 1. 修改下載機制，增加讀取GZIPInputStream串流的選項（178.com專用）
+2.11: 1. 修改下載機制，增加讀取GZIPInputStreamCommon.getStringUsingDefaultLanguage( 串流的選項（178.com專用）
  *   2. 修復重試後無法下載中間漏頁的問題。（ex. 5.jpg 7.jpg 8.jpg，中間遺漏6.jpg）
 2.01: 1. 修改下載機制，不下載青蛙圖（檔案大小10771 bytes）
 2.0 : 1. 加入下載快速模式，專用於google圖片下載
@@ -183,7 +183,7 @@ public class Common {
             Thread.currentThread().sleep( delayMillisecond );
         }
         catch ( InterruptedException ex ) {
-            ex.printStackTrace();
+            Common.hadleErrorMessage( ex, "下載過程中無法等待預定秒數" );
         }
 
         downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, "", false, SetUp.getRetryTimes(), false, false );
@@ -209,7 +209,7 @@ public class Common {
             tempCookieStrings = tryConnect( connection );
         }
         catch ( Exception ex ) {
-            ex.printStackTrace();
+            Common.hadleErrorMessage( ex, "無法正確設置connection" );
         }
 
         String[] cookieStrings = tempCookieStrings;
@@ -247,7 +247,7 @@ public class Common {
             tempCookieStrings = tryConnect( connection );
         }
         catch ( Exception ex ) {
-            ex.printStackTrace();
+            Common.hadleErrorMessage( ex, "無法正確設置connection" );
         }
 
 
@@ -311,7 +311,7 @@ public class Common {
             is.close();
         }
         catch ( Exception ex ) {
-            Logger.getLogger( Common.class.getName() ).log( Level.SEVERE, null, ex );
+            Common.hadleErrorMessage( ex, "無法正確設置connection" );
         }
 
 
@@ -325,7 +325,7 @@ public class Common {
             System.out.println( location );
         }
         catch ( Exception ex ) {
-            Logger.getLogger( Common.class.getName() ).log( Level.SEVERE, null, ex );
+            Common.hadleErrorMessage( ex, "無法正確設置connection" );
         }
 
     }
@@ -420,6 +420,7 @@ public class Common {
                         Thread.sleep( 1000 ); // 每次暫停一秒再重新連線
                     }
                     catch ( InterruptedException iex ) {
+                        Common.hadleErrorMessage( iex, "無法等待既定秒數" );
                     }
                     tryConnect( connection );
                 }
@@ -534,7 +535,7 @@ public class Common {
 
             }
             catch ( Exception e ) {
-                e.printStackTrace();
+                Common.hadleErrorMessage( e, "無法正確下載" + webSite );
             }
 
             CommonGUI.stateBarDetailMessage = null;
@@ -565,7 +566,7 @@ public class Common {
 
         }
         catch ( Exception e ) {
-            e.printStackTrace();
+            Common.hadleErrorMessage( e, "無法正確設置connection" );
         }
         return isOK;
     }
@@ -805,6 +806,7 @@ public class Common {
 
             }
             catch ( IOException e ) {
+                Common.hadleErrorMessage( e, "無法讀入" + filePath + fileName );
                 e.printStackTrace();
             }
         }
@@ -1245,7 +1247,7 @@ public class Common {
                 Common.debugPrintln( "   ... 讀入完畢!!" );
             }
             catch ( Exception ex ) {
-                Common.debugPrintln( "   ... 讀入失敗!!" );
+                Common.hadleErrorMessage( ex, "無法讀入下載清單" );
                 cleanDownTable();
                 new File( "downloadList.dat" ).delete();
             }
@@ -1288,7 +1290,7 @@ public class Common {
                 Common.debugPrintln( "   ... 讀入完畢!!" );
             }
             catch ( Exception ex ) {
-                Common.debugPrintln( "   ... 讀入失敗!!" );
+                Common.hadleErrorMessage( ex, "無法讀入書籤清單" );
             }
 
             return tableModel;
@@ -1329,7 +1331,7 @@ public class Common {
                 Common.debugPrintln( "   ... 讀入完畢!!" );
             }
             catch ( Exception ex ) {
-                Common.debugPrintln( "   ... 讀入失敗!!" );
+                Common.hadleErrorMessage( ex, "無法讀入紀錄清單" );
             }
 
             return tableModel;
@@ -1458,7 +1460,7 @@ public class Common {
                 apath = URLDecoder.decode( apath, "UTF-8" );
             }
             catch ( UnsupportedEncodingException ex ) {
-                Logger.getLogger( Common.class.getName() ).log( Level.SEVERE, null, ex );
+                Common.hadleErrorMessage( ex, "無法將網址轉為utf8編碼" );
             }
 
 
@@ -1534,7 +1536,7 @@ public class Common {
                     sdl.close();
                 }
                 catch ( Exception e ) {
-                    e.printStackTrace();
+                    Common.hadleErrorMessage( e, "無法播放" + audioFileString );
                 }
             }
         } );
@@ -1561,7 +1563,7 @@ public class Common {
             url = temp;
         }
         catch ( Exception e ) {
-            e.printStackTrace();
+             Common.hadleErrorMessage( e, "無法將中文網址轉為正確網址編碼" );
         }
 
         url = url.replaceAll( "\\s", "%20" );
@@ -1632,7 +1634,7 @@ public class Common {
 
         }
         catch ( IOException ex ) {
-            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+            Common.hadleErrorMessage( ex, "無法執行此命令：" + cmd + " " + path );
         }
     }
 
@@ -1677,7 +1679,7 @@ public class Common {
             final Process p = pb.start();
         }
         catch ( IOException ex ) {
-            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+            Common.hadleErrorMessage( ex, "無法執行此命令：" + cmd );
         }
     }
 
@@ -1854,7 +1856,7 @@ public class Common {
 
             }
             catch ( Exception e ) {
-                e.printStackTrace();
+                Common.hadleErrorMessage( e, "無法正確下載" + webSite );
             }
 
             CommonGUI.stateBarDetailMessage = null;
@@ -1995,11 +1997,11 @@ public class Common {
 
         }
         catch ( MalformedURLException e ) {
-            e.printStackTrace();
+            Common.hadleErrorMessage( e, "無法正確下載" + webSite );
         }
         catch ( IOException e ) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            Common.hadleErrorMessage( e, "無法正確下載" + webSite );
         }
     }
 
@@ -2035,6 +2037,39 @@ public class Common {
             return "txt";
         }
         
+    }
+    
+    // 將<>標籤都拿掉
+    public static String replaceTag( String text ) {
+        return text.replaceAll( "<[^<>]+>", "" ); // 將所有標籤去除
+    }
+    
+    // 處理錯誤訊息的步驟
+    public static void hadleErrorMessage( Exception ex, String tipString ) {
+        tipString += "！\n\n";
+        System.err.println( tipString );
+        ex.printStackTrace();
+        Common.outputErrorMessage( ex, tipString );
+    }
+    
+    // 輸出錯誤訊息到檔案
+    public static void outputErrorMessage( Exception ex, String tipString ) {
+        String timeString = new Date().toString(); // 取得當前時間的字串
+        timeString = Common.getStringRemovedIllegalChar( timeString ); // 拿掉不合法字元
+        String outputFileName = "error_report_" + timeString + ".txt";
+        String outputPath = Common.getNowAbsolutePath() + "ErrorRecord" + Common.getSlash();
+        String outputMessage = "錯誤提示：\n" + tipString + 
+                                                  "錯誤原因：\n" + ex.getMessage() + "\n\n" + 
+                                                  "錯誤發生地點：\n";
+        
+        outputMessage = Common.getStringUsingDefaultLanguage( outputMessage );
+        
+        StackTraceElement[] stack = ex.getStackTrace();
+        for ( int i = 0; i < stack.length; i ++ ) {
+            outputMessage += stack[i].toString() + "\n";
+        }
+        
+        Common.outputFile( outputMessage, outputPath, outputFileName  );
     }
 }
 

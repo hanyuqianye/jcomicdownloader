@@ -848,7 +848,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
         }
         catch ( Exception ex ) {
-            Common.debugPrintln( "無法使用" + className + "介面!!" );
+            Common.hadleErrorMessage( ex,  "無法使用" + className + "介面!!"  );
 
             className = ComicDownGUI.getDefaultSkinClassName(); // 回歸預設介面
             CommonGUI.setLookAndFeelByClassName( className );

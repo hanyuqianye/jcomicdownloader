@@ -151,7 +151,13 @@ public class ParseWebPage {
         else if ( webSite.matches( "(?s).*blogspot.com(?s).*" ) ) 
             siteID = Site.BLOGSPOT; 
         else if ( webSite.matches( "(?s).*pixnet.net(?s).*" ) ) 
-            siteID = Site.PIXNET;
+            siteID = Site.PIXNET_BLOG;
+        else if ( webSite.matches( "(?s).*blog.xuite.net(?s).*" ) ) 
+            siteID = Site.XUITE_BLOG;
+        else if ( webSite.matches( "(?s).*blog.yam.com(?s).*" ) ) 
+            siteID = Site.YAM_BLOG;
+        else if ( webSite.matches( "(?s).*eyny.com(?s).*" ) ) 
+            siteID = Site.EYNY_NOVEL;
                     
         else
             siteID = Site.UNKNOWN;

@@ -3,10 +3,14 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v4.04
-Last Modified : 2012/5/29
+Version  : v4.05
+Last Modified : 2012/5/31
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+4.05: 1. 新增對eyny的支援。
+ *      2. 新增對blog.xuite.net的支援。
+ *      3. 新增對blog.yam.com的支援。
+ *      4. 改進例外處理機制，發生錯誤時自動輸出錯誤相關訊息。
 4.04: 1. 新增對pixnet.net的支援。
  *       2. 增加輸出html格式的選項。（作用於文章下載模式）
 4.03: 1. 新增對xxbh的支援。 
@@ -354,7 +358,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v4.04";
+    public static String versionString = "JComicDownloader  v4.05";
 
     public ComicDownGUI() {
         super( versionString );
@@ -543,7 +547,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             CommonGUI.setLookAndFeelByClassName( skinClassName );
         }
         catch ( Exception ex ) {
-            Common.errorReport( "無法使用" + skinClassName + "介面 !!" );
+            Common.hadleErrorMessage( ex, "無法使用" + skinClassName + "介面 !!" );
 
             // 若無法配置指定的skin，就用預設的
             CommonGUI.setLookAndFeelByClassName( defaultSkinClassName );
@@ -1192,8 +1196,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 tray.add( this.trayIcon );
             }
             catch ( AWTException ex ) {
-                System.err.println( "無法加入系統工具列圖示" );
-                ex.printStackTrace();
+                Common.hadleErrorMessage( ex, "無法加入系統工具列圖示" );
             }
         }
         else {
@@ -1260,7 +1263,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             args = doc.getText( 0, doc.getLength() ).split( "\\s+" );
         }
         catch ( BadLocationException ex ) {
-            ex.printStackTrace();
+            Common.hadleErrorMessage( ex, "無法取得documet的文字！" );
         }
 
         //messageArea.append( webSite );
@@ -1272,7 +1275,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             args = doc.getText( 0, doc.getLength() ).split( "\\s+" );
         }
         catch ( BadLocationException ex ) {
-            ex.printStackTrace();
+            Common.hadleErrorMessage( ex, "無法取得document的文字" );
         }
     }
 
@@ -1282,7 +1285,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             args = doc.getText( 0, doc.getLength() ).split( "\\s+" );
         }
         catch ( BadLocationException ex ) {
-            ex.printStackTrace();
+            Common.hadleErrorMessage( ex, "無法取得document的文字" );
         }
     }
 
@@ -1881,21 +1884,24 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Common.debugPrintln( "以外部程式開啟" + title + "的下載資料夾或壓縮檔" );
 
         if ( url.matches( "(?s).*ck101.com(?s).*" )
+                || url.matches( "(?s).*eyny.com(?s).*" )
                 || url.matches( "(?s).*catcatbox.com(?s).*" )
                 || url.matches( "(?s).*mybest.com(?s).*" )
                 || url.matches( "(?s).*wenku.com(?s).*" ) ) {
             String cmd = SetUp.getOpenTextFileProgram();
             String path = "";
 
-            boolean existTextFile = false;
             if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".txt" ).exists() ) {
-                existTextFile = true;
-            }
-            if ( existTextFile ) {
                 path = SetUp.getOriginalDownloadDirectory() + title + ".txt";
                 Common.debugPrintln( "開啟命令：" + cmd + " " + path );
                 Common.runUnansiCmd( cmd, path );
             }
+            else if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".html" ).exists() ) {
+                path = SetUp.getOriginalDownloadDirectory() + title + ".html";
+                Common.debugPrintln( "開啟命令：" + cmd + " " + path );
+                Common.runUnansiCmd( cmd, path );
+            }
+
         }
         else if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" ) ) {
             String cmd = SetUp.getOpenZipFileProgram();
@@ -1926,7 +1932,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
                     }
                     catch ( IOException ex ) {
-                        Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+                        Common.hadleErrorMessage( ex, "無法取得運行時間" );
                     }
                 }
             }
@@ -1982,6 +1988,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" )
                 || url.matches( "(?s).*ck101.com(?s).*" )
+                || url.matches( "(?s).*eyny.com/thread(?s).*" ) || url.matches( "(?s).*eyny.com/archiver/tid(?s).*" )
                 || url.matches( "(?s).*catcatbox.com(?s).*" )
                 || url.matches( "(?s).*mybest.com(?s).*" )
                 || url.matches( "(?s).*wenku.com(?s).*" ) ) {
@@ -2084,7 +2091,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                                 ComicDownGUI.mainFrame.wait();
                             }
                             catch ( InterruptedException ex ) {
-                                ex.printStackTrace();
+                                Common.hadleErrorMessage( ex, "無法讓mainFrame等待（wait）" );
                             }
                         }
                     }
@@ -2187,7 +2194,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     singleRun.join();
                 }
                 catch ( InterruptedException ex ) {
-                    ex.printStackTrace();
+                    Common.hadleErrorMessage( ex, "無法加入singleRun.join()" );
                 }
                 Flag.allowDownloadFlag = false;
             }
@@ -2333,7 +2340,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                         }
                         catch ( InterruptedException ex ) {
-                            ex.printStackTrace();
+                            Common.hadleErrorMessage( ex, "無法加入mainRun.join()" );
                         }
 
                         title = mainRun.getTitle();
@@ -2719,7 +2726,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     Thread.sleep( 3000 ); // 先等三秒
                 }
                 catch ( InterruptedException ex ) {
-                    Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+                    Common.hadleErrorMessage( ex, "無法等待預定秒數" );
                 }
 
                 String counterURL = "http://jcomicdownloader.googlecode.com/files/count.txt";
@@ -2780,7 +2787,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             table.setDefaultRenderer( Class.forName( "java.lang.Object" ), cellRender );
         }
         catch ( ClassNotFoundException ex ) {
-            Logger.getLogger( ChoiceFrame.class.getName() ).log( Level.SEVERE, null, ex );
+            Common.hadleErrorMessage( ex, "無法將table轉型" );
         }
     }
 
@@ -2796,43 +2803,24 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 String picURL = "http://pic1.tuku.cc/100/%E5%85%A8%E8%81%8C%E7%8C%8E%E4%BA%BA/%E7%AC%AC297%E8%AF%9D/001.jpg";
                 String pageURL = "http://mh2.xindm.cn/display.asp?id=62304";
                 //String testURL = "http://www.dm5.com/m61853-p2/chapterimagefun.ashx?cid=61853&page=8&language=1&key=wZUeSh3wcCQ%3D";
-                String testURL = "http://ishare.games.sina.com.cn/download.php?fileid=16938948";
+                String testURL = "http://www03.eyny.com/thread-7735812-1-51AYHW04.html";
 
-                String cookie = "ASPSESSIONIDASAABRQQ=MKHJMJODHGMDMCFEFMKKIAHO; virtualwall=vsid=41f5e31a596392039d4cec61101e986e;";
-                //cookie = Common.getCookieString( pageURL );
-                //cookie = Common.getCookieString( testURL );
-                //System.out.println( cookie );
+                String cookie = "__utma=49542194.1653474786.1315316148.1315316148.1321750944.2; new_cookietime=2592000; smile=1D1; __utma=114565633.515916470.1338447564.1338447564.1338447564.1; __utmb=114565633.6.10.1338447564; __utmc=114565633; __utmz=114565633.1338447564.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=eyny%20%E5%B0%8F%E8%AA%AA; username=abc9070410; djAX_e8d7_sid=8n4mM8; djAX_e8d7_lastvisit=1338443992; djAX_e8d7_lastact=1338447599%09member.php%09logging; djAX_e8d7_auth=eec8obBDlTEvsHGJ0vYFkAd9vD5eg72tbqsYq2jDfpddnx%2Bst7FRLV3LU%2BGxgmNlFjTzcUTPZHXjylqGrpOknZ3J1O2T";
 
-                String referURL = "http://mh2.xindm.cn/display.asp?id=62304";
+                String referURL = testURL;
                 String postString = "";
-                //cookie += "isAdult=1; ";
-                //Common.downloadFile( testURL, "", "test_0.txt", false, "", "" );
-                //Common.simpleDownloadFile( testURL, "", "test1.html" );
-                //Common.urlConnection( testURL );
 
-                pageURL = "http://tel.dm5.com/manhua-nvpengyou/";
-                testURL = "http://mh2.xindm.cn/book2/r/rgwlndh/00/xindm_cn_001002.jpg";
-                //testURL2 = "http://222.218.156.16/coojs/201205/32ca0894.js";
-                //cookie = Common.getCookieString( pageURL );
-                cookie = "HttpOnly ComicHistoryitem_zh=; ";
-                referURL = "http://tel.dm5.com/manhua-new-p5/";
                 //System.out.println( cookie );
                 //Common.simpleDownloadFile( pageURL, "", "test.html", cookie, "" );
 
-                //Common.simpleDownloadFile( testURL, "", "test.jpg", cookie, pageURL );
+                //Common.simpleDownloadFile( testURL, "", "test.html", cookie, referURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
-                //Common.downloadFile( pageURL, "", "test_0.txt", true, cookie, referURL );
+                Common.downloadFile( testURL, "", "test_0.thml", true, cookie, referURL );
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
 
                 //Common.testConnection( testURL );
 
                 System.out.println( "OVER" );
-
-                String allPageString = Common.getFileString( "", "test.txt" );
-
-                //allPageString = replaceJS( allPageString );
-
-                System.out.println( allPageString );
 
             }
         } );

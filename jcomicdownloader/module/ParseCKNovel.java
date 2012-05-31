@@ -231,10 +231,18 @@ public class ParseCKNovel extends ParseOnlineComicSite {
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         int beginIndex, endIndex;
 
-        beginIndex = allPageString.indexOf( "name=\"keywords\"" );
-        beginIndex = allPageString.indexOf( "content=", beginIndex );
-        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
-        endIndex = allPageString.indexOf( "\"", beginIndex );
+        if ( urlString.matches( "(?s).*thread-(?s).*" ) ) { // 網址為文章頁面
+            beginIndex = allPageString.indexOf( "name=\"keywords\"" );
+            beginIndex = allPageString.indexOf( "content=", beginIndex );
+            beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "\"", beginIndex );
+        }
+        else { // 網址為名單頁面 ex. http://ck101.com/forum-1288-1.html
+            beginIndex = allPageString.indexOf( "<title>" );
+            beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "</title>", beginIndex );
+            endIndex = allPageString.lastIndexOf( "-", endIndex );
+        }
 
         String title = allPageString.substring( beginIndex, endIndex ).trim();
 
@@ -248,17 +256,47 @@ public class ParseCKNovel extends ParseOnlineComicSite {
         List<List<String>> combinationList = new ArrayList<List<String>>();
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
+        
+        if ( urlString.matches( "(?s).*thread-(?s).*" ) ) { // 網址為文章頁面
+            // 取得單集名稱
+            String volumeTitle = getTitle();
+            volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
 
+            // 取得單集位址
+            urlList.add( urlString );
 
+            totalVolume = 1;
+        }
+        else {
+            int beginIndex = 0, endIndex = 0;
 
-        // 取得單集名稱
-        String volumeTitle = getTitle();
-        volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
-
-        // 取得單集位址
-        urlList.add( urlString );
-
-        totalVolume = 1;
+            beginIndex = allPageString.indexOf( "class=\"threadrow\"" );
+            endIndex = allPageString.lastIndexOf( "class=\"num\"" );
+            String tempString = allPageString.substring( beginIndex, endIndex );
+            
+            totalVolume = tempString.split( "class=\"threadrow\"" ).length - 1;
+            beginIndex = endIndex = 0;
+            String pageName = ""; // 頁面名稱
+            String volumeTitle = "";
+            for ( int i = 0; i < totalVolume; i ++ ) {
+                // 取得單集位址
+                beginIndex = tempString.indexOf( "class=\"threadrow\"", beginIndex );
+                beginIndex = tempString.indexOf( " href=", beginIndex );
+                beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
+                endIndex = tempString.indexOf( "\"", beginIndex );
+                pageName = tempString.substring(  beginIndex, endIndex );
+                urlList.add( baseURL + "/" + pageName );
+                
+                // 取得單集名稱
+                beginIndex = tempString.indexOf( pageName, beginIndex + 1 );
+                beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+                endIndex = tempString.indexOf( "</a>", beginIndex );
+                volumeTitle = tempString.substring(  beginIndex, endIndex );
+                volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
+            }
+            
+            
+        }
         Common.debugPrintln( "共有" + totalVolume + "集" );
 
         combinationList.add( volumeList );

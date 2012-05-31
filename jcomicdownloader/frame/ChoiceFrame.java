@@ -258,7 +258,7 @@ public class ChoiceFrame extends JFrame implements
             volumeTable.setDefaultRenderer( Class.forName( "java.lang.Object" ), cellRender );
         }
         catch ( ClassNotFoundException ex ) {
-            Logger.getLogger( ChoiceFrame.class.getName() ).log( Level.SEVERE, null, ex );
+            Common.hadleErrorMessage( ex, "無法設置volumeTable上哪些集數要變色" );
         }
     }
 
