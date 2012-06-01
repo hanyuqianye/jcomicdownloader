@@ -77,4 +77,5 @@ public class Site {
     public final static int XUITE_BLOG = 59;
     public final static int YAM_BLOG = 60;
     public final static int EYNY_NOVEL = 61;
+    public final static int KKMH = 62;
 }

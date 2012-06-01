@@ -254,7 +254,8 @@ public class RunModule {
                 || siteID == Site.BLOGSPOT
                 || siteID == Site.PIXNET_BLOG
                 || siteID == Site.XUITE_BLOG
-                || siteID == Site.YAM_BLOG ) {
+                || siteID == Site.YAM_BLOG
+                || siteID == Site.KKMH ) {
             return true;
         }
         else {

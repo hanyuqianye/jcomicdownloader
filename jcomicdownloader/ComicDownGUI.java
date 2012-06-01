@@ -3,10 +3,14 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Version  : v4.05
-Last Modified : 2012/5/31
+Version  : v4.06
+Last Modified : 2012/6/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+4.06: 1. 新增對17kkmh.的支援。
+ *      2. 修復eyny部份頁面解析失敗的問題。
+ *      3. 修復eyny分級頁面無法下載的問題。
+ *      4. 修復wenku非php頁面無法解析的問題。
 4.05: 1. 新增對eyny的支援。
  *      2. 新增對blog.xuite.net的支援。
  *      3. 新增對blog.yam.com的支援。
@@ -358,7 +362,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v4.05";
+    public static String versionString = "JComicDownloader  v4.06";
 
     public ComicDownGUI() {
         super( versionString );
@@ -2803,10 +2807,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 String picURL = "http://pic1.tuku.cc/100/%E5%85%A8%E8%81%8C%E7%8C%8E%E4%BA%BA/%E7%AC%AC297%E8%AF%9D/001.jpg";
                 String pageURL = "http://mh2.xindm.cn/display.asp?id=62304";
                 //String testURL = "http://www.dm5.com/m61853-p2/chapterimagefun.ashx?cid=61853&page=8&language=1&key=wZUeSh3wcCQ%3D";
-                String testURL = "http://www03.eyny.com/thread-7735812-1-51AYHW04.html";
+                String testURL = "http://www03.eyny.com/archiver/tid-1260788-1-1.html";
 
-                String cookie = "__utma=49542194.1653474786.1315316148.1315316148.1321750944.2; new_cookietime=2592000; smile=1D1; __utma=114565633.515916470.1338447564.1338447564.1338447564.1; __utmb=114565633.6.10.1338447564; __utmc=114565633; __utmz=114565633.1338447564.1.1.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=eyny%20%E5%B0%8F%E8%AA%AA; username=abc9070410; djAX_e8d7_sid=8n4mM8; djAX_e8d7_lastvisit=1338443992; djAX_e8d7_lastact=1338447599%09member.php%09logging; djAX_e8d7_auth=eec8obBDlTEvsHGJ0vYFkAd9vD5eg72tbqsYq2jDfpddnx%2Bst7FRLV3LU%2BGxgmNlFjTzcUTPZHXjylqGrpOknZ3J1O2T";
-
+                String cookie = "djAX_e8d7_agree=6; ";
                 String referURL = testURL;
                 String postString = "";
 
@@ -2815,7 +2818,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 //Common.simpleDownloadFile( testURL, "", "test.html", cookie, referURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
-                Common.downloadFile( testURL, "", "test_0.thml", true, cookie, referURL );
+                Common.downloadFile( testURL, "", "test.html", true, cookie, "" );
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
 
                 //Common.testConnection( testURL );
@@ -2824,7 +2827,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             }
         } );
-        //downThread.start();
+        downThread.start();
     }
 
    

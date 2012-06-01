@@ -148,7 +148,8 @@ public class ParseWebPage {
             siteID = Site.XXBH; 
         else if ( webSite.matches( "(?s).*comic.131.com(?s).*" ) ) 
             siteID = Site.COMIC_131; 
-        else if ( webSite.matches( "(?s).*blogspot.com(?s).*" ) ) 
+        else if ( webSite.matches( "(?s).*blogspot.com(?s).*" ) || 
+                     webSite.matches( "(?s).*blogspot.tw(?s).*" ) ) 
             siteID = Site.BLOGSPOT; 
         else if ( webSite.matches( "(?s).*pixnet.net(?s).*" ) ) 
             siteID = Site.PIXNET_BLOG;
@@ -158,6 +159,8 @@ public class ParseWebPage {
             siteID = Site.YAM_BLOG;
         else if ( webSite.matches( "(?s).*eyny.com(?s).*" ) ) 
             siteID = Site.EYNY_NOVEL;
+        else if ( webSite.matches( "(?s).*17kkmh.com(?s).*" ) ) 
+            siteID = Site.KKMH;
                     
         else
             siteID = Site.UNKNOWN;

@@ -357,8 +357,8 @@ abstract public class ParseOnlineComicSite {
         text = text.replaceAll( "\n", "" ); // 拿掉非windows換行機制的換行字元
         
         // 開始替換
-        //text = text.replaceAll( "<br />", "\r\n" );
-        //text = text.replaceAll( "<br>", "\r\n" );
+        text = text.replaceAll( "<br />", "\r\n" );
+        text = text.replaceAll( "<br>", "\r\n" );
         text = text.replaceAll( "<br[^<>]+>", "\r\n" );
         text = text.replaceAll( "</p>", "\r\n" );
         text = text.replaceAll( "</h1>", "\r\n" );

@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2012/5/31
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ *  4.06: 1. 修復分級頁面無法下載的問題。
  *  4.05: 1. 新增對eyny的支援。
 ----------------------------------------------------------------------------------------------------
  */
@@ -28,6 +29,7 @@ public class ParseEynyNovel extends ParseCKNovel {
     protected String indexEncodeName;
     protected String baseURL;
     protected int floorCountInOnePage; // 一頁有幾層樓
+    protected String cookie;
 
     /**
     
@@ -41,9 +43,11 @@ public class ParseEynyNovel extends ParseCKNovel {
         jsName = "index_eyny_novel.js";
         radixNumber = 156661; // default value, not always be useful!!
 
-        baseURL = "http://www03.eyny.com/archiver";
+        baseURL = "http://www03.eyny.com";
 
         floorCountInOnePage = 10; // 一頁有幾層樓
+        
+        cookie = "djAX_e8d7_agree=6; "; // 因應分級頁面
     }
 
     @Override
@@ -62,7 +66,7 @@ public class ParseEynyNovel extends ParseCKNovel {
         NumberFormat formatter = new DecimalFormat( Common.getZero() );
         while ( Run.isAlive ) {
             if ( !new File( getDownloadDirectory() + formatter.format( p + 1 ) + ".html" ).exists() ) {
-                singlePageDownload( getTitle(), getWholeTitle(), pageURL, totalPage, p, 0 ); // 每解析一個網址就下載一張圖
+                singlePageDownload( getTitle(), getWholeTitle(), pageURL, totalPage, p, 0, true, cookie, "", false ); // 每解析一個網址就下載一張圖
             }
             else {
                 Common.debugPrintln( "第" + p + "頁已存在，跳過" );
@@ -85,7 +89,7 @@ public class ParseEynyNovel extends ParseCKNovel {
             else { // 取得下一頁的位址
                 beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
                 endIndex = tempString.indexOf( "\"", beginIndex );
-                pageURL = baseURL + "/" + tempString.substring( beginIndex, endIndex );
+                pageURL = baseURL + "/archiver/" + tempString.substring( beginIndex, endIndex );
                 Common.debugPrintln( "繼續下一頁：" + p + "  " + pageURL );
 
                 endIndex = tempString.lastIndexOf( "</a>" );
@@ -93,15 +97,13 @@ public class ParseEynyNovel extends ParseCKNovel {
                 totalPage = Integer.parseInt( tempString.substring( beginIndex, endIndex ) );
             }
         }
-        
+
         if ( Run.isAlive ) {
             hadleWholeNovel( webSite );  // 處理小說主函式
         }
     }
 
-        // 處理小說主函式
-    
-
+    // 處理小說主函式
     public void hadleWholeNovel( String url ) {
         String allPageString = "";
         String allNovelText = getInformation( title, url ); // 全部頁面加起來小說文字
@@ -200,9 +202,32 @@ public class ParseEynyNovel extends ParseCKNovel {
 
     // 將原本頁面轉為庫存頁面
     public String changeToArchiverPage( String urlString ) {
-        if ( !urlString.matches( "(?s).*/archiver/(?s).*" ) ) {
-            urlString = urlString.replaceAll( "/forum-", "/archiver/fid-" ); // 更換清單頁面的網址
-            urlString = urlString.replaceAll( "/thread-", "/archiver/tid-" ); // 更換閱讀頁面的網址
+        if ( !urlString.matches( "(?s).*/archiver/(?s).*" ) ) { // 不是庫頁存檔的網址
+            if ( urlString.matches( "(?s).*forum\\.php\\?(?s).*" ) ) { // 經過資料庫處理的位址
+                if ( urlString.matches( "(?s).*&tid=(?s).*" ) ) { // 文章頁面      
+                    // 先取得tid
+                    int beginIndex = urlString.indexOf( "&tid=" );
+                    beginIndex = urlString.indexOf( "=", beginIndex ) + 1;
+                    int endIndex = urlString.indexOf( "&", beginIndex );
+                    String tid = urlString.substring( beginIndex, endIndex );
+
+                    // 再取得page
+                    beginIndex = urlString.indexOf( "page%" );
+                    beginIndex = urlString.indexOf( "%", beginIndex ) + 1;
+                    endIndex = urlString.indexOf( "%", beginIndex );
+                    String page = urlString.substring( beginIndex, endIndex );
+
+                    urlString = baseURL + "/archiver/tid-" + tid + "-" + page + ".html";
+                }
+                else if ( urlString.matches( "(?s).*&fid=(?s).*" ) ) { // 清單頁面    
+                    // 因為經過處理的清單頁面沒有對應的庫頁存檔頁面，因此不轉換
+                }
+
+            }
+            else {
+                urlString = urlString.replaceAll( "/forum-", "/archiver/fid-" ); // 更換清單頁面的網址
+                urlString = urlString.replaceAll( "/thread-", "/archiver/tid-" ); // 更換閱讀頁面的網址
+            }
         }
 
         return urlString;
@@ -213,7 +238,7 @@ public class ParseEynyNovel extends ParseCKNovel {
         urlString = changeToArchiverPage( urlString ); // 將原本頁面轉為庫存頁面
 
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_eyny_", "html" );
-        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, true, cookie );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
@@ -238,12 +263,12 @@ public class ParseEynyNovel extends ParseCKNovel {
 
         return Common.getStringRemovedIllegalChar( title );
     }
-    
+
     // 設置基本位址
     public void setBaseURL( String urlString ) {
         // 因為不一定是www03.eyny.com，故隨當前位址轉換基本位址
-        urlString = changeToArchiverPage( urlString ); // 將原本頁面轉為庫存頁面
-        int endIndex = urlString.indexOf( "archiver" );
+
+        int endIndex = urlString.indexOf( "eyny.com" );
         endIndex = urlString.indexOf( "/", endIndex );
         baseURL = urlString.substring( 0, endIndex );
     }
@@ -260,7 +285,9 @@ public class ParseEynyNovel extends ParseCKNovel {
 
         setBaseURL( urlString ); // 設置基本位址
 
-        if ( urlString.matches( "(?s).*/tid-(?s).*" ) || urlString.matches( "(?s).*/thread-(?s).*" ) ) { // 網址為文章頁面 
+        if ( urlString.matches( "(?s).*/tid-(?s).*" )
+                || urlString.matches( "(?s).*/thread-(?s).*" )
+                || urlString.matches( "(?s).*&tid=(?s).*" ) ) { // 網址為文章頁面 
             // 取得單集名稱
             String volumeTitle = getTitle();
             volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
@@ -271,27 +298,60 @@ public class ParseEynyNovel extends ParseCKNovel {
             totalVolume = 1;
         }
         else {
-            beginIndex = allPageString.indexOf( "<li>" );
-            endIndex = allPageString.lastIndexOf( "</ul>" );
-            String tempString = allPageString.substring( beginIndex, endIndex );
+            if ( urlString.matches( "(?s).*&fid=(?s).*" ) ) { // 動態產生的清單頁面
 
-            totalVolume = tempString.split( " href=" ).length - 1;
-            beginIndex = endIndex = 0;
-            String pageName = ""; // 頁面名稱
-            String volumeTitle = "";
-            for ( int i = 0 ; i < totalVolume ; i++ ) {
-                // 取得單集位址
-                beginIndex = tempString.indexOf( " href=", beginIndex );
-                beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "\"", beginIndex );
-                pageName = tempString.substring( beginIndex, endIndex );
-                urlList.add( baseURL + "/" + pageName );
+                beginIndex = allPageString.indexOf( "id=\"separatorline\"" );
+                endIndex = allPageString.lastIndexOf( "</td><td class=\"by\">" );
+                String tempString = allPageString.substring( beginIndex, endIndex );
 
-                // 取得單集名稱
-                beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "</a>", beginIndex );
-                volumeTitle = tempString.substring( beginIndex, endIndex );
-                volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
+                totalVolume = tempString.split( "class=\"xst\"" ).length - 1;
+                beginIndex = endIndex = 0;
+                String pageName = ""; // 頁面名稱
+                String volumeTitle = "";
+                for ( int i = 0 ; i < totalVolume ; i++ ) {
+
+                    // 取得單集名稱
+                    beginIndex = tempString.indexOf( "class=\"xst\"", beginIndex );
+                    beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+                    endIndex = tempString.indexOf( "</a>", beginIndex );
+                    volumeTitle = tempString.substring( beginIndex, endIndex );
+                    volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
+
+                     // 取得單集位址
+                    beginIndex = tempString.lastIndexOf( " href=", beginIndex );
+                    beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
+                    endIndex = tempString.indexOf( "\"", beginIndex );
+                    pageName = tempString.substring( beginIndex, endIndex );
+                    pageName = pageName.replaceAll( "amp;", "" );
+                    urlList.add( baseURL + "/" + pageName );
+                    
+                    beginIndex = tempString.indexOf( "class=\"xst\"", beginIndex ) + 1;
+                }
+            }
+            else { // 靜態的清單頁面
+
+                beginIndex = allPageString.indexOf( "<li>" );
+                endIndex = allPageString.lastIndexOf( "</ul>" );
+                String tempString = allPageString.substring( beginIndex, endIndex );
+
+                totalVolume = tempString.split( " href=" ).length - 1;
+                beginIndex = endIndex = 0;
+                String pageName = ""; // 頁面名稱
+                String volumeTitle = "";
+                for ( int i = 0 ; i < totalVolume ; i++ ) {
+                    // 取得單集位址
+                    beginIndex = tempString.indexOf( " href=", beginIndex );
+                    beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
+                    endIndex = tempString.indexOf( "\"", beginIndex );
+                    pageName = tempString.substring( beginIndex, endIndex );
+                    urlList.add( baseURL + "/archiver/" + pageName );
+
+                    // 取得單集名稱
+                    beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+                    endIndex = tempString.indexOf( "</a>", beginIndex );
+                    volumeTitle = tempString.substring( beginIndex, endIndex );
+                    volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
+                }
             }
 
 

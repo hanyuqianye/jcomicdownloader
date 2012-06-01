@@ -1016,6 +1016,10 @@ public class Common {
         {
             title = title.substring( 0, title.length() - 2 );
         }
+        else if ( title.matches( "在線 (?s).+" ) ) // 拿掉[在線 ]字尾
+        {
+            title = title.substring( 3, title.length() );
+        }
 
         return title.trim();
     }

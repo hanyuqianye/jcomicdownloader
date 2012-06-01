@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2012/5/17
+Last Modified : 2012/6/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 4.06: 1. 修復非php頁面無法解析的問題。
  * 4.03: 1. 修改Wenku模組，使其可輸出單回文字檔與合併文字檔。
  *  4.01: 1. 新增對Wenku的支援。
 ----------------------------------------------------------------------------------------------------
@@ -64,6 +65,8 @@ public class ParseWenku extends ParseOnlineComicSite {
     @Override
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
         // 先取得前面的下載伺服器網址
+        
+        webSite = getPhpURL( webSite );
 
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
@@ -100,7 +103,7 @@ public class ParseWenku extends ParseOnlineComicSite {
                     Common.getTraditionalChinese(
                     tempString.substring( beginIndex, endIndex ).trim() ) ) + "." + Common.getDefaultTextExtension();
             // 每解析一個網址就下載一張圖
-            if ( !new File( getDownloadDirectory() + titles[i] ).exists() ) {
+            if ( !new File( getDownloadDirectory() + titles[i] ).exists() && Run.isAlive ) {
                 singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage, i + 1, 0 );
                 String fileName = formatter.format( i + 1 ) + ".htm";
                 hadleSingleNovel( fileName, titles[i] );  // 處理單一小說主函式
@@ -122,7 +125,7 @@ public class ParseWenku extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始執行合併程序：" );
         Common.debugPrintln( "共有" + (titles.length) + "篇" );
-        for ( int i = 0 ; i < titles.length ; i++ ) {
+        for ( int i = 0 ; i < titles.length && Run.isAlive ; i++ ) {
             Common.debugPrintln( "合併第" + (i + 1) + "篇: " + titles[i] );
             allNovelText += Common.getFileString( getDownloadDirectory(), titles[i] );
 
@@ -198,6 +201,8 @@ public class ParseWenku extends ParseOnlineComicSite {
 
     @Override // 因為原檔就是utf8了，所以無須轉碼
     public String getAllPageString( String urlString ) {
+        urlString = getPhpURL( urlString ); // 若是一般htm網頁，轉為php網頁
+
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_wenku_", "html" );
         String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_wenku_encode_", "html" );
 
@@ -205,6 +210,21 @@ public class ParseWenku extends ParseOnlineComicSite {
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+    }
+
+    // index.htm
+    public String getPhpURL( String url ) {
+        if ( url.matches( "(?s).*index.htm" ) ) {
+            int beginIndex = url.indexOf( "index.htm" );
+            int endIndex = url.lastIndexOf( "/", beginIndex );
+            beginIndex = url.lastIndexOf( "/", endIndex - 1 ) + 1;
+            String num = url.substring( beginIndex, endIndex );
+
+            url = "http://www.wenku.com/articleinfo.php?id=" + num;
+            Common.debugPrintln( "網址轉為：" + url );
+        }
+
+        return url;
     }
 
     @Override
@@ -241,6 +261,7 @@ public class ParseWenku extends ParseOnlineComicSite {
             title += "第" + allPageString.substring( beginIndex, endIndex ).trim() + "頁";
         }
         else {
+
             beginIndex = allPageString.indexOf( " -> " );
             beginIndex = allPageString.indexOf( "<font", beginIndex );
             beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
@@ -251,6 +272,15 @@ public class ParseWenku extends ParseOnlineComicSite {
             beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
             endIndex = allPageString.indexOf( "<", beginIndex );
             title += "-" + allPageString.substring( beginIndex, endIndex ).trim();
+            /*
+            else { // 第二種小說頁面
+            beginIndex = allPageString.indexOf( "<title>" );
+            beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "--", beginIndex );
+            title = allPageString.substring( beginIndex, endIndex ).trim();
+            }
+             * 
+             */
         }
 
         return Common.getStringRemovedIllegalChar(
