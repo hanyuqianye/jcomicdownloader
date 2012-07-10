@@ -36,6 +36,7 @@ public class ParseKUKU extends ParseOnlineComicSite {
  */
     public ParseKUKU() {
         siteID = Site.KUKU;
+        siteName = "kuku";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kuku_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kuku_encode_parse_", "html" );
 
@@ -126,15 +127,6 @@ public class ParseKUKU extends ParseOnlineComicSite {
         }
         //System.exit( 0 ); // debug
     }
-
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "title  = " + title );
-        Common.debugPrintln( "wholeTitle  = " + wholeTitle );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
     
     @Override
     public boolean isSingleVolumePage( String urlString ) {
@@ -210,24 +202,10 @@ public class ParseKUKU extends ParseOnlineComicSite {
             
         return combinationList;
     }
-    
+
     @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-    
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName };
-    }
-    
-    @Override
-    public void printLogo() {
-        System.out.println( " __________________________" );
-        System.out.println( "|                      " );
-        System.out.println( "| Run the KUKU module: " );
-        System.out.println( "|__________________________\n" );
+    public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
+        throw new UnsupportedOperationException( "Not supported yet." );
     }
 }
 

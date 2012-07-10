@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2012/5/29
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ *  4.11: 1. 修復pixnet.net無法取得全部標籤的問題。
  *  4.04: 1. 新增對pixnet.net的支援。
 ----------------------------------------------------------------------------------------------------
  */
@@ -13,10 +14,12 @@ package jcomicdownloader.module;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import jcomicdownloader.tools.*;
-import jcomicdownloader.enums.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import jcomicdownloader.SetUp;
+import jcomicdownloader.enums.FileFormatEnum;
+import jcomicdownloader.enums.Site;
+import jcomicdownloader.tools.Common;
 
 public class ParsePixnetBlog extends ParseOnlineComicSite {
 
@@ -33,6 +36,7 @@ public class ParsePixnetBlog extends ParseOnlineComicSite {
      */
     public ParsePixnetBlog() {
         siteID = Site.PIXNET_BLOG;
+        siteName = "Pixnet Blog";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_pixnet_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_pixnet_encode_parse_", "html" );
 
@@ -265,8 +269,8 @@ public class ParsePixnetBlog extends ParseOnlineComicSite {
         beginIndex = allPageString.indexOf( "id=\"category\"" );
         if ( beginIndex > 0 ) { // 代表有標籤分類
             Common.debugPrintln( "有標籤分類" );
-            beginIndex = allPageString.indexOf( "<ul>", beginIndex );
-            endIndex = allPageString.indexOf( "</ul>", beginIndex );
+            beginIndex = allPageString.indexOf( "<ul", beginIndex );
+            endIndex = allPageString.indexOf( "#category", beginIndex );
             tempString = allPageString.substring( beginIndex, endIndex );
             int labelCount = tempString.split( " href=" ).length - 1; //計算有幾種標籤
 
@@ -294,25 +298,6 @@ public class ParsePixnetBlog extends ParseOnlineComicSite {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the Pixnet Blog module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }
 

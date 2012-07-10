@@ -11,14 +11,12 @@ ChangeLog:
 package jcomicdownloader.module;
 
 import java.io.File;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import jcomicdownloader.tools.*;
-import jcomicdownloader.enums.*;
-import java.util.*;
+import java.util.Arrays;
 import jcomicdownloader.ComicDownGUI;
 import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Encoding;
+import jcomicdownloader.enums.Site;
+import jcomicdownloader.tools.Common;
 
 public class ParseMyBest extends ParseCKNovel {
 
@@ -34,6 +32,7 @@ public class ParseMyBest extends ParseCKNovel {
      */
     public ParseMyBest() {
         siteID = Site.MYBEST;
+        siteName = "Mybest";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mybest_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mybest_encode_parse_", "html" );
 
@@ -99,13 +98,13 @@ public class ParseMyBest extends ParseCKNovel {
         }
         
         //System.exit( 0 ); // debug
-        hadleWholeNovel( webSite );  // 處理小說主函式
+        hadleWholeNovel( webSite, "", null );  // 處理小說主函式
         
     }
     
     // 處理小說主函式
     @Override
-    public void hadleWholeNovel( String url ) {
+    public void hadleWholeNovel( String url, String author, String coverURL ) {
         String allPageString = "";
         String allNovelText = getInformation( title, url ); // 全部頁面加起來小說文字
         
@@ -134,9 +133,9 @@ public class ParseMyBest extends ParseCKNovel {
 
         String textOutputDirectory = tempString.substring( 0, endIndex ); // 放在外面
         
-        if ( SetUp.getDeleteOriginalPic() ) { // 若有勾選原檔就刪除原始未合併文件
+        //if ( SetUp.getDeleteOriginalPic() ) { // 若有勾選原檔就刪除原始未合併文件
             Common.deleteFolder( getDownloadDirectory() ); // 刪除存放原始網頁檔的資料夾
-        }
+        //}
         Common.outputFile(  allNovelText, textOutputDirectory, getWholeTitle() + "." + Common.getDefaultTextExtension() );
         
         textFilePath = textOutputDirectory + getWholeTitle() + "." + Common.getDefaultTextExtension();
@@ -153,13 +152,5 @@ public class ParseMyBest extends ParseCKNovel {
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.BIG5 );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the MyBest module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

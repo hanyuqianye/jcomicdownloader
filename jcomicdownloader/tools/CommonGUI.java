@@ -1,36 +1,38 @@
 /*
-----------------------------------------------------------------------------------------------------
-Program Name : JComicDownloader
-Authors  : surveyorK
-Last Modified : 2011/11/1
-----------------------------------------------------------------------------------------------------
-ChangeLog:
-1.09: 加入書籤表格和紀錄表格相關的公用方法
-----------------------------------------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------
+ Program Name : JComicDownloader
+ Authors  : surveyorK
+ Last Modified : 2011/11/1
+ ----------------------------------------------------------------------------------------------------
+ ChangeLog:
+ 1.09: 加入書籤表格和紀錄表格相關的公用方法
+ ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.tools;
 
 import java.awt.*;
-import jcomicdownloader.*;
-
-import javax.swing.*;
-import javax.imageio.*;
-import java.net.URL;
-import java.io.*;
-import java.lang.reflect.Constructor;
+import java.io.File;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import jcomicdownloader.ComicDownGUI;
+import jcomicdownloader.SetUp;
 import jcomicdownloader.frame.OptionFrame;
 import jcomicdownloader.module.Run;
 
 /**
 
-少部份的通用方法放在這邊，大都與視窗界面有相關。
+ 少部份的通用方法放在這邊，大都與視窗界面有相關。
  */
 public class CommonGUI {
 
@@ -43,7 +45,10 @@ public class CommonGUI {
     // 背景圖如果照正常貼上去，開出來的frame會比原圖小一點，所以需要修正。
     public static int widthGapOfBackgroundPic = 2;
     public static int heightGapOfBackgroundPic = 33;
-
+    public static int optionDialogChoice = -1; // OptionDialog視窗的選擇
+    public static String showInputDialogValue = "IntialValue"; // OptionDialog視窗輸入的值
+    public static boolean showMessageOK = false;
+    
     public CommonGUI() {
         resourceFolder = "resource/";
     }
@@ -65,7 +70,7 @@ public class CommonGUI {
         // set white space in the Label
         URL url = getResourceURL( "tansparent.png" );
         return new JLabel( "<html><img align=\"center\" src="
-                + url + " width=\"" + size + "\" height=\"" + size + "\"/></html>" );
+            + url + " width=\"" + size + "\" height=\"" + size + "\"/></html>" );
     }
 
     public JPanel getCenterPanel( Component comp ) { // make fixed border around
@@ -93,10 +98,10 @@ public class CommonGUI {
         return word;
 
         /*
-        return "<html><font face='文鼎細明體' size='6' >" +
-        word +
-        "</font></html>";
-        
+         return "<html><font face='文鼎細明體' size='6' >" +
+         word +
+         "</font></html>";
+
          */
     }
 
@@ -116,7 +121,7 @@ public class CommonGUI {
     }
 
     public Image getImage( String picName ) {
-        return ((ImageIcon) getImageIcon( picName )).getImage();
+        return ( ( ImageIcon ) getImageIcon( picName ) ).getImage();
     }
 
     public String getButtonPic( String picName ) {
@@ -137,7 +142,7 @@ public class CommonGUI {
 
     public static int getSumOfTrue( boolean[] bool ) {
         int count = 0;
-        for ( int i = 0 ; i < bool.length ; i++ ) {
+        for ( int i = 0; i < bool.length; i++ ) {
             if ( bool[i] ) {
                 count++;
             }
@@ -149,7 +154,7 @@ public class CommonGUI {
     public static int getSumOfTrue( String[] boolStrings ) {
         int count = 0;
 
-        for ( int i = 0 ; i < boolStrings.length ; i++ ) {
+        for ( int i = 0; i < boolStrings.length; i++ ) {
             if ( boolStrings[i] != null && boolStrings[i].equals( "true" ) ) {
                 count++;
             }
@@ -174,7 +179,7 @@ public class CommonGUI {
     public static Vector<Object> getBookmarkDataRow( int order, String title, String url ) {
         Date date = new Date(); // 取得目前時間
         DateFormat shortFormat = DateFormat.getDateTimeInstance(
-                DateFormat.SHORT, DateFormat.SHORT );
+            DateFormat.SHORT, DateFormat.SHORT );
 
         Vector<Object> row = new Vector<Object>();
 
@@ -190,7 +195,7 @@ public class CommonGUI {
     public static Vector<Object> getRecordDataRow( int order, String title, String url ) {
         Date date = new Date(); // 取得目前時間
         DateFormat shortFormat = DateFormat.getDateTimeInstance(
-                DateFormat.SHORT, DateFormat.SHORT );
+            DateFormat.SHORT, DateFormat.SHORT );
 
         Vector<Object> row = new Vector<Object>();
 
@@ -213,7 +218,7 @@ public class CommonGUI {
         UIManager.LookAndFeelInfo looks[] = UIManager.getInstalledLookAndFeels();
 
         int gtkOrder = -1;
-        for ( int i = 0 ; i < looks.length ; i++ ) {
+        for ( int i = 0; i < looks.length; i++ ) {
             if ( looks[i].getClassName().matches( ".*GTK.*" ) ) {
                 gtkOrder = i;
             }
@@ -293,7 +298,7 @@ public class CommonGUI {
             "org.pushingpixels.substance.api.skin.SubstanceOfficeSilver2007LookAndFeel",
             "org.pushingpixels.substance.api.skin.SubstanceRavenLookAndFeel",
             "org.pushingpixels.substance.api.skin.SubstanceSaharaLookAndFeel",
-            "org.pushingpixels.substance.api.skin.SubstanceTwilightLookAndFeel", };
+            "org.pushingpixels.substance.api.skin.SubstanceTwilightLookAndFeel",};
 
         return substanceClassNames;
     }
@@ -301,19 +306,19 @@ public class CommonGUI {
     // 是否為暗色風格的介面
     public static boolean isDarkSytleSkin( String skinName ) {
         if ( skinName.matches( ".*HiFi.*" )
-                || skinName.matches( ".*Noire.*" )
-                || skinName.matches( ".*Night.*" )
-                || skinName.matches( ".*DarkGrey.*" )
-                || skinName.matches( ".*DarkTabaco.*" )
-                || skinName.matches( ".*Burdeos.*" )
-                || skinName.matches( ".*ChallengerDeep.*" )
-                || skinName.matches( ".*EmeraldDusk.*" )
-                || skinName.matches( ".*GraphiteAqua.*" )
-                || skinName.matches( ".*GraphiteGlass.*" )
-                || skinName.matches( ".*Graphite.*" )
-                || skinName.matches( ".*Magellan.*" )
-                || skinName.matches( ".*Raven.*" )
-                || skinName.matches( ".*Twilight.*" ) ) {
+            || skinName.matches( ".*Noire.*" )
+            || skinName.matches( ".*Night.*" )
+            || skinName.matches( ".*DarkGrey.*" )
+            || skinName.matches( ".*DarkTabaco.*" )
+            || skinName.matches( ".*Burdeos.*" )
+            || skinName.matches( ".*ChallengerDeep.*" )
+            || skinName.matches( ".*EmeraldDusk.*" )
+            || skinName.matches( ".*GraphiteAqua.*" )
+            || skinName.matches( ".*GraphiteGlass.*" )
+            || skinName.matches( ".*Graphite.*" )
+            || skinName.matches( ".*Magellan.*" )
+            || skinName.matches( ".*Raven.*" )
+            || skinName.matches( ".*Twilight.*" ) ) {
             return true;
         }
         else {
@@ -460,17 +465,30 @@ public class CommonGUI {
 
         String[] classNames = new String[allClassNameList.size()];
         Object[] objects = allClassNameList.toArray();
-        for ( int i = 0 ; i < objects.length ; i++ ) {
+        for ( int i = 0; i < objects.length; i++ ) {
             classNames[i] = objects[i].toString();
         }
 
         return classNames;
     }
-    
+
+    // 取得所有預設的小說封面搜尋過程中的挑選數量（挑前n個）
+    public String[] getCoverStrings() {
+
+        return new String[]{"取搜尋到的第1張圖當作封面", "從搜尋到的前5張圖挑出封面",
+                "從搜尋到的前10張圖挑出封面", "從搜尋到的前15張圖挑出封面", "從搜尋到的前20張圖挑出封面"};
+    }
+
     // 取得所有預設語言的名稱
     public String[] getLanguageStrings() {
-        
-        return new String[] { "正體中文", "简体中文" };
+
+        return new String[]{"正體中文", "简体中文"};
+    }
+
+    // 取得所有預設語言的名稱
+    public String[] getShellScriptStrings() {
+
+        return new String[]{"bash", "sh", "csh", "ksh", "powershell"};
     }
 
     // 取得預設所有skins和jtattoo所有skins的名稱
@@ -503,7 +521,7 @@ public class CommonGUI {
 
         String[] skinNames = new String[allSkinNameList.size()];
         Object[] objects = allSkinNameList.toArray();
-        for ( int i = 0 ; i < objects.length ; i++ ) {
+        for ( int i = 0; i < objects.length; i++ ) {
             skinNames[i] = objects[i].toString();
         }
 
@@ -515,7 +533,7 @@ public class CommonGUI {
         String[] classNames = getClassNames();
 
         int gtkOrder = -1;
-        for ( int i = 0 ; i < classNames.length ; i++ ) {
+        for ( int i = 0; i < classNames.length; i++ ) {
             if ( classNames[i].equals( skinClassName ) ) {
                 gtkOrder = i;
             }
@@ -542,7 +560,7 @@ public class CommonGUI {
         Class newClass = null;
         //Constructor constructor = null;
         try {
-            classLoader = new URLClassLoader( new URL[] { new URL( jarFileURL ) } );
+            classLoader = new URLClassLoader( new URL[]{new URL( jarFileURL )} );
             newClass = classLoader.loadClass( className );
             //constructor = newClass.getConstructor( null );
         }
@@ -597,7 +615,7 @@ public class CommonGUI {
         try {
             if ( className.matches( ".*NapkinLookAndFeel.*" ) ) {
                 Class napkinClass = getOuterClass( className, "napkinlaf-alpha001.jar" );
-                LookAndFeel laf = (LookAndFeel) getNewInstanceFromClass( napkinClass );
+                LookAndFeel laf = ( LookAndFeel ) getNewInstanceFromClass( napkinClass );
                 if ( laf != null ) {
                     UIManager.setLookAndFeel( laf );
                 }
@@ -614,7 +632,7 @@ public class CommonGUI {
         catch ( Exception ex ) {
             Common.errorReport( "無法使用" + className + "界面 !!" );
             try {
-                UIManager.setLookAndFeel( "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel" );
+                UIManager.setLookAndFeel( ComicDownGUI.getDefaultSkinClassName() );
             }
             catch ( Exception exx ) {
                 exx.printStackTrace();
@@ -635,30 +653,30 @@ public class CommonGUI {
         boolean foundJAR = false; // 是否有設定值需要用到的JAR檔
 
         if ( SetUp.getSkinClassName().matches( "com.jtattoo.plaf.*" )
-                && !new File( Common.getNowAbsolutePath() + jtattooFileName ).exists() ) {
+            && ( !new File( Common.getNowAbsolutePath() + jtattooFileName ).exists() ) ) {
             new CommonGUI().downloadNewTheme( "JTattoo", jtattooFileName,
-                    "http://jcomicdownloader.googlecode.com/files/JTattoo.jar" ); // 下載JTattoo.jar
+                "http://jcomicdownloader.googlecode.com/files/JTattoo.jar" ); // 下載JTattoo.jar
         }
         else if ( SetUp.getSkinClassName().matches( "com.nilo.plaf.nimrod.*" )
-                && !new File( Common.getNowAbsolutePath() + nimrodFileName ).exists() ) {
+            && ( !new File( Common.getNowAbsolutePath() + nimrodFileName ).exists() ) ) {
             new CommonGUI().downloadNewTheme( "NimRod", nimrodFileName,
-                    "http://jcomicdownloader.googlecode.com/files/nimrodlf-1.2.jar" ); // 下載nimrodlf-1.2.jar
+                "http://jcomicdownloader.googlecode.com/files/nimrodlf-1.2.jar" ); // 下載nimrodlf-1.2.jar
         }
         else if ( SetUp.getSkinClassName().matches( ".*NapkinLookAndFeel.*" )
-                && !new File( Common.getNowAbsolutePath() + napkinFileName ).exists() ) {
+            && ( !new File( Common.getNowAbsolutePath() + napkinFileName ).exists() ) ) {
             new CommonGUI().downloadNewTheme( "Napkin", napkinFileName,
-                    "https://sites.google.com/site/jcomicdownloaderbackup/release/napkinlaf-alpha001.jar?attredirects=0&d=1" ); // 下載napkinlaf-alpha001.jar
+                "https://sites.google.com/site/jcomicdownloaderbackup/release/napkinlaf-alpha001.jar?attredirects=0&d=1" ); // 下載napkinlaf-alpha001.jar
         }
         else if ( SetUp.getSkinClassName().matches( ".*substance.api.skin.*" )
-                && (!new File( Common.getNowAbsolutePath() + substanceFileName ).exists()
-                || !new File( Common.getNowAbsolutePath() + tridentFileName ).exists()) ) {
-            String[] themeNames = new String[] { "Substance", "Trident" };
-            String[] fileNames = new String[] { substanceFileName, tridentFileName };
-            String[] urls = new String[] {
+            && ( !new File( Common.getNowAbsolutePath() + substanceFileName ).exists()
+            || !new File( Common.getNowAbsolutePath() + tridentFileName ).exists() ) ) {
+            String[] themeNames = new String[]{"Substance", "Trident"};
+            String[] fileNames = new String[]{substanceFileName, tridentFileName};
+            String[] urls = new String[]{
                 "https://sites.google.com/site/jcomicdownloaderbackup/release/substance-6.1.jar?attredirects=0&d=1",
-                "https://sites.google.com/site/jcomicdownloaderbackup/release/trident.jar?attredirects=0&d=1" };
+                "https://sites.google.com/site/jcomicdownloaderbackup/release/trident.jar?attredirects=0&d=1"};
             new CommonGUI().downloadNewTheme( themeNames, fileNames,
-                    urls ); // 
+                urls ); // 
         }
         else {
             foundJAR = true;
@@ -670,16 +688,16 @@ public class CommonGUI {
 
     // 下載單一個jar檔
     public void downloadNewTheme( String themeName,
-            final String themeFileName, final String themeURL ) {
+        final String themeFileName, final String themeURL ) {
 
-        downloadNewTheme( new String[] { themeName },
-                new String[] { themeFileName },
-                new String[] { themeURL } );
+        downloadNewTheme( new String[]{themeName},
+            new String[]{themeFileName},
+            new String[]{themeURL} );
     }
 
     // 下載多個jar檔
     public void downloadNewTheme( String[] themeNames,
-            final String[] themeFileNames, final String[] themeURLs ) {
+        final String[] themeFileNames, final String[] themeURLs ) {
         String skinName = getSkinNameFromClassName( SetUp.getSkinClassName() );
 
         String tempString = "";
@@ -687,7 +705,7 @@ public class CommonGUI {
             tempString += string + ", ";
         }
         tempString =
-                tempString.substring( 0, tempString.length() - 2 );
+            tempString.substring( 0, tempString.length() - 2 );
 
         final String themeFileNameString = tempString;
 
@@ -696,12 +714,12 @@ public class CommonGUI {
             themeNameString += string + ", ";
         }
         themeNameString =
-                themeNameString.substring( 0, themeNameString.length() - 2 );
+            themeNameString.substring( 0, themeNameString.length() - 2 );
 
         int choice = JOptionPane.showConfirmDialog( null, "資料夾內未發現"
-                + themeFileNameString + "，無法使用"
-                + skinName + "界面！\n\n請問是否要下載" + themeFileNameString + " ？",
-                "提醒訊息", JOptionPane.YES_NO_OPTION );
+            + themeFileNameString + "，無法使用"
+            + skinName + "界面！\n\n請問是否要下載" + themeFileNameString + " ？",
+            "提醒訊息", JOptionPane.YES_NO_OPTION );
 
         if ( choice == JOptionPane.YES_OPTION ) {
             Thread downThread = new Thread( new Runnable() {
@@ -712,17 +730,17 @@ public class CommonGUI {
                     boolean backupValue = Run.isAlive; // 備份原值
                     Run.isAlive = true;
 
-                    for ( int i = 0 ; i < themeURLs.length ; i++ ) {
+                    for ( int i = 0; i < themeURLs.length; i++ ) {
                         Common.downloadFile( themeURLs[i],
-                                Common.getNowAbsolutePath(), themeFileNames[i], false, "" );
+                            Common.getNowAbsolutePath(), themeFileNames[i], false, "" );
                     }
                     Run.isAlive = backupValue; // 還原原值
 
                     CommonGUI.showMessageDialog( ComicDownGUI.mainFrame,
-                            themeFileNameString + "下載完畢，程式即將關閉，請您再次啟動",
-                            "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                        themeFileNameString + "下載完畢，程式即將關閉，請您再次啟動",
+                        "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
 
-                    ComicDownGUI.exit(); // 結束程式
+                    Common.restartApplication(); // 重新開啟程式
 
                     //} } );
                 }
@@ -733,8 +751,8 @@ public class CommonGUI {
             skinName = getSkinNameFromClassName( ComicDownGUI.getDefaultSkinClassName() );
             SetUp.setSkinClassName( ComicDownGUI.getDefaultSkinClassName() );
             CommonGUI.showMessageDialog( ComicDownGUI.mainFrame, "不下載" + themeFileNameString + "，使用預設的"
-                    + skinName + "界面",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                + skinName + "界面",
+                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
 
         }
     }
@@ -772,7 +790,7 @@ public class CommonGUI {
                         try {
                             Class newClass = Class.forName( frameClassName );
 
-                            JFrame frame = (JFrame) newClass.getConstructor().newInstance();
+                            JFrame frame = ( JFrame ) newClass.getConstructor().newInstance();
                             frame.setVisible( isVisible );
                         }
                         catch ( Exception ex ) {
@@ -792,7 +810,7 @@ public class CommonGUI {
                 ImageIcon icon = new ImageIcon( picFileString );
                 Image img = icon.getImage();
                 g.drawImage( img, 0, 0, icon.getIconWidth(),
-                        icon.getIconHeight(), icon.getImageObserver() );
+                    icon.getIconHeight(), icon.getImageObserver() );
                 //frame.setSize( icon.getIconWidth(), icon.getIconHeight() );
 
             }
@@ -808,22 +826,22 @@ public class CommonGUI {
     }
 
     public static void chooseFile( final Component thisComponent, final int type,
-            final String title, final JTextField textField, final String directoryString ) {
+        final String title, final JTextField textField, final String directoryString ) {
         chooseFile( thisComponent, type, title, textField, directoryString, null );
     }
 
     public static void chooseFile( final Component thisComponent, final int type,
-            final String title, final JTextField textField, final String directoryString,
-            final javax.swing.filechooser.FileFilter fileFilter ) {
+        final String title, final JTextField textField, final String directoryString,
+        final javax.swing.filechooser.FileFilter fileFilter ) {
 
         /*
-        if ( SetUp.getSkinClassName().matches( ".*napkin\\..*" ) ) {
-        CommonGUI.showMessageDialog( thisFrame,
-        "使用Napkin介面時無法開啟目錄視窗，\n\n請置換為其他介面後再選擇檔案或目錄",
-        "提醒視窗", JOptionPane.INFORMATION_MESSAGE );
-        
-        return;
-        }
+         if ( SetUp.getSkinClassName().matches( ".*napkin\\..*" ) ) {
+         CommonGUI.showMessageDialog( thisFrame,
+         "使用Napkin介面時無法開啟目錄視窗，\n\n請置換為其他介面後再選擇檔案或目錄",
+         "提醒視窗", JOptionPane.INFORMATION_MESSAGE );
+
+         return;
+         }
          */
 
         new Thread( new Runnable() {
@@ -849,7 +867,7 @@ public class CommonGUI {
                             dirChooser.setAccessory( preview );
                             //dirChooser.showOpenDialog( null );
                         }
-                        
+
                         dirChooser.setFileSelectionMode( type );
 
                         if ( fileFilter != null ) {
@@ -868,7 +886,7 @@ public class CommonGUI {
                                 String path = "";
 
                                 if ( file.getPath().matches( "(?s).*" + Common.getRegexSlash() )
-                                        || type == JFileChooser.FILES_ONLY ) { // 若是檔案就不須在最後加斜線
+                                    || type == JFileChooser.FILES_ONLY ) { // 若是檔案就不須在最後加斜線
                                     path = file.getPath();
                                 }
                                 else {
@@ -905,16 +923,16 @@ public class CommonGUI {
 
     // 取得由html包起來的tooltip字串，使用設定字型和背景顏色
     public static String getHtmlStringOfToolTip( String string ) {
-        int htmlFontSize = (int) (SetUp.getDefaultFontSize() / 4);
+        int htmlFontSize = ( int ) ( SetUp.getDefaultFontSize() / 4 );
         String htmlFontFace = SetUp.getDefaultFontName();
         return "<html><font face=\"" + htmlFontFace
-                + "\" size=\"" + htmlFontSize + "\"" + " bgcolor=\"" + "white" + "\" > " + string + "</font></html>";
+            + "\" size=\"" + htmlFontSize + "\"" + " bgcolor=\"" + "white" + "\" > " + string + "</font></html>";
     }
 
     // 用於tab和table
     public static String getToolTipString( String toolTipString ) {
         toolTipString = Common.getStringUsingDefaultLanguage( toolTipString ); // 使用預設語言 
-        
+
         if ( SetUp.getSkinClassName().matches( ".*napkin.*" ) ) {
             // 因為有可能變成透明而看不清楚
             return getHtmlStringOfToolTip( toolTipString );
@@ -927,36 +945,152 @@ public class CommonGUI {
     // 用於絕大多數的元件
     public static void setToolTip( JComponent componet, String toolTipString ) {
         toolTipString = Common.getStringUsingDefaultLanguage( toolTipString ); // 使用預設語言 
-        
+
         if ( SetUp.getSkinClassName().matches( ".*napkin.*" ) ) {
             // 因為有可能變成透明而看不清楚
             toolTipString = getHtmlStringOfToolTip( toolTipString );
         }
         componet.setToolTipText( toolTipString );
     }
-    
-    public static void showMessageDialog( Component parentComponent, String message, String title, int messageType ) {
+
+    public static void showMessageDialog( Component parentComponent,
+        String message, String title, int messageType ) {
         message = Common.getStringUsingDefaultLanguage( message ); // 使用預設語言 
         title = Common.getStringUsingDefaultLanguage( title ); // 使用預設語言 
-        
-        JOptionPane.showMessageDialog( parentComponent, message, title, messageType );
+
+        CommonGUI.showMessageDialogRun( parentComponent, message, title, messageType );
     }
-    
+
     public static void showMessageDialog( Component parentComponent, String message ) {
         message = Common.getStringUsingDefaultLanguage( message ); // 使用預設語言 
-        
+
         JOptionPane.showMessageDialog( parentComponent, message );
     }
-    
-    public static String showInputDialog(Component parentComponent, String message, String title, int messageType)  {
+
+    public static String showInputDialog( Component parentComponent, String message, String title, int messageType ) {
         message = Common.getStringUsingDefaultLanguage( message ); // 使用預設語言 
         title = Common.getStringUsingDefaultLanguage( title ); // 使用預設語言 
-        return JOptionPane.showInputDialog( parentComponent, message, title, messageType);
+        return CommonGUI.showInputDialogRun( parentComponent, message, title, messageType );
     }
-    
-    public static int showConfirmDialog(Component parentComponent, String message, String title, int optionType)  {
+
+    public static int showConfirmDialog( Component parentComponent, String message, String title, int optionType ) {
         message = Common.getStringUsingDefaultLanguage( message ); // 使用預設語言 
         title = Common.getStringUsingDefaultLanguage( title ); // 使用預設語言 
         return JOptionPane.showConfirmDialog( parentComponent, message, title, optionType );
+    }
+
+    public static int showOptionDialog( Component parentComponent,
+        Object message, String title, int optionType,
+        int messageType, Icon icon, Object[] options, Object initialValue ) {
+        message = Common.getStringUsingDefaultLanguage( message.toString() ); // 使用預設語言 
+        title = Common.getStringUsingDefaultLanguage( title ); // 使用預設語言 
+
+        return showOptionDialogRun( parentComponent, message, title, optionType,
+            messageType, icon, options, initialValue );
+    }
+
+    public static int showOptionDialogRun( final Component parentComponent,
+        final Object message, final String title, final int optionType,
+        final int messageType, final Icon icon, final Object[] options, Object initialValue ) {
+
+        SwingUtilities.invokeLater( new Runnable() {
+
+            public void run() {
+                try {
+                    CommonGUI.optionDialogChoice = JOptionPane.showOptionDialog( parentComponent, message,
+                        title, optionType, messageType, icon, options, options[0] );
+
+                    //notifyAll();
+                }
+                catch ( Exception ex ) {
+                    Common.errorReport( "更新界面時發生錯誤" );
+                    ex.printStackTrace();
+                }
+            }
+        } );
+
+        while ( CommonGUI.optionDialogChoice < 0 ) {
+            try {
+                // 每睡一秒就檢查一次
+                Thread.sleep( 1000 );
+            }
+            catch ( InterruptedException ex ) {
+                Common.hadleErrorMessage( ex, "無法讓Thread睡眠（sleep）" );
+            }
+        }
+
+        return CommonGUI.optionDialogChoice;
+    }
+
+    public static String showInputDialogRun( final Component parentComponent,
+        final String message, final String title, final int messageType ) {
+
+        SwingUtilities.invokeLater( new Runnable() {
+
+            public void run() {
+                try {
+                    CommonGUI.showInputDialogValue = JOptionPane.showInputDialog(
+                        parentComponent, message, title, messageType );
+
+                    //notifyAll();
+                }
+                catch ( Exception ex ) {
+                    Common.errorReport( "更新界面時發生錯誤" );
+                    ex.printStackTrace();
+                }
+            }
+        } );
+
+        while ( CommonGUI.showInputDialogValue.matches( "InitialValue" ) ) {
+            try {
+                // 每睡一秒就檢查一次
+                Thread.sleep( 1000 );
+            }
+            catch ( InterruptedException ex ) {
+                Common.hadleErrorMessage( ex, "無法讓Thread睡眠（sleep）" );
+            }
+        }
+
+        return CommonGUI.showInputDialogValue;
+    }
+
+    public static void showMessageDialogRun( final Component parentComponent,
+        final String message, final String title, final int messageType ) {
+        CommonGUI.showMessageOK  = false;
+        
+        
+        JOptionPane.showMessageDialog(
+                      parentComponent, message, title, messageType );
+        
+/*
+         SwingUtilities.invokeLater( new Runnable() {
+            public void run() {
+                try {
+                    JOptionPane.showMessageDialog(
+                      parentComponent, message, title, messageType );
+                }
+                catch ( Exception ex ) {
+                    Common.errorReport( "更新界面時發生錯誤" );
+                    ex.printStackTrace();
+                }
+                CommonGUI.showMessageOK = true;
+            }
+        } );
+        //CommonGUI.showMessageOK = true;
+        
+        System.out.println( CommonGUI.showMessageOK  );
+        
+        while ( !CommonGUI.showMessageOK ) {
+            try {
+                // 每睡0.5秒就檢查一次
+                Thread.sleep( 500 );
+                Common.debugPrint( "." );
+            }
+            catch ( InterruptedException ex ) {
+                Common.hadleErrorMessage( ex, "無法讓Thread睡眠（sleep）" );
+            }
+        }
+ */
+        
     }
 }

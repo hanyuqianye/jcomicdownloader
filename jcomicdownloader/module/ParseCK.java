@@ -30,6 +30,7 @@ public class ParseCK extends ParseOnlineComicSite {
      */
     public ParseCK() {
         siteID = Site.CK;
+        siteName = "CK101_Comic";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_ck_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_ck_encode_parse_", "html" );
 
@@ -275,13 +276,5 @@ public class ParseCK extends ParseOnlineComicSite {
     @Override
     public String[] getTempFileNames() {
         return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the CK101 module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

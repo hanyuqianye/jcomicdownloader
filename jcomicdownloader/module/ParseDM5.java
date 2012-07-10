@@ -37,6 +37,7 @@ public class ParseDM5 extends ParseOnlineComicSite {
      */
     public ParseDM5() {
         siteID = Site.DM5;
+        siteName = "dm5";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dm5_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mop_dm5_parse_", "html" );
 
@@ -323,13 +324,6 @@ public class ParseDM5 extends ParseOnlineComicSite {
         return integer;
     }
 
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
-
     @Override
     public String getAllPageString( String urlString ) {
         return getAllPageString( urlString, "" );
@@ -373,13 +367,6 @@ public class ParseDM5 extends ParseOnlineComicSite {
         Common.debugPrintln( "MAIN_URL: " + mainPageURL );
 
         return mainPageURL;
-    }
-
-    @Override
-    public String getTitleOnSingleVolumePage( String urlString ) {
-        String mainUrlString = getMainUrlFromSingleVolumeUrl( urlString );
-
-        return getTitleOnMainPage( mainUrlString, getAllPageString( mainUrlString ) );
     }
 
     @Override
@@ -462,22 +449,4 @@ public class ParseDM5 extends ParseOnlineComicSite {
         return combinationList;
     }
 
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[]{indexName, indexEncodeName, jsName};
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the DM5 module:     " );
-        System.out.println( "|_______________________________\n" );
-    }
 }

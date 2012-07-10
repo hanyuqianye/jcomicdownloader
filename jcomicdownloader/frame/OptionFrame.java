@@ -1,25 +1,25 @@
 /*
-----------------------------------------------------------------------------------------------------
-Program Name : JComicDownloader
-Authors  : surveyorK
-Last Modified : 2011/12/25
-----------------------------------------------------------------------------------------------------
-ChangeLog:
-2.11: 1. 增加取消勾選『分析後下載圖檔』時的提醒視窗。
-2.10: 1. 增加任務完成音效的選項。
-2.08: 1. 增加JTattoo介面選項。
-2.05: 1. 修復無法開啟壓縮檔的bug。（預設開啟圖片和壓縮檔為同個程式）
+ ----------------------------------------------------------------------------------------------------
+ Program Name : JComicDownloader
+ Authors  : surveyorK
+ Last Modified : 2011/12/25
+ ----------------------------------------------------------------------------------------------------
+ ChangeLog:
+ 2.11: 1. 增加取消勾選『分析後下載圖檔』時的提醒視窗。
+ 2.10: 1. 增加任務完成音效的選項。
+ 2.08: 1. 增加JTattoo介面選項。
+ 2.05: 1. 修復無法開啟壓縮檔的bug。（預設開啟圖片和壓縮檔為同個程式）
  *    2. 修復暫存資料夾路徑無法改變的bug。
-2.04: 1. 增加選擇紀錄檔和暫存資料夾的選項。
-2. 修改下拉式介面選單的渲染機制，使其可改變字型。 
-2.03: 1. 修改選項視窗為多面板介面。
-2. 增加下載失敗重試次數的選項。
-2.01: 1. 增加預設勾選全部集數的選項。 
-1.16: 勾選自動刪除就要連帶勾選自動壓縮。
-1.14: 增加可選擇字型和字體大小的選項
-1.09: 加入是否保留記錄的選項
-1.08: 讓logCheckBox來決定由cmd或由logFrame來輸出資訊
-----------------------------------------------------------------------------------------------------
+ 2.04: 1. 增加選擇紀錄檔和暫存資料夾的選項。
+ 2. 修改下拉式介面選單的渲染機制，使其可改變字型。 
+ 2.03: 1. 修改選項視窗為多面板介面。
+ 2. 增加下載失敗重試次數的選項。
+ 2.01: 1. 增加預設勾選全部集數的選項。 
+ 1.16: 勾選自動刪除就要連帶勾選自動壓縮。
+ 1.14: 增加可選擇字型和字體大小的選項
+ 1.09: 加入是否保留記錄的選項
+ 1.08: 讓logCheckBox來決定由cmd或由logFrame來輸出資訊
+ ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.frame;
 
@@ -41,18 +41,23 @@ import jcomicdownloader.module.Run;
 
 // 用於改變下拉式介面選單的渲染機制
 /**
-
-選項視窗
+ *
+ * 選項視窗
  */
 public class OptionFrame extends JFrame implements MouseListener {
     // about language
+
     private Object[][] languages;
     private String[] languageStrings;
+    private String[] shellScriptStrings;
     //private UIManager.LookAndFeelInfo looks[] = UIManager.getInstalledLookAndFeels();
     private String[] languageClassNames; // 存放所有介面類別名稱
+    private String[] coverStrings; // 存放可選擇的前面N張封面圖
     private JLabel languageLabel;
+    private JLabel shellScriptLabel;
     private JComboBox languageBox;
-    
+    private JComboBox shellScriptBox;
+    private JComboBox coverBox; // 選擇要取前面幾張封面圖
     // about skin
     private Object[][] skins;
     private String[] skinStrings;
@@ -62,14 +67,17 @@ public class OptionFrame extends JFrame implements MouseListener {
     private JComboBox skinBox;
     // about directory
     private JLabel dirLabel, tempDirLabel, recordDirLabel;
-    private JTextField singleDoneAudioTextField, allDoneAudioTextField;
-    private JLabel playSingleDoneAudioLabel, playAllDoneAudioLabel;
+    private JTextField singleDoneAudioTextField, allDoneAudioTextField; // 顯示音效檔位置
+    private JTextField singleDoneScriptTextField, allDoneScriptTextField; // 顯示腳本檔位置
+    private JLabel playSingleDoneAudioLabel, playAllDoneAudioLabel; // 點了會播放音效
     private JTextField dirTextField, recordDirTextField;
     public static JTextField tempDirTextField;
-    private JButton singleDoneAudioButton, allDoneAudioButton;
+    private JButton singleDoneAudioButton, allDoneAudioButton; // 選擇音效檔位置的按鈕
+    private JButton singleDoneScriptButton, allDoneScriptButton; // 選擇腳本檔位置的按鈕
     private JButton defaultSingleDoneAudioButton, defaultAllDoneAudioButton;
     private JButton dirButton, chooseFontButton, tempDirButton, recordDirButton;
     private JCheckBox singleDoneAudioCheckBox, allDoneAudioCheckBox; // 是否要開啟音效
+    private JCheckBox singleDoneScriptCheckBox, allDoneScriptCheckBox; // 是否要執行腳本
     private JCheckBox compressCheckBox; // about compress
     private JCheckBox deleteCheckBox;  // about delete
     private JCheckBox logCheckBox; // about log
@@ -80,6 +88,7 @@ public class OptionFrame extends JFrame implements MouseListener {
     private JCheckBox keepUndoneCheckBox;  // 是否保持未完成任務到下次開啟
     private JCheckBox trayMessageCheckBox;  // 縮小到系統框後是否顯示下載完成訊息
     private JCheckBox choiceAllVolumeCheckBox;  // 是否勾選全部集數
+    private JCheckBox coverCheckBox; // 是否一併下載小說封面圖
     private JTextField proxyServerTextField; // 輸入代理伺服器位址 ex. proxy.hinet.net
     private JTextField proxyPortTextField; // 輸入代理伺服器連接阜 ex. 80
     private JButton confirmButton;  // about confirm
@@ -88,6 +97,7 @@ public class OptionFrame extends JFrame implements MouseListener {
     //private String defaultColor; // 預設的建議設定顏色
     public static JFrame thisFrame; // use by self
     private JSlider retryTimesSlider, timeoutSlider;
+    private JSlider singleScriptWaitTimeSlider; // 單一任務腳本執行等待時間
     private JTabbedPane tabbedPane;
     private String tabLogoName = "tab_option.png";
     private JLabel viewPicFileLabel;
@@ -101,6 +111,7 @@ public class OptionFrame extends JFrame implements MouseListener {
     private JButton viewZipFileButton;
     public static JLabel retryTimesLabel;
     public static JLabel timeoutLabel;
+    public JLabel singleScriptWaitTimeLabel; // 單一任務腳本執行等待時間
     protected JPanel wholePanel;
     private Dimension frameDimension;
     JCheckBox usingBackgroundPicOfMainFrameCheckBox,
@@ -112,13 +123,12 @@ public class OptionFrame extends JFrame implements MouseListener {
     private JButton setBackgroundPicOfInformationFrameButton;
     private JButton setBackgroundPicOfOptionFrameButton;
     private JButton setBackgroundPicOfChoiceFrameButton;
-
     private JRadioButton zipRadioButtion, cbzRadioButtion;
     private JRadioButton txtRadioButtion, htmlRadioButtion;
 
     /**
-    
-    @author user
+     *
+     * @author user
      */
     public OptionFrame() {
         super( "選項設定" );
@@ -142,13 +152,12 @@ public class OptionFrame extends JFrame implements MouseListener {
 
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) {
             frameDimension = CommonGUI.getDimension( picFileString );
-            int width = (int) frameDimension.getWidth() + CommonGUI.widthGapOfBackgroundPic;
-            int height = (int) frameDimension.getHeight() + CommonGUI.heightGapOfBackgroundPic;
+            int width = ( int ) frameDimension.getWidth() + CommonGUI.widthGapOfBackgroundPic;
+            int height = ( int ) frameDimension.getHeight() + CommonGUI.heightGapOfBackgroundPic;
             setSize( width, height );
             setResizable( false );
-        }
-        else {
-            setSize( 700, 380 );
+        } else {
+            setSize( 800, 450 );
             setResizable( true );
         }
 
@@ -159,12 +168,11 @@ public class OptionFrame extends JFrame implements MouseListener {
 
         Container contentPane;
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) {
-            ((JPanel) getContentPane()).setOpaque( false );
+            ( ( JPanel ) getContentPane() ).setOpaque( false );
             contentPane = CommonGUI.getImagePanel( picFileString );
             contentPane.setPreferredSize( frameDimension );
             getContentPane().add( contentPane, BorderLayout.CENTER );
-        }
-        else {
+        } else {
             contentPane = getContentPane();
         }
         contentPane.setLayout( new BorderLayout() );
@@ -254,6 +262,14 @@ public class OptionFrame extends JFrame implements MouseListener {
                 CommonGUI.getToolTipString( "有關於背景圖片的設定" ) );
         tabbedPane.setMnemonicAt( 5, KeyEvent.VK_6 );
 
+
+        JPanel scriptTablePanel = new CommonGUI().getCenterPanel( new JPanel( new GridLayout( 1, 1 ) ) );
+        setScriptTablePanel( scriptTablePanel );
+        tabbedPane.addTab( getTabeHtmlFontString( "腳本" ), null, scriptTablePanel,
+                CommonGUI.getToolTipString( "有關於任務完成後執行腳本的設定" ) );
+        tabbedPane.setMnemonicAt( 7, KeyEvent.VK_8 );
+
+
         JPanel otherTablePanel = new CommonGUI().getCenterPanel( new JPanel( new GridLayout( 1, 1 ) ) );
         setOtherTablePanel( otherTablePanel );
         tabbedPane.addTab( getTabeHtmlFontString( "其他" ), null, otherTablePanel,
@@ -262,13 +278,15 @@ public class OptionFrame extends JFrame implements MouseListener {
 
 
 
+
+
         panel.add( tabbedPane, BorderLayout.CENTER );
     }
 
     private String getTabeHtmlFontString( String tabName ) {
         tabName = Common.getStringUsingDefaultLanguage( tabName ); // 使用預設語言 
-        
-        int htmlFontSize = (int) (SetUp.getDefaultFontSize() / 4 + 1);
+
+        int htmlFontSize = ( int ) ( SetUp.getDefaultFontSize() / 4 + 1 );
         String htmlFontFace = SetUp.getDefaultFontName();
         return "<html><font face=\"" + htmlFontFace + "\" size=\"" + htmlFontSize + "\"> " + tabName + "  </font></html>";
     }
@@ -345,6 +363,102 @@ public class OptionFrame extends JFrame implements MouseListener {
         otherPanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
 
         panel.add( otherPanel );
+    }
+
+    // 設置腳本設定頁面
+    private void setScriptTablePanel( JPanel panel ) {
+
+        singleDoneScriptCheckBox = getCheckBox( "每個任務完成後執行此腳本", SetUp.getRunSingleDoneScript() );
+        CommonGUI.setToolTip( singleDoneScriptCheckBox, "是否在單一任務下載完成後執行此腳本" );
+
+        singleDoneScriptTextField = getTextField( SetUp.getSingleDoneScriptFile() );
+        CommonGUI.setToolTip( singleDoneScriptTextField, "單一任務完成後所執行的腳本檔" );
+
+        JPanel singleDoneScriptCheckBoxPanel = new JPanel( new FlowLayout( FlowLayout.LEADING, 1, 1 ) );
+        singleDoneScriptCheckBoxPanel.add( singleDoneScriptCheckBox );
+        singleDoneScriptCheckBoxPanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+        singleDoneScriptButton = getButton( "選擇腳本" );
+        CommonGUI.setToolTip( singleDoneScriptButton, "選擇單一任務完成後要執行的外部腳本檔" );
+
+        JPanel singleDoneScriptButtonPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        singleDoneScriptButtonPanelHorizontal.add( singleDoneScriptButton );
+        singleDoneScriptButtonPanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+        JPanel singleDoneScriptPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        singleDoneScriptPanelHorizontal.add( singleDoneScriptCheckBoxPanel );
+        singleDoneScriptPanelHorizontal.add( singleDoneScriptButtonPanelHorizontal );
+        singleDoneScriptPanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+        allDoneScriptCheckBox = getCheckBox( "全部任務完成後執行此腳本", SetUp.getRunAllDoneScript() );
+        CommonGUI.setToolTip( allDoneScriptCheckBox, "是否在全部任務下載完成後執行腳本" );
+
+        allDoneScriptTextField = getTextField( SetUp.getAllDoneScriptFile() );
+        CommonGUI.setToolTip( allDoneScriptTextField, "全部任務完成後所執行的腳本檔" );
+
+        JPanel allDoneScriptCheckBoxPanel = new JPanel( new FlowLayout( FlowLayout.LEADING, 1, 1 ) );
+        allDoneScriptCheckBoxPanel.add( allDoneScriptCheckBox );
+        allDoneScriptCheckBoxPanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+        allDoneScriptButton = getButton( "選擇腳本" );
+        CommonGUI.setToolTip( allDoneScriptButton, "選擇全部任務完成後要執行的外部腳本檔" );
+
+        JPanel allDoneScriptButtonPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        allDoneScriptButtonPanelHorizontal.add( allDoneScriptButton );
+        allDoneScriptButtonPanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+        JPanel allDoneScriptPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        allDoneScriptPanelHorizontal.add( allDoneScriptCheckBoxPanel );
+        allDoneScriptPanelHorizontal.add( allDoneScriptButtonPanelHorizontal );
+        allDoneScriptPanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+
+        // 設置執行腳本的Shell
+        shellScriptStrings = new CommonGUI().getShellScriptStrings(); // 取得所有介面名稱
+        shellScriptBox = getComboBox( shellScriptStrings, SetUp.getDefaultShellScriptIndex() );
+        shellScriptBox.addItemListener( new ItemHandler() ); //
+        CommonGUI.setToolTip( shellScriptBox, "選定執行腳本的語言（若使用Windows系統預設的Batch腳本（*.bat），則無須設定此一項目）" );
+
+
+        shellScriptLabel = getLabel( "選擇腳本語言：" );
+        CommonGUI.setToolTip( shellScriptLabel, "選定執行腳本的語言（Windows系統無須設定此一項目）" );
+
+        // 腳本語言
+        JPanel shellScriptPanel = new JPanel();
+        shellScriptPanel.setLayout( new GridLayout( 1, 2, 5, 5 ) );
+        shellScriptPanel.add( shellScriptLabel );
+        shellScriptPanel.add( shellScriptBox );
+        shellScriptPanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+
+
+        // 等待單一任務腳本執行的時間（因為有waitFor程序，不需自行設定等待時間，故暫時廢棄）
+        singleScriptWaitTimeSlider = new JSlider( JSlider.HORIZONTAL, 0, 60, 1 );
+        singleScriptWaitTimeSlider.addChangeListener( new SliderHandler() );
+        singleScriptWaitTimeSlider.setMajorTickSpacing( 5 );
+        //timeoutSlider.setPaintTicks(true);
+        singleScriptWaitTimeSlider.setPaintLabels( true );
+        singleScriptWaitTimeSlider.setValue( SetUp.getSingleScriptWaitTime() );
+        CommonGUI.setToolTip( singleScriptWaitTimeSlider, "等待此設定秒數後，才繼續進行壓縮等後續動作和處理下一個任務" );
+        singleScriptWaitTimeLabel = getLabel( "任務腳本執行等待時間：" + singleScriptWaitTimeSlider.getValue() + "秒" );
+        CommonGUI.setToolTip( singleScriptWaitTimeLabel, "等待此設定秒數後，才繼續進行壓縮等後續動作和處理下一個任務" );
+        singleScriptWaitTimeSlider.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+        JPanel singleScriptWaitTimePanel = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        singleScriptWaitTimePanel.add( singleScriptWaitTimeLabel );
+        singleScriptWaitTimePanel.add( singleScriptWaitTimeSlider );
+        singleScriptWaitTimePanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+        JPanel scriptPanel = new JPanel( new GridLayout( 6, 1, 2, 2 ) );
+        scriptPanel.add( singleDoneScriptPanelHorizontal );
+        scriptPanel.add( singleDoneScriptTextField );
+        scriptPanel.add( allDoneScriptPanelHorizontal );
+        scriptPanel.add( allDoneScriptTextField );
+        scriptPanel.add( shellScriptPanel );
+        scriptPanel.add( singleScriptWaitTimePanel );
+        scriptPanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+        panel.add( scriptPanel );
     }
 
     private void setBackgroundTablePanel( JPanel panel ) {
@@ -427,11 +541,30 @@ public class OptionFrame extends JFrame implements MouseListener {
         recordDirPanelHorizontal.add( recordDirButton );
         recordDirPanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
 
-        JPanel otherPanel = new JPanel( new GridLayout( 6, 1, 2, 2 ) );
+
+
+        // 下載小說封面的相關設置
+        coverCheckBox = getCheckBox( "搜尋並下載小說封面圖", SetUp.getDownloadNovelCover() );
+        CommonGUI.setToolTip( coverCheckBox, "小說下載後，以Google圖片搜尋適合的封面圖" );
+
+        coverStrings = new CommonGUI().getCoverStrings(); // 取得所有介面名稱
+        coverBox = getComboBox( coverStrings, SetUp.getCoverSelectAmountIndex() );
+        coverBox.addItemListener( new ItemHandler() ); // change skin if change skinBox
+        CommonGUI.setToolTip( coverBox, "以小說關鍵字搜尋後，取前面數來N張圖，從中挑選出最適合的封面" );
+
+        JPanel coverPanel = new JPanel();
+        coverPanel.setLayout( new GridLayout( 1, 2, 5, 5 ) );
+        coverPanel.add( coverCheckBox );
+        coverPanel.add( coverBox );
+        coverPanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
+
+
+        JPanel otherPanel = new JPanel( new GridLayout( 7, 1, 2, 2 ) );
         otherPanel.add( recordDirPanelHorizontal );
         otherPanel.add( recordDirTextField );
         otherPanel.add( tempDirPanelHorizontal );
         otherPanel.add( tempDirTextField );
+        otherPanel.add( coverPanel );
         otherPanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
 
         panel.add( otherPanel );
@@ -461,8 +594,8 @@ public class OptionFrame extends JFrame implements MouseListener {
         viewZipFilePanelHorizontal.add( viewZipFileLabel );
         viewZipFilePanelHorizontal.add( viewZipFileButton );
         viewZipFilePanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
-        
-        
+
+
         viewTextFileLabel = getLabel( "預設開啟文件的程式：       " );
 
         viewTextFileTextField = getTextField( SetUp.getOpenTextFileProgram() );
@@ -515,11 +648,11 @@ public class OptionFrame extends JFrame implements MouseListener {
         downloadCheckBox = getCheckBoxBold( "分析後下載圖檔（預設）", SetUp.getDownloadPicFile() );
         CommonGUI.setToolTip( downloadCheckBox, "如果沒有勾選就不會有下載行為，建議要勾選（但若只想輸出真實下載位址，就不要勾選此選項）" );
 
-        
-        
+
+
         JPanel textFormatPanelHorizontal = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
         setTextFormatPanel( textFormatPanelHorizontal );
-        
+
 
         JPanel filePanel = new JPanel( new GridLayout( 6, 1, 2, 2 ) );
         filePanel.add( dirPanelHorizontal );
@@ -532,18 +665,17 @@ public class OptionFrame extends JFrame implements MouseListener {
 
         panel.add( filePanel );
     }
-    
+
     private void setTextFormatPanel( JPanel textFormatPanelHorizontal ) {
         boolean choiceTxt = false, choiceHtml = false;
         if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML ) {
             choiceHtml = true;
             choiceTxt = false;
-        }
-        else {
+        } else {
             choiceHtml = false;
             choiceTxt = true;
         }
-        
+
         txtRadioButtion = getRadioButton( "txt", choiceTxt );
         CommonGUI.setToolTip( txtRadioButtion, "輸出txt檔" );
         htmlRadioButtion = getRadioButton( "html", choiceHtml );
@@ -551,7 +683,7 @@ public class OptionFrame extends JFrame implements MouseListener {
         ButtonGroup textFormatGroup = new ButtonGroup();
         textFormatGroup.add( txtRadioButtion );
         textFormatGroup.add( htmlRadioButtion );
-        
+
         JLabel textFormatLabel = getLabel( "文章輸出格式：", "批次下載網頁（文字檔）時，預設的輸出格式" );
 
         JPanel textFormatPanel = new JPanel();
@@ -563,14 +695,13 @@ public class OptionFrame extends JFrame implements MouseListener {
         textFormatPanelHorizontal.add( textFormatPanel );
         textFormatPanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
     }
-    
+
     private void setCompressPanel( JPanel compressPanelHorizontal ) {
         boolean choiceZip = false, choiceCbz = false;
         if ( "zip".equals( SetUp.getCompressFormat() ) ) {
             choiceZip = true;
             choiceCbz = false;
-        }
-        else {
+        } else {
             choiceZip = false;
             choiceCbz = true;
         }
@@ -582,7 +713,7 @@ public class OptionFrame extends JFrame implements MouseListener {
         ButtonGroup compressGroup = new ButtonGroup();
         compressGroup.add( zipRadioButtion );
         compressGroup.add( cbzRadioButtion );
-        
+
         JLabel compressLabel = getLabel( "壓縮格式：", "預設的壓縮格式" );
 
         JPanel compressPanel = new JPanel();
@@ -590,7 +721,7 @@ public class OptionFrame extends JFrame implements MouseListener {
         compressPanel.add( zipRadioButtion );
         compressPanel.add( cbzRadioButtion );
 
-        
+
         compressPanelHorizontal.add( compressCheckBox );
         compressPanelHorizontal.add( compressPanel );
         compressPanelHorizontal.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
@@ -673,26 +804,16 @@ public class OptionFrame extends JFrame implements MouseListener {
 
 
         // set language
-        
-        languageClassNames = new CommonGUI().getClassNames(); // 取得所有介面類別名稱
-        languageStrings = new CommonGUI().getLanguageStrings(); // 取得所有介面名稱
-        languageBox = new JComboBox( languageStrings );
-        if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
-            languageBox.setForeground( SetUp.getOptionFrameOtherDefaultColor() );
-            languageBox.setOpaque( false );
-            languageBox.addMouseListener( this );
-        }
 
-        ListCellRenderer languageRenderer = new ComplexCellRenderer();
-        languageBox.setRenderer( languageRenderer );
-        languageBox.setSelectedIndex( SetUp.getDefaultLanguage() );
-        languageBox.setFont( SetUp.getDefaultFont() );
+        //languageClassNames = new CommonGUI().getClassNames(); // 取得所有介面類別名稱
+        languageStrings = new CommonGUI().getLanguageStrings(); // 取得所有介面名稱
+        languageBox = getComboBox( languageStrings, SetUp.getDefaultLanguage() );
+        languageBox.addItemListener( new ItemHandler() ); // change skin if change skinBox
+        CommonGUI.setToolTip( languageBox, "選定介面語言後需關閉重啟，方能看到新設定的語言" );
 
         languageLabel = getLabel( "選擇語言：" );
         CommonGUI.setToolTip( languageLabel, "選定介面語言後需關閉重啟，方能看到新設定的語言" );
 
-        languageBox.addItemListener( new ItemHandler() ); // change skin if change skinBox
-        CommonGUI.setToolTip( languageBox, "選定介面語言後需關閉重啟，方能看到新設定的語言" );
 
         // the order: skinLabel skinBox
         JPanel languagePanel = new JPanel();
@@ -700,10 +821,10 @@ public class OptionFrame extends JFrame implements MouseListener {
         languagePanel.add( languageLabel );
         languagePanel.add( languageBox );
         languagePanel.setOpaque( !SetUp.getUsingBackgroundPicOfOptionFrame() );
-        
-        
+
+
         // set skin
-        
+
         skinClassNames = new CommonGUI().getClassNames(); // 取得所有介面類別名稱
         skinStrings = new CommonGUI().getSkinStrings(); // 取得所有介面名稱
         skinBox = new JComboBox( skinStrings );
@@ -784,8 +905,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
         if ( skinStrings.length > index ) {
             return index;
-        }
-        else {
+        } else {
             Common.errorReport( "超出範圍: " + index + " " + skinClassName );
             return 0;
         }
@@ -799,7 +919,7 @@ public class OptionFrame extends JFrame implements MouseListener {
         if ( checkSettingOfBackgroundPic( index ) ) {
             int napkinIndex = new CommonGUI().getSkinOrderBySkinClassName( "napkin.NapkinLookAndFeel" );
             skinBox.setSelectedIndex( napkinIndex ); // 回到Napkin介面
-            
+
             return;
         }
 
@@ -813,31 +933,28 @@ public class OptionFrame extends JFrame implements MouseListener {
             //className = "com.pagosoft.plaf.PgsLookAndFeel";
 
             /*
-            // oyoaha介面
-            com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel laf =
-            new com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel();
-            File themeFile = new File(
-            "/home/surveyork/文件/程式/JAVA/NetBeansProjects/" + ""
-            + "JComicDownloader/lib/oyoahalnf/metal/green1.theme" );
-            laf.setOyoahaTheme( themeFile );
+             * // oyoaha介面 com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel laf =
+             * new com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel(); File
+             * themeFile = new File(
+             * "/home/surveyork/文件/程式/JAVA/NetBeansProjects/" + "" +
+             * "JComicDownloader/lib/oyoahalnf/metal/green1.theme" );
+             * laf.setOyoahaTheme( themeFile );
              */
 
             /*
-            // Tiny介面
-            de.muntjak.tinylookandfeel.TinyLookAndFeel laf =
-            new de.muntjak.tinylookandfeel.TinyLookAndFeel();
-            
-            
-            // TINY_STYLE = 0;int W99_STYLE = 1;YQ_STYLE = 2;
-            File themeFile = new File("/home/surveyork/文件/程式/JAVA/" + ""
-            + "NetBeansProjects/JComicDownloader/" + ""
-            + "lib/tinylaf-1_4_0/tiny_theme/99 Lego.theme" );
-            
-            //de.muntjak.tinylookandfeel.Theme.loadTheme( themeFile );
-            laf.setCurrentTheme( null );
-            //laf.setCurrentTheme(
-            com.pagosoft.plaf.ThemeFactory.getThemeByName( "silver" ) );
-            UIManager.setLookAndFeel( laf );
+             * // Tiny介面 de.muntjak.tinylookandfeel.TinyLookAndFeel laf = new
+             * de.muntjak.tinylookandfeel.TinyLookAndFeel();
+             *
+             *
+             * // TINY_STYLE = 0;int W99_STYLE = 1;YQ_STYLE = 2; File themeFile
+             * = new File("/home/surveyork/文件/程式/JAVA/" + "" +
+             * "NetBeansProjects/JComicDownloader/" + "" +
+             * "lib/tinylaf-1_4_0/tiny_theme/99 Lego.theme" );
+             *
+             * //de.muntjak.tinylookandfeel.Theme.loadTheme( themeFile );
+             * laf.setCurrentTheme( null ); //laf.setCurrentTheme(
+             * com.pagosoft.plaf.ThemeFactory.getThemeByName( "silver" ) );
+             * UIManager.setLookAndFeel( laf );
              */
 
             // substance介面
@@ -846,9 +963,8 @@ public class OptionFrame extends JFrame implements MouseListener {
 
             CommonGUI.setLookAndFeelByClassName( className );
 
-        }
-        catch ( Exception ex ) {
-            Common.hadleErrorMessage( ex,  "無法使用" + className + "介面!!"  );
+        } catch ( Exception ex ) {
+            Common.hadleErrorMessage( ex, "無法使用" + className + "介面!!" );
 
             className = ComicDownGUI.getDefaultSkinClassName(); // 回歸預設介面
             CommonGUI.setLookAndFeelByClassName( className );
@@ -890,17 +1006,16 @@ public class OptionFrame extends JFrame implements MouseListener {
 
     // 檢查是否有設定背景圖片，若有則發出提醒通知
     private boolean checkSettingOfBackgroundPic( int index ) {
-        if ( !skinClassNames[index].matches( ".*Napkin.*" ) &&
-                (usingBackgroundPicOfMainFrameCheckBox.isSelected()
+        if ( !skinClassNames[index].matches( ".*Napkin.*" )
+                && ( usingBackgroundPicOfMainFrameCheckBox.isSelected()
                 || usingBackgroundPicOfOptionFrameCheckBox.isSelected()
-                || usingBackgroundPicOfChoiceFrameCheckBox.isSelected())
-                && (SetUp.getSkinClassName().matches( ".*napkin.*" )) ) {
+                || usingBackgroundPicOfChoiceFrameCheckBox.isSelected() )
+                && ( SetUp.getSkinClassName().matches( ".*napkin.*" ) ) ) {
             CommonGUI.showMessageDialog( OptionFrame.thisFrame,
                     "若欲讓此介面選擇生效，請取消佈景頁面中背景圖片的設定勾選",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -931,14 +1046,11 @@ public class OptionFrame extends JFrame implements MouseListener {
     public void mousePressed( MouseEvent event ) {
         if ( event.getSource() == playSingleDoneAudioLabel ) {
             Common.playSingleDoneAudio( singleDoneAudioTextField.getText() ); // 播放單一任務完成音效
-        }
-        else if ( event.getSource() == playAllDoneAudioLabel ) {
+        } else if ( event.getSource() == playAllDoneAudioLabel ) {
             Common.playAllDoneAudio( allDoneAudioTextField.getText() ); // 播放全部任務完成音效
-        }
-        else if ( event.getSource() == proxyServerTextField ) {
+        } else if ( event.getSource() == proxyServerTextField ) {
             proxyServerTextField.setText( "" ); // 滑鼠點擊後會清空
-        }
-        else if ( event.getSource() == proxyPortTextField ) {
+        } else if ( event.getSource() == proxyPortTextField ) {
             proxyPortTextField.setText( "" ); // 滑鼠點擊後會清空
         }
 
@@ -951,14 +1063,14 @@ public class OptionFrame extends JFrame implements MouseListener {
     @Override
     public void mouseExited( MouseEvent event ) {
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) {
-            ((JComponent) event.getSource()).setForeground( SetUp.getOptionFrameOtherDefaultColor() );
+            ( ( JComponent ) event.getSource() ).setForeground( SetUp.getOptionFrameOtherDefaultColor() );
         }
     }
 
     @Override
     public void mouseEntered( MouseEvent event ) {
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) {
-            ((JComponent) event.getSource()).setForeground( SetUp.getOptionFrameOtherMouseEnteredColor() );
+            ( ( JComponent ) event.getSource() ).setForeground( SetUp.getOptionFrameOtherMouseEnteredColor() );
         }
     }
 
@@ -997,59 +1109,55 @@ public class OptionFrame extends JFrame implements MouseListener {
             if ( event.getSource() == dirButton ) {
                 CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.DIRECTORIES_ONLY,
                         "選擇下載目錄", dirTextField, SetUp.getOriginalDownloadDirectory() );
-            }
-            else if ( event.getSource() == tempDirButton ) {
+            } else if ( event.getSource() == tempDirButton ) {
                 int endIndex = SetUp.getTempDirectory().lastIndexOf( Common.getSlash() + "temp" ) + 1;
                 String path = SetUp.getTempDirectory().substring( 0, endIndex );
 
                 CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.DIRECTORIES_ONLY,
                         "選擇暫存目錄", tempDirTextField, path );
-            }
-            else if ( event.getSource() == recordDirButton ) {
+            } else if ( event.getSource() == recordDirButton ) {
                 CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.DIRECTORIES_ONLY,
                         "選擇記錄檔存放目錄", recordDirTextField, SetUp.getRecordFileDirectory() );
-            }
-            else if ( event.getSource() == viewPicFileButton ) {
+            } else if ( event.getSource() == viewPicFileButton ) {
                 CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.FILES_ONLY,
                         "選擇可瀏覽圖片的程式", viewPicFileTextField, SetUp.getOpenPicFileProgram() );
-            }
-            else if ( event.getSource() == viewTextFileButton ) {
+            } else if ( event.getSource() == viewTextFileButton ) {
                 CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.FILES_ONLY,
                         "選擇可瀏覽文件檔的程式", viewTextFileTextField, SetUp.getOpenTextFileProgram() );
-            }
-            else if ( event.getSource() == viewZipFileButton ) {
+            } else if ( event.getSource() == viewZipFileButton ) {
                 CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.FILES_ONLY,
                         "選擇可瀏覽壓縮檔的程式", viewZipFileTextField, SetUp.getOpenZipFileProgram() );
-            }
-            else if ( event.getSource() == singleDoneAudioButton ) {
+            } else if ( event.getSource() == singleDoneAudioButton ) {
                 CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.FILES_ONLY,
                         "選擇音效檔", singleDoneAudioTextField,
                         SetUp.getSingleDoneAudioFile(), new AudioFileFilter() );
-            }
-            else if ( event.getSource() == allDoneAudioButton ) {
+            } else if ( event.getSource() == allDoneAudioButton ) {
                 CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.FILES_ONLY,
                         "選擇音效檔", allDoneAudioTextField,
                         SetUp.getAllDoneAudioFile(), new AudioFileFilter() );
-            }
-            else if ( event.getSource() == defaultSingleDoneAudioButton ) {
+            } else if ( event.getSource() == defaultSingleDoneAudioButton ) {
                 singleDoneAudioTextField.setText( Common.defaultSingleDoneAudio );
-            }
-            else if ( event.getSource() == defaultAllDoneAudioButton ) {
+            } else if ( event.getSource() == defaultAllDoneAudioButton ) {
                 allDoneAudioTextField.setText( Common.defaultAllDoneAudio );
+            } else if ( event.getSource() == singleDoneScriptButton ) {
+                CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.FILES_ONLY,
+                        "選擇腳本檔", singleDoneScriptTextField,
+                        SetUp.getSingleDoneScriptFile(), new ScriptFileFilter() );
+            } else if ( event.getSource() == allDoneScriptButton ) {
+                CommonGUI.chooseFile( OptionFrame.thisFrame, JFileChooser.FILES_ONLY,
+                        "選擇腳本檔", allDoneScriptTextField,
+                        SetUp.getAllDoneScriptFile(), new ScriptFileFilter() );
             }
 
 
             // 詳細設定背景圖片和字體顏色搭配
             if ( event.getSource() == setBackgroundPicOfMainFrameButton ) {
                 new BackgroundSettingFrame( FrameEnum.MAIN_FRAME );
-            }
-            else if ( event.getSource() == setBackgroundPicOfInformationFrameButton ) {
+            } else if ( event.getSource() == setBackgroundPicOfInformationFrameButton ) {
                 new BackgroundSettingFrame( FrameEnum.INFORMATION_FRAME );
-            }
-            else if ( event.getSource() == setBackgroundPicOfOptionFrameButton ) {
+            } else if ( event.getSource() == setBackgroundPicOfOptionFrameButton ) {
                 new BackgroundSettingFrame( FrameEnum.OPTION_FRAME );
-            }
-            else if ( event.getSource() == setBackgroundPicOfChoiceFrameButton ) {
+            } else if ( event.getSource() == setBackgroundPicOfChoiceFrameButton ) {
                 new BackgroundSettingFrame( FrameEnum.CHOICE_FRAME );
             }
 
@@ -1060,6 +1168,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
                 SetUp.setRetryTimes( retryTimesSlider.getValue() ); // 設定重新嘗試次數
                 SetUp.setTimeoutTimer( timeoutSlider.getValue() ); // 設定逾時時間
+                SetUp.setSingleScriptWaitTime( singleScriptWaitTimeSlider.getValue() ); // 設定單一任務執行等待時間
 
                 SetUp.setOriginalDownloadDirectory( dirTextField.getText() ); // 紀錄到設定值
                 SetUp.setTempDirectory( tempDirTextField.getText() ); // 紀錄到設定值
@@ -1079,9 +1188,17 @@ public class OptionFrame extends JFrame implements MouseListener {
                 }
                 SetUp.setAllDoneAudioFile( allDoneAudioTextField.getText() ); // 紀錄到設定值
 
-
                 SetUp.setPlaySingleDoneAudio( singleDoneAudioCheckBox.isSelected() ); // 紀錄到設定值
                 SetUp.setPlayAllDoneAudio( allDoneAudioCheckBox.isSelected() ); // 紀錄到設定值
+
+
+                // 腳本設定
+                SetUp.setSingleDoneScriptFile( singleDoneScriptTextField.getText() ); // 紀錄到設定值
+                SetUp.setAllDoneScriptFile( allDoneScriptTextField.getText() ); // 紀錄到設定值
+                SetUp.setRunSingleDoneScript( singleDoneScriptCheckBox.isSelected() ); // 紀錄到設定值
+                SetUp.setRunAllDoneScript( allDoneScriptCheckBox.isSelected() ); // 紀錄到設定值
+
+
                 SetUp.setAutoCompress( compressCheckBox.isSelected() ); // 紀錄到設定值
                 SetUp.setDeleteOriginalPic( deleteCheckBox.isSelected() ); // 紀錄到設定值
                 SetUp.setOutputUrlFile( urlCheckBox.isSelected() ); // 紀錄到設定值
@@ -1091,21 +1208,28 @@ public class OptionFrame extends JFrame implements MouseListener {
                 SetUp.setShowDoneMessageAtSystemTray( trayMessageCheckBox.isSelected() ); // 紀錄到設定值
                 SetUp.setKeepRecord( keepRecordCheckBox.isSelected() ); // 紀錄到設定值
                 SetUp.setChoiceAllVolume( choiceAllVolumeCheckBox.isSelected() ); // 紀錄到設定值
-                
+
                 SetUp.setDefaultLanguage( languageBox.getSelectedIndex() ); // 記錄到設定值
+                SetUp.setDefaultShellScript( shellScriptBox.getSelectedItem().toString() ); // 記錄到設定值
+                
+                // 小說封面圖相關設定
+                SetUp.setDownloadNovelCover( coverCheckBox.isSelected() );
+                SetUp.setCoverSelectAmountIndex( coverBox.getSelectedIndex() ); 
+                
 
                 String compressFormatString = "";
-                if ( zipRadioButtion.isSelected() )
+                if ( zipRadioButtion.isSelected() ) {
                     compressFormatString = "zip";
-                else
+                } else {
                     compressFormatString = "cbz";
+                }
                 SetUp.setCompressFormat( compressFormatString ); // 紀錄到設定值
-                
-                if ( htmlRadioButtion.isSelected() )
-                    SetUp.setDefaultTextOutputFormat( FileFormatEnum.HTML ); // 紀錄到設定值
-                else
-                    SetUp.setDefaultTextOutputFormat( FileFormatEnum.TEXT ); // 紀錄到設定值
 
+                if ( htmlRadioButtion.isSelected() ) {
+                    SetUp.setDefaultTextOutputFormat( FileFormatEnum.HTML ); // 紀錄到設定值
+                } else {
+                    SetUp.setDefaultTextOutputFormat( FileFormatEnum.TEXT ); // 紀錄到設定值
+                }
                 Boolean tempBool = new Boolean( usingBackgroundPicOfMainFrameCheckBox.isSelected() );
                 if ( !tempBool.equals( SetUp.getUsingBackgroundPicOfMainFrame() ) ) {
                     CommonGUI.showMessageDialog( OptionFrame.thisFrame, "主視窗背景設定已改變，請重新開啟程式",
@@ -1132,8 +1256,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                     Common.debugPrintln( "設定代理伺服器："
                             + SetUp.getProxyServer() + " "
                             + SetUp.getProxyPort() );
-                }
-                else {
+                } else {
                     Common.closeHttpProxy();
                     Common.debugPrintln( "代理伺服器資訊欠缺位址或連接阜，因此不加入" );
                 }
@@ -1142,11 +1265,9 @@ public class OptionFrame extends JFrame implements MouseListener {
 
 
                 dispose();
-            }
-            else if ( event.getSource() == cencelButton ) {
+            } else if ( event.getSource() == cencelButton ) {
                 dispose();
-            }
-            else if ( event.getSource() == defaultButton ) {
+            } else if ( event.getSource() == defaultButton ) {
             }
 
         }
@@ -1158,10 +1279,15 @@ public class OptionFrame extends JFrame implements MouseListener {
 
             if ( event.getSource() == retryTimesSlider && OptionFrame.retryTimesLabel != null ) {
                 OptionFrame.retryTimesLabel.setText( "下載失敗重試次數：" + retryTimesSlider.getValue() + "次" );
-            }
-            if ( event.getSource() == timeoutSlider && OptionFrame.timeoutLabel != null ) {
+            } else if ( event.getSource() == timeoutSlider && OptionFrame.timeoutLabel != null ) {
                 OptionFrame.timeoutLabel.setText( "連線逾時時間：" + timeoutSlider.getValue() + "秒" );
+            } else if ( event.getSource() == singleScriptWaitTimeSlider && OptionFrame.timeoutLabel != null ) {
+                if ( singleScriptWaitTimeLabel != null ) {
+                    singleScriptWaitTimeLabel.setText( "任務腳本執行等待時間：" + singleScriptWaitTimeSlider.getValue() + "秒" );
+                }
             }
+
+
 
             //Common.debugPrintln( "改變重試次數：" + retryTimesSlider.getValue() );
         }
@@ -1177,35 +1303,32 @@ public class OptionFrame extends JFrame implements MouseListener {
 
             if ( event.getSource() == usingBackgroundPicOfMainFrameCheckBox ) {
                 if ( usingBackgroundPicOfMainFrameCheckBox.isSelected()
-                        && (SetUp.getBackgroundPicPathOfMainFrame() == null
-                        || SetUp.getBackgroundPicPathOfMainFrame().equals( "" )) ) {
+                        && ( SetUp.getBackgroundPicPathOfMainFrame() == null
+                        || SetUp.getBackgroundPicPathOfMainFrame().equals( "" ) ) ) {
                     CommonGUI.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                     usingBackgroundPicOfMainFrameCheckBox.setSelected( false );
                 }
-            }
-            else if ( event.getSource() == usingBackgroundPicOfInformationFrameCheckBox ) {
+            } else if ( event.getSource() == usingBackgroundPicOfInformationFrameCheckBox ) {
                 if ( usingBackgroundPicOfInformationFrameCheckBox.isSelected()
-                        && (SetUp.getBackgroundPicPathOfInformationFrame() == null
-                        || SetUp.getBackgroundPicPathOfInformationFrame().equals( "" )) ) {
+                        && ( SetUp.getBackgroundPicPathOfInformationFrame() == null
+                        || SetUp.getBackgroundPicPathOfInformationFrame().equals( "" ) ) ) {
                     CommonGUI.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                     usingBackgroundPicOfInformationFrameCheckBox.setSelected( false );
                 }
-            }
-            else if ( event.getSource() == usingBackgroundPicOfOptionFrameCheckBox ) {
+            } else if ( event.getSource() == usingBackgroundPicOfOptionFrameCheckBox ) {
                 if ( usingBackgroundPicOfOptionFrameCheckBox.isSelected()
-                        && (SetUp.getBackgroundPicPathOfOptionFrame() == null
-                        || SetUp.getBackgroundPicPathOfOptionFrame().equals( "" )) ) {
+                        && ( SetUp.getBackgroundPicPathOfOptionFrame() == null
+                        || SetUp.getBackgroundPicPathOfOptionFrame().equals( "" ) ) ) {
                     CommonGUI.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                     usingBackgroundPicOfOptionFrameCheckBox.setSelected( false );
                 }
-            }
-            else if ( event.getSource() == usingBackgroundPicOfChoiceFrameCheckBox ) {
+            } else if ( event.getSource() == usingBackgroundPicOfChoiceFrameCheckBox ) {
                 if ( usingBackgroundPicOfChoiceFrameCheckBox.isSelected()
-                        && (SetUp.getBackgroundPicPathOfChoiceFrame() == null
-                        || SetUp.getBackgroundPicPathOfChoiceFrame().equals( "" )) ) {
+                        && ( SetUp.getBackgroundPicPathOfChoiceFrame() == null
+                        || SetUp.getBackgroundPicPathOfChoiceFrame().equals( "" ) ) ) {
                     CommonGUI.showMessageDialog( OptionFrame.thisFrame, "背景圖片尚未選擇，請先點擊右方的設定頁面按鈕做設定",
                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                     usingBackgroundPicOfChoiceFrameCheckBox.setSelected( false );
@@ -1217,20 +1340,17 @@ public class OptionFrame extends JFrame implements MouseListener {
                 if ( deleteCheckBox.isSelected() ) {
                     compressCheckBox.setSelected( true ); // 勾選自動刪除就要連帶勾選自動壓縮
                 }
-            }
-            else if ( event.getSource() == compressCheckBox ) {
+            } else if ( event.getSource() == compressCheckBox ) {
                 if ( !compressCheckBox.isSelected() ) {
                     deleteCheckBox.setSelected( false ); // 勾選自動刪除就要連帶勾選自動壓縮
                 }
-            }
-            else if ( event.getSource() == downloadCheckBox ) {
+            } else if ( event.getSource() == downloadCheckBox ) {
                 if ( !downloadCheckBox.isSelected() ) {
                     String message = "取消後就不會進行下載，確定取消？";
                     int choice = JOptionPane.showConfirmDialog( OptionFrame.thisFrame, message, "提醒訊息", JOptionPane.YES_NO_OPTION );
                     if ( choice == JOptionPane.NO_OPTION ) { // agree to remove the title in the download list
                         downloadCheckBox.setSelected( true );
-                    }
-                    else {
+                    } else {
                         downloadCheckBox.setSelected( false );
                     }
                 }
@@ -1241,8 +1361,7 @@ public class OptionFrame extends JFrame implements MouseListener {
                 if ( logCheckBox.isSelected() ) {
                     Common.debugPrintln( "改由logFrame來輸出資訊" );
                     Debug.commandDebugMode = false;
-                }
-                else {
+                } else {
                     Common.debugPrintln( "改由cmd來輸出資訊" );
                     Debug.commandDebugMode = true;
                 }
@@ -1268,12 +1387,13 @@ public class OptionFrame extends JFrame implements MouseListener {
 
             if ( event.getSource() == languageBox
                     && event.getStateChange() == ItemEvent.SELECTED ) {
-                if ( languageBox.getSelectedIndex() == LanguageEnum.TRADITIONAL_CHINESE )
+                if ( languageBox.getSelectedIndex() == LanguageEnum.TRADITIONAL_CHINESE ) {
                     Common.debugPrintln( "介面文字設定為正體中文" );
-                else if ( languageBox.getSelectedIndex() == LanguageEnum.SIMPLIFIED_CHINESE )
+                } else if ( languageBox.getSelectedIndex() == LanguageEnum.SIMPLIFIED_CHINESE ) {
                     Common.debugPrintln( "介面文字設定為簡體中文" );
+                }
             }
-            
+
             if ( event.getSource() == skinBox
                     && event.getStateChange() == ItemEvent.SELECTED ) {
                 String nowSelectedSkin = skinBox.getSelectedItem().toString();
@@ -1285,12 +1405,11 @@ public class OptionFrame extends JFrame implements MouseListener {
                 }
             }
         }
-
     }
 
     private JCheckBox getCheckBox( String string, boolean selected ) {
         string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
-        
+
         JCheckBox checkBox = new JCheckBox( string, selected );
         checkBox.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
@@ -1304,7 +1423,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
     private JCheckBox getCheckBoxBold( String string, boolean selected ) {
         string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
-        
+
         JCheckBox checkBox = new JCheckBox( string, selected );
         checkBox.setFont( SetUp.getDefaultBoldFont() );
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
@@ -1318,7 +1437,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
     private JLabel getLabel( String string ) {
         string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
-        
+
         JLabel label = new JLabel( string );
         label.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
@@ -1331,7 +1450,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
     private JLabel getLabel( String string, String toolTipString ) {
         string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
-        
+
         JLabel label = new JLabel( string );
         label.setFont( SetUp.getDefaultFont() );
         CommonGUI.setToolTip( label, toolTipString );
@@ -1345,7 +1464,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
     private JButton getButton( String string ) {
         string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
-        
+
         JButton button = new JButton( string );
         button.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
@@ -1360,7 +1479,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
     private JButton getButton( String string, String picName ) {
         string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
-        
+
         JButton button = new JButton( string, new CommonGUI().getImageIcon( picName ) );
         button.setFont( SetUp.getDefaultFont() );
         if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
@@ -1374,7 +1493,7 @@ public class OptionFrame extends JFrame implements MouseListener {
 
     private JTextField getTextField( String string ) {
         //string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
-        
+
         JTextField textField = new JTextField( string, 20 );
         textField.setFont( SetUp.getDefaultFont( -1 ) );
         textField.setHorizontalAlignment( JTextField.LEADING );
@@ -1389,10 +1508,10 @@ public class OptionFrame extends JFrame implements MouseListener {
 
     private JRadioButton getRadioButton( String string, boolean selected ) {
         string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
-        
+
         JRadioButton radioButton = new JRadioButton( string, selected );
         radioButton.setFont( SetUp.getDefaultFont() );
-        
+
         if ( SetUp.getUsingBackgroundPicOfChoiceFrame() ) { // 若設定為透明，就用預定字體。
             radioButton.setOpaque( false );
             radioButton.setForeground( SetUp.getChoiceFrameOtherDefaultColor() );
@@ -1408,6 +1527,22 @@ public class OptionFrame extends JFrame implements MouseListener {
 
         return radioButton;
     }
+
+    private JComboBox getComboBox( String[] strings, int selectedIndex ) {
+        JComboBox comboBox = new JComboBox( strings );
+        if ( SetUp.getUsingBackgroundPicOfOptionFrame() ) { // 若設定為透明，就用預定字體。
+            comboBox.setForeground( SetUp.getOptionFrameOtherDefaultColor() );
+            comboBox.setOpaque( false );
+            comboBox.addMouseListener( this );
+        }
+
+        ListCellRenderer renderer = new ComplexCellRenderer();
+        comboBox.setRenderer( renderer );
+        comboBox.setSelectedIndex( selectedIndex );
+        comboBox.setFont( SetUp.getDefaultFont() );
+
+        return comboBox;
+    }
 }
 
 class ComplexCellRenderer implements ListCellRenderer {
@@ -1421,13 +1556,12 @@ class ComplexCellRenderer implements ListCellRenderer {
         Icon theIcon = null;
         String theText = null;
 
-        JLabel renderer = (JLabel) defaultRenderer.getListCellRendererComponent( list, value, index,
+        JLabel renderer = ( JLabel ) defaultRenderer.getListCellRendererComponent( list, value, index,
                 isSelected, cellHasFocus );
 
         if ( value instanceof String ) {
-            theText = (String) value;
-        }
-        else {
+            theText = ( String ) value;
+        } else {
             theFont = list.getFont();
             theForeground = list.getForeground();
             theText = "";

@@ -29,6 +29,7 @@ public class ParseCityManga extends ParseOnlineComicSite {
      */
     public ParseCityManga() {
         siteID = Site.CITY_MANGA;
+        siteName = "CityManga";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_city_manga_encode_parse_", "html" );
 
@@ -215,13 +216,5 @@ public class ParseCityManga extends ParseOnlineComicSite {
     @Override
     public String[] getTempFileNames() {
         return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the CityManga module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

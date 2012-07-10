@@ -146,14 +146,20 @@ public class Run extends Thread { // main class to run whole program
                 ParseOnlineComicSite parse = new Parse99Manga();
                 runSingleParseModule( parse );
             }
+            
             else if ( pw.getSiteID() == Site.NINENINE_MANGA_TC ) {
                 ParseOnlineComicSite parse = new Parse99MangaTC();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.NINENINE_MANGA_WWW ) {
+                ParseOnlineComicSite parse = new Parse99MangaWWW();
                 runSingleParseModule( parse );
             }
             else if ( pw.getSiteID() == Site.NINENINE_99770 ) {
                 ParseOnlineComicSite parse = new Parse99770();
                 runSingleParseModule( parse );
             }
+            
             else if ( pw.getSiteID() == Site.NINENINE_MH_99770 ) {
                 ParseOnlineComicSite parse = new ParseMh99770();
                 runSingleParseModule( parse );
@@ -356,8 +362,56 @@ public class Run extends Thread { // main class to run whole program
                 ParseOnlineComicSite parse = new ParseEynyNovel();
                 runSingleParseModule( parse );
             }
-            else if ( pw.getSiteID() == Site.KKMH ) {
-                ParseOnlineComicSite parse = new ParseKKMH();
+            else if ( pw.getSiteID() == Site.ZUIWANJU ) {
+                ParseOnlineComicSite parse = new ParseZuiwanju();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.TWO_ECY ) {
+                ParseOnlineComicSite parse = new Parse2ecy();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.TIANYA_BOOK ) {
+                ParseOnlineComicSite parse = new ParseTianyaBook();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.EIGHT_NOVEL ) {
+                ParseOnlineComicSite parse = new ParseEightNovel();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.QQ_BOOK ) {
+                ParseOnlineComicSite parse = new ParseQQBook();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.QQ_ORIGIN_BOOK ) {
+                ParseOnlineComicSite parse = new ParseQQOriginBook();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.SINA_BOOK ) {
+                ParseOnlineComicSite parse = new ParseSinaBook();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.FIVEONE_CTO ) {
+                ParseOnlineComicSite parse = new Parse51Cto();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.ONESEVEN_KK ) {
+                ParseOnlineComicSite parse = new Parse17KK();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.UUS8 ) {
+                ParseOnlineComicSite parse = new ParseUUS8();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.WENKU8 ) {
+                ParseOnlineComicSite parse = new ParseWenku8();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.IFENG_BOOK ) {
+                ParseOnlineComicSite parse = new ParseIfengBook();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.XUNLOOK ) {
+                ParseOnlineComicSite parse = new ParseXunlook();
                 runSingleParseModule( parse );
             }
 

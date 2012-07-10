@@ -38,6 +38,7 @@ public class ParseBAIDU extends ParseOnlineComicSite {
      */
     public ParseBAIDU() {
         siteID = Site.BAIDU;
+        siteName = "Baidu";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_baidu_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_baidu_encode_parse_", "html" );
 
@@ -298,13 +299,5 @@ public class ParseBAIDU extends ParseOnlineComicSite {
     @Override
     public String[] getTempFileNames() {
         return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the BAIDU module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

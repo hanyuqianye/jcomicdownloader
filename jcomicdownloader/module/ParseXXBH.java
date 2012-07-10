@@ -1,12 +1,13 @@
 /*
-----------------------------------------------------------------------------------------------------
-Program Name : JComicDownloader
-Authors  : surveyorK
-Last Modified : 2012/5/27
-----------------------------------------------------------------------------------------------------
-ChangeLog:
+ ----------------------------------------------------------------------------------------------------
+ Program Name : JComicDownloader
+ Authors  : surveyorK
+ Last Modified : 2012/5/27
+ ----------------------------------------------------------------------------------------------------
+ ChangeLog:
+    4.14: 1. 修復xxbh因網站改版而無法解析的問題。
  *  4.03: 1. 新增對xxbh的支援。
-----------------------------------------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
 
@@ -28,11 +29,12 @@ public class ParseXXBH extends ParseOnlineComicSite {
     protected String baseURL;
 
     /**
-    
-    @author user
+
+     @author user
      */
     public ParseXXBH() {
         siteID = Site.XXBH;
+        siteName = "xxbh";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xxbh_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xxbh_encode_parse_", "html" );
 
@@ -54,12 +56,11 @@ public class ParseXXBH extends ParseOnlineComicSite {
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
-
+        
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             // 因為正常解析不需要用到單集頁面，所以給此兩行放進來
 
-            String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+            String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
             int beginIndex = allPageString.indexOf( "</a>->" ) + 1;
             beginIndex = allPageString.indexOf( "</a>->", beginIndex ) + 6;
@@ -67,7 +68,7 @@ public class ParseXXBH extends ParseOnlineComicSite {
             String tempTitleString = allPageString.substring( beginIndex, endIndex ).replaceAll( "&nbsp;", "" );
 
             setWholeTitle( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                    Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
+                Common.getTraditionalChinese( tempTitleString.trim() ) ) ) );
         }
 
         Common.debugPrintln( "作品名稱(title) : " + getTitle() );
@@ -83,7 +84,7 @@ public class ParseXXBH extends ParseOnlineComicSite {
         String tempString = "";
         String allJSPageString = "";
 
-        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
 
         // 找出全部的伺服器位址
@@ -106,7 +107,7 @@ public class ParseXXBH extends ParseOnlineComicSite {
         String[] frontPicURLs = new String[serverAmount];
 
         beginIndex = endIndex = 0;
-        for ( int i = 0 ; i < serverAmount ; i++ ) {
+        for ( int i = 0; i < serverAmount; i++ ) {
             beginIndex = tempString.indexOf( "http://", beginIndex );
             endIndex = tempString.indexOf( "\"", beginIndex );
             frontPicURLs[i] = tempString.substring( beginIndex, endIndex );
@@ -125,8 +126,7 @@ public class ParseXXBH extends ParseOnlineComicSite {
         Common.debugPrintln( "開始解析後面部份的位址" );
         String referURL = webSite + "?page=1";
         Common.simpleDownloadFile( jsURL, SetUp.getTempDirectory(), indexName, referURL );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
-        allJSPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+        allJSPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
         beginIndex = allJSPageString.indexOf( " msg" );
         beginIndex = allJSPageString.indexOf( "'", beginIndex ) + 1;
@@ -151,36 +151,30 @@ public class ParseXXBH extends ParseOnlineComicSite {
         Common.debugPrintln( "第一張圖片位址：" + frontPicURLs[serverId - 1] + backPicURLs[0] );
 
         beginIndex = endIndex = 0;
-        for ( int p = 0 ; p < totalPage && Run.isAlive ; p++ ) {
+        for ( int p = 0; p < totalPage && Run.isAlive; p++ ) {
 
             comicURL[p] = frontPicURLs[serverId - 1] + backPicURLs[p];
 
             //使用最簡下載協定，加入refer始可下載
-            referURL = webSite + "?page=" + (p + 1);
-            singlePageDownloadUsingSimple( getTitle(), getWholeTitle(),
-                    comicURL[p], totalPage, p + 1, referURL );
-
+            referURL = webSite + "?page=" + ( p + 1 );
+            singlePageDownloadUsingSimple( getTitle(), getWholeTitle(), comicURL[p], totalPage, p + 1, referURL );
+            if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
+                singlePageDownloadUsingRefer( getTitle(), getWholeTitle(), comicURL[p], totalPage, p + 1, 0, referURL );
+            }
             //Common.debugPrintln( ( p + 1 ) + " " + comicURL[p] + " " + referURL ); // debug
         }
         //System.exit( 0 ); // debug
     }
 
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
-
     @Override
     public String getAllPageString( String urlString ) {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xxbh_", "html" );
-        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xxbh_encode_", "html" );
+        //String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xxbh_encode_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
+        //Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
 
-        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
     @Override
@@ -247,13 +241,13 @@ public class ParseXXBH extends ParseOnlineComicSite {
         String volumeURL = "";
         String volumeTitle = "";
         beginIndex = endIndex = 0;
-        for ( int i = 0 ; i < volumeCount ; i++ ) {
+        for ( int i = 0; i < volumeCount; i++ ) {
             // 取得單集位址
             beginIndex = tempString.indexOf( " href=", beginIndex );
             beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
             endIndex = tempString.indexOf( "\"", beginIndex );
             volumeURL = tempString.substring( beginIndex, endIndex );
-            
+
             if ( !volumeURL.matches( ".*/s/.*" ) ) { // 代表有非集數的網址在亂入
                 urlList.add( baseURL + volumeURL );
                 // 取得單集名稱
@@ -262,7 +256,7 @@ public class ParseXXBH extends ParseOnlineComicSite {
                 volumeTitle = tempString.substring( beginIndex, endIndex );
                 volumeTitle = volumeTitle.replaceAll( "<.*>", "" );
                 volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
+                    Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
             }
         }
 
@@ -270,24 +264,5 @@ public class ParseXXBH extends ParseOnlineComicSite {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the xxbh module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

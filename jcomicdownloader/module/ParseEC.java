@@ -19,6 +19,9 @@ import jcomicdownloader.*;
 import java.io.*;
 import java.util.*;
 import java.text.*;
+import jcomicdownloader.encode.Encoding;
+import jcomicdownloader.encode.Zhcode;
+
 
 public class ParseEC extends ParseOnlineComicSite {
 
@@ -38,6 +41,7 @@ public class ParseEC extends ParseOnlineComicSite {
      */
     public ParseEC() {
         siteID = Site.EIGHT_COMIC;
+        siteName = "8comic";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_encode_parse_", "html" );
 
@@ -145,22 +149,12 @@ public class ParseEC extends ParseOnlineComicSite {
         //System.exit(0);
     }
 
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "volpic = " + volpic );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "tpf  = " + tpf );
-        Common.debugPrintln( "tpf2  = " + tpf2 );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
-
     @Override // 因為原檔就是utf8了，所以無須轉碼
     public String getAllPageString( String urlString ) {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_", "html" );
         String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_encode_", "html" );
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeBIG5File( SetUp.getTempDirectory(), indexName, indexEncodeName );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Zhcode.BIG5 );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName ).replace( "&#22338;", "阪" );
     }
@@ -272,22 +266,16 @@ public class ParseEC extends ParseOnlineComicSite {
     }
 
     @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
     public void printLogo() {
         System.out.println( " _____________________________" );
         System.out.println( "|                          " );
         System.out.println( "| Run the 8comic module: " );
         System.out.println( "|______________________________\n" );
+    }
+
+    @Override
+    public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
+        throw new UnsupportedOperationException( "Not supported yet." );
     }
 }
 
@@ -395,14 +383,6 @@ class ParseECphoto extends ParseEC {
 
         return combinationList;
     }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ____________________________________" );
-        System.out.println( "|                                 " );
-        System.out.println( "| Run the 8comic photo module: " );
-        System.out.println( "|_____________________________________\n" );
-    }
 }
 
 class ParseSixComic extends ParseEC {
@@ -419,9 +399,7 @@ class ParseSixComic extends ParseEC {
 
         return getTitleOnMainPage( mainPageUrlString, getAllPageString( mainPageUrlString ) );
     }
-
     
-
     @Override
     public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString ) {
         // combine volumeList and urlList into combinationList, return it.

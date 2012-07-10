@@ -5,6 +5,8 @@ Authors  : surveyorK
 Last Modified : 2012/5/31
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ *  4.11: 1. 修復blog.yam.com無法取得全部標籤的問題。
+ *           2. 修復blog.yam.com沒有標示日期的問題。
  *  4.05: 1. 新增對blog.yam.com的支援。
 ----------------------------------------------------------------------------------------------------
  */
@@ -33,6 +35,7 @@ public class ParseYamBlog extends ParsePixnetBlog {
      */
     public ParseYamBlog() {
         siteID = Site.YAM_BLOG;
+        siteName = "Yam Blog";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_yam_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_yam_encode_parse_", "html" );
 
@@ -166,7 +169,10 @@ public class ParseYamBlog extends ParsePixnetBlog {
         beginIndex = endIndex;
         beginIndex = allPageString.indexOf( "<div class=\"articleTitleDiv\">", beginIndex );
         if ( beginIndex < 0 ) {
-            beginIndex = allPageString.indexOf( "<div class=\"post_titlediv\">", beginIndex );
+            beginIndex = allPageString.indexOf( "<div class=\"post_body\"", 0 );
+            if ( beginIndex < 0 ) {
+                beginIndex = allPageString.indexOf( "<div class=\"post\"", 0 );
+            }
         }
 
         endIndex = allPageString.indexOf( "<style type='text/css'>", beginIndex );
@@ -228,7 +234,8 @@ public class ParseYamBlog extends ParsePixnetBlog {
         beginIndex = allPageString.indexOf( "class=\"filetree\"" );
         if ( beginIndex > 0 ) { // 代表有標籤分類
             Common.debugPrintln( "有標籤分類" );
-            endIndex = allPageString.indexOf( "</ul>", beginIndex );
+            endIndex = allPageString.lastIndexOf( "/category/" );
+            endIndex = allPageString.indexOf( "</ul>", endIndex );
             tempString = allPageString.substring( beginIndex, endIndex );
             int labelCount = tempString.split( "class=\"file\"" ).length - 1; //計算有幾種標籤
 
@@ -259,14 +266,6 @@ public class ParseYamBlog extends ParsePixnetBlog {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-    
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the Yam Blog module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }
 

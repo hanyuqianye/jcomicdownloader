@@ -47,8 +47,11 @@ public class ParseWebPage {
             siteID = Site.EX;
         else if ( webSite.matches( "(?s).*dm.99manga.com(?s).*" ) )
             siteID = Site.NINENINE_MANGA_TC;
+        else if ( webSite.matches( "(?s).*www.99manga.com(?s).*" ) )
+            siteID = Site.NINENINE_MANGA_WWW;
         else if ( webSite.matches( "(?s).*99manga.com(?s).*" ) )
             siteID = Site.NINENINE_MANGA;
+        
         else if ( webSite.matches( "(?s).*www.99comic.com(?s).*" ) )
             siteID = Site.NINENINE_COMIC_TC;
         else if ( webSite.matches( "(?s).*/99comic.com(?s).*" ) )
@@ -87,8 +90,8 @@ public class ParseWebPage {
             siteID = Site.MANGAFOX;
         else if ( webSite.matches( "(?s).*\\.manmankan.com/(?s).*" ) )
             siteID = Site.MANMANKAN;
-       // else if ( webSite.matches( "(?s).*xindm.cn/(?s).*" ) )
-      //      siteID = Site.XINDM;
+        //else if ( webSite.matches( "(?s).*xindm.cn/(?s).*" ) )
+        //    siteID = Site.XINDM;
         else if ( webSite.matches( "(?s).*google.com(?s).*" ) ) 
             siteID = Site.GOOGLE_PIC;
         else if ( webSite.matches( "(?s).*nanadm.com(?s).*" ) ) 
@@ -148,8 +151,7 @@ public class ParseWebPage {
             siteID = Site.XXBH; 
         else if ( webSite.matches( "(?s).*comic.131.com(?s).*" ) ) 
             siteID = Site.COMIC_131; 
-        else if ( webSite.matches( "(?s).*blogspot.com(?s).*" ) || 
-                     webSite.matches( "(?s).*blogspot.tw(?s).*" ) ) 
+        else if ( webSite.matches( "(?s).*blogspot\\.(?s).*" ) ) 
             siteID = Site.BLOGSPOT; 
         else if ( webSite.matches( "(?s).*pixnet.net(?s).*" ) ) 
             siteID = Site.PIXNET_BLOG;
@@ -159,9 +161,37 @@ public class ParseWebPage {
             siteID = Site.YAM_BLOG;
         else if ( webSite.matches( "(?s).*eyny.com(?s).*" ) ) 
             siteID = Site.EYNY_NOVEL;
-        else if ( webSite.matches( "(?s).*17kkmh.com(?s).*" ) ) 
-            siteID = Site.KKMH;
-                    
+        else if ( webSite.matches( "(?s).*zuiwanju.com(?s).*" ) ) 
+            siteID = Site.ZUIWANJU; 
+        else if ( webSite.matches( "(?s).*manhua.2ecy.com(?s).*" ) ) 
+            siteID = Site.TWO_ECY; 
+        else if ( webSite.matches( "(?s).*tianyabook..com(?s).*" ) ) 
+            siteID = Site.TIANYA_BOOK;             
+        else if ( webSite.matches( "(?s).*8novel.com/books/(?s).*" ) ) 
+            siteID = Site.EIGHT_NOVEL;             
+        else if ( webSite.matches( "(?s).*book.qq.com/s/book/(?s).*" ) ) 
+            siteID = Site.QQ_BOOK;             
+        else if ( webSite.matches( "(?s).*book.qq.com/origin/book/(?s).*" ) ) 
+            siteID = Site.QQ_ORIGIN_BOOK;     
+        else if ( webSite.matches( "(?s).*book.sina.com.cn/book/(?s).*" ) ) 
+            siteID = Site.SINA_BOOK; 
+        else if ( webSite.matches( "(?s).*book.51cto.com/art(?s).*" ) ) 
+            siteID = Site.FIVEONE_CTO; 
+        else if ( webSite.matches( "(?s).*17kk.cc/(?s).*" ) ) 
+            siteID = Site.ONESEVEN_KK; 
+        else if ( webSite.matches( "(?s).*uus8.com.*/" ) || 
+                  webSite.matches( "(?s).*uus8.com.*/\\d+" ) ||
+                  webSite.matches( "(?s).*uus8.com/book/display(?s).*" ) ) 
+            siteID = Site.UUS8; 
+        else if ( webSite.matches( "(?s).*wenku8.cn/modules/article/reader.php(?s).*" ) ||
+                  webSite.matches( "(?s).*wenku8.cn/modules/article/articleinfo.php(?s).*" ) ) 
+            siteID = Site.WENKU8; 
+        else if ( webSite.matches( "(?s).*book.ifeng.com/(?s).*" ) ) 
+            siteID = Site.IFENG_BOOK; 
+        else if ( webSite.matches( "(?s).*xunlook.com/(?s).*" ) ) 
+            siteID = Site.XUNLOOK; 
+        
+        
         else
             siteID = Site.UNKNOWN;
     }

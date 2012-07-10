@@ -34,6 +34,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
      */
     public ParseDmeden() {
         siteID = Site.DMEDEN;
+        siteName = "Dmeden";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dmeden_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dmeden_encode_parse_", "html" );
 
@@ -123,13 +124,6 @@ public class ParseDmeden extends ParseOnlineComicSite {
             //Common.debugPrintln( p + " " + comicURL[p-1] ); // debug
         }
         //System.exit(0); // debug
-    }
-
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
     }
 
     @Override
@@ -256,21 +250,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
     }
 
     @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the Dmeden module:     " );
-        System.out.println( "|______________________________\n" );
+    public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
+        throw new UnsupportedOperationException( "Not supported yet." );
     }
 }

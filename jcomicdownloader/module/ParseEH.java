@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/10
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+4.10: 修復在Substance介面下若跳出輸入視窗必崩潰的問題。
 1.16: 新增對EX的支援
 1.12: 將下載部分搬移到ParseOnlineComicSite，另作一個singlePageDownload()方法
 ----------------------------------------------------------------------------------------------------
@@ -19,6 +20,7 @@ import java.io.*;
 import java.util.*;
 import java.text.*;
 import javax.swing.JOptionPane;
+
 
 public class ParseEH extends ParseOnlineComicSite {
 
@@ -37,6 +39,7 @@ public class ParseEH extends ParseOnlineComicSite {
      */
     public ParseEH() {
         siteID = Site.EH;
+        siteName = "EH";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_e_Hentai_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_e_Hentai_encode_parse_", "html" );
         onePagePicCount = 20; // 20 pics on every page
@@ -56,6 +59,14 @@ public class ParseEH extends ParseOnlineComicSite {
 
     @Override
     public void setParameters() { // let all the non-set attributes get values
+        
+        if ( SetUp.getEhMemberID() != null 
+                && !"".equals( SetUp.getEhMemberID() ) 
+                && !"0".equals( SetUp.getEhMemberID() ) ) {
+            cookieString = "ipb_member_id=" + SetUp.getEhMemberID()
+                + ";ipb_pass_hash=" + SetUp.getEhMemberPasswordHash();
+            Common.debugPrintln( "有ID和passhash紀錄，使用cookie: " + cookieString );
+        }
 
         Common.slowDownloadFile( webSite, SetUp.getTempDirectory(), indexName, 1000, needCookie, cookieString );
 
@@ -309,12 +320,6 @@ public class ParseEH extends ParseOnlineComicSite {
     }
 
     @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         //setTitle( "E-Hentai" );
         if ( isRealSingleVolumePage( urlString ) ) {
@@ -329,24 +334,16 @@ public class ParseEH extends ParseOnlineComicSite {
     }
 
     @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            |" );
-        System.out.println( "| Run the e-Hentai module: |" );
-        System.out.println( "|_______________________________|\n" );
+    public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
+        throw new UnsupportedOperationException( "Not supported yet." );
     }
 }
-
 class ParseEX extends ParseEH {
 
     public ParseEX() {
         super();
         siteID = Site.EX;
+        siteName = "EX";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_ex_Hentai_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_ex_Hentai_encode_parse_", "html" );
 
@@ -389,24 +386,34 @@ class ParseEX extends ParseEH {
     }
 
     public void enterMemberID() { // 輸入id
-        while ( SetUp.getEhMemberID().equals( "0" ) ) {
+        if ( SetUp.getEhMemberID().equals( "0" ) || 
+            !SetUp.getEhMemberID().matches( "\\d+" )  ) {
+            CommonGUI.showInputDialogValue = "InitialValue";
             String idString = CommonGUI.showInputDialog( ComicDownGUI.mainFrame,
                     "請輸入e-hentai的ipb_member_id", "輸入視窗", JOptionPane.INFORMATION_MESSAGE );
+            
+            System.out.println( "輸入：" + idString );
             if ( idString.matches( "\\d+" ) ) {
                 SetUp.setEhMemberID( idString );
-                break;
+                //break;
             } else {
-                JOptionPane.showMessageDialog( ComicDownGUI.mainFrame,
+                CommonGUI.showMessageDialog( ComicDownGUI.mainFrame,
                         "輸入錯誤！（必須全為數字），請重新輸入", "提醒訊息", JOptionPane.ERROR_MESSAGE );
+                return;
             }
         }
     }
 
     public void enterMemberPasswordHash() { // 輸入密碼hash
-        if ( SetUp.getEhMemberPasswordHash().equals( "NULL" ) ) {
+        if ( SetUp.getEhMemberPasswordHash().equals( "NULL" ) || 
+                SetUp.getEhMemberPasswordHash().equals( "null" ) ||
+             SetUp.getEhMemberPasswordHash().equals( "InitialValue" ) ) {
+            CommonGUI.showInputDialogValue = "InitialValue";
             String hashString = CommonGUI.showInputDialog( ComicDownGUI.mainFrame,
                     "請輸入e-hentai的ipb_pass_hash", "輸入視窗", JOptionPane.INFORMATION_MESSAGE );
+            System.out.println( "輸入：" + hashString );
             SetUp.setEhMemberPasswordHash( hashString );
+            
         }
     }
 
@@ -418,13 +425,5 @@ class ParseEX extends ParseEH {
         Common.slowDownloadFile( urlString, SetUp.getTempDirectory(), indexName, 1000, true, cookieString );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexName );
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ________________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the ExHentai module: " );
-        System.out.println( "|_________________________________\n" );
     }
 }

@@ -33,6 +33,7 @@ public class ParseBlogspot extends ParseOnlineComicSite {
      */
     public ParseBlogspot() {
         siteID = Site.BLOGSPOT;
+        siteName = "BlogspotBlog";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_blogspot_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_blogspot_encode_parse_", "html" );
 
@@ -414,13 +415,5 @@ public class ParseBlogspot extends ParseOnlineComicSite {
     @Override
     public String[] getTempFileNames() {
         return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the Blogspot module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

@@ -37,6 +37,7 @@ public class ParseEynyNovel extends ParseCKNovel {
      */
     public ParseEynyNovel() {
         siteID = Site.EYNY_NOVEL;
+        siteName = "EynyNovel";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_eyny_novel_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_eyny_novel_encode_parse_", "html" );
 
@@ -62,11 +63,21 @@ public class ParseEynyNovel extends ParseCKNovel {
         int endIndex = 0;
         int p = 1; // 目前頁數
         totalPage = p;
+        
+        
+        // 取得作者名稱
+        String author = "";
+        endIndex = getWholeTitle().indexOf( "-" );
+        if ( endIndex > 0 ) { // 有標示作者
+           author = getWholeTitle().substring( 0, endIndex );
+        }
+        Common.debugPrintln( "作者：" + author );
+        
 
         NumberFormat formatter = new DecimalFormat( Common.getZero() );
         while ( Run.isAlive ) {
             if ( !new File( getDownloadDirectory() + formatter.format( p + 1 ) + ".html" ).exists() ) {
-                singlePageDownload( getTitle(), getWholeTitle(), pageURL, totalPage, p, 0, true, cookie, "", false ); // 每解析一個網址就下載一張圖
+                singlePageDownload( getTitle(), getWholeTitle(), pageURL, null, totalPage, p, 0, true, cookie, "", false ); // 每解析一個網址就下載一張圖
             }
             else {
                 Common.debugPrintln( "第" + p + "頁已存在，跳過" );
@@ -99,12 +110,12 @@ public class ParseEynyNovel extends ParseCKNovel {
         }
 
         if ( Run.isAlive ) {
-            hadleWholeNovel( webSite );  // 處理小說主函式
+            hadleWholeNovel( webSite, author );  // 處理小說主函式
         }
     }
 
     // 處理小說主函式
-    public void hadleWholeNovel( String url ) {
+    public void hadleWholeNovel( String url, String author ) {
         String allPageString = "";
         String allNovelText = getInformation( title, url ); // 全部頁面加起來小說文字
 
@@ -132,12 +143,16 @@ public class ParseEynyNovel extends ParseCKNovel {
         //Common.debugPrintln( "OLD: " + getDownloadDirectory() );
         //Common.debugPrintln( "NEW: " + textOutputDirectory );
 
-        if ( SetUp.getDeleteOriginalPic() ) { // 若有勾選原檔就刪除原始未合併文件
+        //if ( SetUp.getDeleteOriginalPic() ) { // 若有勾選原檔就刪除原始未合併文件
             Common.deleteFolder( getDownloadDirectory() ); // 刪除存放原始網頁檔的資料夾
-        }
+        //}
         Common.outputFile( allNovelText, textOutputDirectory, getWholeTitle() + "." + Common.getDefaultTextExtension() );
 
         textFilePath = textOutputDirectory + getWholeTitle() + "." + Common.getDefaultTextExtension();
+    
+        if ( SetUp.getDownloadNovelCover() ) {
+            downloadCover( getWholeTitle(), author ); // 下載封面
+        }
     }
 
     // 處理小說網頁，將標籤去除
@@ -159,6 +174,7 @@ public class ParseEynyNovel extends ParseCKNovel {
             oneFloorText = floorTexts[i];
             beginIndex = oneFloorText.indexOf( "</p>" );
             oneFloorText = oneFloorText.substring( beginIndex, oneFloorText.length() ); // 拿掉發表人和發表日期
+            oneFloorText = Common.getTraditionalChinese( oneFloorText ); // 簡轉繁
 
             if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML ) {
                 oneFloorText = replaceProcessToHtml( oneFloorText );
@@ -260,8 +276,10 @@ public class ParseEynyNovel extends ParseCKNovel {
         }
 
         String title = allPageString.substring( beginIndex, endIndex ).trim();
+        title = getRegularFileName( title );
 
-        return Common.getStringRemovedIllegalChar( title );
+        return Common.getStringRemovedIllegalChar( 
+                Common.getTraditionalChinese( title ) );
     }
 
     // 設置基本位址
@@ -290,6 +308,7 @@ public class ParseEynyNovel extends ParseCKNovel {
                 || urlString.matches( "(?s).*&tid=(?s).*" ) ) { // 網址為文章頁面 
             // 取得單集名稱
             String volumeTitle = getTitle();
+            volumeTitle = getRegularFileName( volumeTitle );
             volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
 
             // 取得單集位址
@@ -350,7 +369,8 @@ public class ParseEynyNovel extends ParseCKNovel {
                     beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
                     endIndex = tempString.indexOf( "</a>", beginIndex );
                     volumeTitle = tempString.substring( beginIndex, endIndex );
-                    volumeList.add( Common.getStringRemovedIllegalChar( volumeTitle.trim() ) );
+                    volumeList.add( Common.getStringRemovedIllegalChar( 
+                            Common.getTraditionalChinese( volumeTitle.trim() ) ) );
                 }
             }
 
@@ -362,24 +382,5 @@ public class ParseEynyNovel extends ParseCKNovel {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the Eyny Novel module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

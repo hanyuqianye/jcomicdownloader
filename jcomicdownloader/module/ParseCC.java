@@ -36,6 +36,7 @@ public class ParseCC extends ParseOnlineComicSite {
      */
     public ParseCC() {
         siteID = Site.CC;
+        siteName = "CC";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kuku_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kuku_encode_parse_", "html" );
 
@@ -158,16 +159,6 @@ public class ParseCC extends ParseOnlineComicSite {
         return mame;
     }
 
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "volpic = " + volpic );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "tpf  = " + tpf );
-        Common.debugPrintln( "tpf2  = " + tpf2 );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
-
     @Override
     public String getAllPageString( String urlString ) {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_CC_", "html" );
@@ -265,21 +256,7 @@ public class ParseCC extends ParseOnlineComicSite {
     }
 
     @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[]{indexName, indexEncodeName, jsName};
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ________________________" );
-        System.out.println( "|                      " );
-        System.out.println( "| Run the CC module: " );
-        System.out.println( "|_________________________\n" );
+    public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
+        throw new UnsupportedOperationException( "Not supported yet." );
     }
 }

@@ -6,6 +6,7 @@
  Last Modified : 2011/10/29
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 4.06: 1. 增添資訊視窗上的最新版本下載訊息。
  2.13: 1. 修改最新版本下載按鈕，使其按下去可以直接下載最新版本。
  2.01: 1. 增加支援網站列表的資訊。
  1.14: 1. 修改文字顯示方式，使用setFont而不使用html語法，避免在某些情況下出現亂碼。
@@ -38,7 +39,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
     private JLabel supportedSiteLabel;
     private String resourceFolder;
     private JButton versionButton;
-    private JButton downloadButton;
+    public static JButton downloadButton;
     private String officialName;
     private String officialURL;
     public static JFrame thisFrame; // for change look and feel
@@ -60,7 +61,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         setUpUIComponent();
         setUpeListener();
         setVisible( true );
-        
+
         deleteOfficialHtml(); // 刪除官方網頁檔案
 
         setNewestVersion(); // 檢查是否有新版本
@@ -70,16 +71,16 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
     private void setUpUIComponent() {
         String picFileString = SetUp.getBackgroundPicPathOfInformationFrame();
         // 檢查背景圖片是否存在
-        if ( SetUp.getUsingBackgroundPicOfInformationFrame() && 
-            !new File( picFileString ).exists() ) {
+        if ( SetUp.getUsingBackgroundPicOfInformationFrame()
+            && !new File( picFileString ).exists() ) {
             CommonGUI.showMessageDialog( this, picFileString
                 + "\n背景圖片不存在，重新設定為原始佈景",
                 "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             SetUp.setUsingBackgroundPicOfInformationFrame( false );
         }
-        
+
         if ( SetUp.getUsingBackgroundPicOfInformationFrame() ) {
-            
+
             frameDimension = CommonGUI.getDimension( picFileString );
             //setSize( frameDimension );
             int width = ( int ) frameDimension.getWidth() + CommonGUI.widthGapOfBackgroundPic;
@@ -88,7 +89,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
             setResizable( false );
         }
         else {
-            setSize( 470, 640 );
+            setSize( 470, 690 );
             setResizable( true );
         }
 
@@ -148,20 +149,23 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
 
         JButton teachingButton = getButton( " 線上使用教學", "information_manual.png",
             "https://sites.google.com/site/jcomicdownloader/step-by-step" );
-        JButton searchButton = getButton( " 漫畫搜尋引擎", "information_search.png",
+        JButton searchComicButton = getButton( " 漫畫搜尋引擎", "information_search.png",
             "http://www.google.com/cse/home?cx=002948535609514911011:ls5mhwb6sqa&hl=zh-TW" );
+        JButton searchNovelButton = getButton( " 小說搜尋引擎", "information_novel_search.png",
+            "http://www.google.com/cse/home?cx=002948535609514911011:_vv3hzthlt8&hl=zh-TW" );
         JButton messageButton = getButton( " 疑難問題回報", "information_report.png",
             "http://jcomicdownloader.blogspot.com/2012/05/bug-report-2.html" );
 
         JLabel authorLabel = getLabel( "作者：surveyorK （abc9070410@gmail.com）" );
 
-        informationPanel = new JPanel( new GridLayout( 7, 1, 5, 5 ) );
+        informationPanel = new JPanel( new GridLayout( 8, 1, 5, 5 ) );
         //informationPanel.add( versionPanel );
         informationPanel.add( updatePanel );
         informationPanel.add( downloadButton );
         informationPanel.add( supportedSiteButton );
         informationPanel.add( teachingButton );
-        informationPanel.add( searchButton );
+        informationPanel.add( searchComicButton );
+        informationPanel.add( searchNovelButton );
         informationPanel.add( messageButton );
         informationPanel.add( authorLabel );
         informationPanel.setOpaque( !SetUp.getUsingBackgroundPicOfInformationFrame() );
@@ -237,6 +241,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
     }
 
     public void setNewestVersion() {
+        
         Thread versionThread = new Thread( new Runnable() {
 
             public void run() {
@@ -254,7 +259,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
 
                 supportedSiteLabel.setText( getUpdateSupportedSiteString() ); // 從官方網頁提取支援網站資訊
                 repaint();
-                
+
                 if ( !CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
                     versionLabel.setForeground( Color.RED );
                     dateLabel.setForeground( Color.BLUE );
@@ -286,7 +291,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
 
     private JLabel getLabel( String string ) {
         string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
-        
+
         JLabel label = new JLabel( string );
         label.setFont( SetUp.getDefaultFont() );
 
@@ -301,7 +306,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
 
     private JButton getButton( String string, String picName, final String urlString ) {
         string = Common.getStringUsingDefaultLanguage( string ); // 使用預設語言 
-        
+
         JButton button = new JButton( string, new CommonGUI().getImageIcon( picName ) );
         button.setFont( SetUp.getDefaultFont( 3 ) );
         if ( urlString != null ) {
@@ -320,12 +325,16 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         }
 
 
-
+        
         return button;
     }
 
     // 下載最新版本的JComicDownloader
     private void downloadLastestVersion() {
+        InformationFrame.downloadButton.setText( "嘗試取得版本資訊..." );
+        
+        
+        
         new Thread( new Runnable() {
 
             public void run() {
@@ -350,7 +359,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
                                     InformationFrame.thisFrame.wait();
                                 }
                                 catch ( InterruptedException ex ) {
-                                    Common.hadleErrorMessage( ex,  "無法讓informationFrame等待（wait）"  );
+                                    Common.hadleErrorMessage( ex, "無法讓informationFrame等待（wait）" );
                                 }
                             }
                             Common.debugPrintln( "OK" );
@@ -358,13 +367,14 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
 
                         String fileName = "JComicDownloader_" + versionLabel.getText() + ".jar";
 
+                        
                         if ( ComicDownGUI.versionString.matches( ".*" + versionLabel.getText() + ".*" ) ) {
                             CommonGUI.showMessageDialog( thisFrame, "目前程式已是最新版本！",
                                 "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                         }
                         else if ( new File( Common.getNowAbsolutePath() + fileName ).exists() ) {
-                            CommonGUI.showMessageDialog( thisFrame, "最新版本已存在於程式資料夾！",
-                                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                           // CommonGUI.showMessageDialog( thisFrame, "最新版本已存在於程式資料夾！",
+                           //     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                         }
                         else {
                             Common.debugPrintln( "開始下載最新版本" );
@@ -373,6 +383,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
                             String backURL = "?attredirects=0&amp;d=1";
                             String lastestVersionURL = frontURL + fileName + backURL;
                             Common.downloadFile( lastestVersionURL, Common.getNowAbsolutePath(), fileName, false, null );
+                            InformationFrame.downloadButton.setText( "最新版本下載完成" );
 
 
                             Object[] options = {"確定", "開啟存放程式的資料夾"};
@@ -394,6 +405,8 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
                                 }
                             }
                         }
+                        
+                        InformationFrame.downloadButton.setText( "最新版本下載" );
                     }
                 } );
 

@@ -5,19 +5,18 @@
  Last Modified : 2012/4/20
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+    4.13: 1. 修復jmymh解析集數錯誤的問題。
     4.01: 1. 修復jmymh無法下載的問題。（加入伺服器檢查機制）
  *  3.15: 1. 新增對www.jmymh.com的支援。
  ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import jcomicdownloader.tools.*;
-import jcomicdownloader.enums.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import jcomicdownloader.SetUp;
-import jcomicdownloader.encode.Zhcode;
+import jcomicdownloader.enums.Site;
+import jcomicdownloader.tools.Common;
 
 public class ParseJM extends ParseOnlineComicSite {
 
@@ -33,6 +32,7 @@ public class ParseJM extends ParseOnlineComicSite {
      */
     public ParseJM() {
         siteID = Site.JM;
+        siteName = "JM";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jm_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jm_encode_parse_", "html" );
 
@@ -132,13 +132,6 @@ public class ParseJM extends ParseOnlineComicSite {
         //System.exit( 0 ); // debug
     }
 
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
-
     @Override
     public String getAllPageString( String urlString ) {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jm_", "html" );
@@ -179,13 +172,6 @@ public class ParseJM extends ParseOnlineComicSite {
     }
 
     @Override
-    public String getTitleOnSingleVolumePage( String urlString ) {
-        String mainUrlString = getMainUrlFromSingleVolumeUrl( urlString );
-
-        return getTitleOnMainPage( mainUrlString, getAllPageString( mainUrlString ) );
-    }
-
-    @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         int beginIndex = allPageString.indexOf( "<h1>" ) + 5;
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
@@ -208,14 +194,14 @@ public class ParseJM extends ParseOnlineComicSite {
 
         String tempString = allPageString.substring( beginIndex, endIndex );
 
-        int volumeCount = tempString.split( "href=" ).length - 1;
+        int volumeCount = tempString.split( "href='/" ).length - 1;
 
         String volumeTitle = "";
         beginIndex = endIndex = 0;
         for ( int i = 0; i < volumeCount; i++ ) {
 
             // 取得單集位址
-            beginIndex = tempString.indexOf( "href=", beginIndex );
+            beginIndex = tempString.indexOf( "href='/", beginIndex );
             beginIndex = tempString.indexOf( "'", beginIndex ) + 1;
             endIndex = tempString.indexOf( "'", beginIndex );
             urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
@@ -236,24 +222,5 @@ public class ParseJM extends ParseOnlineComicSite {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[]{indexName, indexEncodeName, jsName};
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the HH module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

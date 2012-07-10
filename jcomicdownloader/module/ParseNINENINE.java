@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2012/5/03
+Last Modified : 2012/6/16
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+4.12: 1. 修復mh.99770.cc和www.cococomic.com部份位址解析錯誤的問題。
 4.01: 1. 修復cococomic簡體版頁面的集數解析問題。
 3.19: 1. 修復99manga繁體版因改版而解析錯誤的問題。
 3.17: 1. 修復99770和cococomic繁體版頁面的集數解析問題。
@@ -17,12 +18,13 @@ ChangeLog:
  */
 package jcomicdownloader.module;
 
-import jcomicdownloader.tools.*;
-import jcomicdownloader.enums.*;
-import jcomicdownloader.*;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Zhcode;
+import jcomicdownloader.enums.Site;
+import jcomicdownloader.tools.Common;
+
 
 public class ParseNINENINE extends ParseOnlineComicSite {
 
@@ -38,6 +40,7 @@ public class ParseNINENINE extends ParseOnlineComicSite {
      * @author user
      */
     public ParseNINENINE() {
+        siteName = "99";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_encode_parse_", "html" );
         jsName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_parse_", "js" );
@@ -63,7 +66,8 @@ public class ParseNINENINE extends ParseOnlineComicSite {
         setServerNo( serverNo );
 
 
-        int beginIndex = allString.indexOf( "script src=" ) + 11;
+        int beginIndex = allString.indexOf( "script src=" );
+        beginIndex = allString.indexOf( "=", beginIndex ) + 1;
         int endIndex = allString.indexOf( ">", beginIndex );
 
         int endIndexOfBaseURL = Common.getIndexOfOrderKeyword( webSite, "/", 3 );
@@ -244,6 +248,12 @@ public class ParseNINENINE extends ParseOnlineComicSite {
         String baseURL = urlString.substring( 0, endIndexOfBaseURL );
 
         int totalVolume = getHowManyKeyWordInString( allPageString, "ShowA" );
+        
+        if ( totalVolume == 0 ) {
+            Common.debugPrintln( "找不到任何集數！" );
+            return null;
+        }
+        
         int index = 0;
         for ( int count = 0 ; count < totalVolume ; count++ ) {
             index = allPageString.indexOf( "href=/", index );
@@ -272,38 +282,24 @@ public class ParseNINENINE extends ParseOnlineComicSite {
     }
 
     @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
     public void printLogo() {
         System.out.println( " __________________________________" );
         System.out.println( "|                              " );
-        System.out.println( "| Run the NINE NINE module: " );
+        System.out.println( "| Run the " + siteName + " module: " );
         System.out.println( "|__________________________________\n" );
     }
 
     @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
+    public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
+        throw new UnsupportedOperationException( "Not supported yet." );
     }
 }
-
 class Parse99Comic extends ParseNINENINE {
 
     public Parse99Comic() {
         super();
         siteID = Site.NINENINE_COMIC;
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " _______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the 99 comic module: " );
-        System.out.println( "|________________________________\n" );
+        siteName = "99 comic";
     }
 }
 
@@ -312,6 +308,7 @@ class Parse99MangaTC extends Parse99ComicTC {
     public Parse99MangaTC() {
         super();
         siteID = Site.NINENINE_MANGA_TC;
+        siteName = "dm.99manga.com";
         
         baseURL = "http://dm.99manga.com";
     }
@@ -365,13 +362,143 @@ class Parse99MangaTC extends Parse99ComicTC {
         return combinationList;
     }
 
-    @Override
-    public void printLogo() {
-        System.out.println( " ________________________________" );
-        System.out.println( "|                             " );
-        System.out.println( "| Run the dm 99 manga module: " );
-        System.out.println( "|_________________________________\n" );
+}
+
+class Parse99MangaWWW extends Parse99MangaTC {
+
+    public Parse99MangaWWW() {
+        super();
+        siteID = Site.NINENINE_MANGA_WWW;
+        siteName = "www.99manga.com";
+        
+        baseURL = "http://www.99manga.com";
     }
+    
+    @Override // 從網址判斷是否為單集頁面(true) 還是主頁面(false)
+    public boolean isSingleVolumePage( String urlString ) {
+        // ex. http://www.99manga.com/manhua/5506z70473/
+        if ( urlString.matches( "(?s).*/manhua/(?s).*" ) )
+        {
+            return true;
+        } else // ex. http://www.99manga.com/Comic/5506/
+        {
+            return false;
+        }
+    }
+    
+    @Override // 下載網址指向的網頁，全部存入String後回傳
+    public String getAllPageString( String urlString ) {
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_manga_www_", "html" );
+
+        System.out.println( "URL: " + urlString );
+        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        
+        // 網頁為簡體版utf8，無須轉碼
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
+
+    }
+    
+    
+    @Override // 從主頁面取得所有集數名稱和網址
+    public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString ) {
+        
+        List<List<String>> combinationList = new ArrayList<List<String>>();
+        List<String> urlList = new ArrayList<String>();
+        List<String> volumeList = new ArrayList<String>();
+        
+        int beginIndex = allPageString.indexOf( "class=\"cVol\"" );
+        int endIndex = allPageString.indexOf( "Vol_list", beginIndex );
+
+        String tempString = allPageString.substring( beginIndex, endIndex );
+        
+        totalVolume = tempString.split( " href=" ).length - 1;
+
+        beginIndex = endIndex = 0;
+        for ( int count = 0 ; count < totalVolume ; count++ ) {
+
+            beginIndex = tempString.indexOf( " href=", beginIndex );
+            beginIndex = tempString.indexOf( "'", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "'", beginIndex );
+            urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
+
+            beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "<", beginIndex );
+            String title = tempString.substring( beginIndex, endIndex );
+
+            volumeList.add( getVolumeWithFormatNumber( 
+                    Common.getStringRemovedIllegalChar( 
+                        Common.getTraditionalChinese( title.trim() ) ) ) );
+        }
+
+        combinationList.add( volumeList );
+        combinationList.add( urlList );
+
+        return combinationList;
+    }
+    
+    /*
+    @Override // 從主頁面取得title(作品名稱)
+    public String getTitleOnMainPage( String urlString, String allPageString ) {
+        Common.debugPrintln( "開始由主頁面位址取得title：" );
+
+        int beginIndex = allPageString.indexOf( "<h1>" );
+        beginIndex = allPageString.indexOf( " title=", beginIndex );
+        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "<", beginIndex );
+        String tempString = allPageString.substring( beginIndex, endIndex );
+        
+        String title = Common.getStringRemovedIllegalChar( 
+                        Common.getTraditionalChinese( tempString.trim() ) );
+        
+        return title;
+    }
+    
+    @Override // 從主頁面取得所有集數名稱和網址
+    public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString ) {
+        // combine volumeList and urlList into combinationList, return it.
+        // ex. <li><a href=/manga/4142/84144.htm?s=4 target=_blank>bakuman151集</a>
+        //     <a href="javascript:ShowA(4142,84144,4);" class=Showa>加速A</a>
+        //     <a href="javascript:ShowB(4142,84144,4);" class=Showb>加速B</a></li>
+
+        List<List<String>> combinationList = new ArrayList<List<String>>();
+        List<String> urlList = new ArrayList<String>();
+        List<String> volumeList = new ArrayList<String>();
+
+        int endIndexOfBaseURL = Common.getIndexOfOrderKeyword( urlString, "/", 3 );
+        String baseURL = urlString.substring( 0, endIndexOfBaseURL );
+        
+        int beginIndex = allPageString.indexOf( "class=\"vol\"" );
+        int endIndex = allPageString.indexOf( "class=\"replv\"", beginIndex );
+        String tempString = allPageString.substring( beginIndex, endIndex );
+        
+        int totalVolume = getHowManyKeyWordInString( tempString, "ShowA" );
+        int index = 0;
+        for ( int count = 0 ; count < totalVolume ; count++ ) {
+            index = tempString.indexOf( "href=/", index );
+
+            int urlBeginIndex = tempString.indexOf( "/", index );
+            int urlEndIndex = Common.getSmallerIndexOfTwoKeyword( tempString, index, " ", ">" );
+
+            urlList.add( baseURL + tempString.substring( urlBeginIndex, urlEndIndex ) );
+
+            int volumeBeginIndex = tempString.indexOf( ">", index ) + 1;
+            int volumeEndIndex = tempString.indexOf( "<", volumeBeginIndex );
+
+            String title = tempString.substring( volumeBeginIndex, volumeEndIndex );
+
+            volumeList.add( getVolumeWithFormatNumber( 
+                    Common.getStringRemovedIllegalChar( 
+                        Common.getTraditionalChinese( title ) ) ) );
+
+            index = volumeEndIndex;
+        }
+
+        combinationList.add( volumeList );
+        combinationList.add( urlList );
+
+        return combinationList;
+    }
+     */
 }
 
 class Parse99Manga extends ParseNINENINE {
@@ -379,16 +506,71 @@ class Parse99Manga extends ParseNINENINE {
     public Parse99Manga() {
         super();
         siteID = Site.NINENINE_MANGA;
+        siteName = "99manga.com";
         
-        baseURL = "http://99comic.com";
+        baseURL = "http://99manga.com";
     }
+    
+    @Override // 從主頁面取得title(作品名稱)
+    public String getTitleOnMainPage( String urlString, String allPageString ) {
+        Common.debugPrintln( "開始由主頁面位址取得title：" );
 
-    @Override
-    public void printLogo() {
-        System.out.println( " ________________________________" );
-        System.out.println( "|                             " );
-        System.out.println( "| Run the 99 manga module: " );
-        System.out.println( "|_________________________________\n" );
+        int beginIndex = allPageString.lastIndexOf( " alt=" );
+        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "\"", beginIndex );
+        String tempString = allPageString.substring( beginIndex, endIndex );
+        
+        String title = Common.getStringRemovedIllegalChar( 
+                        Common.getTraditionalChinese( tempString.trim() ) );
+        
+        return title;
+    }
+    
+    @Override // 從主頁面取得所有集數名稱和網址
+    public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString ) {
+        // combine volumeList and urlList into combinationList, return it.
+        // ex. <li><a href=/manga/4142/84144.htm?s=4 target=_blank>bakuman151集</a>
+        //     <a href="javascript:ShowA(4142,84144,4);" class=Showa>加速A</a>
+        //     <a href="javascript:ShowB(4142,84144,4);" class=Showb>加速B</a></li>
+
+        List<List<String>> combinationList = new ArrayList<List<String>>();
+        List<String> urlList = new ArrayList<String>();
+        List<String> volumeList = new ArrayList<String>();
+
+        int endIndexOfBaseURL = Common.getIndexOfOrderKeyword( urlString, "/", 3 );
+        String baseURL = urlString.substring( 0, endIndexOfBaseURL );
+        
+        int beginIndex = allPageString.indexOf( "class=\"vol\"" );
+        int endIndex = allPageString.indexOf( "class=\"replv\"", beginIndex );
+        String tempString = allPageString.substring( beginIndex, endIndex );
+        
+
+        int totalVolume = getHowManyKeyWordInString( tempString, "ShowA" );
+        int index = 0;
+        for ( int count = 0 ; count < totalVolume ; count++ ) {
+            index = tempString.indexOf( "href=/", index );
+
+            int urlBeginIndex = tempString.indexOf( "/", index );
+            int urlEndIndex = Common.getSmallerIndexOfTwoKeyword( tempString, index, " ", ">" );
+
+            urlList.add( baseURL + tempString.substring( urlBeginIndex, urlEndIndex ) );
+
+            int volumeBeginIndex = tempString.indexOf( ">", index ) + 1;
+            int volumeEndIndex = tempString.indexOf( "<", volumeBeginIndex );
+
+            String title = tempString.substring( volumeBeginIndex, volumeEndIndex );
+
+            volumeList.add( getVolumeWithFormatNumber( 
+                    Common.getStringRemovedIllegalChar( 
+                        Common.getTraditionalChinese( title ) ) ) );
+
+            index = volumeEndIndex;
+        }
+
+        combinationList.add( volumeList );
+        combinationList.add( urlList );
+
+        return combinationList;
     }
 }
 
@@ -398,6 +580,8 @@ class Parse99ComicTC extends ParseCocoTC {
     public Parse99ComicTC() {
         super();
         siteID = Site.NINENINE_COMIC_TC;
+        siteName = "www.99comic.com";
+        
         jsURL = "http://www.99comic.com/script/viewhtml.js";
         baseURL = "http://www.99comic.com";
     }
@@ -418,11 +602,12 @@ class Parse99ComicTC extends ParseCocoTC {
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         Common.debugPrintln( "開始由主頁面位址取得title：" );
 
-        int beginIndex = allPageString.indexOf( "<h1>" ) + 5;
+        int beginIndex = allPageString.indexOf( "<h1>" );
+        beginIndex = allPageString.indexOf( " href=", beginIndex ) + 1;
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "<", beginIndex );
+        int endIndex = allPageString.indexOf( "</a>", beginIndex );
 
-        title = allPageString.substring( beginIndex, endIndex ).trim().split( "\\s" )[0];
+        title = allPageString.substring( beginIndex, endIndex ).trim(); // .split( "\\s" )[0];
 
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
@@ -525,18 +710,10 @@ class Parse99ComicTC extends ParseCocoTC {
         Common.debugPrintln( "下載伺服器位址: " + baseURL );
 
         for ( int i = 0 ; i < comicURL.length ; i++ ) {
-            comicURL[i] = baseURL + urlTokens[i];
+            comicURL[i] = baseURL + Common.getFixedChineseURL( urlTokens[i] );
             //Common.debugPrintln( i + " : " + comicURL[i] ) ;
         }
         //System.exit(0);
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                           " );
-        System.out.println( "| Run the www.99comic.com module: " );
-        System.out.println( "|_______________________________\n" );
     }
 }
 
@@ -546,6 +723,8 @@ class ParseMh99770 extends ParseCocoTC {
     public ParseMh99770() {
         super();
         siteID = Site.NINENINE_MH_99770;
+        siteName = "mh.99770.cc";
+        jsURL = "http://mh.99770.cc/script/viewhtml.js";
     }
 
     @Override
@@ -563,14 +742,6 @@ class Parse99770 extends ParseNINENINE {
         super();
         siteID = Site.NINENINE_99770;
     }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                           " );
-        System.out.println( "| Run the www.99770.cc module: " );
-        System.out.println( "|_______________________________\n" );
-    }
 }
 
 class Parse99Mh extends ParseNINENINE {
@@ -578,18 +749,9 @@ class Parse99Mh extends ParseNINENINE {
     public Parse99Mh() {
         super();
         siteID = Site.NINENINE_MH;
+        siteName = "99mh";
         
         jsURL = "http://mh.99770.cc/script/ds.js";
-    }
-    
-
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ___________________________" );
-        System.out.println( "|                         " );
-        System.out.println( "| Run the 99mh module: " );
-        System.out.println( "|____________________________\n" );
     }
 }
 
@@ -598,19 +760,11 @@ class ParseCoco extends ParseNINENINE {
     public ParseCoco() {
         super();
         siteID = Site.NINENINE_COCO;
+        siteName = "cococomic";
         
         jsURL = "http://cococomic.com/v3/i3.js";
     }
     
-
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ___________________________" );
-        System.out.println( "|                         " );
-        System.out.println( "| Run the cococomic module: " );
-        System.out.println( "|____________________________\n" );
-    }
 }
 
 // cococomic變繁體版了，解析方法全面翻新
@@ -619,6 +773,7 @@ class ParseCocoTC extends ParseNINENINE {
     public ParseCocoTC() {
         super();
         siteID = Site.NINENINE_COCO_TC;
+        siteName = "www.cococomic.com";
         
         jsURL = "http://www.cococomic.com/script/ds.js";
     }
@@ -656,7 +811,7 @@ class ParseCocoTC extends ParseNINENINE {
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
         int endIndex = allPageString.indexOf( "<", beginIndex );
 
-        title = allPageString.substring( beginIndex, endIndex ).trim().split( "\\s" )[0];
+        title = allPageString.substring( beginIndex, endIndex ).trim().split( "\\n" )[0];
 
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
@@ -761,18 +916,10 @@ class ParseCocoTC extends ParseNINENINE {
         Common.debugPrintln( "下載伺服器位址: " + baseURL );
 
         for ( int i = 0 ; i < comicURL.length ; i++ ) {
-            comicURL[i] = baseURL + urlTokens[i];
+            comicURL[i] = baseURL + Common.getFixedChineseURL( urlTokens[i] );
             //Common.debugPrintln( i + " : " + comicURL[i] ) ;
         }
         //System.exit(0);
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ________________________________" );
-        System.out.println( "|                             " );
-        System.out.println( "| Run the cococomic TC module: " );
-        System.out.println( "|_________________________________\n" );
     }
 }
 
@@ -781,6 +928,7 @@ class Parse1Mh extends Parse99ComicTC {
     public Parse1Mh() {
         super();
         siteID = Site.NINENINE_1MH;
+        siteName = "1mh.com";
         
         baseURL = "http://1mh.com";
     }
@@ -796,15 +944,6 @@ class Parse1Mh extends Parse99ComicTC {
             return false;
         }
     }
-
-
-    @Override
-    public void printLogo() {
-        System.out.println( " __________________________" );
-        System.out.println( "|                        " );
-        System.out.println( "| Run the 1mh module: " );
-        System.out.println( "|___________________________\n" );
-    }
 }
 
 class Parse3G extends ParseNINENINE {
@@ -812,14 +951,7 @@ class Parse3G extends ParseNINENINE {
     public Parse3G() {
         super();
         siteID = Site.NINENINE_3G;
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ________________________" );
-        System.out.println( "|                      " );
-        System.out.println( "| Run the 3G module: " );
-        System.out.println( "|_________________________\n" );
+        siteName = "3G";
     }
 
     @Override // 從主頁面取得所有集數名稱和網址

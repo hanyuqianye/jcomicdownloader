@@ -33,6 +33,7 @@ public class ParseXuiteBlog extends ParsePixnetBlog {
      */
     public ParseXuiteBlog() {
         siteID = Site.XUITE_BLOG;
+        siteName = "Xuite Blog";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xuite_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xuite_encode_parse_", "html" );
 
@@ -253,14 +254,6 @@ public class ParseXuiteBlog extends ParsePixnetBlog {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-    
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the Xuite Blog module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }
 

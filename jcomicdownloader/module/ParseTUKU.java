@@ -12,11 +12,11 @@ package jcomicdownloader.module;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import jcomicdownloader.tools.*;
-import jcomicdownloader.enums.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import jcomicdownloader.SetUp;
-import jcomicdownloader.encode.Zhcode;
+import jcomicdownloader.enums.Site;
+import jcomicdownloader.tools.Common;
 
 public class ParseTUKU extends ParseOnlineComicSite {
 
@@ -32,6 +32,7 @@ public class ParseTUKU extends ParseOnlineComicSite {
      */
     public ParseTUKU() {
         siteID = Site.TUKU;
+        siteName = "Tuku";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tuku_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tuku_encode_parse_", "html" );
 
@@ -130,13 +131,6 @@ public class ParseTUKU extends ParseOnlineComicSite {
         //System.exit( 0 ); // debug
     }
 
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
-
     @Override
     public String getAllPageString( String urlString ) {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tuku_", "html" );
@@ -170,14 +164,7 @@ public class ParseTUKU extends ParseOnlineComicSite {
 
         return mainPageURL;
     }
-
-    @Override
-    public String getTitleOnSingleVolumePage( String urlString ) {
-        String mainUrlString = getMainUrlFromSingleVolumeUrl( urlString );
-
-        return getTitleOnMainPage( mainUrlString, getAllPageString( mainUrlString ) );
-    }
-
+    
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         int beginIndex = allPageString.indexOf( "<strong>" );
@@ -236,24 +223,5 @@ public class ParseTUKU extends ParseOnlineComicSite {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[]{indexName, indexEncodeName, jsName};
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the Tuku(CC) module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

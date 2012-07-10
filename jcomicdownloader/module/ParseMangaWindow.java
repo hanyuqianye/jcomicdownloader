@@ -10,10 +10,11 @@
  */
 package jcomicdownloader.module;
 
-import jcomicdownloader.tools.*;
-import jcomicdownloader.enums.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import jcomicdownloader.SetUp;
+import jcomicdownloader.enums.Site;
+import jcomicdownloader.tools.Common;
 
 public class ParseMangaWindow extends ParseOnlineComicSite {
 
@@ -29,6 +30,7 @@ public class ParseMangaWindow extends ParseOnlineComicSite {
      */
     public ParseMangaWindow() {
         siteID = Site.MANGA_WINDOW;
+        siteName = "Manga Window";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mangaWindow_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_mangaWindow_encode_parse_", "html" );
 
@@ -185,21 +187,7 @@ public class ParseMangaWindow extends ParseOnlineComicSite {
     }
 
     @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[]{indexName, indexEncodeName, jsName};
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ____________________________________" );
-        System.out.println( "|                                 " );
-        System.out.println( "| Run the MangaWindow module:     " );
-        System.out.println( "|_____________________________________\n" );
+    public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
+        throw new UnsupportedOperationException( "Not supported yet." );
     }
 }

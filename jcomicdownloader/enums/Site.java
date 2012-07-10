@@ -77,5 +77,19 @@ public class Site {
     public final static int XUITE_BLOG = 59;
     public final static int YAM_BLOG = 60;
     public final static int EYNY_NOVEL = 61;
-    public final static int KKMH = 62;
+    //public final static int KKMH = 62;
+    public final static int ZUIWANJU = 63; // zuiwanju.
+    public final static int TWO_ECY = 64; 
+    public final static int TIANYA_BOOK = 65; 
+    public final static int NINENINE_MANGA_WWW= 66; 
+    public final static int EIGHT_NOVEL= 67; 
+    public final static int QQ_BOOK= 68; 
+    public final static int SINA_BOOK = 69; 
+    public final static int FIVEONE_CTO = 70;
+    public final static int ONESEVEN_KK = 71;
+    public final static int QQ_ORIGIN_BOOK = 72; 
+    public final static int UUS8 = 73; 
+    public final static int WENKU8 = 74; 
+    public final static int IFENG_BOOK = 75; 
+    public final static int XUNLOOK = 76; 
 }

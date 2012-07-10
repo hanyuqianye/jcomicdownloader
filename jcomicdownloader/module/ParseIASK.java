@@ -36,6 +36,7 @@ public class ParseIASK extends ParseOnlineComicSite {
      */
     public ParseIASK() {
         siteID = Site.IASK;
+        siteName = "IASK";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_iask_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_iask_encode_parse_", "html" );
 
@@ -337,13 +338,5 @@ public class ParseIASK extends ParseOnlineComicSite {
     @Override
     public String[] getTempFileNames() {
         return new String[]{indexName, indexEncodeName, jsName};
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the IASK module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

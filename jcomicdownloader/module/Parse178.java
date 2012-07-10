@@ -44,6 +44,7 @@ public class Parse178 extends ParseOnlineComicSite {
      */
     public Parse178() {
         siteID = Site.MANHUA_178;
+        siteName = "178";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_178_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_178_encode_parse_", "html" );
 
@@ -287,13 +288,5 @@ public class Parse178 extends ParseOnlineComicSite {
     @Override
     public String[] getTempFileNames() {
         return new String[]{indexName, indexEncodeName, jsName};
-    }
-
-    @Override
-    public void printLogo() {
-        Common.debugPrintln( " ______________________________" );
-        Common.debugPrintln( "|                            " );
-        Common.debugPrintln( "| Run the 178 module:     " );
-        Common.debugPrintln( "|_______________________________\n" );
     }
 }

@@ -1,3 +1,4 @@
+
 /*
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
@@ -5,12 +6,14 @@ Authors  : surveyorK
 Last Modified : 2012/5/24
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+    4.12: 1. 修復fumanhua因伺服器位址更換而無法下載的問題。
     4.02: 1. 修復fumanhua解析集數錯誤的問題。
  *  4.01: 1. 新增對fumanhua的支援。
 ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import jcomicdownloader.tools.*;
@@ -34,6 +37,7 @@ public class ParseFumanhua extends ParseOnlineComicSite {
      */
     public ParseFumanhua() {
         siteID = Site.FUMANHUA;
+        siteName = "Fumanhua";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_fumanhua_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_fumanhua_encode_parse_", "html" );
 
@@ -89,15 +93,36 @@ public class ParseFumanhua extends ParseOnlineComicSite {
         comicURL = new String[totalPage];
         
         // 設定伺服器位址
-        String serverURL1 = "http://img.kkcomic.com";
-        String serverURL2 = "http://img1.kkcomic.com";
-        String serverURL3 = "http://img2.kkcomic.com";
+        String serverURL1 = "http://pic2.fumanhua.com";
+        String serverURL2 = "http://img2.fumanhua.com";
+        String serverURL3 = "http://img3.fumanhua.com";
+        String serverURL = "";
 
         // 開始第一張圖片位址
         beginIndex = allPageString.indexOf( "var imgurl" );
         beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
         endIndex = allPageString.indexOf( "'", beginIndex );
-        String firstPicURL = serverURL1 + allPageString.substring( beginIndex, endIndex );
+        String firestPicBackURL = allPageString.substring( beginIndex, endIndex );
+        
+        String firstPicURL = "";
+        String firstPicURL1 = serverURL1 + firestPicBackURL;
+        String firstPicURL2 = serverURL2 + firestPicBackURL;
+        String firstPicURL3 = serverURL3 + firestPicBackURL;
+        
+        // 測試三組伺服器，順序：1 -> 2 -> 3
+        if ( Common.urlIsOK( firstPicURL1 ) ) {
+            firstPicURL = firstPicURL1;
+            Common.debugPrintln( "使用伺服器位址：" + serverURL1 );
+        }
+        else if ( Common.urlIsOK( firstPicURL2 ) ) {
+            firstPicURL = firstPicURL2;
+            Common.debugPrintln( "使用伺服器位址：" + serverURL2 );
+        }
+        else if ( Common.urlIsOK( firstPicURL3 ) ) {
+            firstPicURL = firstPicURL3;
+            Common.debugPrintln( "使用伺服器位址：" + serverURL3 );
+        }
+        
         Common.debugPrintln( "第一張圖片位址：" + firstPicURL );
         
         // 取得圖片副檔名
@@ -107,25 +132,25 @@ public class ParseFumanhua extends ParseOnlineComicSite {
         
         NumberFormat formatter = new DecimalFormat( "000" ); // 此站預設三個零，之後若有變數再說
 
+        String cookie = "Hm_lvt_a0d6e70519c7610ccd1d37c3ebb0434b=1341308909421; Hm_lpvt_a0d6e70519c7610ccd1d37c3ebb0434b=1341308909421";
+        
         int p = 0; // 目前頁數
         String picURL = firstPicURL; // 每張圖片位址
         for ( int i = 1 ; i <= totalPage && Run.isAlive; i++ ) {
             String nowFileName = formatter.format( i ) + "." + extension;
             String nextFileName = formatter.format( i + 1 ) + "." + extension;
 
-            comicURL[p++] = picURL; // 存入每一頁的網頁網址
+            comicURL[p] = picURL; // 存入每一頁的網頁網址
             //Common.debugPrintln( p + " " + comicURL[p - 1] ); // debug
+            
+            singlePageDownload( getTitle(), getWholeTitle(), comicURL[p], null,
+                totalPage, i, 0, true, cookie, webSite, true );
+            
+            p ++;
 
             picURL = picURL.replaceAll( nowFileName, nextFileName ); // 換下一張圖片
         }
         //System.exit( 0 ); // debug
-    }
-
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
     }
 
     @Override
@@ -224,24 +249,5 @@ public class ParseFumanhua extends ParseOnlineComicSite {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the Fumanhua module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

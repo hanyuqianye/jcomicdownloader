@@ -32,10 +32,11 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
  */
     public ParseJumpcncn() {
         siteID = Site.JUMPCNCN;
-        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_encode_parse_", "html" );
+        siteName = "JumpCNCN";
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcncn_parse_", "html" );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcncn_encode_parse_", "html" );
 
-        jsName = "index_jumpcn.js";
+        jsName = "index_jumpcncn.js";
         radixNumber = 185271; // default value, not always be useful!!
         orinialWholeTitle = "";
     }
@@ -142,17 +143,10 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
         //System.exit(0);
     }
 
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
-
     @Override
     public String getAllPageString( String urlString ) {
-        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_", "html" );
-        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_encode_", "html" );
+        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcncn_", "html" );
+        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcncn_encode_", "html" );
         
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
@@ -241,21 +235,7 @@ public class ParseJumpcncn extends ParseOnlineComicSite {
     }
 
     @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-    
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " __________________________________" );
-        System.out.println( "|                               " );
-        System.out.println( "| Run the JumpCNCN module: " );
-        System.out.println( "|__________________________________\n" );
+    public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
+        throw new UnsupportedOperationException( "Not supported yet." );
     }
 }

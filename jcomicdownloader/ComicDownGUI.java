@@ -1,239 +1,287 @@
+
+
 /*
  * JComicDownloader
-----------------------------------------------------------------------------------------------------
-Program Name : JComicDownloader
-Authors  : surveyorK
-Version  : v4.06
-Last Modified : 2012/6/2
-----------------------------------------------------------------------------------------------------
-ChangeLog:
-4.06: 1. 新增對17kkmh.的支援。
+ ----------------------------------------------------------------------------------------------------
+ Program Name : JComicDownloader
+ Authors  : surveyorK
+ Version  : v4.14
+ Last Modified : 2012/7/3
+ ----------------------------------------------------------------------------------------------------
+ ChangeLog:
+ 4.14: 1. 新增對book.ifeng.com的支援。
+       2. 新增對xunlook.com的支援。
+       3. 修復wenku8繁體頁面下載錯誤的問題。
+       4. 修復xxbh因網站改版而無法解析的問題。
+4.13: 1. 修復jmymh解析集數錯誤的問題。
+       2. 修正wenku8的封面與插圖下載。
+       3. 修正部份訊息視窗無法顯現的問題。
+       4. 下載新的JAR介面庫後可自動重新開啟。
+ 4.12: 1. 新增對uus8.com的支援。
+       2. 修正刪除檔案時的路徑檢查。（若因故找不到任務名稱，則無法刪除）
+       3. 增加powershell腳本的選擇。
+       4. 修復mh.99770.cc和www.cococomic.com部份位址解析錯誤的問題。
+       5. 修復fumanhua因伺服器位址更換而無法下載的問題。
+ 4.11:  1. 新增對bookapp.book.qq.com的支援。
+ *        2. 新增任務完成後搜尋並下載小說封面圖的選項。
+ *        2. 修復pixnet.net無法取得全部標籤的問題。
+ *        3. 修復blog.yam.com無法取得全部標籤的問題。
+ *        4. 修復blog.yam.com沒有標示日期的問題。
+          5. 修復在Substance介面下若跳出選擇檔案下載方式視窗必崩潰的問題。
+          6. 修復在Substance介面下若跳出輸入視窗必崩潰的問題。
+ 4.10: 1. 修復對17kk的支援。
+       2. 修復對99770的支援。
+       3. 約略精簡各解析模組。
+       4. 修正部份字元轉換錯誤。
+       5. 修正部份小說網站的儲存位置以搭配腳本使用。
+       6. 修正ck101動態頁面只下載第一頁的問題。
+ 4.09: 1. 新增對8novel的支援。
+ *      2. 新增對book.qq.com的支援。
+ *      3. 新增對book.sina.com的支援。
+ *      4. 新增對book.51cto.com的支援。
+ *       5. 在資訊視窗中加入小說搜尋按鈕。
+ *       6. 修復對www.iibq.com的支援。
+ *       7. 若檢查有紀錄ID和HASH值，下載EH時自動掛載cookie，以增加下載額度。
+ 4.08: 1. 新增任務結束後執行腳本的功能選項。
+ 2. 修復xxbh部份漫畫無法下載的問題。
+
+ 4.07: 1. 新增對zuiwanju的支援。
+ *       2. 新增對manhua.2ecy.com的支援。
+ *       3. 修復www.99comic.com無法解析的問題。
+ *       4. 修復fumanhua因改版而無法解析的問題。
+ *       5. 修復99comic標題不完整的問題。
+ *       6. 調整設定，使其不會重複寫入設定檔。
+ 4.06: 1. 新增對17kkmh.的支援。
  *      2. 修復eyny部份頁面解析失敗的問題。
  *      3. 修復eyny分級頁面無法下載的問題。
  *      4. 修復wenku非php頁面無法解析的問題。
-4.05: 1. 新增對eyny的支援。
+ 5. 修復編碼問題，將GB2312->UTF8改為GBK->UTF8。
+ 6. 修復ck101動態頁面解析錯誤的問題。
+ 7. 修正部份資料夾開啟的位置。
+ 8. 增添資訊視窗上的最新版本下載訊息。
+ 4.05: 1. 新增對eyny的支援。
  *      2. 新增對blog.xuite.net的支援。
  *      3. 新增對blog.yam.com的支援。
  *      4. 改進例外處理機制，發生錯誤時自動輸出錯誤相關訊息。
-4.04: 1. 新增對pixnet.net的支援。
+ 4.04: 1. 新增對pixnet.net的支援。
  *       2. 增加輸出html格式的選項。（作用於文章下載模式）
-4.03: 1. 新增對xxbh的支援。 
+ 4.03: 1. 新增對xxbh的支援。 
  *       2. 新增對blogspot.com的支援（只支援基本範本）。
  *       3. 修復imanhua部份下載錯誤的問題。
  *       4. 更新對於html的tag和NCR（Numeric character reference）的替換機制，使輸出文字檔更趨自然。
  *       5. 修改Wenku模組，使其可輸出單回文字檔與合併文字檔。
-4.02: 1. 新增對comic.131.com的支援。
-2. 修復部份網站按停止無法立刻停止的bug。
-3. 修復dm5新集數無法下載的問題。
-4. 修復dm5集數名稱格式不一的問題。
-5. 修復fumanhua解析集數錯誤的問題。
-4.01: 1. 新增對fumanhua的支援。
-2. 新增對6manga的支援。
-3. 新增對Wenku的支援。
-4. 增加開啟文件檔的功能選項。
-5. 修復jmymh無法下載的問題。（加入伺服器檢查機制）
-6. 修復cococomic簡體版頁面的集數解析問題。
-7. 修復89890部份集數無法下載的問題。
-4.0 : 1. 新增對imanhua的支援。
-2. 新增對veryim的支援。
-3. 翻新178的解析方式，直接轉碼而非參照字典檔。
-3.19: 1. 新增對ck101的支援。
-2. 新增對mybest的支援。
-3. 修復99manga繁體版因改版而解析錯誤的問題。
-3.18: 1. 新增對mangawindow.com的支援。
-2. 修復在不支援trayIcon系統下無法執行的bug。
-3. 修復hhcomic因網站改版而下載錯誤的問題。
-3.17: 1. 修復99770和cococomic繁體版頁面的集數解析問題。
-2. 修復99manga簡體版和繁體版頁面的集數解析問題。
-3. 修復1mh的集數解析問題。
-4. 修復dmeden標題名稱解析錯誤的問題。
-3.16: 1. 新增對www.99comic.com繁體版的支援。
-2. 修復178部分漫畫解析錯誤的問題。
-3.15: 1. 新增對jmymh.com的支援。
-3.14: 1. 修復178部分漫畫解析錯誤的問題。
-2. 修復部分標題名稱出現unicode代碼的問題。
-3. 完善簡體中文介面。
-3.13: 1. 增加簡體中文的選項。
-2. 修復comic.ck101.com無法下載的問題。
-3.12: 1. 修復cococomic因網站改版而無法下載的問題。
-2. 修復99770因網站改版而無法下載的問題。
-3. 修復jumpcn因網站改版而解析標題錯誤的問題。
-3.11: 1. 修復對www.iibq.com的支援。
-2. 修復Linux系統下有時無法開啟檔案的bug。
-3. 增加刪除實際檔案和反白任務的右鍵選單。
-4. 修復無法辨別cbz檔被當作不存在的bug。
-3.10: 1. 修正讀入集數資訊失敗後導致程式無法關閉的bug。
-2. 增加反白任務置頂和置底的右鍵選單。
-3.09: 1. 新增對iask的支援。
-2. 修復對dmeden.net的支援。
-3. 修正加入任務不會馬上儲存的bug。
-3.08: 1. 修復對89890的支援。
-2. 修復對MangaFox的支援。 
-3. 修復對8comic的支援。 
-4. 取消對xindm的支援。
-5. 修正EH的標題命名選擇。
-3.07: 1. 新增對google一般搜尋的支援。
-2. 增加cbz壓縮格式的選擇。
-3.06: 1. 新增對hhcomic.com的支援。
-2. 系統框訊息的全部任務重新定義為已勾選任務總數。
-3. 每次新增任務便立即寫入任務紀錄，避免不正常關閉後紀錄消失。
-3.05: 1. 新增對www.tuku.cc的支援。
-3.04: 1. 修復dm5部份漫畫無法下載的bug。
-2. 修復dm5漫畫集數分析不全的bug。
-3. 修復dmeden標題名稱解析不全的bug。
-3.03: 1. 修復nanadm無法下載的問題。
-2. 修復部份右鍵選單功能會執行兩次的bug。
-3. 修復無法下載最新版本的bug。
-3.02: 1. 新增對dm5的支援。
-2. 修復xindm部份漫畫無法下載的bug。
-3.01: 1. 修復選擇集數視窗中選擇項目失效的bug。
-3.0: 1. 增加設定背景圖片的選項。
-2. 改進Napkin介面的部份顯示。
-3. 修復少數網址被誤判為違法網址的bug。
-4. 修復非中文版的google圖片搜尋無法下載的bug。
-5. 修復無法一執行就掛上proxy的bug。
-3. 修復少數網址被誤判為違法網址的bug。
-4. 修復非中文版的google圖片搜尋無法下載的bug。
+ 4.02: 1. 新增對comic.131.com的支援。
+ 2. 修復部份網站按停止無法立刻停止的bug。
+ 3. 修復dm5新集數無法下載的問題。
+ 4. 修復dm5集數名稱格式不一的問題。
+ 5. 修復fumanhua解析集數錯誤的問題。
+ 4.01: 1. 新增對fumanhua的支援。
+ 2. 新增對6manga的支援。
+ 3. 新增對Wenku的支援。
+ 4. 增加開啟文件檔的功能選項。
+ 5. 修復jmymh無法下載的問題。（加入伺服器檢查機制）
+ 6. 修復cococomic簡體版頁面的集數解析問題。
+ 7. 修復89890部份集數無法下載的問題。
+ 4.0 : 1. 新增對imanhua的支援。
+ 2. 新增對veryim的支援。
+ 3. 翻新178的解析方式，直接轉碼而非參照字典檔。
+ 3.19: 1. 新增對ck101的支援。
+ 2. 新增對mybest的支援。
+ 3. 修復99manga繁體版因改版而解析錯誤的問題。
+ 3.18: 1. 新增對mangawindow.com的支援。
+ 2. 修復在不支援trayIcon系統下無法執行的bug。
+ 3. 修復hhcomic因網站改版而下載錯誤的問題。
+ 3.17: 1. 修復99770和cococomic繁體版頁面的集數解析問題。
+ 2. 修復99manga簡體版和繁體版頁面的集數解析問題。
+ 3. 修復1mh的集數解析問題。
+ 4. 修復dmeden標題名稱解析錯誤的問題。
+ 3.16: 1. 新增對www.99comic.com繁體版的支援。
+ 2. 修復178部分漫畫解析錯誤的問題。
+ 3.15: 1. 新增對jmymh.com的支援。
+ 3.14: 1. 修復178部分漫畫解析錯誤的問題。
+ 2. 修復部分標題名稱出現unicode代碼的問題。
+ 3. 完善簡體中文介面。
+ 3.13: 1. 增加簡體中文的選項。
+ 2. 修復comic.ck101.com無法下載的問題。
+ 3.12: 1. 修復cococomic因網站改版而無法下載的問題。
+ 2. 修復99770因網站改版而無法下載的問題。
+ 3. 修復jumpcn因網站改版而解析標題錯誤的問題。
+ 3.11: 1. 修復對www.iibq.com的支援。
+ 2. 修復Linux系統下有時無法開啟檔案的bug。
+ 3. 增加刪除實際檔案和反白任務的右鍵選單。
+ 4. 修復無法辨別cbz檔被當作不存在的bug。
+ 3.10: 1. 修正讀入集數資訊失敗後導致程式無法關閉的bug。
+ 2. 增加反白任務置頂和置底的右鍵選單。
+ 3.09: 1. 新增對iask的支援。
+ 2. 修復對dmeden.net的支援。
+ 3. 修正加入任務不會馬上儲存的bug。
+ 3.08: 1. 修復對89890的支援。
+ 2. 修復對MangaFox的支援。 
+ 3. 修復對8comic的支援。 
+ 4. 取消對xindm的支援。
+ 5. 修正EH的標題命名選擇。
+ 3.07: 1. 新增對google一般搜尋的支援。
+ 2. 增加cbz壓縮格式的選擇。
+ 3.06: 1. 新增對hhcomic.com的支援。
+ 2. 系統框訊息的全部任務重新定義為已勾選任務總數。
+ 3. 每次新增任務便立即寫入任務紀錄，避免不正常關閉後紀錄消失。
+ 3.05: 1. 新增對www.tuku.cc的支援。
+ 3.04: 1. 修復dm5部份漫畫無法下載的bug。
+ 2. 修復dm5漫畫集數分析不全的bug。
+ 3. 修復dmeden標題名稱解析不全的bug。
+ 3.03: 1. 修復nanadm無法下載的問題。
+ 2. 修復部份右鍵選單功能會執行兩次的bug。
+ 3. 修復無法下載最新版本的bug。
+ 3.02: 1. 新增對dm5的支援。
+ 2. 修復xindm部份漫畫無法下載的bug。
+ 3.01: 1. 修復選擇集數視窗中選擇項目失效的bug。
+ 3.0: 1. 增加設定背景圖片的選項。
+ 2. 改進Napkin介面的部份顯示。
+ 3. 修復少數網址被誤判為違法網址的bug。
+ 4. 修復非中文版的google圖片搜尋無法下載的bug。
+ 5. 修復無法一執行就掛上proxy的bug。
+ 3. 修復少數網址被誤判為違法網址的bug。
+ 4. 修復非中文版的google圖片搜尋無法下載的bug。
  * 2.19: 1. 新增對comic.ck101.com的支援。
  * 　　 2. 修復dmeden少數漫畫無法下載的bug。
  * 2.18: 1. 增加Napkin介面風格。
-2. 增加Substance介面風格（共27種）。
+ 2. 增加Substance介面風格（共27種）。
  * 2.17: 1. 新增對dm.game.mop.com的支援。
-2. 增加選擇反白集數的選項。
-3. 加入右鍵選單的圖示。
-4. 修復linux系統下無法開啟檔案總管(nautilus)的bug。
-5. 修復178檔名含有中文就會解析錯誤的bug。
-6. 修復部份漫畫無法正確下載缺少頁數的bug。
+ 2. 增加選擇反白集數的選項。
+ 3. 加入右鍵選單的圖示。
+ 4. 修復linux系統下無法開啟檔案總管(nautilus)的bug。
+ 5. 修復178檔名含有中文就會解析錯誤的bug。
+ 6. 修復部份漫畫無法正確下載缺少頁數的bug。
  * 
  * 2.16: 1. 改由NetBeans生成JAR檔。
-2. 增加標題重新命名的右鍵選單。
+ 2. 增加標題重新命名的右鍵選單。
  * 　　 3. 修改暗色系界面的已下載和未下載的顏色標示。 
-4. 修改任務列刪除機制，使其下載中仍能刪除任務。
-5. 修復178少數檔名解析錯誤的bug。
-6. 修復在非下載時，第一列任務仍無法置頂或置底的bug。
+ 4. 修改任務列刪除機制，使其下載中仍能刪除任務。
+ 5. 修復178少數檔名解析錯誤的bug。
+ 6. 修復在非下載時，第一列任務仍無法置頂或置底的bug。
  * 2.15: 1. 增加NimROD介面風格（共六種）。
-2. 修復mangaFox已刪除漫畫加入後會當掉的問題。
+ 2. 修復mangaFox已刪除漫畫加入後會當掉的問題。
  * 
  * 2.14: 1. 修改任務列置換機制，使其在下載中仍能置頂或置底。
-2. 修改下載清單版面，將"下載順序"改為"編號"，這樣順序置換後會比較清楚。
-3. 修改紀錄儲存機制，即使取消"是否下載"的勾選，仍會儲存紀錄。
-4. 修復8comic的作品名稱解析不完全的bug。
-5. 修復kuku因為mh.socomic.com無法連接而解析失敗的問題。
+ 2. 修改下載清單版面，將"下載順序"改為"編號"，這樣順序置換後會比較清楚。
+ 3. 修改紀錄儲存機制，即使取消"是否下載"的勾選，仍會儲存紀錄。
+ 4. 修復8comic的作品名稱解析不完全的bug。
+ 5. 修復kuku因為mh.socomic.com無法連接而解析失敗的問題。
  * 2.13: 1. 新增對mh.emland.net的支援。
  * 　　 2. 修改最新版本下載按鈕，使其按下去可以直接下載最新版本。
-3. 修復178少數漫畫無法下載的bug。
-4. 修復8comic少數漫畫名稱解析錯誤的bug。
+ 3. 修復178少數漫畫無法下載的bug。
+ 4. 修復8comic少數漫畫名稱解析錯誤的bug。
  * 2.12: 1. 新增對www.bengou.com的支援。
  * 2.11: 1. 新增對www.kangdm.com的支援。
-2. 增加搜尋此本漫畫的右鍵選單。
-3. 增加取消勾選『分析後下載圖檔』時的提醒視窗。
-4. 修復manhua.178.com擷取網頁時出錯的問題。（應該都可以正常下載了）
-5. 修復重試後無法下載中間漏頁的問題。（ex. 5.jpg 7.jpg 8.jpg，中間遺漏6.jpg）
+ 2. 增加搜尋此本漫畫的右鍵選單。
+ 3. 增加取消勾選『分析後下載圖檔』時的提醒視窗。
+ 4. 修復manhua.178.com擷取網頁時出錯的問題。（應該都可以正常下載了）
+ 5. 修復重試後無法下載中間漏頁的問題。（ex. 5.jpg 7.jpg 8.jpg，中間遺漏6.jpg）
  * 2.10: 1. 新增對manhua.178.com的支援。（仍有些問題，測試中）
-2. 增加任務完成音效的選項。
-3. 修改黑底介面的訊息文字顯示顏色（藍色 -> 黃色）。
-4. 修復kuku解析少數圖片網址時後面多出">"的問題。
-5. 修復沒有設定瀏覽圖片程式便無法開啟網頁的問題。
+ 2. 增加任務完成音效的選項。
+ 3. 修改黑底介面的訊息文字顯示顏色（藍色 -> 黃色）。
+ 4. 修復kuku解析少數圖片網址時後面多出">"的問題。
+ 5. 修復沒有設定瀏覽圖片程式便無法開啟網頁的問題。
  * 2.09: 1. 新增對www.kkkmh.com/的支援。
-2. 新增對6comic.com的支援。
-3. 增加開啟原始網頁的右鍵選單。
-4. 修復顯示加入單集的訊息後仍抓取網址的問題。
-5. 修復Linux系統下無法在同目錄讀取set.ini的問題。
-6. 修復Linux系統下無法正常使用JTattoo介面的問題。
-7. 拿掉對comic.92wy.com的支援。（關站了......）
+ 2. 新增對6comic.com的支援。
+ 3. 增加開啟原始網頁的右鍵選單。
+ 4. 修復顯示加入單集的訊息後仍抓取網址的問題。
+ 5. 修復Linux系統下無法在同目錄讀取set.ini的問題。
+ 6. 修復Linux系統下無法正常使用JTattoo介面的問題。
+ 7. 拿掉對comic.92wy.com的支援。（關站了......）
  * 2.08: 1. 增加額外的JTattoo介面選項（共增加11組介面可供選擇）。
-2. 修復xindm解析錯誤的bug。
-3. 修復部份89890解析錯誤的bug。
+ 2. 修復xindm解析錯誤的bug。
+ 3. 修復部份89890解析錯誤的bug。
  * 2.07: 1. 新增對comic.sfacg.com的支援。
-2. 增加baidu頁面下載時的選項。（至貼圖結束為止或解析全部頁面）
-3. 修改紀錄檔機制，下載清單和書籤清單會寫出檔案多次，避免因不正常關閉造成記錄遺失。
+ 2. 增加baidu頁面下載時的選項。（至貼圖結束為止或解析全部頁面）
+ 3. 修改紀錄檔機制，下載清單和書籤清單會寫出檔案多次，避免因不正常關閉造成記錄遺失。
  * 2.06: 1. 新增對baidu的支援。
-2. 修復集數名稱數字格式化的bug。
+ 2. 修復集數名稱數字格式化的bug。
  * 2.05: 1. 修改選項視窗，明確顯示失敗重傳次數和連線逾時時間（因為linux系統下無法看到刻度）。
-2. 修復Linux系統下無法開啟檔案的bug。
-3. 修復無法開啟壓縮檔的bug。（預設開啟圖片和壓縮檔為同個程式）
-4. 修復暫存資料夾路徑無法改變的bug。
-5. 修復部分集數名稱解析失敗的bug。（數字規格化改由前面開始找）
+ 2. 修復Linux系統下無法開啟檔案的bug。
+ 3. 修復無法開啟壓縮檔的bug。（預設開啟圖片和壓縮檔為同個程式）
+ 4. 修復暫存資料夾路徑無法改變的bug。
+ 5. 修復部分集數名稱解析失敗的bug。（數字規格化改由前面開始找）
  * 2.04: 1. 增加選擇紀錄檔和暫存資料夾的選項。
-2. 修改下拉式介面選單的渲染機制，使其可改變字型。 
-3. 修改集數名稱命名機制，將裡面的數字格式化（ex. 第3回 -> 第003回），以方便排序。
-4. 增加選擇字型時可以預覽字型的功能。
-5. 修復部份CC漫畫解析錯誤的bug。
+ 2. 修改下拉式介面選單的渲染機制，使其可改變字型。 
+ 3. 修改集數名稱命名機制，將裡面的數字格式化（ex. 第3回 -> 第003回），以方便排序。
+ 4. 增加選擇字型時可以預覽字型的功能。
+ 5. 修復部份CC漫畫解析錯誤的bug。
  * 
  * 2.03: 1. 新增對www.iibq.com的支援。
-2. 增加可用外部程式開啟漫畫的選項。
-3. 增加逾時倒數時間設定的選項。
-4. 增加下載失敗後重新嘗試次數(retryTimes)的選項
-5. 修復nanadm有些第一集無法解析的bug。
-6. 因應dmeden轉換位址進行解析修正（dmeden.net <-> www.dmeden.com）
-7. 因應改版後的mangaFox進行解析修正
-8. 修改選項視窗為多面板介面。
+ 2. 增加可用外部程式開啟漫畫的選項。
+ 3. 增加逾時倒數時間設定的選項。
+ 4. 增加下載失敗後重新嘗試次數(retryTimes)的選項
+ 5. 修復nanadm有些第一集無法解析的bug。
+ 6. 因應dmeden轉換位址進行解析修正（dmeden.net <-> www.dmeden.com）
+ 7. 因應改版後的mangaFox進行解析修正
+ 8. 修改選項視窗為多面板介面。
  * 2.02: 1. 新增對www.citymanga.com的支援。
-2. 修復kuku網址轉碼部份發生錯誤的bug。
-3. 修復92wy部分集數無法讀取的bug。
-4. 修復mangaFox部份集數命名重疊的bug。
+ 2. 修復kuku網址轉碼部份發生錯誤的bug。
+ 3. 修復92wy部分集數無法讀取的bug。
+ 4. 修復mangaFox部份集數命名重疊的bug。
  * 
  * 2.01: 1. 在訊息視窗中加入支援列表的資訊。
-2. 在選項視窗中加入可以預設全選集數的選項。
-3. 修改下載機制，不下載青蛙圖（檔案大小10771 bytes）。
-4. 修復NANA無法解析粗體字集數名稱的bug。
-5. 修正Google圖片搜尋中部份非英文關鍵字沒有正確解析為資料夾名稱的bug。
+ 2. 在選項視窗中加入可以預設全選集數的選項。
+ 3. 修改下載機制，不下載青蛙圖（檔案大小10771 bytes）。
+ 4. 修復NANA無法解析粗體字集數名稱的bug。
+ 5. 修正Google圖片搜尋中部份非英文關鍵字沒有正確解析為資料夾名稱的bug。
  * 2.0 : 1. 新增對www.nanadm.com的支援。
-2. 修復Google圖片搜尋批次每張圖下載十秒後就逾時的bug。
-3. 修復書籤和紀錄表格改變外觀順序後無法對應的bug。
-4. 修復下載任務置頂或置底卻沒有改變下載順序的bug。
-5. 修復下載表格改變外觀順序後發生錯誤的bug。（作法就是禁止改變下載表格的外觀順序......）
+ 2. 修復Google圖片搜尋批次每張圖下載十秒後就逾時的bug。
+ 3. 修復書籤和紀錄表格改變外觀順序後無法對應的bug。
+ 4. 修復下載任務置頂或置底卻沒有改變下載順序的bug。
+ 5. 修復下載表格改變外觀順序後發生錯誤的bug。（作法就是禁止改變下載表格的外觀順序......）
 
  * 1.19: 1. 修正後已支援『顯示更多結果』後面的圖。
-2. 修改下載機制，遇到非正常連線直接放棄，加快速度。
+ 2. 修改下載機制，遇到非正常連線直接放棄，加快速度。
  * 1.18: 1. 新增新增對google圖片搜尋的支援(僅支援前237張)。
  * 1.17: 1. 按下載按鈕後會回到下載任務頁面。
-2. 修復集數名稱後面數字會消失的bug。
-=======
+ 2. 修復集數名稱後面數字會消失的bug。
+ =======
  * 1.17: 1. 按下載按鈕後會回到下載任務頁面。
-2. 修復集數名稱後面數字會消失的bug。
->>>>>>> .r66
+ 2. 修復集數名稱後面數字會消失的bug。
+ >>>>>>> .r66
  * 1.16: 1. 新增新增對comic.92wy.com的支援。
-2. 新增對EX的支援。
-3. 增加將下載任務置頂與置底的右鍵選單。
-4. 增加紀錄檔存放資料夾選項（set.ini裡面的recordFileDirectory項目）
-5. 修改選項視窗，使之勾選自動刪除就要連帶勾選自動壓縮。
-6. 修復部分網站無法立即跳至最後一張圖片開始下載的bug。
-7. 修復記錄檔讀取失敗會無法開啟的bug。
+ 2. 新增對EX的支援。
+ 3. 增加將下載任務置頂與置底的右鍵選單。
+ 4. 增加紀錄檔存放資料夾選項（set.ini裡面的recordFileDirectory項目）
+ 5. 修改選項視窗，使之勾選自動刪除就要連帶勾選自動壓縮。
+ 6. 修復部分網站無法立即跳至最後一張圖片開始下載的bug。
+ 7. 修復記錄檔讀取失敗會無法開啟的bug。
  * 1.15: 1. 新增對xindm.cn的支援。
-2. 增加網址列的右鍵選單（貼上網址）。
-3. 修復"坂"無對應繁體字的bug。
+ 2. 增加網址列的右鍵選單（貼上網址）。
+ 3. 修復"坂"無對應繁體字的bug。
  * 1.14: 1. 新增對manmankan.com的支援。
-2. 增加可選擇字型和字體大小的選項。
-3. 修改集數選擇視窗（choiceFrame）的關閉功能，允許按右上角的『X』來關閉。
-4. 修復若沒有下載成功仍會產生空壓縮檔的bug。
-5. 修復official.html無法刪除的bug。 
+ 2. 增加可選擇字型和字體大小的選項。
+ 3. 修改集數選擇視窗（choiceFrame）的關閉功能，允許按右上角的『X』來關閉。
+ 4. 修復若沒有下載成功仍會產生空壓縮檔的bug。
+ 5. 修復official.html無法刪除的bug。 
  * 1.13: 1. 新增對mangafox.com的支援。
-2. 修復jumpcn.com.cn因置換伺服器而解析錯誤的問題。
+ 2. 修復jumpcn.com.cn因置換伺服器而解析錯誤的問題。
  * 1.12: 1. 增加對jumpcn.com的支援。
-2. 增加兩個下載任務區的右鍵選單：『刪除所有未勾選任務』和『刪除所有已完成任務』。
-3. 修復刪除單一下載任務會造成網址錯誤的bug。
-4. 修復tempDirectory最後出現兩個斜線的bug。
-5. 修復8comic的圖庫選擇集數時無法感知是否已經存在於資料夾的bug。
-6. 修復kuku的美食的俘虜解析網址錯誤的bug。
-7. 讓部分網站邊解析邊下載，降低實際下載前的解析時間。
+ 2. 增加兩個下載任務區的右鍵選單：『刪除所有未勾選任務』和『刪除所有已完成任務』。
+ 3. 修復刪除單一下載任務會造成網址錯誤的bug。
+ 4. 修復tempDirectory最後出現兩個斜線的bug。
+ 5. 修復8comic的圖庫選擇集數時無法感知是否已經存在於資料夾的bug。
+ 6. 修復kuku的美食的俘虜解析網址錯誤的bug。
+ 7. 讓部分網站邊解析邊下載，降低實際下載前的解析時間。
  * 1.11: 1. 新增對dmeden.net的支援。
-2. 將volumeTitle傳入RunModule，可避免重新解析單集名稱不一致的問題。
-3. 選取集數視窗中，已經存在於資料夾的集數會呈淺灰色。
-4. 修復記錄表格無法點選刪除的bug。
+ 2. 將volumeTitle傳入RunModule，可避免重新解析單集名稱不一致的問題。
+ 3. 選取集數視窗中，已經存在於資料夾的集數會呈淺灰色。
+ 4. 修復記錄表格無法點選刪除的bug。
  * 1.10: 1. 加入www.jumpcn.com.cn的支援
-2. 修復一些1.09版的bug
+ 2. 修復一些1.09版的bug
  * 1.09: 1. 加入書籤和記錄兩個新頁面。
-2. 修復右鍵表單出現亂碼的bug。
-3. 拿掉多餘標題字尾。
+ 2. 修復右鍵表單出現亂碼的bug。
+ 3. 拿掉多餘標題字尾。
  * 1.08: 1. 新增對8comic的支援，包含免費漫畫區和圖庫區。
-2. 下載圖檔時若發現圖檔大小只有21或22kb，則懷疑連接到盜連警示圖片，停一秒後重新連線一次。
-3. 若logFrame有開啟，就會自動讓logFrame輸出資訊。
-4. 修復在取得最新版本資訊時無法點擊其他按鈕的bug。
-5. 修復選取集數後按『下載』仍跳出選取集數視窗的bug。
+ 2. 下載圖檔時若發現圖檔大小只有21或22kb，則懷疑連接到盜連警示圖片，停一秒後重新連線一次。
+ 3. 若logFrame有開啟，就會自動讓logFrame輸出資訊。
+ 4. 修復在取得最新版本資訊時無法點擊其他按鈕的bug。
+ 5. 修復選取集數後按『下載』仍跳出選取集數視窗的bug。
  * 1.07: 修復EH無法下載會出現警告頁面Content Warning的問題
 
-----------------------------------------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------
 
  */
 
@@ -248,11 +296,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -279,15 +323,15 @@ import jcomicdownloader.tools.RunBrowser;
 import jcomicdownloader.tools.SystemClipBoard;
 
 /**
-@author surveyorK
-@version 1.14 user 主介面，同時監聽window、mouse、button和textField。
+ @author surveyorK
+ @version 1.14 user 主介面，同時監聽window、mouse、button和textField。
 
  */
 public class ComicDownGUI extends JFrame implements ActionListener,
-        DocumentListener,
-        MouseListener,
-        MouseMotionListener,
-        WindowFocusListener {
+    DocumentListener,
+    MouseListener,
+    MouseMotionListener,
+    WindowFocusListener {
 
     public static JFrame mainFrame; // for change look and feel
     // GUI component
@@ -362,12 +406,12 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v4.06";
+    public static String versionString = "JComicDownloader  v4.14";
 
     public ComicDownGUI() {
         super( versionString );
 
-        setHttpProxy(); // 設置代理伺服器
+        Common.setHttpProxy(); // 設置代理伺服器
 
         minimizeEvent();
         inittrayIcon();
@@ -429,38 +473,22 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     }
 
-    private void setHttpProxy() {
-        if ( SetUp.getProxyServer() != null
-                && !SetUp.getProxyServer().equals( "" )
-                && SetUp.getProxyPort() != null
-                && !SetUp.getProxyPort().equals( "" ) ) {
-            Common.setHttpProxy( SetUp.getProxyServer(), SetUp.getProxyPort() );
-            Common.debugPrintln( "設定代理伺服器："
-                    + SetUp.getProxyServer() + " "
-                    + SetUp.getProxyPort() );
-        }
-        else {
-            Common.closeHttpProxy();
-            Common.debugPrintln( "代理伺服器資訊欠缺位址或連接阜，因此不加入" );
-        }
-    }
-
     private void setUpUIComponent() {
         String picFileString = SetUp.getBackgroundPicPathOfMainFrame();
         // 檢查背景圖片是否存在
         if ( SetUp.getUsingBackgroundPicOfMainFrame()
-                && !new File( picFileString ).exists() ) {
+            && !new File( picFileString ).exists() ) {
             CommonGUI.showMessageDialog( this, picFileString
-                    + "\n背景圖片不存在，重新設定為原始佈景",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                + "\n背景圖片不存在，重新設定為原始佈景",
+                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             SetUp.setUsingBackgroundPicOfMainFrame( false );
         }
 
         if ( SetUp.getUsingBackgroundPicOfMainFrame() ) {
             frameDimension = CommonGUI.getDimension( picFileString );
 
-            int width = (int) frameDimension.getWidth() + CommonGUI.widthGapOfBackgroundPic;
-            int height = (int) frameDimension.getHeight() + CommonGUI.heightGapOfBackgroundPic;
+            int width = ( int ) frameDimension.getWidth() + CommonGUI.widthGapOfBackgroundPic;
+            int height = ( int ) frameDimension.getHeight() + CommonGUI.heightGapOfBackgroundPic;
             setSize( width, height );
             //setSize( frameDimension );
             setResizable( false );
@@ -480,7 +508,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         Container contentPane;
         if ( SetUp.getUsingBackgroundPicOfMainFrame() ) {
-            ((JPanel) getContentPane()).setOpaque( false );
+            ( ( JPanel ) getContentPane() ).setOpaque( false );
             contentPane = CommonGUI.getImagePanel( picFileString );
             //contentPane.setPreferredSize( frameDimension );
             getContentPane().add( contentPane, BorderLayout.CENTER );
@@ -508,8 +536,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         CommonGUI.setToolTip( stateBar, "可顯示程式執行流程與目前下載進度" );
 
         if ( SetUp.getUsingBackgroundPicOfMainFrame() ) {
-            int width = (int) frameDimension.getWidth();
-            int height = (int) frameDimension.getHeight() * 5 / 100;
+            int width = ( int ) frameDimension.getWidth();
+            int height = ( int ) frameDimension.getHeight() * 5 / 100;
             stateBar.setPreferredSize( new Dimension( width, height ) );
             stateBar.setForeground( SetUp.getMainFrameOtherDefaultColor() );
         }
@@ -532,8 +560,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     /**
-    改成defaultSkinClassName名稱的版面
-    
+     改成defaultSkinClassName名稱的版面
+
      */
     private void setSkin() {
         setSkin( SetUp.getSkinClassName() );
@@ -544,7 +572,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         try {
             if ( skinClassName.matches( ".*substance.api.skin.*" )
-                    && !new File( Common.getNowAbsolutePath() + "trident.jar" ).exists() ) {
+                && !new File( Common.getNowAbsolutePath() + "trident.jar" ).exists() ) {
                 throw new Exception( "資料夾內找不到trident.jar，無法設置Substance介面" );
             }
 
@@ -587,7 +615,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         CommonGUI.setToolTip( button[ButtonEnum.INFORMATION], "相關提示與訊息" );
         CommonGUI.setToolTip( button[ButtonEnum.EXIT], "關閉本程式" );
 
-        for ( int count = 0 ; count < button.length ; count++ ) {
+        for ( int count = 0; count < button.length; count++ ) {
             button[count].setHorizontalTextPosition( SwingConstants.CENTER );
             button[count].setVerticalTextPosition( SwingConstants.BOTTOM );
             buttonPanel.add( button[count] );
@@ -596,8 +624,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
 
         if ( SetUp.getUsingBackgroundPicOfMainFrame() ) {
-            int width = (int) frameDimension.getWidth();
-            int height = (int) frameDimension.getHeight() / 4;
+            int width = ( int ) frameDimension.getWidth();
+            int height = ( int ) frameDimension.getHeight() / 4;
             buttonPanel.setPreferredSize( new Dimension( width, height ) );
         }
         contentPane.add( buttonPanel, BorderLayout.NORTH );
@@ -606,7 +634,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     // 設置主介面上的網址輸入框
     private void setTextLayout( Container contentPane ) {
         urlField = new JTextField(
-                Common.getStringUsingDefaultLanguage( "請複製欲下載的漫畫頁面網址，此輸入欄會自動捕捉" ) );
+            Common.getStringUsingDefaultLanguage( "請複製欲下載的漫畫頁面網址，此輸入欄會自動捕捉" ) );
         urlField.setFont( SetUp.getDefaultFont( 3 ) );
 
         if ( SetUp.getUsingBackgroundPicOfMainFrame() ) {
@@ -688,30 +716,30 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         JPanel downTablePanel = new JPanel( new GridLayout( 1, 1 ) ); // 不規範為gridLayout就會固定大小...
         setDownloadTable( downTablePanel );
         tabbedPane.addTab( Common.getStringUsingDefaultLanguage( " 下載任務  " ),
-                new CommonGUI().getImageIcon( "tab_download.png" ),
-                downTablePanel, CommonGUI.getToolTipString( "所有欲下載的任務都會出現在此處，可依序下載" ) );
+            new CommonGUI().getImageIcon( "tab_download.png" ),
+            downTablePanel, CommonGUI.getToolTipString( "所有欲下載的任務都會出現在此處，可依序下載" ) );
         tabbedPane.setMnemonicAt( 0, KeyEvent.VK_1 );
 
         JPanel bookmarkTablePanel = new JPanel( new GridLayout( 1, 1 ) ); // 不規範為gridLayout就會固定大小...
         setBookmarkTable( bookmarkTablePanel );
         tabbedPane.addTab( Common.getStringUsingDefaultLanguage( " 我的書籤  " ),
-                new CommonGUI().getImageIcon( "tab_bookmark.png" ),
-                bookmarkTablePanel, CommonGUI.getToolTipString( "希望持續追蹤的漫畫可加入到此處" ) );
+            new CommonGUI().getImageIcon( "tab_bookmark.png" ),
+            bookmarkTablePanel, CommonGUI.getToolTipString( "希望持續追蹤的漫畫可加入到此處" ) );
         tabbedPane.setMnemonicAt( 1, KeyEvent.VK_2 );
 
         JPanel recordTablePanel = new JPanel( new GridLayout( 1, 1 ) ); // 不規範為gridLayout就會固定大小...
         setRecordTable( recordTablePanel );
         tabbedPane.addTab( Common.getStringUsingDefaultLanguage( " 任務記錄  " ),
-                new CommonGUI().getImageIcon( "tab_record.png" ),
-                recordTablePanel, CommonGUI.getToolTipString( "所有曾經加入到下載任務的漫畫都會記錄在這邊，可由『選項』來選擇持續記錄或關閉後清空" ) );
+            new CommonGUI().getImageIcon( "tab_record.png" ),
+            recordTablePanel, CommonGUI.getToolTipString( "所有曾經加入到下載任務的漫畫都會記錄在這邊，可由『選項』來選擇持續記錄或關閉後清空" ) );
         tabbedPane.setMnemonicAt( 2, KeyEvent.VK_3 );
 
         // 若設定為透明，就用預定顏色字體。
         if ( SetUp.getUsingBackgroundPicOfMainFrame() ) {
-            int width = (int) frameDimension.getWidth();
+            int width = ( int ) frameDimension.getWidth();
             int height = 0;
 
-            int frameHeight = (int) frameDimension.getHeight();
+            int frameHeight = ( int ) frameDimension.getHeight();
 
             if ( frameHeight < 400 ) {
                 height = frameHeight * 48 / 100;
@@ -751,22 +779,22 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Vector<String> columnName = new Vector<String>();
 
         if ( SetUp.getDefaultLanguage() == LanguageEnum.TRADITIONAL_CHINESE ) {
-            columnName.add( ("編號") );
-            columnName.add( ("是否下載") );
-            columnName.add( ("漫畫名稱") );
-            columnName.add( ("總共集數") );
-            columnName.add( ("勾選集數") );
-            columnName.add( ("目前狀態") );
-            columnName.add( ("網址解析") );
+            columnName.add( ( "編號" ) );
+            columnName.add( ( "是否下載" ) );
+            columnName.add( ( "漫畫名稱" ) );
+            columnName.add( ( "總共集數" ) );
+            columnName.add( ( "勾選集數" ) );
+            columnName.add( ( "目前狀態" ) );
+            columnName.add( ( "網址解析" ) );
         }
         else {
-            columnName.add( ("编号") );
-            columnName.add( ("是否下载") );
-            columnName.add( ("漫画名称") );
-            columnName.add( ("总共集数") );
-            columnName.add( ("勾选集数") );
-            columnName.add( ("目前状态") );
-            columnName.add( ("网址解析") );
+            columnName.add( ( "编号" ) );
+            columnName.add( ( "是否下载" ) );
+            columnName.add( ( "漫画名称" ) );
+            columnName.add( ( "总共集数" ) );
+            columnName.add( ( "勾选集数" ) );
+            columnName.add( ( "目前状态" ) );
+            columnName.add( ( "网址解析" ) );
         }
 
         return columnName;
@@ -881,7 +909,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         if ( SetUp.getUsingBackgroundPicOfMainFrame() ) {
             int spaceCount = 15 - bookmarkTablePopup.getComponentCount();
-            for ( int i = 0 ; i < spaceCount ; i++ ) {
+            for ( int i = 0; i < spaceCount; i++ ) {
                 bookmarkTablePopup.add( "" );
             }
         }
@@ -911,7 +939,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         if ( SetUp.getUsingBackgroundPicOfMainFrame() ) {
             int spaceCount = 15 - recordTablePopup.getComponentCount();
-            for ( int i = 0 ; i < spaceCount ; i++ ) {
+            for ( int i = 0; i < spaceCount; i++ ) {
                 recordTablePopup.add( "" );
             }
         }
@@ -925,7 +953,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         JTable table = new JTable( downTableModel ) {
 
-            protected String[] columnToolTips = { CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可刪除該列任務" ),
+            protected String[] columnToolTips = {CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可刪除該列任務" ),
                 CommonGUI.getToolTipString( "此欄位若沒有勾選就不會進行下載" ),
                 CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可開啟該列任務的下載資料夾" ),
                 CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可重新選取該列任務的下載集數" ),
@@ -959,13 +987,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         TableColumnModel cModel = table.getColumnModel();
 
         // 配置每個欄位的寬度比例（可隨視窗大小而變化）
-        cModel.getColumn( DownTableEnum.ORDER ).setPreferredWidth( (int) (this.getWidth() * 0.07) );
-        cModel.getColumn( DownTableEnum.YES_OR_NO ).setPreferredWidth( (int) (this.getWidth() * 0.14) );
-        cModel.getColumn( DownTableEnum.TITLE ).setPreferredWidth( (int) (this.getWidth() * 0.6) );
-        cModel.getColumn( DownTableEnum.VOLUMES ).setPreferredWidth( (int) (this.getWidth() * 0.14) );
-        cModel.getColumn( DownTableEnum.CHECKS ).setPreferredWidth( (int) (this.getWidth() * 0.14) );
-        cModel.getColumn( DownTableEnum.STATE ).setPreferredWidth( (int) (this.getWidth() * 0.3) );
-        cModel.getColumn( DownTableEnum.URL ).setPreferredWidth( (int) (this.getWidth() * 0.002) );
+        cModel.getColumn( DownTableEnum.ORDER ).setPreferredWidth( ( int ) ( this.getWidth() * 0.07 ) );
+        cModel.getColumn( DownTableEnum.YES_OR_NO ).setPreferredWidth( ( int ) ( this.getWidth() * 0.14 ) );
+        cModel.getColumn( DownTableEnum.TITLE ).setPreferredWidth( ( int ) ( this.getWidth() * 0.6 ) );
+        cModel.getColumn( DownTableEnum.VOLUMES ).setPreferredWidth( ( int ) ( this.getWidth() * 0.14 ) );
+        cModel.getColumn( DownTableEnum.CHECKS ).setPreferredWidth( ( int ) ( this.getWidth() * 0.14 ) );
+        cModel.getColumn( DownTableEnum.STATE ).setPreferredWidth( ( int ) ( this.getWidth() * 0.3 ) );
+        cModel.getColumn( DownTableEnum.URL ).setPreferredWidth( ( int ) ( this.getWidth() * 0.002 ) );
 
         //table.setOpaque(false); //無效 
 
@@ -989,7 +1017,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         bookmarkTableModel = Common.inputBookmarkTableFile();//new DataTableModel( getDownloadColumns(), 0 );
         JTable table = new JTable( bookmarkTableModel ) {
 
-            protected String[] columnToolTips = { CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可刪除該列書籤" ),
+            protected String[] columnToolTips = {CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可刪除該列書籤" ),
                 CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可開啟該列書籤的下載資料夾" ),
                 CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可將該列書籤加入到下載任務清單中" ),
                 CommonGUI.getToolTipString( "此欄位顯示該列漫畫加入書籤的系統時間，滑鼠左鍵點兩下以預設瀏覽程式開啟" ),
@@ -1022,11 +1050,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         TableColumnModel cModel = table.getColumnModel();
 
         // 配置每個欄位的寬度比例（可隨視窗大小而變化）
-        cModel.getColumn( BookmarkTableEnum.ORDER ).setPreferredWidth( (int) (this.getWidth() * 0.07) );
-        cModel.getColumn( BookmarkTableEnum.TITLE ).setPreferredWidth( (int) (this.getWidth() * 0.25) );
-        cModel.getColumn( BookmarkTableEnum.DATE ).setPreferredWidth( (int) (this.getWidth() * 0.25) );
-        cModel.getColumn( BookmarkTableEnum.URL ).setPreferredWidth( (int) (this.getWidth() * 0.38) );
-        cModel.getColumn( BookmarkTableEnum.COMMENT ).setPreferredWidth( (int) (this.getWidth() * 0.27) );
+        cModel.getColumn( BookmarkTableEnum.ORDER ).setPreferredWidth( ( int ) ( this.getWidth() * 0.07 ) );
+        cModel.getColumn( BookmarkTableEnum.TITLE ).setPreferredWidth( ( int ) ( this.getWidth() * 0.25 ) );
+        cModel.getColumn( BookmarkTableEnum.DATE ).setPreferredWidth( ( int ) ( this.getWidth() * 0.25 ) );
+        cModel.getColumn( BookmarkTableEnum.URL ).setPreferredWidth( ( int ) ( this.getWidth() * 0.38 ) );
+        cModel.getColumn( BookmarkTableEnum.COMMENT ).setPreferredWidth( ( int ) ( this.getWidth() * 0.27 ) );
 
         // 若設定為透明，就用預定顏色字體。
         if ( SetUp.getUsingBackgroundPicOfMainFrame() ) {
@@ -1047,7 +1075,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         recordTableModel = Common.inputRecordTableFile();//new DataTableModel( getDownloadColumns(), 0 );
         JTable table = new JTable( recordTableModel ) {
 
-            protected String[] columnToolTips = { CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可刪除該列記錄" ),
+            protected String[] columnToolTips = {CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可刪除該列記錄" ),
                 CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可開啟該列記錄的下載資料夾" ),
                 CommonGUI.getToolTipString( "此欄位滑鼠左鍵點兩下可將該列漫畫加入到下載任務清單中" ),
                 CommonGUI.getToolTipString( "此欄位顯示該列漫畫在當初加入任務的系統時間，滑鼠左鍵點兩下以預設瀏覽程式開啟" )
@@ -1079,10 +1107,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         TableColumnModel cModel = table.getColumnModel();
 
         // 配置每個欄位的寬度比例（可隨視窗大小而變化）
-        cModel.getColumn( RecordTableEnum.ORDER ).setPreferredWidth( (int) (this.getWidth() * 0.07) );
-        cModel.getColumn( RecordTableEnum.TITLE ).setPreferredWidth( (int) (this.getWidth() * 0.32) );
-        cModel.getColumn( RecordTableEnum.DATE ).setPreferredWidth( (int) (this.getWidth() * 0.25) );
-        cModel.getColumn( RecordTableEnum.URL ).setPreferredWidth( (int) (this.getWidth() * 0.43) );
+        cModel.getColumn( RecordTableEnum.ORDER ).setPreferredWidth( ( int ) ( this.getWidth() * 0.07 ) );
+        cModel.getColumn( RecordTableEnum.TITLE ).setPreferredWidth( ( int ) ( this.getWidth() * 0.32 ) );
+        cModel.getColumn( RecordTableEnum.DATE ).setPreferredWidth( ( int ) ( this.getWidth() * 0.25 ) );
+        cModel.getColumn( RecordTableEnum.URL ).setPreferredWidth( ( int ) ( this.getWidth() * 0.43 ) );
 
         // 若設定為透明，就用預定顏色字體。
         if ( SetUp.getUsingBackgroundPicOfMainFrame() ) {
@@ -1104,22 +1132,18 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     private void setUpeListener() {
         /*
-        addComponentListener(new ComponentAdapter() {
-        public void componentResized(ComponentEvent e) {
-        Dimension nowSize = getSize();
-        panelWidth = getWidth();
-        panelHeight = getHeight();
-        
-        System.out.println( panelWidth + ", " + panelHeight );
-        repaint();
-        }
-        });
+         addComponentListener(new ComponentAdapter() { public void
+         componentResized(ComponentEvent e) { Dimension nowSize = getSize();
+         panelWidth = getWidth(); panelHeight = getHeight();
+
+         System.out.println( panelWidth + ", " + panelHeight ); repaint(); }
+         });
          */
         //setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
     }
 
     /**
-    @param args the command line arguments
+     @param args the command line arguments
      */
     public static void main( String[] args ) {
         Common.debugPrintln( "JComicDownloader start ..." );
@@ -1148,7 +1172,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 Common.prevClipString = clipString;
 
                 if ( SetUp.getAutoAddMission() ) {
-                    String[] tempArgs = { clipString };
+                    String[] tempArgs = {clipString};
                     parseURL( tempArgs, false, false, 0 );
                 }
             }
@@ -1329,10 +1353,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             if ( event.getSource() instanceof JTable ) { // 主要是table
                 CommonGUI.nowMouseAtRow = 10000; // 給很大的初始值，避免剛開始就有上色情形
-                ((JComponent) event.getSource()).repaint();
+                ( ( JComponent ) event.getSource() ).repaint();
             }
             else {
-                ((JComponent) event.getSource()).setForeground( SetUp.getMainFrameOtherDefaultColor() );
+                ( ( JComponent ) event.getSource() ).setForeground( SetUp.getMainFrameOtherDefaultColor() );
             }
         }
     }
@@ -1343,7 +1367,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             if ( event.getSource() instanceof JTable ) {
             }
             else {
-                ((JComponent) event.getSource()).setForeground( SetUp.getMainFrameOtherMouseEnteredColor() );
+                ( ( JComponent ) event.getSource() ).setForeground( SetUp.getMainFrameOtherMouseEnteredColor() );
             }
         }
     }
@@ -1366,11 +1390,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         /*
          * // 原本的系統列 if ( event.getSource() == trayIcon_old &&
-        event.getButton() == MouseEvent.BUTTON3 ) { if ( event.isPopupTrigger()
-        && !trayPopup.isVisible() ) { trayPopup.setLocation( event.getX() + 10,
-        event.getY() ); trayPopup.setInvoker( trayPopup );
-        trayPopup.setVisible( true ); } else { trayPopup.setVisible( false ); }
-        }
+         event.getButton() == MouseEvent.BUTTON3 ) { if (
+         event.isPopupTrigger() && !trayPopup.isVisible() ) {
+         trayPopup.setLocation( event.getX() + 10, event.getY() );
+         trayPopup.setInvoker( trayPopup ); trayPopup.setVisible( true ); }
+         else { trayPopup.setVisible( false ); } }
          */
 
     }
@@ -1380,14 +1404,14 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     @Override
     public void mouseClicked( MouseEvent event ) {
 
-        if ( (event.getModifiers() & MouseEvent.BUTTON1_MASK) != 0
-                && event.getClickCount() == 2
-                && tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION ) {
+        if ( ( event.getModifiers() & MouseEvent.BUTTON1_MASK ) != 0
+            && event.getClickCount() == 2
+            && tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION ) {
             int row = event.getY() / downTable.getRowHeight();
             int col = downTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
 
             if ( event.getSource() == downTable
-                    && row < Common.missionCount && row >= 0 ) {
+                && row < Common.missionCount && row >= 0 ) {
 
                 // 任何時候都能開啟下載資料夾
                 if ( col == DownTableEnum.TITLE ) {
@@ -1399,13 +1423,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 // 正在下載的時候不能重選集數，也不能刪除任務
                 if ( col == DownTableEnum.VOLUMES
-                        || col == DownTableEnum.CHECKS ) {
+                    || col == DownTableEnum.CHECKS ) {
                     if ( !Flag.downloadingFlag ) {
                         rechoiceVolume( row );
                     }
                     else {
                         CommonGUI.showMessageDialog( this, "目前正下載中，無法重新選擇集數",
-                                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                            "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                     }
                 }
                 else if ( col == DownTableEnum.ORDER ) {
@@ -1414,14 +1438,14 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
         }
 
-        if ( (event.getModifiers() & MouseEvent.BUTTON1_MASK) != 0
-                && event.getClickCount() == 2
-                && tabbedPane.getSelectedIndex() == TabbedPaneEnum.BOOKMARK ) {
+        if ( ( event.getModifiers() & MouseEvent.BUTTON1_MASK ) != 0
+            && event.getClickCount() == 2
+            && tabbedPane.getSelectedIndex() == TabbedPaneEnum.BOOKMARK ) {
             int row = event.getY() / bookmarkTable.getRowHeight();
             int col = bookmarkTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
 
             if ( event.getSource() == bookmarkTable
-                    && row < Common.bookmarkCount && row >= 0 ) {
+                && row < Common.bookmarkCount && row >= 0 ) {
 
                 // 任何時候都能開啟下載資料夾
                 if ( col == BookmarkTableEnum.TITLE ) {
@@ -1441,14 +1465,14 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
         }
 
-        if ( (event.getModifiers() & MouseEvent.BUTTON1_MASK) != 0
-                && event.getClickCount() == 2
-                && tabbedPane.getSelectedIndex() == TabbedPaneEnum.RECORD ) {
+        if ( ( event.getModifiers() & MouseEvent.BUTTON1_MASK ) != 0
+            && event.getClickCount() == 2
+            && tabbedPane.getSelectedIndex() == TabbedPaneEnum.RECORD ) {
             int row = event.getY() / recordTable.getRowHeight();
             int col = recordTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
 
             if ( event.getSource() == recordTable
-                    && row < Common.recordCount && row >= 0 ) {
+                && row < Common.recordCount && row >= 0 ) {
 
                 // 任何時候都能開啟下載資料夾
                 if ( col == RecordTableEnum.TITLE ) {
@@ -1496,9 +1520,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         System.out.println( downTableModel.getRealValueAt( row, DownTableEnum.CHECKS ).toString() );
         ComicDownGUI.nowSelectedCheckStrings = Common.getSeparateStrings(
-                String.valueOf( downTableModel.getRealValueAt( row, DownTableEnum.CHECKS ) ) );
+            String.valueOf( downTableModel.getRealValueAt( row, DownTableEnum.CHECKS ) ) );
         Common.debugPrintln( "重新解析位址（為了重選集數）：" + downTableUrlStrings[row] );
-        parseURL( new String[] { downTableUrlStrings[row] }, false, true, row );
+        parseURL( new String[]{downTableUrlStrings[row]}, false, true, row );
 
     }
 
@@ -1507,7 +1531,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         if ( row == nowDownloadMissionRow && Flag.downloadingFlag ) {
             CommonGUI.showMessageDialog( this, "目前正下載中，無法重新命名標題",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
         }
 
@@ -1515,7 +1539,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         Common.debugPrintln( "原本標題名稱：" + oldTitleString );
 
         String newTitleString = CommonGUI.showInputDialog( ComicDownGUI.mainFrame,
-                "請輸入新的標題名稱（需在下載之前修改）", "輸入視窗", JOptionPane.INFORMATION_MESSAGE );
+            "請輸入新的標題名稱（需在下載之前修改）", "輸入視窗", JOptionPane.INFORMATION_MESSAGE );
 
         if ( newTitleString != null ) {
             Common.debugPrintln( "新的標題名稱：" + newTitleString );
@@ -1525,7 +1549,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     // 從beginIndex開始，後面的全部往前挪一格
     private void stringsMoveOneForward( String[] strings, int beginIndex ) {
-        for ( int i = beginIndex ; strings[i + 1] != null ; i++ ) {
+        for ( int i = beginIndex; strings[i + 1] != null; i++ ) {
             strings[i] = strings[i + 1];
         }
     }
@@ -1539,7 +1563,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         // 若指定要置頂的該列正好是目前下載列，則禁止置換
         if ( row == nowDownloadMissionRow && Flag.downloadingFlag ) {
             CommonGUI.showMessageDialog( this, "目前正下載中，無法移動任務的順序位置",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
         }
 
@@ -1556,7 +1580,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         String urlString = downTableUrlStrings[row]; // 先將此列任務另存
         //downTable.setValueAt( roof + 1, row, DownTableEnum.ORDER );
-        for ( int i = row - 1 ; i >= roof ; i-- ) {
+        for ( int i = row - 1; i >= roof; i-- ) {
             downTableUrlStrings[i + 1] = downTableUrlStrings[i]; // row列之前的往後遞移一位
             i = downTable.convertRowIndexToModel( i ); // 顯示的列 -> 實際的列
             //downTable.setValueAt( i + 2, i, DownTableEnum.ORDER );
@@ -1576,7 +1600,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         // 若指定要置頂的該列正好是目前下載列，則禁止置換
         if ( row == nowDownloadMissionRow && Flag.downloadingFlag ) {
             CommonGUI.showMessageDialog( this, "目前正下載中，無法移動任務的順序位置",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
         }
 
@@ -1595,7 +1619,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         String urlString = downTableUrlStrings[row]; // 先將此列任務另存
         //downTable.setValueAt( floor + 1, row, DownTableEnum.ORDER );
-        for ( int i = row + 1 ; i <= floor ; i++ ) {
+        for ( int i = row + 1; i <= floor; i++ ) {
             i = downTable.convertRowIndexToModel( i ); // 顯示的列 -> 實際的列
             downTableUrlStrings[i - 1] = downTableUrlStrings[i]; // row列之後的往前遞移一位
             //downTable.setValueAt( i, i, DownTableEnum.ORDER );
@@ -1606,10 +1630,21 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     private boolean deleteDownloadFile( String fileTitle ) {
+        
+        if ( fileTitle == null || fileTitle.equals( "" ) ) {
+            CommonGUI.showMessageDialog( this,
+                "<html>找不到此任務的名稱</font>，無法刪除！</html>",
+                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+
+            Common.debugPrintln( "找不到此任務的名稱，無法刪除！" );
+            return false;
+        }
+        
         String path = SetUp.getOriginalDownloadDirectory() + fileTitle;
 
         String nowSkinName = SetUp.getSkinClassName();
         String colorString = "blue";
+        
         if ( CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
             colorString = "yellow"; // 暗色風格界面用黃色比較看得清楚
         }
@@ -1624,9 +1659,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
         else {
             CommonGUI.showMessageDialog( this,
-                    "<html>找不到<font color=" + colorString + ">"
-                    + path + "</font>，無法刪除！</html>",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                "<html>找不到<font color=" + colorString + ">"
+                + path + "</font>，無法刪除！</html>",
+                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
 
             Common.debugPrintln( path + " 找不到，無法刪除！" );
             return false;
@@ -1635,8 +1670,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
 
         String message = "<html>請問是否強制刪除<br><font color="
-                + colorString + ">" + path + "</font> ？<br>"
-                + "（注意：檔案刪除後將不會存放於資源回收筒，無法復原，請慎重考慮）</html>";
+            + colorString + ">" + path + "</font> ？<br>"
+            + "（注意：檔案刪除後將不會存放於資源回收筒，無法復原，請慎重考慮）</html>";
         int choice = CommonGUI.showConfirmDialog( this, message, "提醒訊息", JOptionPane.YES_NO_OPTION );
 
         if ( choice == JOptionPane.YES_OPTION ) { // agree to remove the title in the download list
@@ -1663,11 +1698,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private void deleteMissionAndFile( int row ) { // 刪除第row列的任務和實際資料夾
         row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         String title = String.valueOf( downTableModel.getRealValueAt(
-                row, DownTableEnum.TITLE ) );
+            row, DownTableEnum.TITLE ) );
 
         if ( Flag.downloadingFlag ) {
             CommonGUI.showMessageDialog( this, "目前正下載中，無法刪除任務",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
         }
         else if ( deleteDownloadFile( title ) ) {
             deleteMission( row );
@@ -1682,12 +1717,12 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         if ( row <= nowDownloadMissionRow && Flag.downloadingFlag ) {
             CommonGUI.showMessageDialog( this, "目前正下載中，無法刪除任務",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
         }
         else {
 
             String title = String.valueOf( downTableModel.getRealValueAt(
-                    row, DownTableEnum.TITLE ) );
+                row, DownTableEnum.TITLE ) );
 
             String message = "是否要在任務清單中刪除" + title + " ?";
 
@@ -1746,7 +1781,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private void deleteBookmark( int row ) { // 刪除第row列書籤
         row = bookmarkTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         String title = String.valueOf( bookmarkTableModel.getValueAt(
-                row, BookmarkTableEnum.TITLE ) );
+            row, BookmarkTableEnum.TITLE ) );
         String message = "是否要在書籤中刪除" + title + " ?";
         int choice = CommonGUI.showConfirmDialog( this, message, "提醒訊息", JOptionPane.YES_NO_OPTION );
 
@@ -1759,7 +1794,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private void deleteFileFromRecord( int row ) {
         row = recordTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         String title = String.valueOf( recordTableModel.getValueAt(
-                row, RecordTableEnum.TITLE ) );
+            row, RecordTableEnum.TITLE ) );
 
 
         if ( deleteDownloadFile( title ) );
@@ -1768,7 +1803,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private void deleteRecord( int row ) { // 刪除第row列記錄
         row = recordTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
         String title = String.valueOf( recordTableModel.getValueAt(
-                row, RecordTableEnum.TITLE ) );
+            row, RecordTableEnum.TITLE ) );
         String message = "是否要在記錄中刪除" + title + " ?";
         int choice = CommonGUI.showConfirmDialog( this, message, "提醒訊息", JOptionPane.YES_NO_OPTION );
 
@@ -1793,9 +1828,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         Common.debugPrintln( "加入到書籤：" + title + " " + url );
         bookmarkTableModel.addRow( CommonGUI.getBookmarkDataRow(
-                ++Common.bookmarkCount,
-                title,
-                url ) );
+            ++Common.bookmarkCount,
+            title,
+            url ) );
 
         Common.outputBookmarkTableFile( bookmarkTableModel ); // 每加入書籤便寫入書籤記錄檔一次。
     }
@@ -1850,24 +1885,72 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         new RunBrowser().runBroswer( url );
     }
 
+    private boolean isNovelSite( String url ) {
+        if ( url.matches( "(?s).*ck101.com(?s).*" )
+            || url.matches( "(?s).*eyny.com(?s).*" )
+            || url.matches( "(?s).*catcatbox.com(?s).*" )
+            || url.matches( "(?s).*mybest.com(?s).*" )
+            || url.matches( "(?s).*wenku.com(?s).*" )
+            || url.matches( "(?s).*8novel.com(?s).*" )
+            || url.matches( "(?s).*book.qq.com(?s).*" )
+            || url.matches( "(?s).*book.sina.com(?s).*" )
+            || url.matches( "(?s).*51cto.com(?s).*" )
+            || url.matches( "(?s).*uus8.com(?s).*" )
+            || url.matches( "(?s).*wenku8.com(?s).*" )
+            || url.matches( "(?s).*book.ifeng.com(?s).*" )
+            || url.matches( "(?s).*xunlook.com(?s).*" ) ) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private boolean isBlogSite( String url ) {
+        if ( url.matches( "(?s).*blogspot(?s).*" )
+            || url.matches( "(?s).*pixnet.net(?s).*" )
+            || url.matches( "(?s).*blog.xuite.net(?s).*" )
+            || url.matches( "(?s).*blog.yam.com(?s).*" ) ) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private boolean openTextFile( String cmd, String path, String title ) {
+        String filePath = "";
+        if ( new File( path + title + ".txt" ).exists() ) {
+            filePath = path + title + ".txt";
+            //Common.debugPrintln( "開啟命令：" + cmd + " " + filePath );
+
+            if ( Common.isWindows() ) {
+                Common.runUnansiCmd( cmd, filePath );
+            }
+            else {
+                Common.runSimpleCmd( cmd, filePath );
+            }
+            return true;
+        }
+        else if ( new File( path + title + ".html" ).exists() ) {
+            filePath = path + title + ".html";
+            //Common.debugPrintln( "開啟命令：" + cmd + " " + filePath );
+            if ( Common.isWindows() ) {
+                Common.runUnansiCmd( cmd, filePath );
+            }
+            else {
+                Common.runSimpleCmd( cmd, filePath );
+            }
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     private void openDownloadFile( int row ) {  // 開啟第row列任務的下載檔案
         String title = "";
         String url = "";
-
-        if ( SetUp.getOpenPicFileProgram().matches( "" ) ) {
-            //String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
-            // 取得介面設定值（不用getLookAndFeel()是因為這樣才能讀到_之後的參數）
-            String nowSkinName = SetUp.getSkinClassName();
-            String colorString = "blue";
-            if ( CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
-                colorString = "yellow"; // 暗色風格界面用黃色比較看得清楚
-            }
-
-            CommonGUI.showMessageDialog( this,
-                    "<html>尚未設定開啟程式，請前往<font color=" + colorString + ">選項 -> 瀏覽</font>做設定</html>",
-                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-            return;
-        }
 
         if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION ) { // 從任務清單開啟
             row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
@@ -1885,25 +1968,42 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             url = String.valueOf( recordTableModel.getValueAt( row, RecordTableEnum.URL ) );
         }
 
+        // 檢查有無設定外部開啟程式
+        String fileFormatName = "";
+        String program = ""; // 預設開啟檔案的程式
+        if ( isNovelSite( url ) || isBlogSite( url ) ) {
+            program = SetUp.getOpenTextFileProgram();
+            fileFormatName = "文字檔";
+        }
+        else {
+            program = SetUp.getOpenPicFileProgram();
+            fileFormatName = "圖片檔";
+        }
+
+        if ( program.matches( "" ) ) {
+            //String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
+            // 取得介面設定值（不用getLookAndFeel()是因為這樣才能讀到_之後的參數）
+            String nowSkinName = SetUp.getSkinClassName();
+            String colorString = "blue";
+            if ( CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
+                colorString = "yellow"; // 暗色風格界面用黃色比較看得清楚
+            }
+
+            CommonGUI.showMessageDialog( this,
+                "<html>尚未設定" + fileFormatName + "開啟程式，請前往<font color=" + colorString + ">選項 -> 瀏覽</font>做設定</html>",
+                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+            return;
+        }
+
         Common.debugPrintln( "以外部程式開啟" + title + "的下載資料夾或壓縮檔" );
 
-        if ( url.matches( "(?s).*ck101.com(?s).*" )
-                || url.matches( "(?s).*eyny.com(?s).*" )
-                || url.matches( "(?s).*catcatbox.com(?s).*" )
-                || url.matches( "(?s).*mybest.com(?s).*" )
-                || url.matches( "(?s).*wenku.com(?s).*" ) ) {
+        if ( isNovelSite( url ) || isBlogSite( url ) ) {
             String cmd = SetUp.getOpenTextFileProgram();
-            String path = "";
 
-            if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".txt" ).exists() ) {
-                path = SetUp.getOriginalDownloadDirectory() + title + ".txt";
-                Common.debugPrintln( "開啟命令：" + cmd + " " + path );
-                Common.runUnansiCmd( cmd, path );
-            }
-            else if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".html" ).exists() ) {
-                path = SetUp.getOriginalDownloadDirectory() + title + ".html";
-                Common.debugPrintln( "開啟命令：" + cmd + " " + path );
-                Common.runUnansiCmd( cmd, path );
+            String path = SetUp.getOriginalDownloadDirectory();
+            if ( !openTextFile( cmd, path, title ) ) { // 先測試生成在母下載資料夾的那些 ex. ./down/
+                path = SetUp.getOriginalDownloadDirectory() + title + Common.getSlash();
+                openTextFile( cmd, path, title ); // 再測試生成在子下載資料夾的那些 ex. ./down/title/
             }
 
         }
@@ -1930,14 +2030,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     Common.runUnansiCmd( cmd, path );
                 }
                 else {
-                    try {
-
-                        String[] cmds = new String[] { cmd, path };
-                        Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
-                    }
-                    catch ( IOException ex ) {
-                        Common.hadleErrorMessage( ex, "無法取得運行時間" );
-                    }
+                    Common.runSimpleCmd( cmd, path );
                 }
             }
             else {
@@ -1958,11 +2051,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         else {
             if ( Common.isWindows() ) {
                 Common.runUnansiCmd( SetUp.getOpenPicFileProgram(),
-                        SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+                    SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
             }
             else {
                 Common.runCmd( SetUp.getOpenPicFileProgram(),
-                        SetUp.getOriginalDownloadDirectory() + title, false );
+                    SetUp.getOriginalDownloadDirectory() + title, false );
             }
         }
 
@@ -1989,13 +2082,19 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
 
         Common.debugPrintln( "開啟" + title + "的下載資料夾" );
+        System.out.println( "符合條件: " + url );
 
         if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" )
-                || url.matches( "(?s).*ck101.com(?s).*" )
-                || url.matches( "(?s).*eyny.com/thread(?s).*" ) || url.matches( "(?s).*eyny.com/archiver/tid(?s).*" )
-                || url.matches( "(?s).*catcatbox.com(?s).*" )
-                || url.matches( "(?s).*mybest.com(?s).*" )
-                || url.matches( "(?s).*wenku.com(?s).*" ) ) {
+
+            /*
+            // 因為這個url取的是所有集數的位址串連...
+            || ( url.matches( "(?s).*eyny.com(?s).*" ) && url.split( "eyny\\.com" ).length < 3 )
+            || ( url.matches( "(?s).*ck101.com(?s).*" ) && url.split( "ck101\\.com" ).length < 3 )
+            || url.matches( "(?s).*catcatbox.com(?s).*" )
+            || url.matches( "(?s).*mybest.com(?s).*" )
+            || url.matches( "(?s).*wenku.com(?s).*" )
+            */
+            ) {
             if ( Common.isWindows() ) {
                 if ( new File( SetUp.getOriginalDownloadDirectory() + title + ".zip" ).exists() ) {
                     // 開啟資料夾並將指定的檔案反白
@@ -2027,6 +2126,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             else {
                 Common.runCmd( "nautilus", SetUp.getOriginalDownloadDirectory(), true );
             }
+
         }
         else {
             if ( Common.isWindows() ) {
@@ -2102,9 +2202,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     Common.debugPrintln( "選擇集數完畢，結束等待" );
                 }
 
-                for ( int i = 0 ; i < Common.missionCount && Run.isAlive ; i++ ) {
+                for ( int i = 0; i < Common.missionCount && Run.isAlive; i++ ) {
                     if ( downTableModel.getValueAt( i, DownTableEnum.YES_OR_NO ).toString().equals( "false" )
-                            || downTableModel.getValueAt( i, DownTableEnum.STATE ).toString().equals( "下載完畢" ) ) {
+                        || downTableModel.getValueAt( i, DownTableEnum.STATE ).toString().equals( "下載完畢" ) ) {
                         Common.processPrintln( "跳過 " + downTableModel.getValueAt( i, DownTableEnum.TITLE ).toString() );
                         continue;
                     }
@@ -2113,18 +2213,18 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                     // ex http://xxx  http://xxx  ...
                     String[] urlStrings = Common.getSeparateStrings(
-                            downTableModel.getValueAt( i, DownTableEnum.URL ).toString() );
+                        downTableModel.getValueAt( i, DownTableEnum.URL ).toString() );
 
                     // ex. true  false  false ...
                     String[] checkStrings = Common.getSeparateStrings(
-                            String.valueOf( downTableModel.getRealValueAt( i, DownTableEnum.CHECKS ) ) );
+                        String.valueOf( downTableModel.getRealValueAt( i, DownTableEnum.CHECKS ) ) );
 
                     // volume title
                     String[] volumeStrings = Common.getSeparateStrings(
-                            String.valueOf( downTableModel.getRealValueAt( i, DownTableEnum.VOLUMES ) ) );
+                        String.valueOf( downTableModel.getRealValueAt( i, DownTableEnum.VOLUMES ) ) );
 
                     int downloadCount = 0;
-                    for ( int j = 0 ; j < urlStrings.length && Run.isAlive ; j++ ) {
+                    for ( int j = 0; j < urlStrings.length && Run.isAlive; j++ ) {
                         if ( checkStrings[j].equals( "true" ) ) {
                             Flag.allowDownloadFlag = true;
 
@@ -2132,7 +2232,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                             downTableModel.setValueAt( nowState, i, DownTableEnum.STATE );
                             // 啟動下載
                             Run mainRun = new Run( urlStrings[j], volumeStrings[j], downTableModel.getValueAt( i, DownTableEnum.TITLE ).toString(),
-                                    RunModeEnum.DOWNLOAD_MODE );
+                                RunModeEnum.DOWNLOAD_MODE );
                             mainRun.run();
                             downloadCount++;
                         }
@@ -2168,8 +2268,15 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     if ( SetUp.getPlayAllDoneAudio() ) {
                         Common.playAllDoneAudio(); // 播放全部任務完成音效
                     }
+                    if ( SetUp.getRunAllDoneScript() ) {
+                        ComicDownGUI.stateBar.setText( "全部任務完成，執行腳本中" );
+                        Common.runShellScript( SetUp.getAllDoneScriptFile(), SetUp.getDownloadDirectory() ); // 執行全部任務完成腳本
+                        ComicDownGUI.stateBar.setText( "腳本執行結束" );
+
+                    }
                     if ( SetUp.getShowDoneMessageAtSystemTray() && trayIcon != null ) {
-                        trayIcon.displayMessage( "JComicDownloader Message", countOfChoiceMission + "個任務全部下載完畢! ", TrayIcon.MessageType.INFO );
+                        trayIcon.displayMessage( "JComicDownloader Message",
+                            countOfChoiceMission + "個任務全部下載完畢! ", TrayIcon.MessageType.INFO );
                     }
                     trayIcon.setToolTip( "JComicDownloader" );
                     Flag.allowDownloadFlag = false;
@@ -2209,7 +2316,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     }
 
     // 跳出選擇集數的視窗
-    public void runChoiceFrame( final boolean modifySelected, final int modifyRow, final String title, final String urlString ) {
+    public void runChoiceFrame( final boolean modifySelected,
+        final int modifyRow, final String title, final String urlString ) {
 
         new Thread( new Runnable() {
 
@@ -2220,7 +2328,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                         ChoiceFrame choiceFrame;
                         if ( modifySelected ) {
-                            choiceFrame = new ChoiceFrame( "重新選擇欲下載的集數 [" + title + "]", true, modifyRow, title, urlString );
+                            choiceFrame = new ChoiceFrame(
+                                "重新選擇欲下載的集數 [" + title + "]", true, modifyRow, title, urlString );
                         }
                         else {
                             choiceFrame = new ChoiceFrame( title, urlString );
@@ -2295,9 +2404,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     // 分析位址，分析完後開始下載。
     public void parseURL( final String[] newArgs,
-            final boolean allowDownload,
-            final boolean modifySelected,
-            final int modifyRow ) {  // call by add button and download button
+        final boolean allowDownload,
+        final boolean modifySelected,
+        final int modifyRow ) {  // call by add button and download button
         Thread praseThread = new Thread( new Runnable() {
 
             public void run() {
@@ -2453,7 +2562,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
             else {
                 CommonGUI.showMessageDialog( this, "目前正下載中，無法重新選擇集數",
-                        "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             }
         }
         if ( event.getSource() == tableRenameTitleItem ) {
@@ -2465,7 +2574,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
         else if ( event.getSource() == tableDeleteSelectedMissionItem ) {
             // 刪除所有反白任務
-            for ( int i = downTable.getRowCount() ; i >= 0 ; i-- ) {
+            for ( int i = downTable.getRowCount(); i >= 0; i-- ) {
                 if ( downTable.isRowSelected( i ) ) {
                     deleteMission( i );
                 }
@@ -2477,7 +2586,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
             else {
                 CommonGUI.showMessageDialog( this, "目前正下載中，無法刪除任務",
-                        "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             }
         }
         else if ( event.getSource() == tableDeleteAllDoneMissionItem ) {
@@ -2486,7 +2595,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
             else {
                 CommonGUI.showMessageDialog( this, "目前正下載中，無法刪除任務",
-                        "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             }
         }
         else if ( event.getSource() == tableDeleteFileItem ) {
@@ -2502,7 +2611,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
         else if ( event.getSource() == tableSelectedMoveToRoofItem ) {
             // 所有反白任務置頂
-            for ( int i = 0 ; i < downTable.getRowCount() ; i++ ) {
+            for ( int i = 0; i < downTable.getRowCount(); i++ ) {
                 if ( downTable.isRowSelected( i ) ) {
                     moveMissionToRoof( i );
                 }
@@ -2510,7 +2619,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
         else if ( event.getSource() == tableSelectedMoveToFloorItem ) {
             // 所有反白任務置底 
-            for ( int i = downTable.getRowCount() - 1 ; i >= 0 ; i-- ) {
+            for ( int i = downTable.getRowCount() - 1; i >= 0; i-- ) {
                 if ( downTable.isRowSelected( i ) ) {
                     moveMissionToFloor( i );
                 }
@@ -2549,9 +2658,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             Common.outputRecordTableFile( recordTableModel );
         }
         if ( event.getSource() == button[ButtonEnum.DOWNLOAD]
-                || event.getSource() == trayStartItem ) { // button of Download
+            || event.getSource() == trayStartItem ) { // button of Download
             if ( Flag.downloadingFlag || Flag.parseUrlFlag ) { // 目前正分析網址或下載中，不提供直接下載服務
-                CommonGUI.showMessageDialog( this, "目前正下載中，不提供直接下載，請按「加入」來加入下載任務。", "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                CommonGUI.showMessageDialog( this,
+                    "目前正下載中，不提供直接下載，請按「加入」來加入下載任務。", "提醒訊息",
+                    JOptionPane.INFORMATION_MESSAGE );
             }
             else {
                 logFrame.redirectSystemStreams(); // start to log message
@@ -2564,7 +2675,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
         }
         if ( event.getSource() == button[ButtonEnum.STOP]
-                || event.getSource() == trayStopItem ) { // button of stop
+            || event.getSource() == trayStopItem ) { // button of stop
             Run.isAlive = false; // forbid download work
             Flag.allowDownloadFlag = Flag.downloadingFlag = Flag.parseUrlFlag = false;
             stateBar.setText( "所有下載任務停止" );
@@ -2613,7 +2724,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
         if ( event.getSource() == button[ButtonEnum.CLEAR] ) { // button of CLEAR
             int choice = CommonGUI.showConfirmDialog( this, "請問是否要將目前內容全部清空？",
-                    "提醒訊息", JOptionPane.YES_NO_OPTION );
+                "提醒訊息", JOptionPane.YES_NO_OPTION );
 
             if ( choice == JOptionPane.YES_OPTION ) {
                 if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION ) {
@@ -2629,9 +2740,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         }
         if ( event.getSource() == button[ButtonEnum.EXIT]
-                || event.getSource() == trayExitItem ) { // button of Exit
+            || event.getSource() == trayExitItem ) { // button of Exit
             int choice = CommonGUI.showConfirmDialog( this, "請問是否要關閉JComicDownloader？",
-                    "提醒訊息", JOptionPane.YES_NO_OPTION );
+                "提醒訊息", JOptionPane.YES_NO_OPTION );
 
             if ( choice == JOptionPane.YES_OPTION ) {
                 // 輸出下載任務清單，下次開啟時會自動載入
@@ -2663,7 +2774,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     @Override
     public void mouseMoved( MouseEvent event ) {
-        JTable table = (JTable) event.getSource();
+        JTable table = ( JTable ) event.getSource();
 
         // 現在滑鼠所在的列
         CommonGUI.nowMouseAtRow = event.getY() / table.getRowHeight();
@@ -2673,7 +2784,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     // 取得目前下載任務清單中的已勾選任務總數
     private int getCountOfChoiceMisssion() {
         int count = 0;
-        for ( int i = 0 ; i < Common.missionCount ; i++ ) {
+        for ( int i = 0; i < Common.missionCount; i++ ) {
             if ( downTableModel.getValueAt( i, DownTableEnum.YES_OR_NO ).toString().equals( "true" ) ) {
                 count++;
             }
@@ -2688,24 +2799,23 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         public void valueChanged( ListSelectionEvent event ) {
             /*
-            replace this with mouse event if (event.getValueIsAdjusting()) {
-            return; } if ( Flag.downloadFlag ) return;
-            
-            int row = downTable.getSelectionModel().getLeadSelectionIndex();
-            int
-            col =
-            downTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
-            //System.out.println( col );
-            
-            if ( row > 0 && col != 0 && col != 1 && col != 6 ) {
-            //System.out.println( row + " : " + downTableUrlStrings[row] );
-            
-            ComicDownGUI.nowSelectedCheckStrings = Common.getSeparateStrings(
-            String.valueOf( downTableModel.getRealValueAt( row,
-            DownTableEnum.CHECKS ) ) );
-            
-            parseURL( new String[]{downTableUrlStrings[row]}, false, true, row
-            ); }
+             replace this with mouse event if (event.getValueIsAdjusting()) {
+             return; } if ( Flag.downloadFlag ) return;
+
+             int row = downTable.getSelectionModel().getLeadSelectionIndex();
+             int col =
+             downTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
+             * //System.out.println( col );
+
+             if ( row > 0 && col != 0 && col != 1 && col != 6 ) {
+             * //System.out.println( row + " : " + downTableUrlStrings[row] );
+
+             ComicDownGUI.nowSelectedCheckStrings = Common.getSeparateStrings(
+             String.valueOf( downTableModel.getRealValueAt( row,
+             DownTableEnum.CHECKS ) ) );
+
+             parseURL( new String[]{downTableUrlStrings[row]}, false, true,
+             row ); }
              */
         }
     }
@@ -2713,10 +2823,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     // 取得自訂搜尋引擎的關鍵字搜尋頁面網址
     private String getKeywordSearchURL( String keyword ) {
         String url = "http://www.google.com/cse?cx=002948535609514911011%3Als5mhwb6sqa&ie=UTF-8&q="
-                + keyword
-                + "&sa=%E6%90%9C%E5%B0%8B&hl=zh-TW&siteurl=www.google.com%2Fcse%2Fhome%3Fcx%3D002948535609514911011%3Als5mhwb6sqa%26hl%3Dzh-TW#gsc.tab=0&gsc.q="
-                + keyword
-                + "&gsc.page=1";
+            + keyword
+            + "&sa=%E6%90%9C%E5%B0%8B&hl=zh-TW&siteurl=www.google.com%2Fcse%2Fhome%3Fcx%3D002948535609514911011%3Als5mhwb6sqa%26hl%3Dzh-TW#gsc.tab=0&gsc.q="
+            + keyword
+            + "&gsc.page=1";
 
         return Common.getFixedChineseURL( url );
     }
@@ -2802,33 +2912,38 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 Run.isAlive = true;
 
-                String testURL2 = "";
-
-                String picURL = "http://pic1.tuku.cc/100/%E5%85%A8%E8%81%8C%E7%8C%8E%E4%BA%BA/%E7%AC%AC297%E8%AF%9D/001.jpg";
-                String pageURL = "http://mh2.xindm.cn/display.asp?id=62304";
+                String picURL = "http://mh2.xindm.cn/book2/y/yishenchuanshuo/Vol_03/xindm_cn_000001.jpg";
+                String pageURL = "http://www.xindm.cn/type.asp?typeid=7002";
                 //String testURL = "http://www.dm5.com/m61853-p2/chapterimagefun.ashx?cid=61853&page=8&language=1&key=wZUeSh3wcCQ%3D";
-                String testURL = "http://www03.eyny.com/archiver/tid-1260788-1-1.html";
+                String testURL = "http://www.fumanhua.com/images/pic_loading.gif";
 
-                String cookie = "djAX_e8d7_agree=6; ";
-                String referURL = testURL;
+                String referURL = "http://www.fumanhua.com/manhua/1764/262710.html";
+                String cookie = "";
+                //cookie = Common.getCookieString( pageURL );
                 String postString = "";
+                cookie = "Hm_lvt_a0d6e70519c7610ccd1d37c3ebb0434b=1341308909421; Hm_lpvt_a0d6e70519c7610ccd1d37c3ebb0434b=1341308909421";
+               
+                
+                //pageURL = Common.getFixedChineseURL( pageURL );
+
+                //Common.downloadFile( picURL, "", "test.jpg", false, "", referURL );
+                //Common.downloadFile( pageURL, "", "test1.html", false, "", "" );
 
                 //System.out.println( cookie );
-                //Common.simpleDownloadFile( pageURL, "", "test.html", cookie, "" );
-
-                //Common.simpleDownloadFile( testURL, "", "test.html", cookie, referURL );
+                
+                Common.simpleDownloadFile( picURL, "", "test.jpg", cookie, pageURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
-                Common.downloadFile( testURL, "", "test.html", true, cookie, "" );
+                //Common.downloadFile( testURL, "", "test.html", true, cookie, "" );
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
 
                 //Common.testConnection( testURL );
 
                 System.out.println( "OVER" );
 
+                
+
             }
         } );
-        downThread.start();
+        //downThread.start();
     }
-
-   
 }

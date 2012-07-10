@@ -6,6 +6,7 @@ Last Modified : 2012/6/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
  * 4.06: 1. 修復非php頁面無法解析的問題。
+         2. 修復編碼問題，將GB2312->UTF8改為GBK->UTF8。
  * 4.03: 1. 修改Wenku模組，使其可輸出單回文字檔與合併文字檔。
  *  4.01: 1. 新增對Wenku的支援。
 ----------------------------------------------------------------------------------------------------
@@ -37,6 +38,7 @@ public class ParseWenku extends ParseOnlineComicSite {
      */
     public ParseWenku() {
         siteID = Site.WENKU;
+        siteName = "wenku";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_wenku_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_wenku_encode_parse_", "html" );
 
@@ -69,7 +71,7 @@ public class ParseWenku extends ParseOnlineComicSite {
         webSite = getPhpURL( webSite );
 
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GBK );
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
@@ -156,13 +158,18 @@ public class ParseWenku extends ParseOnlineComicSite {
         String allNovelText = ""; // 全部頁面加起來小說文字
 
         Common.newEncodeFile( getDownloadDirectory(),
-                fileName, "utf8_" + fileName, Encoding.GB2312 );
+                fileName, "utf8_" + fileName, Encoding.GBK );
 
         allPageString = Common.getFileString( getDownloadDirectory(), "utf8_" + fileName );
+        
         Common.deleteFile( getDownloadDirectory(), fileName ); // 刪掉utf8編碼的暫存檔
         Common.deleteFile( getDownloadDirectory(), "utf8_" + fileName ); // 刪掉utf8編碼的暫存檔
-
-        allNovelText = getRegularNovel( allPageString ); // 每一頁處理過都加總起來 
+        
+        if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML ) {
+            allNovelText = getCharsetInformation();
+        }
+        
+        allNovelText += getRegularNovel( allPageString ); // 每一頁處理過都加總起來 
         Common.outputFile( allNovelText, getDownloadDirectory(), title );
 
     }
@@ -192,13 +199,6 @@ public class ParseWenku extends ParseOnlineComicSite {
         return oneFloorText;
     }
 
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
-
     @Override // 因為原檔就是utf8了，所以無須轉碼
     public String getAllPageString( String urlString ) {
         urlString = getPhpURL( urlString ); // 若是一般htm網頁，轉為php網頁
@@ -207,7 +207,8 @@ public class ParseWenku extends ParseOnlineComicSite {
         String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_wenku_encode_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
+        // 雖然網頁註明GB2312，但實質上是GBK編碼
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GBK );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }
@@ -236,13 +237,6 @@ public class ParseWenku extends ParseOnlineComicSite {
 
     public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
         return volumeURL;
-    }
-
-    @Override
-    public String getTitleOnSingleVolumePage( String urlString ) {
-        String mainUrlString = getMainUrlFromSingleVolumeUrl( urlString );
-
-        return getTitleOnMainPage( mainUrlString, getAllPageString( mainUrlString ) );
     }
 
     @Override
@@ -343,22 +337,4 @@ public class ParseWenku extends ParseOnlineComicSite {
         return combinationList;
     }
 
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the wenku module:     " );
-        System.out.println( "|_______________________________\n" );
-    }
 }

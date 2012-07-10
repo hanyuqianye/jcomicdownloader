@@ -10,11 +10,12 @@
  */
 package jcomicdownloader.module;
 
-import jcomicdownloader.tools.*;
-import jcomicdownloader.enums.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Encoding;
+import jcomicdownloader.enums.Site;
+import jcomicdownloader.tools.Common;
 
 public class ParseManmankan extends ParseOnlineComicSite {
     private int radixNumber; // use to figure out the name of pic
@@ -28,6 +29,7 @@ public class ParseManmankan extends ParseOnlineComicSite {
  */
     public ParseManmankan() {
         siteID = Site.MANMANKAN;
+        siteName = "Manmankan";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_manmankan_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_manmankan_encode_parse_", "html" );
 
@@ -115,12 +117,6 @@ public class ParseManmankan extends ParseOnlineComicSite {
     }
 
     @Override
-    public String getTitleOnSingleVolumePage( String urlString ) {
-        String mainUrlString = getMainUrlFromSingleVolumeUrl( urlString );
-        return getTitleOnMainPage( mainUrlString, getAllPageString( mainUrlString ) );
-    }
-
-    @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         
         String[] tokens = allPageString.split( ">|<" );
@@ -166,25 +162,6 @@ public class ParseManmankan extends ParseOnlineComicSite {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-    
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " _______________________________________" );
-        System.out.println( "|                                  " );
-        System.out.println( "| Run the manmankan module:     " );
-        System.out.println( "|________________________________________\n" );
     }
 }
 

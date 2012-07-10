@@ -32,6 +32,7 @@ public class ParseJumpcn extends ParseOnlineComicSite {
      */
     public ParseJumpcn() {
         siteID = Site.JUMPCN;
+        siteName = "JumpCN";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_jumpcn_encode_parse_", "html" );
 
@@ -99,13 +100,6 @@ public class ParseJumpcn extends ParseOnlineComicSite {
             }
         }
         //System.exit(0); // debug
-    }
-
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
     }
 
     @Override
@@ -190,21 +184,7 @@ public class ParseJumpcn extends ParseOnlineComicSite {
     }
 
     @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " _______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the JumpCN module:  " );
-        System.out.println( "|________________________________\n" );
+    public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
+        throw new UnsupportedOperationException( "Not supported yet." );
     }
 }

@@ -32,6 +32,7 @@ public class ParseKangdm extends ParseOnlineComicSite {
      */
     public ParseKangdm() {
         siteID = Site.KANGDM;
+        siteName = "kangdm";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kangdm_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kangdm_encode_parse_", "html" );
 
@@ -114,13 +115,6 @@ public class ParseKangdm extends ParseOnlineComicSite {
         //System.exit( 0 ); // debug
     }
 
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
-    }
-
     @Override
     public String getAllPageString( String urlString ) {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_kangdm_", "html" );
@@ -152,13 +146,6 @@ public class ParseKangdm extends ParseOnlineComicSite {
         Common.debugPrintln( "MAIN_URL: " + mainPageURL );
 
         return mainPageURL;
-    }
-
-    @Override
-    public String getTitleOnSingleVolumePage( String urlString ) {
-        String mainUrlString = getMainUrlFromSingleVolumeUrl( urlString );
-
-        return getTitleOnMainPage( mainUrlString, getAllPageString( mainUrlString ) );
     }
 
     @Override
@@ -217,24 +204,5 @@ public class ParseKangdm extends ParseOnlineComicSite {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the Kangdm module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }

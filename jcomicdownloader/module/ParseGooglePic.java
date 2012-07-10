@@ -5,6 +5,7 @@
  Last Modified : 2011/11/21
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 4.10: 1. 修復在Substance介面下若跳出選擇檔案下載方式視窗必崩潰的問題。
  3.0:  1. 修復非中文版的google圖片搜尋無法下載的bug。
  *  2.01: 1. 修正Google圖片搜尋中部份非英文關鍵字沒有正確解析為資料夾名稱的bug。
  *  1.19: 1. 修正後已支援『顯示更多結果』後面的圖。
@@ -24,8 +25,10 @@ import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import jcomicdownloader.ComicDownGUI;
 import jcomicdownloader.SetUp;
+import jcomicdownloader.frame.OptionFrame;
 
 enum GoogleEnum {
 
@@ -49,6 +52,7 @@ public class ParseGooglePic extends ParseOnlineComicSite {
      */
     public ParseGooglePic() {
         siteID = Site.GOOGLE_PIC;
+        siteName = "GooglePic";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_google_pic_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_google_pic_encode_parse_", "html" );
 
@@ -232,16 +236,34 @@ public class ParseGooglePic extends ParseOnlineComicSite {
     }
 
     // google獨立下載函式，需要判斷是否有同檔名的已下載檔案
-    private void downloadGoogle( String picName, int p ) {
+    private void downloadGoogle( final String picName, final int p ) {
+        
         if ( new File( getDownloadDirectory() + picName ).exists() ) {
             existSameNameFile = true;
+            // 因為substance介面呼叫showOptionDialog時會出現例外情形，只好預設自動更改名稱
+
+            if ( SetUp.getSkinClassName().indexOf( ".substance." ) > 0 ) {
+                //choice = 0;
+                //String className = ComicDownGUI.getDefaultSkinClassName(); // 回歸預設介面
+            }
 
             if ( choice < 0 ) {
+                CommonGUI.optionDialogChoice = choice;
                 Object[] options = {"自動更改名稱", "自動略過不下載", "自動複寫檔案"};
-                choice = JOptionPane.showOptionDialog( ComicDownGUI.mainFrame, "資料夾內已有" + picName + "，請問應該怎麼處理？（選定後，往後遇到相同情形皆依此次辦理)",
-                    "詢問視窗",
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                choice = CommonGUI.showOptionDialog( ComicDownGUI.mainFrame,
+                    "資料夾內已有" + picName + "，請問應該怎麼處理？（選定後，往後遇到相同情形皆依此次辦理)",
+                    "詢問視窗", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                     null, options, options[0] );
+                /*
+                while ( choice < 0 ) {
+                    try {
+                        this.wait();
+                    }
+                    catch ( InterruptedException ex ) {
+                        Common.hadleErrorMessage( ex, "無法讓" + this.getClass() + "等待（wait）" );
+                    }
+                }
+                */
             }
 
             if ( choice == 0 ) {
@@ -279,13 +301,6 @@ public class ParseGooglePic extends ParseOnlineComicSite {
         String baseUrlString = allPageString.substring( beginIndex, endIndex );
 
         return baseUrlString;
-    }
-
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
     }
 
     @Override
@@ -392,24 +407,5 @@ public class ParseGooglePic extends ParseOnlineComicSite {
         combinationList.add( urlList );
 
         return combinationList;
-    }
-
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[]{indexName, indexEncodeName, jsName};
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________________________" );
-        System.out.println( "|                                   " );
-        System.out.println( "| Run the Google Picture Search module:     " );
-        System.out.println( "|_______________________________________________\n" );
     }
 }

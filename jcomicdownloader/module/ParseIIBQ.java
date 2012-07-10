@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2012/3/25
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ * 4.09: 1. 修復對www.iibq.com的支援。
     3.11 :1. 修復對www.iibq.com的支援。
  *  2.03 :1. 新增新增對www.iibq.com的支援。
 ----------------------------------------------------------------------------------------------------
@@ -28,7 +29,7 @@ public class ParseIIBQ extends ParseOnlineComicSite {
     
     protected String firstServerURL = "http://comic.jmydm.net/"; // 電信一
     protected String secondServerURL = "http://zj.jmydm.net/"; // 電信二
-    protected String thirdServerURL = "http://wt.jmydm.net:2012/"; // 網通
+    protected String thirdServerURL = "http://lt.jmydm.net:2012/"; // 網通
 
     /**
      *
@@ -36,6 +37,7 @@ public class ParseIIBQ extends ParseOnlineComicSite {
      */
     public ParseIIBQ() {
         siteID = Site.IIBQ;
+        siteName = "IIBQ";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_iibq_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_iibq_encode_parse_", "html" );
 
@@ -96,19 +98,19 @@ public class ParseIIBQ extends ParseOnlineComicSite {
         beginIndex = allPageString.indexOf( "\"", endIndex + 1 ) + 1;
         endIndex = allPageString.indexOf( "\"", beginIndex );
         String middleURL = allPageString.substring( beginIndex, endIndex );
+        
+        // 開始取得伺服器位址
+        String jsURL = "http://www.iibq.com/script/ds.js";
+        allPageString = getAllPageString( jsURL );
+        beginIndex = allPageString.lastIndexOf( "|" ) + 1;
+        endIndex = Common.getSmallerIndexOfTwoKeyword( allPageString, beginIndex, "\"", "^" );
+        String basePicURL = allPageString.substring( beginIndex, endIndex );
 
         for ( int p = 1 ; p <= totalPage && Run.isAlive; p++ ) {
-            comicURL[p - 1] = thirdServerURL + middleURL + urlTokens[p-1];
+            comicURL[p - 1] = basePicURL + middleURL + urlTokens[p-1];
             //System.out.println( comicURL[p - 1] ); // debug
         }
         //System.exit(0); // debug
-    }
-
-    public void showParameters() { // for debug
-        Common.debugPrintln( "----------" );
-        Common.debugPrintln( "totalPage = " + totalPage );
-        Common.debugPrintln( "webSite = " + webSite );
-        Common.debugPrintln( "----------" );
     }
 
     @Override
@@ -142,13 +144,6 @@ public class ParseIIBQ extends ParseOnlineComicSite {
         String mainPageURL = volumeURL.substring( 0, endIndex );;
 
         return mainPageURL;
-    }
-
-    @Override
-    public String getTitleOnSingleVolumePage( String urlString ) {
-        String mainUrlString = getMainUrlFromSingleVolumeUrl( urlString );
-
-        return getTitleOnMainPage( mainUrlString, getAllPageString( mainUrlString ) );
     }
 
     @Override
@@ -203,22 +198,4 @@ public class ParseIIBQ extends ParseOnlineComicSite {
         return combinationList;
     }
 
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the IIBQ module:     " );
-        System.out.println( "|_______________________________\n" );
-    }
 }

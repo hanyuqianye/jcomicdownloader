@@ -32,6 +32,7 @@ public class Parse131 extends ParseOnlineComicSite {
      */
     public Parse131() {
         siteID = Site.COMIC_131;
+        siteName = "131";
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_131_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_131_encode_parse_", "html" );
 
@@ -271,13 +272,5 @@ public class Parse131 extends ParseOnlineComicSite {
     @Override
     public String[] getTempFileNames() {
         return new String[]{indexName, indexEncodeName, jsName};
-    }
-
-    @Override
-    public void printLogo() {
-        System.out.println( " ______________________________" );
-        System.out.println( "|                            " );
-        System.out.println( "| Run the 131 module:     " );
-        System.out.println( "|_______________________________\n" );
     }
 }
