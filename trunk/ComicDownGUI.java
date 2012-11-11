@@ -2267,16 +2267,18 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
     private void addBookmark( int row )
     {  // 將第row列任務加入到書籤中
-        row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
+
         String title = "";
         String url = "";
         if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION )
         { // 從任務清單加入
+            row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
             title = String.valueOf( downTableModel.getRealValueAt( row, DownTableEnum.TITLE ) );
             url = downTableUrlStrings[row];
         }
         else if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.RECORD )
         { // 從紀錄清單加入
+            row = recordTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
             title = String.valueOf( recordTableModel.getValueAt( row, RecordTableEnum.TITLE ) );
             url = String.valueOf( recordTableModel.getValueAt( row, RecordTableEnum.URL ) );
         }
