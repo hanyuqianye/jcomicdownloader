@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/5/13
+ Last Modified : 2012/11/15
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.07: 修復veryim集數解析不全的問題。
 5.01: 1. 修復veryim無法下載的問題。
  *  4.0: 1. 新增對veryim的支援。
  ----------------------------------------------------------------------------------------------------
@@ -217,6 +218,11 @@ public class ParseVeryim extends ParseOnlineComicSite {
 
         int beginIndex = allPageString.indexOf( "id=\"chapters\"" );
         int endIndex = allPageString.indexOf( "</ul>", beginIndex );
+        
+        if ( allPageString.indexOf( "class=\"ex\"" ) > 0 ) {
+            endIndex = allPageString.indexOf( "class=\"ex\"", beginIndex );
+            endIndex = allPageString.indexOf( "</ul>", endIndex );
+        }
 
         String tempString = allPageString.substring( beginIndex, endIndex );
 
