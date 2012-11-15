@@ -349,6 +349,7 @@ public class RunModule {
                 }
                 
                 ComicDownGUI.stateBar.setText( "單集下載完成，執行腳本中" );
+                Common.debugPrintln( "單集下載完成，執行腳本中" );
                 Common.runShellScript( SetUp.getSingleDoneScriptFile(), runPath );
                 
                 if ( SetUp.getSingleScriptWaitTime() > 0 ) {

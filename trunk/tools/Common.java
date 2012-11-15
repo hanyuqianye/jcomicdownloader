@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2011/12/25
+ Last Modified : 2011/11/15
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.07: 修復在windows系統下執行腳本若有錯誤輸出時會阻塞的問題。
  2.11: 1. 修改下載機制，增加讀取GZIPInputStreamCommon.getStringUsingDefaultLanguage( 串流的選項（178.com專用）
  *   2. 修復重試後無法下載中間漏頁的問題。（ex. 5.jpg 7.jpg 8.jpg，中間遺漏6.jpg）
  2.01: 1. 修改下載機制，不下載青蛙圖（檔案大小10771 bytes）
@@ -51,7 +52,8 @@ import jcomicdownloader.frame.InformationFrame;
 
  大部分的通用方法都放在這邊，全宣告為靜態，方便使用。
  */
-public class Common {
+public class Common
+{
 
     public static String recordDirectory = Common.getNowAbsolutePath();
     public static String tempDirectory = Common.getNowAbsolutePath() + "temp" + getSlash();
@@ -77,71 +79,86 @@ public class Common {
     public static String playAudioPic = "play.png";
     public static String NULL = "NULL";
 
-    public static String getZero() {
+    public static String getZero()
+    {
         int length = SetUp.getFileNameLength();
 
         String zero = "";
-        for ( int i = 0; i < length; i++ ) {
+        for ( int i = 0; i < length; i++ )
+        {
             zero += "0";
         }
 
         return zero;
     }
 
-    public static String getZero( int zeroAmount ) {
+    public static String getZero( int zeroAmount )
+    {
         String zero = "";
-        for ( int i = 0; i < zeroAmount; i++ ) {
+        for ( int i = 0; i < zeroAmount; i++ )
+        {
             zero += "0";
         }
 
         return zero;
     }
 
-    public static void errorReport( String errorString ) {
+    public static void errorReport( String errorString )
+    {
         System.out.println( "ERROR: " + errorString );
         Run.isLegal = false;
-        try {
+        try
+        {
             throw new Exception( errorString ); // 自動產生例外訊息，以供輸出
         }
-        catch ( Exception ex ) {
+        catch ( Exception ex )
+        {
             outputErrorMessage( ex, "ERROR: " + errorString + "\n" );
         }
     }
 
-    public static void debugPrintln( String print ) { // for debug
+    public static void debugPrintln( String print )
+    { // for debug
         print = Common.getStringUsingDefaultLanguage( print, print ); // 使用預設語言 
 
-        if ( Debug.debugMode ) {
+        if ( Debug.debugMode )
+        {
             System.out.println( print );
         }
     }
 
-    public static void debugPrint( String print ) { // for debug
+    public static void debugPrint( String print )
+    { // for debug
         print = Common.getStringUsingDefaultLanguage( print, print ); // 使用預設語言 
 
-        if ( Debug.debugMode ) {
+        if ( Debug.debugMode )
+        {
             System.out.print( print );
         }
     }
 
-    public static void processPrintln( String print ) { // for debug
+    public static void processPrintln( String print )
+    { // for debug
         System.out.println( print );
     }
 
-    public static void processPrint( String print ) { // for debug
+    public static void processPrint( String print )
+    { // for debug
         System.out.print( print );
     }
 
-    public static void checkDirectory( String dir ) {
+    public static void checkDirectory( String dir )
+    {
         // check if dir exists or not, if not exist, create one.
-        if ( !new File( dir ).exists() ) {
+        if ( !new File( dir ).exists() )
+        {
             new File( dir ).mkdirs();
         }
     }
-    
 
     // 批次下載webSite[i]的檔案，存於outputDirectory，並取名為titles[i]
-    public static void downloadManyFile( String[] webSite, String[] titles, String outputDirectory ) {
+    public static void downloadManyFile( String[] webSite, String[] titles, String outputDirectory )
+    {
 
         // if we want to check "\", cannot use [\\], should use [\\\\] ...
         String[] pathStrings = outputDirectory.split( "[\\\\]|/" );
@@ -153,39 +170,46 @@ public class Common {
         String tempName = "temp";
         String fileName = "";
         String nextFileName = "";
-        for ( int i = 0; i < webSite.length && Run.isAlive; i++ ) {
+        for ( int i = 0; i < webSite.length && Run.isAlive; i++ )
+        {
             fileName = titles[i];
-            if ( i + 1 < webSite.length ) {
+            if ( i + 1 < webSite.length )
+            {
                 nextFileName = titles[i + 1];
             }
 
-            if ( webSite[i] != null ) {
+            if ( webSite[i] != null )
+            {
                 // if not all download, the last file needs to re-download
                 if ( !new File( outputDirectory + nextFileName ).exists()
-                    || !new File( outputDirectory + fileName ).exists() ) {
+                        || !new File( outputDirectory + fileName ).exists() )
+                {
                     CommonGUI.stateBarMainMessage = mainMessage;
                     CommonGUI.stateBarDetailMessage = "  :  " + "共" + webSite.length + "頁"
-                        + "，第" + ( i + 1 ) + "頁下載中";
+                            + "，第" + (i + 1) + "頁下載中";
 
-                    if ( Common.withGUI() && ComicDownGUI.trayIcon != null ) {
+                    if ( Common.withGUI() && ComicDownGUI.trayIcon != null )
+                    {
                         ComicDownGUI.trayIcon.setToolTip( CommonGUI.stateBarMainMessage
-                            + CommonGUI.stateBarDetailMessage );
+                                + CommonGUI.stateBarDetailMessage );
                     }
 
                     CommonGUI.stateBarDetailMessage += " : " + fileName;
                     Common.downloadFile( webSite[i], outputDirectory, tempName, false, "", "", false, SetUp.getRetryTimes(), false, false );
 
                 }
-                System.out.print( ( i + 1 ) + " " );
+                System.out.print( (i + 1) + " " );
             }
-            else {
-                Common.errorReport( "缺少第" + ( i + 1 ) + "個章節（" + titles[i] + "）的位址" );
+            else
+            {
+                Common.errorReport( "缺少第" + (i + 1) + "個章節（" + titles[i] + "）的位址" );
             }
         }
     }
 
     public static void downloadManyFile( String[] webSite, String outputDirectory,
-        String picFrontName, String extensionName ) {
+                                         String picFrontName, String extensionName )
+    {
         NumberFormat formatter = new DecimalFormat( Common.getZero() );
 
         // if we want to check "\", cannot use [\\], should use [\\\\] ...
@@ -195,29 +219,33 @@ public class Common {
 
         String mainMessage = "下載 " + nowDownloadTitle + " / " + nowDownloadVolume + " ";
 
-        for ( int i = 1; i <= webSite.length && Run.isAlive; i++ ) {
+        for ( int i = 1; i <= webSite.length && Run.isAlive; i++ )
+        {
             // 察知此圖片的副檔名(因為會呼叫downloadManyFile的都是下載圖片)
             String[] tempStrings = webSite[i - 1].split( "/|\\." );
 
             if ( tempStrings[tempStrings.length - 1].length() == 3 || // ex. jgp, png
-                tempStrings[tempStrings.length - 1].length() == 4 ) // ex. jpeg
+                    tempStrings[tempStrings.length - 1].length() == 4 ) // ex. jpeg
             {
                 extensionName = tempStrings[tempStrings.length - 1];
             }
 
             String fileName = picFrontName + formatter.format( i ) + "." + extensionName;
             String nextFileName = picFrontName + formatter.format( i + 1 ) + "." + extensionName;
-            if ( webSite[i - 1] != null ) {
+            if ( webSite[i - 1] != null )
+            {
                 // if not all download, the last file needs to re-download
                 if ( !new File( outputDirectory + nextFileName ).exists()
-                    || !new File( outputDirectory + fileName ).exists() ) {
+                        || !new File( outputDirectory + fileName ).exists() )
+                {
                     CommonGUI.stateBarMainMessage = mainMessage;
                     CommonGUI.stateBarDetailMessage = "  :  " + "共" + webSite.length + "頁"
-                        + "，第" + i + "頁下載中";
+                            + "，第" + i + "頁下載中";
 
-                    if ( Common.withGUI() && ComicDownGUI.trayIcon != null ) {
+                    if ( Common.withGUI() && ComicDownGUI.trayIcon != null )
+                    {
                         ComicDownGUI.trayIcon.setToolTip( CommonGUI.stateBarMainMessage
-                            + CommonGUI.stateBarDetailMessage );
+                                + CommonGUI.stateBarDetailMessage );
                     }
 
                     CommonGUI.stateBarDetailMessage += " : " + fileName;
@@ -231,11 +259,14 @@ public class Common {
     }
 
     public static void slowDownloadFile( String webSite, String outputDirectory, String outputFileName,
-        int delayMillisecond, boolean needCookie, String cookieString ) {
-        try {
+                                         int delayMillisecond, boolean needCookie, String cookieString )
+    {
+        try
+        {
             Thread.currentThread().sleep( delayMillisecond );
         }
-        catch ( InterruptedException ex ) {
+        catch ( InterruptedException ex )
+        {
             Common.hadleErrorMessage( ex, "下載過程中無法等待預定秒數" );
         }
 
@@ -243,10 +274,12 @@ public class Common {
 
     }
 
-    public static String[] getCookieStringsTest( String urlString, String postString ) {
+    public static String[] getCookieStringsTest( String urlString, String postString )
+    {
         String[] tempCookieStrings = null;
 
-        try {
+        try
+        {
             URL url = new URL( urlString );
             HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
             connection.setRequestProperty( "User-Agent", "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
@@ -261,15 +294,19 @@ public class Common {
 
             tempCookieStrings = tryConnect( connection );
         }
-        catch ( Exception ex ) {
+        catch ( Exception ex )
+        {
             Common.hadleErrorMessage( ex, "無法正確設置connection" );
         }
 
         String[] cookieStrings = tempCookieStrings;
         int cookieCount = 0;
-        if ( tempCookieStrings != null ) {
-            for ( int i = 0; i < tempCookieStrings.length; i++ ) {
-                if ( tempCookieStrings[i] != null ) {
+        if ( tempCookieStrings != null )
+        {
+            for ( int i = 0; i < tempCookieStrings.length; i++ )
+            {
+                if ( tempCookieStrings[i] != null )
+                {
                     cookieStrings[cookieCount++] = tempCookieStrings[i]; // 把cookie都集中到前面
                     System.out.println( cookieCount + " " + tempCookieStrings[i] );
                 }
@@ -278,36 +315,43 @@ public class Common {
 
         return cookieStrings;
     }
-    
-    public static String getCookieString( String urlString ) {
+
+    public static String getCookieString( String urlString )
+    {
         return getCookieString( urlString, null );
     }
 
     // 將所有cookies串起來
-    public static String getCookieString( String urlString, String referURL ) {
+    public static String getCookieString( String urlString, String referURL )
+    {
         String[] cookies = getCookieStrings( urlString, referURL );
 
         String cookie = "";
-        for ( int i = 0; i < cookies.length && cookies[i] != null; i++ ) {
+        for ( int i = 0; i < cookies.length && cookies[i] != null; i++ )
+        {
             cookie += cookies[i] + "; ";
         }
         return cookie;
     }
 
-    public static String[] getCookieStrings( String urlString, String referURL ) {
+    public static String[] getCookieStrings( String urlString, String referURL )
+    {
         String[] tempCookieStrings = null;
 
-        try {
+        try
+        {
             URL url = new URL( urlString );
             HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
             connection.setRequestProperty( "User-Agent", "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
-            
-            if ( referURL != null ) {
+
+            if ( referURL != null )
+            {
                 connection.setRequestProperty( "Referer", referURL );
             }
             tempCookieStrings = tryConnect( connection );
         }
-        catch ( Exception ex ) {
+        catch ( Exception ex )
+        {
             Common.hadleErrorMessage( ex, "無法正確設置connection" );
         }
 
@@ -315,10 +359,13 @@ public class Common {
 
         String[] cookieStrings = tempCookieStrings;
         int cookieCount = 0;
-        if ( tempCookieStrings != null ) {
+        if ( tempCookieStrings != null )
+        {
 
-            for ( int i = 0; i < tempCookieStrings.length; i++ ) {
-                if ( tempCookieStrings[i] != null ) {
+            for ( int i = 0; i < tempCookieStrings.length; i++ )
+            {
+                if ( tempCookieStrings[i] != null )
+                {
                     cookieStrings[cookieCount] = tempCookieStrings[i]; // 把cookie都集中到前面
                     System.out.println( cookieCount + ": " + tempCookieStrings[i] );
                     cookieCount++;
@@ -332,37 +379,44 @@ public class Common {
 
     // 普通下載模式，連線失敗會嘗試再次連線
     public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
-        boolean needCookie, String cookieString ) {
+                                     boolean needCookie, String cookieString )
+    {
         downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, "", false, SetUp.getRetryTimes(), false, false );
     }
 
     // 普通下載模式，連線失敗會嘗試再次連線
     public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
-        boolean needCookie, String cookieString, String referURL ) {
+                                     boolean needCookie, String cookieString, String referURL )
+    {
         downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, referURL, false, SetUp.getRetryTimes(), false, false );
     }
 
     // 解壓縮下載模式，連線失敗會嘗試再次連線，且收取資料串流後會以Gzip解壓縮
     public static void downloadGZIPInputStreamFile( String webSite, String outputDirectory, String outputFileName,
-        boolean needCookie, String cookieString ) {
+                                                    boolean needCookie, String cookieString )
+    {
         downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, "", false, SetUp.getRetryTimes(), true, false );
     }
 
     // 直接下載模式，不管Run.isAlive值為何都可以直接下載
     public static void downloadFileByForce( String webSite, String outputDirectory, String outputFileName,
-        boolean needCookie, String cookieString ) {
+                                            boolean needCookie, String cookieString )
+    {
         downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, "", false, SetUp.getRetryTimes(), false, true );
     }
 
     // 加速下載模式，連線失敗就跳過
     public static void downloadFileFast( String webSite, String outputDirectory, String outputFileName,
-        boolean needCookie, String cookieString ) {
+                                         boolean needCookie, String cookieString )
+    {
         downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, "", true, SetUp.getRetryTimes(), false, false );
     }
 
     // 查看此url是否有轉向其他url
-    public static void testConnection( String url ) {
-        try {
+    public static void testConnection( String url )
+    {
+        try
+        {
             URLConnection con = new URL( url ).openConnection();
             System.out.println( "orignal url: " + con.getURL() );
             con.connect();
@@ -371,13 +425,15 @@ public class Common {
             System.out.println( "redirected url: " + con.getURL() );
             is.close();
         }
-        catch ( Exception ex ) {
+        catch ( Exception ex )
+        {
             Common.hadleErrorMessage( ex, "無法正確設置connection" );
         }
 
 
-        try {
-            HttpURLConnection con = ( HttpURLConnection ) ( new URL( url ).openConnection() );
+        try
+        {
+            HttpURLConnection con = ( HttpURLConnection ) (new URL( url ).openConnection());
             con.setInstanceFollowRedirects( false );
             con.connect();
             int responseCode = con.getResponseCode();
@@ -385,32 +441,38 @@ public class Common {
             String location = con.getHeaderField( "Location" );
             System.out.println( location );
         }
-        catch ( Exception ex ) {
+        catch ( Exception ex )
+        {
             Common.hadleErrorMessage( ex, "無法正確設置connection" );
         }
 
     }
 
     public static void downloadFile( String webSite, String outputDirectory, String outputFileName,
-        boolean needCookie, String cookieString, String referURL, boolean fastMode, int retryTimes,
-        boolean gzipEncode, boolean forceDownload ) {
+                                     boolean needCookie, String cookieString, String referURL, boolean fastMode, int retryTimes,
+                                     boolean gzipEncode, boolean forceDownload )
+    {
         // downlaod file by URL
 
         int fileGotSize = 0;
 
-        if ( CommonGUI.stateBarDetailMessage == null ) {
+        if ( CommonGUI.stateBarDetailMessage == null )
+        {
             CommonGUI.stateBarMainMessage = "下載網頁進行分析 : ";
             CommonGUI.stateBarDetailMessage = outputFileName + " ";
         }
 
-        if ( Run.isAlive || forceDownload ) { // 當允許下載或強制下載時才執行連線程序
-            try {
+        if ( Run.isAlive || forceDownload )
+        { // 當允許下載或強制下載時才執行連線程序
+            try
+            {
 
                 ComicDownGUI.stateBar.setText( webSite + " 連線中..." );
 
                 // google圖片下載時因為有些連線很久沒回應，所以要設置計時器，預防連線時間過長
                 Timer timer = new Timer();
-                if ( SetUp.getTimeoutTimer() > 0 ) {
+                if ( SetUp.getTimeoutTimer() > 0 )
+                {
                     // 預設(getTimeoutTimer()*1000)秒會timeout
                     timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 );
                 }
@@ -436,7 +498,8 @@ public class Common {
                 //connection.setInstanceFollowRedirects( false ); // 不轉址
 
 
-                if ( referURL != null && !referURL.equals( "" ) ) {
+                if ( referURL != null && !referURL.equals( "" ) )
+                {
                     //Common.debugPrintln( "設置Referer=" + referURL );
                     connection.setRequestProperty( "Referer", "referURL" );
                 }
@@ -455,7 +518,8 @@ public class Common {
                 connection.setConnectTimeout( 10000 ); // 與主機連接時間不能超過十秒
 
 
-                if ( needCookie ) {
+                if ( needCookie )
+                {
                     connection.setRequestMethod( "GET" );
                     connection.setDoOutput( true );
                     connection.setRequestProperty( "Cookie", cookieString );
@@ -464,8 +528,9 @@ public class Common {
                 int responseCode = 0;
 
                 // 快速模式不下載青蛙圖！（其檔案大小就是10771......）
-                if ( ( fastMode && connection.getResponseCode() != 200 )
-                    || ( fastMode && connection.getContentLength() == 10771 ) ) {
+                if ( (fastMode && connection.getResponseCode() != 200)
+                        || (fastMode && connection.getContentLength() == 10771) )
+                {
                     return;
                 }
 
@@ -475,23 +540,28 @@ public class Common {
                 int fileSize = connection.getContentLength() / 1000;
 
                 if ( Common.isPicFileName( outputFileName )
-                    && ( fileSize == 21 || fileSize == 22 ) ) { // 連到99系列的盜連圖
+                        && (fileSize == 21 || fileSize == 22) )
+                { // 連到99系列的盜連圖
                     Common.debugPrintln( "似乎連到盜連圖，停一秒後重新連線......" );
-                    try {
+                    try
+                    {
                         Thread.sleep( 1000 ); // 每次暫停一秒再重新連線
                     }
-                    catch ( InterruptedException iex ) {
+                    catch ( InterruptedException iex )
+                    {
                         Common.hadleErrorMessage( iex, "無法等待既定秒數" );
                     }
                     tryConnect( connection );
                 }
                 // 內部伺服器發生錯誤，讀取getErrorStream() 
-                if ( connection.getResponseCode() == 500 ) {
+                if ( connection.getResponseCode() == 500 )
+                {
                 }
-                else if ( connection.getResponseCode() != 200 ) {
+                else if ( connection.getResponseCode() != 200 )
+                {
                     //Common.debugPrintln( "第二次失敗，不再重試!" );
                     Common.errorReport( "錯誤回傳碼(responseCode): "
-                        + connection.getResponseCode() + " : " + webSite );
+                            + connection.getResponseCode() + " : " + webSite );
                     return;
                 }
 
@@ -501,53 +571,62 @@ public class Common {
                 OutputStream os = new FileOutputStream( outputDirectory + outputFileName );
                 InputStream is = null;
 
-                if ( connection.getResponseCode() == 500 ) {
+                if ( connection.getResponseCode() == 500 )
+                {
                     is = connection.getErrorStream(); // xindm
                 }
                 else if ( gzipEncode && fileSize < 17 ) // 178漫畫小於17kb就認定為已經壓縮過的
                 {
-                    try {
+                    try
+                    {
                         is = new GZIPInputStream( connection.getInputStream() ); // ex. 178.com
                     }
-                    catch ( IOException ex ) {
+                    catch ( IOException ex )
+                    {
                         is = connection.getInputStream(); // 其他漫畫網
                     }
                 }
-                else {
+                else
+                {
                     is = connection.getInputStream(); // 其他漫畫網
                 }
                 Common.debugPrint( "(" + fileSize + " k) " );
                 String fileSizeString = fileSize > 0 ? "" + fileSize : " ? ";
 
-                byte[] r = new byte[1024];
+                byte[] r = new byte[ 1024 ];
                 int len = 0;
 
-                while ( ( len = is.read( r ) ) > 0 && ( Run.isAlive || forceDownload ) ) {
+                while ( (len = is.read( r )) > 0 && (Run.isAlive || forceDownload) )
+                {
                     // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
                     if ( fileSize > 1024 || !Flag.timeoutFlag ) // 預防卡住的機制
                     {
                         os.write( r, 0, len );
                     }
-                    else {
+                    else
+                    {
                         break;
                     }
 
-                    fileGotSize += ( len / 1000 );
+                    fileGotSize += (len / 1000);
 
-                    if ( Common.withGUI() ) {
+                    if ( Common.withGUI() )
+                    {
                         int percent = 100;
                         String downloadText = "";
-                        if ( fileSize > 0 ) {
-                            percent = ( fileGotSize * 100 ) / fileSize;
+                        if ( fileSize > 0 )
+                        {
+                            percent = (fileGotSize * 100) / fileSize;
                             downloadText = fileSizeString + "Kb ( " + percent + "% ) ";
                         }
-                        else {
+                        else
+                        {
                             downloadText = fileSizeString + " Kb ( " + fileGotSize + "Kb ) ";
                         }
 
                         ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
-                            + CommonGUI.stateBarDetailMessage
-                            + " : " + downloadText );
+                                + CommonGUI.stateBarDetailMessage
+                                + " : " + downloadText );
                     }
                 }
 
@@ -555,10 +634,11 @@ public class Common {
                 os.flush();
                 os.close();
 
-                if ( Common.withGUI() ) {
+                if ( Common.withGUI() )
+                {
                     ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
-                        + CommonGUI.stateBarDetailMessage
-                        + " : " + fileSizeString + "Kb ( 100% ) " );
+                            + CommonGUI.stateBarDetailMessage
+                            + " : " + fileSizeString + "Kb ( 100% ) " );
                 }
 
                 connection.disconnect();
@@ -566,21 +646,23 @@ public class Common {
 
                 // 若真實下載檔案大小比預估來得小，則視設定值決定要重新嘗試幾次
                 int realFileGotSize = ( int ) new File( outputDirectory + outputFileName ).length() / 1000;
-                if ( realFileGotSize + 1 < fileGotSize && retryTimes > 0 ) {
+                if ( realFileGotSize + 1 < fileGotSize && retryTimes > 0 )
+                {
                     String messageString = realFileGotSize + " < " + fileGotSize
-                        + " -> 等待兩秒後重新嘗試下載" + outputFileName + "（" + retryTimes
-                        + "/" + SetUp.getRetryTimes() + "）";
+                            + " -> 等待兩秒後重新嘗試下載" + outputFileName + "（" + retryTimes
+                            + "/" + SetUp.getRetryTimes() + "）";
                     Common.debugPrintln( messageString );
                     ComicDownGUI.stateBar.setText( messageString );
                     Thread.sleep( 2000 ); // 每次暫停一秒再重新連線
 
                     downloadFile( webSite, outputDirectory, outputFileName,
-                        needCookie, cookieString, referURL, fastMode, retryTimes - 1, gzipEncode, false );
+                                  needCookie, cookieString, referURL, fastMode, retryTimes - 1, gzipEncode, false );
 
 
                 }
 
-                if ( fileSize < 1024 && Flag.timeoutFlag ) {
+                if ( fileSize < 1024 && Flag.timeoutFlag )
+                {
                     new File( outputDirectory + outputFileName ).delete();
                     Common.debugPrintln( "刪除不完整檔案：" + outputFileName );
 
@@ -595,7 +677,8 @@ public class Common {
                 Common.debugPrintln( webSite + " downloads successful!" ); // for debug
 
             }
-            catch ( Exception e ) {
+            catch ( Exception e )
+            {
                 Common.hadleErrorMessage( e, "無法正確下載" + webSite );
             }
 
@@ -603,10 +686,12 @@ public class Common {
         }
     }
 
-    public static boolean urlIsOK( String urlString ) {
+    public static boolean urlIsOK( String urlString )
+    {
 
         boolean isOK = false;
-        try {
+        try
+        {
 
             URL url = new URL( urlString );
 
@@ -615,103 +700,129 @@ public class Common {
 
             connection.connect();
 
-            if ( connection.getResponseCode() == HttpURLConnection.HTTP_OK ) {
+            if ( connection.getResponseCode() == HttpURLConnection.HTTP_OK )
+            {
                 isOK = true;
                 Common.debugPrintln( urlString + " 測試連線結果: OK" );
             }
-            else {
+            else
+            {
                 isOK = false;
                 Common.debugPrintln( urlString + " 測試連線結果: 不OK ( " + connection.getResponseCode() + " )" );
             }
             connection.disconnect();
 
         }
-        catch ( Exception e ) {
+        catch ( Exception e )
+        {
             Common.hadleErrorMessage( e, "無法正確設置connection" );
         }
         return isOK;
     }
 
-    public static String[] tryConnect( HttpURLConnection connection ) {
+    public static String[] tryConnect( HttpURLConnection connection )
+    {
         return tryConnect( connection, null );
     }
 
-    public static String[] tryConnect( HttpURLConnection connection, String postString ) {
-        String[] cookieStrings = new String[100];
-        try {
+    public static String[] tryConnect( HttpURLConnection connection, String postString )
+    {
+        String[] cookieStrings = new String[ 100 ];
+        try
+        {
             connection.connect();
             String headerName = "";
-            for ( int i = 1; ( headerName = connection.getHeaderFieldKey( i ) ) != null; i++ ) {
-                if ( headerName.equals( "Set-Cookie" ) ) {
+            for ( int i = 1; (headerName = connection.getHeaderFieldKey( i )) != null; i++ )
+            {
+                if ( headerName.equals( "Set-Cookie" ) )
+                {
 
                     cookieStrings[i - 1] = new String( connection.getHeaderField( i ) );
                     //System.out.println( i + " " + cookieStrings[i-1] );
                 }
-                else {
-                    if ( headerName.matches( "Content-Length" ) ) {
+                else
+                {
+                    if ( headerName.matches( "Content-Length" ) )
+                    {
                         System.out.println( headerName + " = " + connection.getHeaderField( i ) );
                     }
                     //System.out.println( headerName + " = " + connection.getHeaderField( i ) );
                 }
             }
         }
-        catch ( Exception ex ) {
-            try {
-                if ( connection.getResponseCode() != 200 && !Flag.timeoutFlag ) {
-                    try {
+        catch ( Exception ex )
+        {
+            try
+            {
+                if ( connection.getResponseCode() != 200 && !Flag.timeoutFlag )
+                {
+                    try
+                    {
                         Thread.sleep( 1000 ); // 每次暫停一秒再重新連線
                     }
-                    catch ( InterruptedException iex ) {
+                    catch ( InterruptedException iex )
+                    {
                     }
                     Common.debugPrintln( "重新嘗試連線......" );
-                    if ( Common.withGUI() ) {
+                    if ( Common.withGUI() )
+                    {
                         ComicDownGUI.stateBar.setText( "重新嘗試連線......" );
                         connection.connect(); // 第二次嘗試連線
                     }
                 }
             }
-            catch ( Exception exx ) {
+            catch ( Exception exx )
+            {
                 exx.printStackTrace();
             }
         }
         return cookieStrings;
     }
 
-    public static boolean isLegalURL( String webSite ) {
+    public static boolean isLegalURL( String webSite )
+    {
 
         boolean theURLisLegal = true;
 
-        try {
+        try
+        {
             URL url = new URL( webSite );
         }
-        catch ( MalformedURLException ex ) {
+        catch ( MalformedURLException ex )
+        {
             theURLisLegal = false;
         }
 
         //String regex = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+\\+&@!#/%=~_|]";
 
-        if ( theURLisLegal ) {
+        if ( theURLisLegal )
+        {
             return true;
         }
-        else {
+        else
+        {
             return false;
         }
 
     }
 
     // -----------------------------------
-    public static void compress( File source, File destination ) { //  compress to zip
-        try {
+    public static void compress( File source, File destination )
+    { //  compress to zip
+        try
+        {
             // Deflater.NO_COMPRESSION: 沒有壓縮，僅儲存
             compress( source, destination, null, Deflater.NO_COMPRESSION );
         }
-        catch ( Exception e ) {
+        catch ( Exception e )
+        {
             e.printStackTrace();
         }
     }
 
     public static void compress( File source, File destination,
-        String comment, int level ) throws IOException {
+                                 String comment, int level ) throws IOException
+    {
         ZipOutputStream zos = new ZipOutputStream( new FileOutputStream( destination ) );
         zos.setComment( comment );
         zos.setLevel( level );
@@ -721,72 +832,88 @@ public class Common {
     }
 
     private static void compress( ZipOutputStream zos, String rootpath,
-        File source ) throws IOException {
+                                  File source ) throws IOException
+    {
         // 下面這行原本用來取得壓縮檔中的圖片資料夾名稱，但會有亂碼，所以直接放外面。
         //String filename = source.toString().substring(rootpath.length() + 1);
-        if ( source.isFile() ) {
+        if ( source.isFile() )
+        {
             ZipEntry zipEntry = new ZipEntry( source.getName() );//filename );
             zos.putNextEntry( zipEntry );
             FileInputStream fis = new FileInputStream( source );
-            byte[] buffer = new byte[1024];
-            for ( int length; ( length = fis.read( buffer ) ) > 0; ) {
+            byte[] buffer = new byte[ 1024 ];
+            for ( int length; (length = fis.read( buffer )) > 0; )
+            {
                 zos.write( buffer, 0, length );
             }
             fis.close();
             zos.closeEntry();
         }
-        else if ( source.isDirectory() ) {
+        else if ( source.isDirectory() )
+        {
             // 下面這三行是把資料夾加入到壓縮檔裡面，因為有亂碼，所以拿掉。
             //ZipEntry zipEntry = new ZipEntry( filename + "/" );
             //zos.putNextEntry( zipEntry );
             //zos.closeEntry();
             File[] files = source.listFiles();
-            for ( File file : files ) {
+            for ( File file : files )
+            {
                 compress( zos, rootpath, file );
             }
         }
     }
 
-    public static void deleteFolder( String folderPath ) {
+    public static void deleteFolder( String folderPath )
+    {
         Common.debugPrintln( "刪除資料夾：" + folderPath );
 
-        try {
+        try
+        {
             deleteAllFile( folderPath ); // delete all the file in dir
             String filePath = folderPath;
             filePath = filePath.toString();
             File myFilePath = new File( filePath );
             myFilePath.delete(); // delete empty dir
         }
-        catch ( Exception e ) {
+        catch ( Exception e )
+        {
             e.printStackTrace();
         }
     }
 
-    public static boolean deleteAllFile( String path ) {
+    public static boolean deleteAllFile( String path )
+    {
         boolean flag = false;
         File file = new File( path );
-        if ( !file.exists() ) {
+        if ( !file.exists() )
+        {
             return flag;
         }
 
-        if ( !file.isDirectory() ) {
+        if ( !file.isDirectory() )
+        {
             return flag;
         }
 
         String[] tempList = file.list();
         File temp = null;
-        for ( int i = 0; i < tempList.length; i++ ) {
-            if ( path.endsWith( File.separator ) ) {
+        for ( int i = 0; i < tempList.length; i++ )
+        {
+            if ( path.endsWith( File.separator ) )
+            {
                 temp = new File( path + tempList[i] );
             }
-            else {
+            else
+            {
                 temp = new File( path + File.separator + tempList[i] );
             }
 
-            if ( temp.isFile() ) {
+            if ( temp.isFile() )
+            {
                 temp.delete();
             }
-            if ( temp.isDirectory() ) {
+            if ( temp.isDirectory() )
+            {
                 deleteAllFile( path + "/" + tempList[i] ); // first delete all files in dir
                 deleteFolder( path + "/" + tempList[i] ); // and then delete the dir
                 flag = true;
@@ -795,12 +922,14 @@ public class Common {
         return flag;
     }
 
-    public static BufferedReader getBufferedReader( String filePath ) throws IOException {
+    public static BufferedReader getBufferedReader( String filePath ) throws IOException
+    {
         FileReader fr = new FileReader( filePath );
         return new BufferedReader( fr );
     }
 
-    public static void outputFile( String outputText, String outputFile ) {
+    public static void outputFile( String outputText, String outputFile )
+    {
         int index = outputFile.lastIndexOf( Common.getSlash() );
         String filePath = outputFile.substring( 0, index + 1 );
         String fileName = outputFile.substring( index + 1, outputFile.length() );
@@ -808,10 +937,12 @@ public class Common {
         outputFile( outputText, filePath, fileName );
     }
 
-    public static void outputFile( String ouputText, String filePath, String fileName ) {
+    public static void outputFile( String ouputText, String filePath, String fileName )
+    {
         checkDirectory( filePath );
 
-        try {
+        try
+        {
             FileOutputStream fout = new FileOutputStream( filePath + fileName );
             DataOutputStream dataout = new DataOutputStream( fout );
             byte[] data1 = ouputText.getBytes( "UTF-8" );
@@ -819,36 +950,43 @@ public class Common {
             fout.close();
             Common.debugPrintln( "寫出 " + filePath + fileName + " 檔案" );
         }
-        catch ( IOException e ) {
+        catch ( IOException e )
+        {
             e.printStackTrace();
         }
     }
 
-    public static void outputFile( String[] outputStrings, String filePath, String fileName ) {
+    public static void outputFile( String[] outputStrings, String filePath, String fileName )
+    {
         StringBuffer sb = new StringBuffer();
-        for ( int i = 0; i < outputStrings.length; i++ ) {
+        for ( int i = 0; i < outputStrings.length; i++ )
+        {
             sb.append( outputStrings[i] + "\n" );
         }
 
         outputFile( sb.toString(), filePath, fileName );
     }
 
-    public static void outputFile( List outputList, String filePath, String fileName ) {
+    public static void outputFile( List outputList, String filePath, String fileName )
+    {
         StringBuffer sb = new StringBuffer();
-        for ( int i = 0; i < outputList.size(); i++ ) {
+        for ( int i = 0; i < outputList.size(); i++ )
+        {
             sb.append( outputList.get( i ) + "\n" );
         }
 
         outputFile( sb.toString(), filePath, fileName );
     }
 
-    public static void outputUrlFile( String[] urlStrings, String oldDownloadPath ) {
+    public static void outputUrlFile( String[] urlStrings, String oldDownloadPath )
+    {
         String[] dirStrings = oldDownloadPath.split( "[\\\\]|/" );
 
         String urlFileName = dirStrings[dirStrings.length - 1] + ".txt";
         String downloadPath = "";
 
-        for ( int i = 0; i < dirStrings.length - 1; i++ ) {
+        for ( int i = 0; i < dirStrings.length - 1; i++ )
+        {
             downloadPath += dirStrings[i] + "/";
         }
 
@@ -857,7 +995,8 @@ public class Common {
     }
 
     // 讀取file的全部文字內容並回傳
-    public static String getFileString( String file ) {
+    public static String getFileString( String file )
+    {
         int index = file.lastIndexOf( Common.getSlash() );
         String filePath = file.substring( 0, index + 1 );
         String fileName = file.substring( index + 1, file.length() );
@@ -865,48 +1004,58 @@ public class Common {
         return getFileString( filePath, fileName );
     }
 
-    public static String getFileString( String filePath, String fileName ) {
+    public static String getFileString( String filePath, String fileName )
+    {
         String str = "";
         StringBuffer sb = new StringBuffer( "" );
 
-        if ( new File( filePath + fileName ).exists() ) {
-            try {
+        if ( new File( filePath + fileName ).exists() )
+        {
+            try
+            {
                 FileInputStream fileInputStream = new FileInputStream( filePath + fileName );
 
                 InputStreamReader inputStreamReader = new InputStreamReader( fileInputStream, "UTF8" );
 
                 int ch = 0;
-                while ( ( ch = inputStreamReader.read() ) != -1 ) {
+                while ( (ch = inputStreamReader.read()) != -1 )
+                {
                     sb.append( ( char ) ch );
                 }
 
                 fileInputStream.close(); // 加這句才能讓official.html刪除，還在實驗中
 
             }
-            catch ( IOException e ) {
+            catch ( IOException e )
+            {
                 Common.hadleErrorMessage( e, "無法讀入" + filePath + fileName );
                 e.printStackTrace();
             }
         }
-        else {
+        else
+        {
             Common.errorReport( "沒有找到" + filePath + fileName + "此一檔案" );
         }
 
         return sb.toString();
     }
 
-    public static String[] getFileStrings( String filePath, String fileName ) {
+    public static String[] getFileStrings( String filePath, String fileName )
+    {
         String[] tempStrings = getFileString( filePath, fileName ).split( "\\n|\\r" );
 
         return tempStrings;
         //return correctStrings;
     }
 
-    public static String GBK2Unicode( String str ) {
+    public static String GBK2Unicode( String str )
+    {
         StringBuffer result = new StringBuffer();
-        for ( int i = 0; i < str.length(); i++ ) {
+        for ( int i = 0; i < str.length(); i++ )
+        {
             char chr1 = str.charAt( i );
-            if ( !isNeedConvert( chr1 ) ) {
+            if ( !isNeedConvert( chr1 ) )
+            {
                 result.append( chr1 );
                 continue;
             }
@@ -915,129 +1064,154 @@ public class Common {
         return result.toString();
     }
 
-    public static boolean isNeedConvert( char para ) {
-        return ( ( para & ( 0x00FF ) ) != para );
+    public static boolean isNeedConvert( char para )
+    {
+        return ((para & (0x00FF)) != para);
     }
-    
+
     // 尚未做完英文介面 先留著
     //public static String getStringUsingDefaultLanguage( String string ) {
     //    return Common.getStringUsingDefaultLanguage( string, string ) ;
     //}
-
-    public static String getStringUsingDefaultLanguage( String string, String enString ) {
-        if ( SetUp.getDefaultLanguage() == LanguageEnum.ENGLISH ) {
+    public static String getStringUsingDefaultLanguage( String string, String enString )
+    {
+        if ( SetUp.getDefaultLanguage() == LanguageEnum.ENGLISH )
+        {
             return enString;
         }
-        else if ( SetUp.getDefaultLanguage() == LanguageEnum.SIMPLIFIED_CHINESE ) {
+        else if ( SetUp.getDefaultLanguage() == LanguageEnum.SIMPLIFIED_CHINESE )
+        {
             return Common.getSimplifiedChinese( string );
         }
-        else {
+        else
+        {
             return string;
         }
     }
 
     // v4.10: 不知道為什麼破折號都會顯示為��，因此做了暫時的補救措施......
-    public static String getTraditionalChinese( String gbString ) {
+    public static String getTraditionalChinese( String gbString )
+    {
         // Simplified Chinese To Traditional Chinese
         Zhcode mycode = new Zhcode();
 
-        if ( SetUp.getDefaultLanguage() == LanguageEnum.TRADITIONAL_CHINESE ) {
+        if ( SetUp.getDefaultLanguage() == LanguageEnum.TRADITIONAL_CHINESE )
+        {
             return mycode.convertString( gbString, mycode.GB2312, mycode.BIG5 ).replaceAll( "[\\\\]ufffd", "_" ).replaceAll( "��", "——" );
         }
-        else {
+        else
+        {
             return gbString;
         }
     }
 
-    public static String getSimplifiedChinese( String big5String ) {
+    public static String getSimplifiedChinese( String big5String )
+    {
         Zhcode mycode = new Zhcode();
         String gbString = mycode.convertString( big5String, mycode.BIG5, mycode.GB2312 );
         return gbString.replace( "\\u51ea", "止" ).replace( "\\u9ed2", "黑" );
     }
 
-    public static String getUtf8toUnicode( String utf8 ) {
+    public static String getUtf8toUnicode( String utf8 )
+    {
         Zhcode mycode = new Zhcode();
         return mycode.convertString( utf8, mycode.UTF8, mycode.UNICODE );
     }
 
-    public static String getUtf8toBig5( String utf8 ) {
+    public static String getUtf8toBig5( String utf8 )
+    {
         Zhcode mycode = new Zhcode();
         return mycode.convertString( utf8, mycode.UTF8, mycode.BIG5 );
     }
 
-    public static String getUtf8toGB2312( String utf8 ) {
+    public static String getUtf8toGB2312( String utf8 )
+    {
         Zhcode mycode = new Zhcode();
         return mycode.convertString( utf8, mycode.UTF8, mycode.GB2312 );
     }
 
-    public static String getBig5toUtf8( String big5 ) {
+    public static String getBig5toUtf8( String big5 )
+    {
         Zhcode mycode = new Zhcode();
         return mycode.convertString( big5, mycode.BIG5, mycode.UTF8 );
     }
 
-    public static String getGB2312toUtf8( String gb ) {
+    public static String getGB2312toUtf8( String gb )
+    {
         Zhcode mycode = new Zhcode();
         return mycode.convertString( gb, mycode.BIG5, mycode.UTF8 );
     }
 
-    public static void newEncodeFile( String directory, String fileName, String encodeFileName ) {
+    public static void newEncodeFile( String directory, String fileName, String encodeFileName )
+    {
         Common.newEncodeFile( directory, fileName, encodeFileName, Zhcode.GB2312 );
     }
 
-    public static void newEncodeFile( String directory, String fileName, String encodeFileName, int inputCode ) {
+    public static void newEncodeFile( String directory, String fileName, String encodeFileName, int inputCode )
+    {
 
 
         Zhcode mycode = new Zhcode();
         mycode.convertFile( directory + fileName,
-            directory + encodeFileName,
-            inputCode,
-            mycode.UTF8 );
+                            directory + encodeFileName,
+                            inputCode,
+                            mycode.UTF8 );
     }
 
     public static void newEncodeFile( String directory, String fileName,
-        String encodeFileName, int inputCode, int outputCode ) {
+                                      String encodeFileName, int inputCode, int outputCode )
+    {
         Zhcode mycode = new Zhcode();
         mycode.convertFile( directory + fileName,
-            directory + encodeFileName,
-            inputCode,
-            outputCode );
+                            directory + encodeFileName,
+                            inputCode,
+                            outputCode );
     }
 
-    public static String getConnectStrings( String[] strings ) {
+    public static String getConnectStrings( String[] strings )
+    {
         String str = "";
 
-        for ( int i = 0; i < strings.length; i++ ) {
+        for ( int i = 0; i < strings.length; i++ )
+        {
             str += strings[i] + "####";
         }
 
         return str;
     }
 
-    public static String[] getSeparateStrings( String connectString ) {
+    public static String[] getSeparateStrings( String connectString )
+    {
         return connectString.split( "####" );
     }
 
-    public static int getTrueCountFromStrings( String[] strings ) {
+    public static int getTrueCountFromStrings( String[] strings )
+    {
         int count = 0;
-        for ( String str : strings ) {
-            if ( str.equals( "true" ) ) {
+        for ( String str : strings )
+        {
+            if ( str.equals( "true" ) )
+            {
                 count++;
             }
         }
         return count;
     }
 
-    public static String[] getCopiedStrings( String[] copiedStrings ) {
-        String[] newStrings = new String[copiedStrings.length];
+    public static String[] getCopiedStrings( String[] copiedStrings )
+    {
+        String[] newStrings = new String[ copiedStrings.length ];
 
-        for ( int i = 0; i < copiedStrings.length; i++ ) {
+        for ( int i = 0; i < copiedStrings.length; i++ )
+        {
             newStrings[i] = copiedStrings[i];
         }
 
         return newStrings;
     }
 
-    public static String getStringReplaceHttpCode( String oldString ) {
+    public static String getStringReplaceHttpCode( String oldString )
+    {
         String string = oldString;
         string = string.replace( "&#039;", "'" );
         string = string.replace( "&lt;", "＜" );
@@ -1047,37 +1221,44 @@ public class Common {
         string = string.replace( "&quot;", "''" );
         string = string.replaceAll( "&#8226;", "•" );
         string = string.replaceAll( "&#9829;", "♥" );
-        
+
         return string;
     }
 
-    public static String getStringRemovedIllegalChar( String oldString ) {
+    public static String getStringRemovedIllegalChar( String oldString )
+    {
         // "\/:*?"<>|"
         oldString = getStringReplaceHttpCode( oldString ); // 先經過html字符編碼轉換
         String newString = "";
 
-        for ( int i = 0; i < oldString.length(); i++ ) {
+        for ( int i = 0; i < oldString.length(); i++ )
+        {
             if ( oldString.charAt( i ) == '\\'
-                || oldString.charAt( i ) == '/'
-                || oldString.charAt( i ) == '*'
-                || oldString.charAt( i ) == '"'
-                || oldString.charAt( i ) == '<'
-                || oldString.charAt( i ) == '>'
-                || oldString.charAt( i ) == '|'
-                || oldString.charAt( i ) == '.' ) {
+                    || oldString.charAt( i ) == '/'
+                    || oldString.charAt( i ) == '*'
+                    || oldString.charAt( i ) == '"'
+                    || oldString.charAt( i ) == '<'
+                    || oldString.charAt( i ) == '>'
+                    || oldString.charAt( i ) == '|'
+                    || oldString.charAt( i ) == '.' )
+            {
 
                 newString += String.valueOf( '_' );
             }
             else if ( oldString.charAt( i ) == '?'
-                || oldString.charAt( i ) == ':' ) {
+                    || oldString.charAt( i ) == ':' )
+            {
                 newString += String.valueOf( ' ' );
             }
-            else if ( oldString.charAt( i ) == '&' ) {
+            else if ( oldString.charAt( i ) == '&' )
+            {
                 newString += String.valueOf( '＆' );
             }
-            else if ( oldString.charAt( i ) == '\'' ) {
+            else if ( oldString.charAt( i ) == '\'' )
+            {
             }
-            else {
+            else
+            {
                 newString += String.valueOf( oldString.charAt( i ) );
             }
         }
@@ -1085,7 +1266,8 @@ public class Common {
         return Common.getReomvedUnnecessaryWord( newString );
     }
 
-    public static String getReomvedUnnecessaryWord( String title ) {
+    public static String getReomvedUnnecessaryWord( String title )
+    {
 
         if ( title.matches( "(?s).+九九漫畫" ) ) // 拿掉多餘字尾
         {
@@ -1111,27 +1293,34 @@ public class Common {
         return title.trim();
     }
 
-    public static boolean withGUI() { // check the running app is GUI version or console version
-        if ( Thread.currentThread().getName().equals( consoleThreadName ) ) {
+    public static boolean withGUI()
+    { // check the running app is GUI version or console version
+        if ( Thread.currentThread().getName().equals( consoleThreadName ) )
+        {
             return false;
         }
-        else {
+        else
+        {
             return true;
         }
     }
 
     public static String getStoredFileName( String outputDirectory,
-        String defaultFileName,
-        String defaultExtensionName ) {
+                                            String defaultFileName,
+                                            String defaultExtensionName )
+    {
         int indexNameNo = 0;
         boolean over = false;
-        while ( over ) {
+        while ( over )
+        {
             File tempFile = new File( outputDirectory + defaultFileName
-                + indexNameNo + "." + defaultExtensionName );
-            if ( tempFile.exists() && ( !tempFile.canRead() || !tempFile.canWrite() ) ) {
+                    + indexNameNo + "." + defaultExtensionName );
+            if ( tempFile.exists() && (!tempFile.canRead() || !tempFile.canWrite()) )
+            {
                 indexNameNo++;
             }
-            else {
+            else
+            {
                 over = true;
             }
         }
@@ -1139,48 +1328,60 @@ public class Common {
         return defaultFileName + indexNameNo + "." + defaultExtensionName;
     }
 
-    public static String getAbsolutePath( String relativePath ) {
+    public static String getAbsolutePath( String relativePath )
+    {
         return new File( relativePath ).getAbsolutePath();
     }
 
-    public static boolean isWindows() { // windows
+    public static boolean isWindows()
+    { // windows
         String os = System.getProperty( "os.name" ).toLowerCase();
-        return ( os.indexOf( "win" ) >= 0 );
+        return (os.indexOf( "win" ) >= 0);
     }
 
-    public static boolean isMac() { // Mac
+    public static boolean isMac()
+    { // Mac
         String os = System.getProperty( "os.name" ).toLowerCase();
-        return ( os.indexOf( "mac" ) >= 0 );
+        return (os.indexOf( "mac" ) >= 0);
     }
 
-    public static boolean isUnix() { // linux or unix
+    public static boolean isUnix()
+    { // linux or unix
         String os = System.getProperty( "os.name" ).toLowerCase();
-        return ( os.indexOf( "nix" ) >= 0 || os.indexOf( "nux" ) >= 0 );
+        return (os.indexOf( "nix" ) >= 0 || os.indexOf( "nux" ) >= 0);
 
     }
 
-    public static String getSlash() {
-        if ( Common.isWindows() ) {
+    public static String getSlash()
+    {
+        if ( Common.isWindows() )
+        {
             return "\\";
         }
-        else {
+        else
+        {
             return "/";
         }
     }
 
-    public static String getRegexSlash() { // \\要轉為\\\\
-        if ( Common.isWindows() ) {
+    public static String getRegexSlash()
+    { // \\要轉為\\\\
+        if ( Common.isWindows() )
+        {
             return "\\\\";
         }
-        else {
+        else
+        {
             return "/";
         }
     }
 
     // 取得string中第order個keyword的位置
-    public static int getIndexOfOrderKeyword( String string, String keyword, int order ) {
+    public static int getIndexOfOrderKeyword( String string, String keyword, int order )
+    {
         int index = 0;
-        for ( int i = 0; i < order && index >= 0; i++ ) {
+        for ( int i = 0; i < order && index >= 0; i++ )
+        {
             index++;
             index = string.indexOf( keyword, index );
         }
@@ -1189,11 +1390,13 @@ public class Common {
     }
 
     // 取得string中從beginIndex開始數起來第order個keyword的位置
-    public static int getIndexOfOrderKeyword( String string, String keyword, int order, int beginIndex ) {
+    public static int getIndexOfOrderKeyword( String string, String keyword, int order, int beginIndex )
+    {
         String newString = string.substring( beginIndex, string.length() );
 
         int index = 0;
-        for ( int i = 0; i < order && index >= 0; i++ ) {
+        for ( int i = 0; i < order && index >= 0; i++ )
+        {
             index++;
             index = newString.indexOf( keyword, index );
         }
@@ -1202,46 +1405,59 @@ public class Common {
     }
 
     // 找出從beginIndex開始，keyword1和keyword2在string中的位置（index），並回傳較小的index
-    public static int getSmallerIndexOfTwoKeyword( String string, int beginIndex, String keyword1, String keyword2 ) {
+    public static int getSmallerIndexOfTwoKeyword( String string, int beginIndex, String keyword1, String keyword2 )
+    {
         int index1 = string.indexOf( keyword1, beginIndex );
         int index2 = string.indexOf( keyword2, beginIndex );
 
-        if ( index1 < 0 ) { // 沒找到keyword1
+        if ( index1 < 0 )
+        { // 沒找到keyword1
             return index2;
         }
-        else if ( index2 < 0 ) { // 沒找到keyword2
+        else if ( index2 < 0 )
+        { // 沒找到keyword2
             return index1;
         }
-        else {
+        else
+        {
             return index1 < index2 ? index1 : index2;
         }
     }
 
     // 找出keyword1和keyword2在string中的位置（index），並回傳較大的index
-    public static int getBiggerIndexOfTwoKeyword( String string, String keyword1, String keyword2 ) {
+    public static int getBiggerIndexOfTwoKeyword( String string, String keyword1, String keyword2 )
+    {
         int index1 = string.lastIndexOf( keyword1 );
         int index2 = string.lastIndexOf( keyword2 );
 
-        if ( index1 < 0 ) {
+        if ( index1 < 0 )
+        {
             return index2;
         }
-        else if ( index2 < 0 ) {
+        else if ( index2 < 0 )
+        {
             return index1;
         }
-        else {
+        else
+        {
             return index1 > index2 ? index1 : index2;
         }
     }
 
     // 寫出目前的下載任務清單
-    public static void outputDownTableFile( DownloadTableModel downTableModel ) {
+    public static void outputDownTableFile( DownloadTableModel downTableModel )
+    {
         StringBuffer sb = new StringBuffer();
-        for ( int row = 0; row < Common.missionCount; row++ ) {
+        for ( int row = 0; row < Common.missionCount; row++ )
+        {
             // 有勾選下載才會儲存！ -> 即使沒有勾選還是儲存！
             //if ( downTableModel.getValueAt( row, DownTableEnum.YES_OR_NO ).toString().equals( "true" ) ) {
-            if ( SetUp.getKeepUndoneDownloadMission() ) { // 保存未完成任務
-                if ( !downTableModel.getValueAt( row, DownTableEnum.STATE ).toString().equals( "下載完畢" ) ) {
-                    for ( int col = 0; col < ComicDownGUI.getDownloadColumns().size(); col++ ) {
+            if ( SetUp.getKeepUndoneDownloadMission() )
+            { // 保存未完成任務
+                if ( !downTableModel.getValueAt( row, DownTableEnum.STATE ).toString().equals( "下載完畢" ) )
+                {
+                    for ( int col = 0; col < ComicDownGUI.getDownloadColumns().size(); col++ )
+                    {
                         sb.append( downTableModel.getRealValueAt( row, col ).toString() );
                         sb.append( "@@@@@@" );
                     }
@@ -1249,9 +1465,12 @@ public class Common {
                     sb.append( "%%%%%%" );
                 }
             }
-            if ( SetUp.getKeepDoneDownloadMission() ) { // 保存已完成任務
-                if ( downTableModel.getValueAt( row, DownTableEnum.STATE ).toString().equals( "下載完畢" ) ) {
-                    for ( int col = 0; col < ComicDownGUI.getDownloadColumns().size(); col++ ) {
+            if ( SetUp.getKeepDoneDownloadMission() )
+            { // 保存已完成任務
+                if ( downTableModel.getValueAt( row, DownTableEnum.STATE ).toString().equals( "下載完畢" ) )
+                {
+                    for ( int col = 0; col < ComicDownGUI.getDownloadColumns().size(); col++ )
+                    {
                         sb.append( downTableModel.getRealValueAt( row, col ).toString() );
                         sb.append( "@@@@@@" );
                     }
@@ -1267,11 +1486,15 @@ public class Common {
     }
 
     // 寫出目前的書籤清單
-    public static void outputBookmarkTableFile( BookmarkTableModel bookmarkTableModel ) {
+    public static void outputBookmarkTableFile( BookmarkTableModel bookmarkTableModel )
+    {
         StringBuffer sb = new StringBuffer();
-        for ( int row = 0; row < Common.bookmarkCount; row++ ) {
-            if ( SetUp.getKeepBookmark() ) { // 保存書籤
-                for ( int col = 0; col < ComicDownGUI.getBookmarkColumns().size(); col++ ) {
+        for ( int row = 0; row < Common.bookmarkCount; row++ )
+        {
+            if ( SetUp.getKeepBookmark() )
+            { // 保存書籤
+                for ( int col = 0; col < ComicDownGUI.getBookmarkColumns().size(); col++ )
+                {
                     sb.append( bookmarkTableModel.getValueAt( row, col ).toString() );
                     sb.append( "@@@@@@" );
                 }
@@ -1285,11 +1508,15 @@ public class Common {
     }
 
     // 寫出目前的記錄清單
-    public static void outputRecordTableFile( RecordTableModel recordTableModel ) {
+    public static void outputRecordTableFile( RecordTableModel recordTableModel )
+    {
         StringBuffer sb = new StringBuffer();
-        for ( int row = 0; row < Common.recordCount; row++ ) {
-            if ( SetUp.getKeepRecord() ) { // 保存記錄
-                for ( int col = 0; col < ComicDownGUI.getRecordColumns().size(); col++ ) {
+        for ( int row = 0; row < Common.recordCount; row++ )
+        {
+            if ( SetUp.getKeepRecord() )
+            { // 保存記錄
+                for ( int col = 0; col < ComicDownGUI.getRecordColumns().size(); col++ )
+                {
                     sb.append( recordTableModel.getValueAt( row, col ).toString() );
                     sb.append( "@@@@@@" );
                 }
@@ -1303,26 +1530,34 @@ public class Common {
     }
 
     // 讀入之前儲存的下載任務清單
-    public static DownloadTableModel inputDownTableFile() {
+    public static DownloadTableModel inputDownTableFile()
+    {
         String dataString = getFileString( SetUp.getRecordFileDirectory(), "downloadList.dat" );
 
-        if ( !dataString.matches( "\\s*_OVER_\\s*" ) ) { // 之前有記錄下載清單
+        if ( !dataString.matches( "\\s*_OVER_\\s*" ) )
+        { // 之前有記錄下載清單
             String[] rowStrings = dataString.split( "%%%%%%" );
-            Common.debugPrint( "將讀入下載任務數量: " + ( rowStrings.length - 1 ) );
+            Common.debugPrint( "將讀入下載任務數量: " + (rowStrings.length - 1) );
             DownloadTableModel downTableModel = new DownloadTableModel( ComicDownGUI.getDownloadColumns(),
-                rowStrings.length - 1 );
-            try {
-                for ( int row = 0; row < rowStrings.length - 1; row++ ) {
+                                                                        rowStrings.length - 1 );
+            try
+            {
+                for ( int row = 0; row < rowStrings.length - 1; row++ )
+                {
                     String[] colStrings = rowStrings[row].split( "@@@@@@" );
 
-                    for ( int col = 0; col < ComicDownGUI.getDownloadColumns().size(); col++ ) {
-                        if ( col == DownTableEnum.YES_OR_NO ) {
+                    for ( int col = 0; col < ComicDownGUI.getDownloadColumns().size(); col++ )
+                    {
+                        if ( col == DownTableEnum.YES_OR_NO )
+                        {
                             downTableModel.setValueAt( Boolean.valueOf( colStrings[col] ), row, col );
                         }
-                        else if ( col == DownTableEnum.ORDER ) {
+                        else if ( col == DownTableEnum.ORDER )
+                        {
                             downTableModel.setValueAt( new Integer( row + 1 ), row, col );
                         }
-                        else {
+                        else
+                        {
                             downTableModel.setValueAt( colStrings[col], row, col );
                         }
                     }
@@ -1332,7 +1567,8 @@ public class Common {
                 }
                 Common.debugPrintln( "   ... 讀入完畢!!" );
             }
-            catch ( Exception ex ) {
+            catch ( Exception ex )
+            {
                 Common.hadleErrorMessage( ex, "無法讀入下載清單" );
                 cleanDownTable();
                 new File( "downloadList.dat" ).delete();
@@ -1341,31 +1577,39 @@ public class Common {
 
             return downTableModel;
         }
-        else {
+        else
+        {
             return new DownloadTableModel( ComicDownGUI.getDownloadColumns(), 0 );
         }
 
     }
 
     // 讀入之前儲存的書籤清單
-    public static BookmarkTableModel inputBookmarkTableFile() {
+    public static BookmarkTableModel inputBookmarkTableFile()
+    {
         String dataString = getFileString( SetUp.getRecordFileDirectory(), "bookmarkList.dat" );
 
-        if ( !dataString.matches( "\\s*_OVER_\\s*" ) ) { // 之前有記錄下載清單
+        if ( !dataString.matches( "\\s*_OVER_\\s*" ) )
+        { // 之前有記錄下載清單
             String[] rowStrings = dataString.split( "%%%%%%" );
-            Common.debugPrint( "將讀入書籤數量: " + ( rowStrings.length - 1 ) );
+            Common.debugPrint( "將讀入書籤數量: " + (rowStrings.length - 1) );
             BookmarkTableModel tableModel = new BookmarkTableModel( ComicDownGUI.getBookmarkColumns(),
-                rowStrings.length - 1 );
-            try {
-                for ( int row = 0; row < rowStrings.length - 1; row++ ) {
+                                                                    rowStrings.length - 1 );
+            try
+            {
+                for ( int row = 0; row < rowStrings.length - 1; row++ )
+                {
                     String[] colStrings = rowStrings[row].split( "@@@@@@" );
 
-                    for ( int col = 0; col < ComicDownGUI.getBookmarkColumns().size(); col++ ) {
+                    for ( int col = 0; col < ComicDownGUI.getBookmarkColumns().size(); col++ )
+                    {
                         //Common.debugPrint( colStrings[col] + " " );
-                        if ( col == BookmarkTableEnum.ORDER ) {
+                        if ( col == BookmarkTableEnum.ORDER )
+                        {
                             tableModel.setValueAt( new Integer( row + 1 ), row, col );
                         }
-                        else {
+                        else
+                        {
                             tableModel.setValueAt( colStrings[col], row, col );
                         }
                     }
@@ -1375,38 +1619,47 @@ public class Common {
                 }
                 Common.debugPrintln( "   ... 讀入完畢!!" );
             }
-            catch ( Exception ex ) {
+            catch ( Exception ex )
+            {
                 Common.hadleErrorMessage( ex, "無法讀入書籤清單" );
             }
 
             return tableModel;
         }
-        else {
+        else
+        {
             return new BookmarkTableModel( ComicDownGUI.getBookmarkColumns(), 0 );
         }
 
     }
 
     // 讀入之前儲存的記錄清單
-    public static RecordTableModel inputRecordTableFile() {
+    public static RecordTableModel inputRecordTableFile()
+    {
         String dataString = getFileString( SetUp.getRecordFileDirectory(), "recordList.dat" );
 
-        if ( !dataString.matches( "\\s*_OVER_\\s*" ) ) { // 之前有記錄下載清單
+        if ( !dataString.matches( "\\s*_OVER_\\s*" ) )
+        { // 之前有記錄下載清單
             String[] rowStrings = dataString.split( "%%%%%%" );
-            Common.debugPrint( "將讀入記錄數量: " + ( rowStrings.length - 1 ) );
+            Common.debugPrint( "將讀入記錄數量: " + (rowStrings.length - 1) );
             RecordTableModel tableModel = new RecordTableModel( ComicDownGUI.getRecordColumns(),
-                rowStrings.length - 1 );
-            try {
-                for ( int row = 0; row < rowStrings.length - 1; row++ ) {
+                                                                rowStrings.length - 1 );
+            try
+            {
+                for ( int row = 0; row < rowStrings.length - 1; row++ )
+                {
                     String[] colStrings = rowStrings[row].split( "@@@@@@" );
 
-                    for ( int col = 0; col < ComicDownGUI.getRecordColumns().size(); col++ ) {
+                    for ( int col = 0; col < ComicDownGUI.getRecordColumns().size(); col++ )
+                    {
                         //Common.debugPrint( colStrings[col] + " " );
 
-                        if ( col == RecordTableEnum.ORDER ) {
+                        if ( col == RecordTableEnum.ORDER )
+                        {
                             tableModel.setValueAt( new Integer( row + 1 ), row, col );
                         }
-                        else {
+                        else
+                        {
                             tableModel.setValueAt( colStrings[col], row, col );
                         }
                     }
@@ -1416,114 +1669,135 @@ public class Common {
                 }
                 Common.debugPrintln( "   ... 讀入完畢!!" );
             }
-            catch ( Exception ex ) {
+            catch ( Exception ex )
+            {
                 Common.hadleErrorMessage( ex, "無法讀入紀錄清單" );
             }
 
             return tableModel;
         }
-        else {
+        else
+        {
             return new RecordTableModel( ComicDownGUI.getRecordColumns(), 0 );
         }
 
     }
 
-    public static void deleteFile( String filePath, String fileName ) {
+    public static void deleteFile( String filePath, String fileName )
+    {
         File file = new File( filePath + fileName );
 
-        if ( file.exists() && file.isFile() ) {
+        if ( file.exists() && file.isFile() )
+        {
             Common.debugPrintln( "刪除暫存檔案：" + fileName );
             file.delete();
         }
     }
 
-    public static void deleteFile( String fileName ) {
+    public static void deleteFile( String fileName )
+    {
         File file = new File( fileName );
 
-        if ( file.exists() && file.isFile() ) {
+        if ( file.exists() && file.isFile() )
+        {
             Common.debugPrintln( "刪除暫存檔案：" + fileName );
             file.delete();
         }
     }
 
-    public static void setHttpProxy() {
+    public static void setHttpProxy()
+    {
         if ( SetUp.getProxyServer() != null
-            && !SetUp.getProxyServer().equals( "" )
-            && SetUp.getProxyPort() != null
-            && !SetUp.getProxyPort().equals( "" ) ) {
+                && !SetUp.getProxyServer().equals( "" )
+                && SetUp.getProxyPort() != null
+                && !SetUp.getProxyPort().equals( "" ) )
+        {
             Common.setHttpProxy( SetUp.getProxyServer(), SetUp.getProxyPort() );
             Common.debugPrintln( "設定代理伺服器："
-                + SetUp.getProxyServer() + " "
-                + SetUp.getProxyPort() );
+                    + SetUp.getProxyServer() + " "
+                    + SetUp.getProxyPort() );
         }
-        else {
+        else
+        {
             Common.closeHttpProxy();
             Common.debugPrintln( "代理伺服器資訊欠缺位址或連接阜，因此不加入" );
         }
     }
 
-    public static void setHttpProxy( String proxyServer, String proxyPort ) {
+    public static void setHttpProxy( String proxyServer, String proxyPort )
+    {
         Properties systemProperties = System.getProperties();
         systemProperties.setProperty( "proxySet", "true" );
         systemProperties.setProperty( "http.proxyHost", proxyServer );
         systemProperties.setProperty( "http.proxyPort", proxyPort );
     }
 
-    public static void closeHttpProxy() {
+    public static void closeHttpProxy()
+    {
         Properties systemProperties = System.getProperties();
         systemProperties.setProperty( "proxySet", "false" );
     }
 
-    public static boolean isPicFileName( String fileName ) {
+    public static boolean isPicFileName( String fileName )
+    {
         if ( fileName.matches( "(?s).*\\.jpg" )
-            || fileName.matches( "(?s).*\\.JPG" )
-            || fileName.matches( "(?s).*\\.png" )
-            || fileName.matches( "(?s).*\\.PNG" )
-            || fileName.matches( "(?s).*\\.gif" )
-            || fileName.matches( "(?s).*\\.GIF" )
-            || fileName.matches( "(?s).*\\.jpeg" )
-            || fileName.matches( "(?s).*\\.JPEG" )
-            || fileName.matches( "(?s).*\\.bmp" )
-            || fileName.matches( "(?s).*\\.BMP" ) ) {
+                || fileName.matches( "(?s).*\\.JPG" )
+                || fileName.matches( "(?s).*\\.png" )
+                || fileName.matches( "(?s).*\\.PNG" )
+                || fileName.matches( "(?s).*\\.gif" )
+                || fileName.matches( "(?s).*\\.GIF" )
+                || fileName.matches( "(?s).*\\.jpeg" )
+                || fileName.matches( "(?s).*\\.JPEG" )
+                || fileName.matches( "(?s).*\\.bmp" )
+                || fileName.matches( "(?s).*\\.BMP" ) )
+        {
             return true;
         }
-        else {
+        else
+        {
             return false;
         }
 
     }
 
     // direcotory裏面第p張圖片是否存在
-    public static boolean existPicFile( String directory, int p ) {
+    public static boolean existPicFile( String directory, int p )
+    {
         NumberFormat formatter = new DecimalFormat( Common.getZero() );
         String fileName = formatter.format( p );
         if ( new File( directory + fileName + ".jpg" ).exists()
-            || new File( directory + fileName + ".JPG" ).exists()
-            || new File( directory + fileName + ".png" ).exists()
-            || new File( directory + fileName + ".PNG" ).exists()
-            || new File( directory + fileName + ".gif" ).exists()
-            || new File( directory + fileName + ".GIF" ).exists()
-            || new File( directory + fileName + ".jpeg" ).exists()
-            || new File( directory + fileName + ".JPEG" ).exists()
-            || new File( directory + fileName + ".bmp" ).exists()
-            || new File( directory + fileName + ".BMP" ).exists() ) {
+                || new File( directory + fileName + ".JPG" ).exists()
+                || new File( directory + fileName + ".png" ).exists()
+                || new File( directory + fileName + ".PNG" ).exists()
+                || new File( directory + fileName + ".gif" ).exists()
+                || new File( directory + fileName + ".GIF" ).exists()
+                || new File( directory + fileName + ".jpeg" ).exists()
+                || new File( directory + fileName + ".JPEG" ).exists()
+                || new File( directory + fileName + ".bmp" ).exists()
+                || new File( directory + fileName + ".BMP" ).exists() )
+        {
             return true;
         }
-        else {
+        else
+        {
             return false;
         }
 
     }
 
-    public static void cleanDownTable() {
+    public static void cleanDownTable()
+    {
         DefaultTableModel table = ComicDownGUI.downTableModel;
-        if ( table != null ) {
+        if ( table != null )
+        {
             int downListCount = table.getRowCount();
-            while ( table.getRowCount() > 1 ) {
+            while ( table.getRowCount() > 1 )
+            {
                 table.removeRow( table.getRowCount() - 1 );
                 Common.missionCount--;
             }
-            if ( Common.missionCount > 0 ) {
+            if ( Common.missionCount > 0 )
+            {
                 table.removeRow( 0 );
             }
             ComicDownGUI.mainFrame.repaint(); // 重繪
@@ -1534,17 +1808,21 @@ public class Common {
         }
     }
 
-    public static String getHtmlStringWithColor( String string, String color ) {
+    public static String getHtmlStringWithColor( String string, String color )
+    {
         return "<html><font color=" + color + string + "</font></html>";
     }
 
     // 字串A裡面有幾個字串B
-    public static int getAmountOfString( String aString, String bString ) {
+    public static int getAmountOfString( String aString, String bString )
+    {
         int bLength = bString.length();
 
         int conformTimes = 0; // 符合次數
-        for ( int i = 0; i < aString.length(); i += bLength ) {
-            if ( aString.substring( i, i + bLength ).equals( bString ) ) {
+        for ( int i = 0; i < aString.length(); i += bLength )
+        {
+            if ( aString.substring( i, i + bLength ).equals( bString ) )
+            {
                 conformTimes++;
             }
         }
@@ -1554,74 +1832,95 @@ public class Common {
         return conformTimes;
     }
 
-    public static String getNowAbsolutePath() {
-        if ( Common.isUnix() ) {
+    public static String getNowAbsolutePath()
+    {
+        if ( Common.isUnix() )
+        {
 
             String apath = Common.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-            try {
+            try
+            {
                 apath = URLDecoder.decode( apath, "UTF-8" );
             }
-            catch ( UnsupportedEncodingException ex ) {
+            catch ( UnsupportedEncodingException ex )
+            {
                 Common.hadleErrorMessage( ex, "無法將網址轉為utf8編碼" );
             }
 
 
             String absolutePath;
-            if ( apath.endsWith( ".jar" ) ) {
+            if ( apath.endsWith( ".jar" ) )
+            {
                 absolutePath = apath.replaceAll( "([^/\\\\]+).jar$", "" );
             }
-            else {
+            else
+            {
                 absolutePath = new File( "" ).getAbsolutePath() + Common.getSlash();
             }
 
             return absolutePath;
         }
-        else {
+        else
+        {
             return new File( "" ).getAbsolutePath() + getSlash();
         }
 
     }
 
     // 播放音效
-    public static void playSingleDoneAudio() {
+    public static void playSingleDoneAudio()
+    {
         playSingleDoneAudio( SetUp.getSingleDoneAudioFile() );
     }
 
-    public static void playSingleDoneAudio( String fileString ) {
-        if ( new File( fileString ).exists() ) {
+    public static void playSingleDoneAudio( String fileString )
+    {
+        if ( new File( fileString ).exists() )
+        {
             playAudio( fileString, false );
         }
-        else {
+        else
+        {
             playAudio( Common.defaultSingleDoneAudio, true );
         }
     }
 
-    public static void playAllDoneAudio() {
+    public static void playAllDoneAudio()
+    {
         playAllDoneAudio( SetUp.getAllDoneAudioFile() );
     }
 
-    public static void playAllDoneAudio( String fileString ) {
-        if ( new File( fileString ).exists() ) {
+    public static void playAllDoneAudio( String fileString )
+    {
+        if ( new File( fileString ).exists() )
+        {
             playAudio( fileString, false );
         }
-        else {
+        else
+        {
             playAudio( Common.defaultAllDoneAudio, true );
         }
     }
 
     // 播放音效
-    private static void playAudio( final String audioFileString, final boolean defaultResource ) {
-        Thread playThread = new Thread( new Runnable() {
+    private static void playAudio( final String audioFileString, final boolean defaultResource )
+    {
+        Thread playThread = new Thread( new Runnable()
+        {
 
-            public void run() {
-                try {
+            public void run()
+            {
+                try
+                {
                     AudioInputStream ais;
 
-                    if ( defaultResource ) { // 預設音效
+                    if ( defaultResource )
+                    { // 預設音效
                         URL audioFileURL = new CommonGUI().getResourceURL( audioFileString );
                         ais = AudioSystem.getAudioInputStream( audioFileURL );
                     }
-                    else { // 外部音效
+                    else
+                    { // 外部音效
                         File audioFile = new File( audioFileString );
                         ais = AudioSystem.getAudioInputStream( audioFile );
                     }
@@ -1631,14 +1930,16 @@ public class Common {
                     SourceDataLine sdl = ( SourceDataLine ) AudioSystem.getLine( inf );
                     sdl.open( af );
                     sdl.start();
-                    byte[] buf = new byte[65536];
-                    for ( int n = 0; ( n = ais.read( buf, 0, buf.length ) ) > 0; ) {
+                    byte[] buf = new byte[ 65536 ];
+                    for ( int n = 0; (n = ais.read( buf, 0, buf.length )) > 0; )
+                    {
                         sdl.write( buf, 0, n );
                     }
                     sdl.drain();
                     sdl.close();
                 }
-                catch ( Exception e ) {
+                catch ( Exception e )
+                {
                     Common.hadleErrorMessage( e, "無法播放" + audioFileString );
                 }
             }
@@ -1646,11 +1947,14 @@ public class Common {
         playThread.start();
     }
 
-    static public String getRegularURL( String url ) {
-        try {
+    static public String getRegularURL( String url )
+    {
+        try
+        {
             url = URLEncoder.encode( url, "UTF-8" );
         }
-        catch ( UnsupportedEncodingException ex ) {
+        catch ( UnsupportedEncodingException ex )
+        {
             Common.errorReport( "無法轉換網址：" + url );
         }
 
@@ -1662,26 +1966,32 @@ public class Common {
         return url;
     }
 
-    static public String getFixedChineseURL( String url ) {
+    static public String getFixedChineseURL( String url )
+    {
         // ex. "收?的十二月" should be changed into
         //     "%E6%94%B6%E8%8E%B7%E7%9A%84%E5%8D%81%E4%BA%8C%E6%9C%88"
 
-        try {
+        try
+        {
             String temp = "";
 
-            for ( int k = 0; k < url.length(); k++ ) {
+            for ( int k = 0; k < url.length(); k++ )
+            {
                 // \u0080-\uFFFF -> 中日韓3byte以上的字符
-                if ( url.substring( k, k + 1 ).matches( "(?s).*[\u0080-\uFFFF]+(?s).*" ) ) {
+                if ( url.substring( k, k + 1 ).matches( "(?s).*[\u0080-\uFFFF]+(?s).*" ) )
+                {
                     temp += URLEncoder.encode( url.substring( k, k + 1 ), "UTF-8" );
                 }
-                else {
+                else
+                {
                     temp += url.substring( k, k + 1 );
                 }
 
             }
             url = temp;
         }
-        catch ( Exception e ) {
+        catch ( Exception e )
+        {
             Common.hadleErrorMessage( e, "無法將中文網址轉為正確網址編碼" );
         }
 
@@ -1692,34 +2002,43 @@ public class Common {
     }
 
     // 只用於非Windows系統的執行程式
-    public static void runSimpleCmd( String cmd, String path ) {
-        try {
+    public static void runSimpleCmd( String cmd, String path )
+    {
+        try
+        {
 
-            String[] cmds = new String[]{cmd, path};
+            String[] cmds = new String[]
+            {
+                cmd, path
+            };
             Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
         }
-        catch ( IOException ex ) {
+        catch ( IOException ex )
+        {
             Common.hadleErrorMessage( ex, "在非Windows系統下無法開啟檔案" );
         }
     }
 
     // 非windows系統時的操作
     // openFileManger: 開啟檔案總管
-    public static void runCmd( String program, String file, boolean openFileManger ) {
+    public static void runCmd( String program, String file, boolean openFileManger )
+    {
         String path = file;
         String cmd = program;
 
         // 檔案不存在就只顯示訊息而不繼續操作
-        if ( !new File( file ).exists() ) {
+        if ( !new File( file ).exists() )
+        {
             String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
             String colorString = "blue";
-            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) ) {
+            if ( nowSkinName.equals( "HiFi" ) || nowSkinName.equals( "Noire" ) )
+            {
                 colorString = "yellow";
             }
 
             CommonGUI.showMessageDialog( ComicDownGUI.mainFrame, "<html><font color=" + colorString + ">"
-                + file + "</font>" + "不存在，無法開啟</html>",
-                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                    + file + "</font>" + "不存在，無法開啟</html>",
+                                         "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
         }
 
@@ -1728,109 +2047,145 @@ public class Common {
 
         String firstCompressFileName = "";
         boolean existCompressFile = false;
-        for ( int i = 0; i < fileList.length; i++ ) {
+        for ( int i = 0; i < fileList.length; i++ )
+        {
             //System.out.println( "FILE: " + fileList[i] );
             if ( fileList[i].matches( "(?s).*\\.zip" )
-                || fileList[i].matches( "(?s).*\\.cbz" ) ) {
+                    || fileList[i].matches( "(?s).*\\.cbz" ) )
+            {
                 firstCompressFileName = fileList[i];
                 existCompressFile = true;
                 break;
             }
         }
 
-        if ( !openFileManger ) {
-            if ( existCompressFile ) {
+        if ( !openFileManger )
+        {
+            if ( existCompressFile )
+            {
                 // 資料夾內存在壓縮檔
                 path = file + Common.getSlash() + firstCompressFileName;
             }
-            else {
+            else
+            {
                 String[] picList = new File( file + Common.getSlash() + fileList[0] ).list();
                 String firstPicFileInFirstVolume = "";
 
-                if ( picList != null ) {
+                if ( picList != null )
+                {
                     firstPicFileInFirstVolume = picList[0];
                 }
 
                 path = file + Common.getSlash() + fileList[0]
-                    + Common.getSlash() + firstPicFileInFirstVolume;
+                        + Common.getSlash() + firstPicFileInFirstVolume;
             }
         }
 
         Common.debugPrintln( "開啟命令：" + cmd + " " + path );
 
-        try {
-            String[] cmds = new String[]{cmd, path};
+        try
+        {
+            String[] cmds = new String[]
+            {
+                cmd, path
+            };
             Runtime.getRuntime().exec( cmds, null, new File( Common.getNowAbsolutePath() ) );
             //Runtime.getRuntime().exec(cmd + path);
 
         }
-        catch ( IOException ex ) {
+        catch ( IOException ex )
+        {
             Common.hadleErrorMessage( ex, "無法執行此命令：" + cmd + " " + path );
         }
     }
 
     // 在runDirectory此資料夾內執行腳本
-    public static void runShellScript( String scriptFile, String runDirectory ) {
-        if ( !new File( scriptFile ).exists() ) {
+    public static void runShellScript( String scriptFile, String runDirectory )
+    {
+        if ( !new File( scriptFile ).exists() )
+        {
             Common.errorReport( "無法執行！找不到此腳本：" + scriptFile );
 
             return;
         }
 
-        if ( Common.isWindows() ) { // windows系統下的執行程序
+        if ( Common.isWindows() )
+        { // windows系統下的執行程序
             String cmd = SetUp.getDefaultShellScript(); // 設置預設腳本語言 ex. powershell
 
             String[] cmds = null;
-            if ( cmd.equals( "powershell" ) ) { // 執行ps1檔
-                cmds = new String[]{cmd, scriptFile};
+            if ( cmd.equals( "powershell" ) )
+            { // 執行ps1檔
+                cmds = new String[]
+                {
+                    cmd, scriptFile
+                };
             }
-            else { // 執行bat檔
-                cmds = new String[]{scriptFile};
+            else
+            {
+                // 執行bat檔
+                cmds = new String[]
+                {
+                    scriptFile
+                };
+                runWindowsCmd( cmds, runDirectory );
             }
 
-            runWindowsCmd( cmds, runDirectory );
+
         }
-        else { // 非windows系統下的執行程序
+        else
+        { // 非windows系統下的執行程序
             String cmd = SetUp.getDefaultShellScript(); // 設置預設腳本語言 ex. bash
             String path = scriptFile;
-            try {
-                String[] cmds = new String[]{cmd, path};
+            try
+            {
+                String[] cmds = new String[]
+                {
+                    cmd, path
+                };
                 Common.debugPrintln( "\n在[" + runDirectory + "]資料夾內執行腳本：" + cmds[0] + " " + cmds[1] );
                 Process p = Runtime.getRuntime().exec( cmds, null, new File( runDirectory ) );
 
-                try {
+                try
+                {
                     p.waitFor(); // 等待到腳本執行結束
                 }
-                catch ( InterruptedException e ) {
+                catch ( InterruptedException e )
+                {
                     Common.hadleErrorMessage( e, "無法等待腳本執行" );
                 }
             }
-            catch ( IOException ex ) {
+            catch ( IOException ex )
+            {
                 Common.hadleErrorMessage( ex, "無法執行此命令：" + cmd + " " + path );
             }
         }
     }
 
     // 執行window的命令，目前僅用於執行腳本
-    public static void runWindowsCmd( String[] cmd, String runDirectory ) {
+    public static void runWindowsCmd( String[] cmd, String runDirectory )
+    {
         String cmdString = ""; // 顯示用的命令串
-        for ( int i = 0; i < cmd.length; i++ ) {
+        for ( int i = 0; i < cmd.length; i++ )
+        {
             cmdString += cmd[i] + " ";
         }
 
         Map<String, String> newEnv = new HashMap<String, String>();
         newEnv.putAll( System.getenv() );
-        String[] i18n = new String[cmd.length + 2];
+        String[] i18n = new String[ cmd.length + 2 ];
         i18n[0] = "cmd";
         i18n[1] = "/C";
         i18n[2] = cmd[0];
-        for ( int counter = 1; counter < cmd.length; counter++ ) {
+        for ( int counter = 1; counter < cmd.length; counter++ )
+        {
             String envName = "JENV_" + counter;
             i18n[counter + 2] = "%" + envName + "%";
             newEnv.put( envName, cmd[counter] );
         }
         cmd = i18n;
 
+        BufferedReader stdout = null;
         ProcessBuilder pb = new ProcessBuilder( cmd );
         File dirFile = new File( runDirectory );
         pb.directory( dirFile ); //設置執行資料夾
@@ -1840,66 +2195,94 @@ public class Common {
 
         // 暫時將資料夾移動到預設下載目錄下的tmepScript資料夾內
         String tempRunScriptDirectory = SetUp.getDownloadDirectory() + "tempScript" + Common.getSlash();
-        if ( new File( runDirectory ).renameTo( new File( tempRunScriptDirectory ) ) ) {
-            Common.debugPrintln( "\n將尚未執行腳本完成的資料夾移動回到" + tempRunScriptDirectory );
 
+        if ( true )
+        { //new File( runDirectory ).renameTo( new File( tempRunScriptDirectory ) ) ) {
+            //Common.debugPrintln( "\n將尚未執行腳本完成的資料夾移動回到" + tempRunScriptDirectory );
+            tempRunScriptDirectory = runDirectory;
             pb.directory( new File( tempRunScriptDirectory ) ); //設置執行資料夾
-            try { // 原本的資料夾無法執行腳本，那就改在暫存資料夾執行。
+            try
+            { // 原本的資料夾無法執行腳本，那就改在暫存資料夾執行。
                 Common.debugPrintln( "嘗試在[" + tempRunScriptDirectory + "]資料夾內執行命令：" + cmdString );
+                pb.redirectErrorStream( true );
                 final Process p = pb.start();
 
-                try {
-                    p.waitFor(); // 等待到腳本執行結束
+                //read the standard output 
+                stdout = new BufferedReader( new InputStreamReader( p.getInputStream() ) );
+                String line = "";
+                while ( (line = stdout.readLine()) != null )
+                {
+                    Common.debugPrintln( line );
                 }
-                catch ( InterruptedException e ) {
+
+                try
+                {
+                    int ret = p.waitFor(); // 等待到腳本執行結束
+                    Common.debugPrintln( "回傳值為 " + ret );
+                }
+                catch ( InterruptedException e )
+                {
                     Common.hadleErrorMessage( e, "無法等待腳本執行" );
                 }
 
-                if ( new File( tempRunScriptDirectory ).renameTo( new File( runDirectory ) ) ) {
+                stdout.close();
+
+                if ( new File( tempRunScriptDirectory ).renameTo( new File( runDirectory ) ) )
+                {
                     Common.debugPrintln( "將已執行腳本完成的資料夾移動回到" + runDirectory );
                 }
-                else {
+                else
+                {
                     Common.debugPrintln( "無法將已執行腳本完成的資料夾移動回到" + runDirectory );
                 }
 
             }
-            catch ( IOException ex1 ) {
+            catch ( IOException ex1 )
+            {
                 Common.hadleErrorMessage( ex1, "無法在[" + tempRunScriptDirectory + "]資料夾內執行此命令：" + cmd );
             }
         }
-        else {
-            Common.debugPrintln( "無法將尚未執行腳本完成的資料夾移動回到" + runDirectory );
+        else
+        {
+            Common.debugPrintln( "無法將尚未執行腳本完成的資料夾 " + runDirectory + " 移動到 " + tempRunScriptDirectory );
         }
     }
 
     // 解決非ANSI字會變成？而無法使用程式開啟的問題
     // 出處：http://stackoverflow.com/questions/1876507/java-runtime-exec-on-windows-fails-with-unicode-in-arguments
-    public static void runUnansiCmd( String program, String file ) {
-        if ( !new File( file ).exists() ) {
+    public static void runUnansiCmd( String program, String file )
+    {
+        if ( !new File( file ).exists() )
+        {
             //String nowSkinName = UIManager.getLookAndFeel().getName(); // 目前使用中的面板名稱
             // 取得介面設定值（不用UIManager.getLookAndFeel().getName()是因為這樣才能讀到_之後的參數）
             String nowSkinName = SetUp.getSkinClassName();
             String colorString = "blue";
-            if ( CommonGUI.isDarkSytleSkin( nowSkinName ) ) {
+            if ( CommonGUI.isDarkSytleSkin( nowSkinName ) )
+            {
                 colorString = "yellow"; // 暗色風格界面用黃色比較看得清楚
             }
 
             CommonGUI.showMessageDialog( ComicDownGUI.mainFrame, "<html><font color=" + colorString + ">"
-                + file + "</font>" + "不存在，無法開啟</html>",
-                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                    + file + "</font>" + "不存在，無法開啟</html>",
+                                         "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
         }
 
         file = "\"" + file + "\"";
 
-        String[] cmd = new String[]{program, file};
+        String[] cmd = new String[]
+        {
+            program, file
+        };
         Map<String, String> newEnv = new HashMap<String, String>();
         newEnv.putAll( System.getenv() );
-        String[] i18n = new String[cmd.length + 2];
+        String[] i18n = new String[ cmd.length + 2 ];
         i18n[0] = "cmd";
         i18n[1] = "/C";
         i18n[2] = cmd[0];
-        for ( int counter = 1; counter < cmd.length; counter++ ) {
+        for ( int counter = 1; counter < cmd.length; counter++ )
+        {
             String envName = "JENV_" + counter;
             i18n[counter + 2] = "%" + envName + "%";
             newEnv.put( envName, cmd[counter] );
@@ -1909,17 +2292,20 @@ public class Common {
         ProcessBuilder pb = new ProcessBuilder( cmd );
         Map<String, String> env = pb.environment();
         env.putAll( newEnv );
-        try {
+        try
+        {
             Common.debugPrintln( "執行命令：" + program + " " + file );
             final Process p = pb.start();
         }
-        catch ( IOException ex ) {
+        catch ( IOException ex )
+        {
             Common.hadleErrorMessage( ex, "無法執行此命令：" + cmd );
         }
     }
 
     public static void downloadPost( String webSite, String outputDirectory,
-        String outputFileName, boolean needCookie, String cookieString, String postString, String referURL ) {
+                                     String outputFileName, boolean needCookie, String cookieString, String postString, String referURL )
+    {
         // downlaod file by URL
 
         boolean gzipEncode = false;
@@ -1930,13 +2316,16 @@ public class Common {
         int fileGotSize = 0;
 
 
-        if ( CommonGUI.stateBarDetailMessage == null ) {
+        if ( CommonGUI.stateBarDetailMessage == null )
+        {
             CommonGUI.stateBarMainMessage = "下載網頁進行分析 : ";
             CommonGUI.stateBarDetailMessage = outputFileName + " ";
         }
 
-        if ( Run.isAlive || forceDownload ) { // 當允許下載或強制下載時才執行連線程序
-            try {
+        if ( Run.isAlive || forceDownload )
+        { // 當允許下載或強制下載時才執行連線程序
+            try
+            {
 
                 ComicDownGUI.stateBar.setText( webSite + " 連線中..." );
 
@@ -1947,38 +2336,41 @@ public class Common {
 
                 connection.setDoOutput( true );
                 connection.setDoInput( true );
-                ( ( HttpURLConnection ) connection ).setRequestMethod( "POST" );
+                (( HttpURLConnection ) connection).setRequestMethod( "POST" );
                 connection.setUseCaches( false );
                 connection.setAllowUserInteraction( true );
                 HttpURLConnection.setFollowRedirects( true );
                 connection.setInstanceFollowRedirects( true );
 
                 connection.setRequestProperty(
-                    "User-agent",
-                    "Mozilla/5.0 (Windows; U; Windows NT 6.0; zh-TW; rv:1.9.1.2) "
-                    + "Gecko/20090729 Firefox/3.5.2 GTB5 (.NET CLR 3.5.30729)" );
+                        "User-agent",
+                        "Mozilla/5.0 (Windows; U; Windows NT 6.0; zh-TW; rv:1.9.1.2) "
+                        + "Gecko/20090729 Firefox/3.5.2 GTB5 (.NET CLR 3.5.30729)" );
                 connection.setRequestProperty( "Accept",
-                    "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" );
+                                               "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" );
                 connection.setRequestProperty( "Accept-Language",
-                    "zh-tw,en-us;q=0.7,en;q=0.3" );
+                                               "zh-tw,en-us;q=0.7,en;q=0.3" );
                 connection.setRequestProperty( "Accept-Charse",
-                    "Big5,utf-8;q=0.7,*;q=0.7" );
-                if ( cookieString != null ) {
+                                               "Big5,utf-8;q=0.7,*;q=0.7" );
+                if ( cookieString != null )
+                {
                     connection.setRequestProperty( "Cookie", cookieString );
                 }
-                if ( referURL != null ) {
+                if ( referURL != null )
+                {
                     connection.setRequestProperty( "Referer", referURL );
                 }
 
                 connection.setRequestProperty( "Content-Type",
-                    "application/x-www-form-urlencoded" );
+                                               "application/x-www-form-urlencoded" );
 
 
                 connection.setRequestProperty( "Content-Length", String.valueOf( postString.getBytes().length ) );
 
                 // google圖片下載時因為有些連線很久沒回應，所以要設置計時器，預防連線時間過長
                 Timer timer = new Timer();
-                if ( SetUp.getTimeoutTimer() > 0 ) {
+                if ( SetUp.getTimeoutTimer() > 0 )
+                {
                     // 預設(getTimeoutTimer()*1000)秒會timeout
                     timer.schedule( new TimeoutTask(), SetUp.getTimeoutTimer() * 1000 );
                 }
@@ -1991,16 +2383,17 @@ public class Common {
 
 
                 java.io.DataOutputStream dos = new java.io.DataOutputStream(
-                    connection.getOutputStream() );
+                        connection.getOutputStream() );
                 dos.writeBytes( postString );
                 dos.close();
 
                 //tryConnect( connection );
 
-                if ( connection.getResponseCode() != 200 ) {
+                if ( connection.getResponseCode() != 200 )
+                {
                     //Common.debugPrintln( "第二次失敗，不再重試!" );
                     Common.errorReport( "錯誤回傳碼(responseCode): "
-                        + connection.getResponseCode() + " : " + webSite );
+                            + connection.getResponseCode() + " : " + webSite );
                     return;
                 }
 
@@ -2010,35 +2403,40 @@ public class Common {
                 Common.debugPrint( "(" + fileSize + " k) " );
                 String fileSizeString = fileSize > 0 ? "" + fileSize : " ? ";
 
-                byte[] r = new byte[1024];
+                byte[] r = new byte[ 1024 ];
                 int len = 0;
 
-                while ( ( len = is.read( r ) ) > 0 && ( Run.isAlive || forceDownload ) ) {
+                while ( (len = is.read( r )) > 0 && (Run.isAlive || forceDownload) )
+                {
                     // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
                     if ( fileSize > 1024 || !Flag.timeoutFlag ) // 預防卡住的機制
                     {
                         os.write( r, 0, len );
                     }
-                    else {
+                    else
+                    {
                         break;
                     }
 
-                    fileGotSize += ( len / 1000 );
+                    fileGotSize += (len / 1000);
 
-                    if ( Common.withGUI() ) {
+                    if ( Common.withGUI() )
+                    {
                         int percent = 100;
                         String downloadText = "";
-                        if ( fileSize > 0 ) {
-                            percent = ( fileGotSize * 100 ) / fileSize;
+                        if ( fileSize > 0 )
+                        {
+                            percent = (fileGotSize * 100) / fileSize;
                             downloadText = fileSizeString + "Kb ( " + percent + "% ) ";
                         }
-                        else {
+                        else
+                        {
                             downloadText = fileSizeString + " Kb ( " + fileGotSize + "Kb ) ";
                         }
 
                         ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
-                            + CommonGUI.stateBarDetailMessage
-                            + " : " + downloadText );
+                                + CommonGUI.stateBarDetailMessage
+                                + " : " + downloadText );
                     }
                 }
 
@@ -2049,10 +2447,11 @@ public class Common {
 
 
 
-                if ( Common.withGUI() ) {
+                if ( Common.withGUI() )
+                {
                     ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
-                        + CommonGUI.stateBarDetailMessage
-                        + " : " + fileSizeString + "Kb ( 100% ) " );
+                            + CommonGUI.stateBarDetailMessage
+                            + " : " + fileSizeString + "Kb ( 100% ) " );
                 }
 
                 connection.disconnect();
@@ -2060,21 +2459,23 @@ public class Common {
 
                 // 若真實下載檔案大小比預估來得小，則視設定值決定要重新嘗試幾次
                 int realFileGotSize = ( int ) new File( outputDirectory + outputFileName ).length() / 1000;
-                if ( realFileGotSize + 1 < fileGotSize && retryTimes > 0 ) {
+                if ( realFileGotSize + 1 < fileGotSize && retryTimes > 0 )
+                {
                     String messageString = realFileGotSize + " < " + fileGotSize
-                        + " -> 等待兩秒後重新嘗試下載" + outputFileName + "（" + retryTimes
-                        + "/" + SetUp.getRetryTimes() + "）";
+                            + " -> 等待兩秒後重新嘗試下載" + outputFileName + "（" + retryTimes
+                            + "/" + SetUp.getRetryTimes() + "）";
                     Common.debugPrintln( messageString );
                     ComicDownGUI.stateBar.setText( messageString );
                     Thread.sleep( 2000 ); // 每次暫停一秒再重新連線
 
                     downloadFile( webSite, outputDirectory, outputFileName,
-                        needCookie, cookieString, referURL, fastMode, retryTimes - 1, gzipEncode, false );
+                                  needCookie, cookieString, referURL, fastMode, retryTimes - 1, gzipEncode, false );
 
 
                 }
 
-                if ( fileSize < 1024 && Flag.timeoutFlag ) {
+                if ( fileSize < 1024 && Flag.timeoutFlag )
+                {
                     new File( outputDirectory + outputFileName ).delete();
                     Common.debugPrintln( "刪除不完整檔案：" + outputFileName );
 
@@ -2089,7 +2490,8 @@ public class Common {
                 Common.debugPrintln( webSite + " downloads successful!" ); // for debug
 
             }
-            catch ( Exception e ) {
+            catch ( Exception e )
+            {
                 Common.hadleErrorMessage( e, "無法正確下載" + webSite );
             }
 
@@ -2097,20 +2499,23 @@ public class Common {
         }
     }
 
-    public static void urlConnection( String urlString ) {
+    public static void urlConnection( String urlString )
+    {
         //urlString = "http://www.coderanch.com/t/207232/sockets/java/httpURLConnection-content-length-always";
 
-        try {
+        try
+        {
             URL url = new URL( urlString );
             URLConnection yc = url.openConnection();
             BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                yc.getInputStream() ) );
+                    new InputStreamReader(
+                    yc.getInputStream() ) );
             String inputLine;
 
 
 
-            while ( ( inputLine = in.readLine() ) != null ) {
+            while ( (inputLine = in.readLine()) != null )
+            {
                 System.out.println( inputLine );
             }
             in.close();
@@ -2118,26 +2523,31 @@ public class Common {
             Common.debugPrintln( "連線結束" );
 
         }
-        catch ( Exception ex ) {
+        catch ( Exception ex )
+        {
             Common.errorReport( "無法連線" );
         }
 
     }
 
     public static int simpleDownloadFile( String webSite,
-        String outputDirectory, String outputFileName ) {
+                                          String outputDirectory, String outputFileName )
+    {
         return simpleDownloadFile( webSite, outputDirectory, outputFileName, null, null );
     }
 
     public static int simpleDownloadFile( String webSite,
-        String outputDirectory, String outputFileName, String referString ) {
+                                          String outputDirectory, String outputFileName, String referString )
+    {
         return simpleDownloadFile( webSite, outputDirectory, outputFileName, null, referString );
     }
 
     public static int simpleDownloadFile( String webSite,
-        String outputDirectory, String outputFileName, String cookieString, String referString ) {
+                                          String outputDirectory, String outputFileName, String cookieString, String referString )
+    {
         int responseCode = 0;
-        try {
+        try
+        {
             URL url = new URL( webSite );
             HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
 
@@ -2147,11 +2557,13 @@ public class Common {
             connection.setRequestProperty( "If-None-Match", "\"c4d553cc945cd1:0\"" );
             connection.setRequestProperty( "Host", "pic.fumanhua.com" );
 
-            if ( referString != null && !"".equals( referString ) ) { // 設置refer
+            if ( referString != null && !"".equals( referString ) )
+            { // 設置refer
                 connection.setRequestProperty( "Referer", referString );
             }
 
-            if ( cookieString != null && !"".equals( cookieString ) ) { // 設置cookie
+            if ( cookieString != null && !"".equals( cookieString ) )
+            { // 設置cookie
                 connection.setRequestProperty( "Cookie", cookieString );
             }
 
@@ -2162,10 +2574,11 @@ public class Common {
             int fileSize = connection.getContentLength() / 1000;
 
             responseCode = connection.getResponseCode();
-            if ( responseCode != 200 ) {
+            if ( responseCode != 200 )
+            {
                 //Common.debugPrintln( "第二次失敗，不再重試!" );
                 Common.errorReport( "錯誤回傳碼(responseCode): "
-                    + responseCode + " : " + webSite );
+                        + responseCode + " : " + webSite );
 
                 return responseCode;
             }
@@ -2184,36 +2597,41 @@ public class Common {
 
 
 
-            byte[] r = new byte[1024];
+            byte[] r = new byte[ 1024 ];
             int len = 0;
 
             int fileGotSize = 0;
-            while ( ( len = is.read( r ) ) > 0 && ( Run.isAlive ) ) {
+            while ( (len = is.read( r )) > 0 && (Run.isAlive) )
+            {
                 // 快速模式下，檔案小於1mb且連線超時 -> 切斷連線
                 if ( fileSize > 1024 || !Flag.timeoutFlag ) // 預防卡住的機制
                 {
                     os.write( r, 0, len );
                 }
-                else {
+                else
+                {
                     break;
                 }
 
-                fileGotSize += ( len / 1000 );
+                fileGotSize += (len / 1000);
 
-                if ( Common.withGUI() ) {
+                if ( Common.withGUI() )
+                {
                     int percent = 100;
                     String downloadText = "";
-                    if ( fileSize > 0 ) {
-                        percent = ( fileGotSize * 100 ) / fileSize;
+                    if ( fileSize > 0 )
+                    {
+                        percent = (fileGotSize * 100) / fileSize;
                         downloadText = fileSizeString + "Kb ( " + percent + "% ) ";
                     }
-                    else {
+                    else
+                    {
                         downloadText = fileSizeString + " Kb ( " + fileGotSize + "Kb ) ";
                     }
 
                     ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
-                        + CommonGUI.stateBarDetailMessage
-                        + " : " + downloadText );
+                            + CommonGUI.stateBarDetailMessage
+                            + " : " + downloadText );
                 }
             }
 
@@ -2221,10 +2639,11 @@ public class Common {
             os.flush();
             os.close();
 
-            if ( Common.withGUI() ) {
+            if ( Common.withGUI() )
+            {
                 ComicDownGUI.stateBar.setText( CommonGUI.stateBarMainMessage
-                    + CommonGUI.stateBarDetailMessage
-                    + " : " + fileSizeString + "Kb ( 100% ) " );
+                        + CommonGUI.stateBarDetailMessage
+                        + " : " + fileSizeString + "Kb ( 100% ) " );
             }
 
             connection.disconnect();
@@ -2234,10 +2653,12 @@ public class Common {
             Common.debugPrintln( webSite + " downloads successful!" ); // for debug
 
         }
-        catch ( MalformedURLException e ) {
+        catch ( MalformedURLException e )
+        {
             Common.hadleErrorMessage( e, "無法正確下載" + webSite );
         }
-        catch ( IOException e ) {
+        catch ( IOException e )
+        {
             // TODO Auto-generated catch block
             Common.hadleErrorMessage( e, "無法正確下載" + webSite );
         }
@@ -2247,7 +2668,8 @@ public class Common {
     }
 
     // 從java.awt.Color[r=255,g=175,b=175]轉為Color
-    public static Color getColor( String colorString ) {
+    public static Color getColor( String colorString )
+    {
 
         String[] tempStrings = colorString.split( "=|,|\\[|\\]" );
 
@@ -2261,8 +2683,10 @@ public class Common {
     }
 
     // 測試印出
-    public static void print( String... string ) {
-        for ( String s : string ) {
+    public static void print( String... string )
+    {
+        for ( String s : string )
+        {
             Common.debugPrintln( s );
         }
 
@@ -2270,24 +2694,29 @@ public class Common {
     }
 
     // 回傳文字檔案預設輸出格式的副檔名
-    public static String getDefaultTextExtension() {
-        if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITHOUT_PIC ||
-             SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITH_PIC ) {
+    public static String getDefaultTextExtension()
+    {
+        if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITHOUT_PIC
+                || SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITH_PIC )
+        {
             return "html";
         }
-        else {
+        else
+        {
             return "txt";
         }
 
     }
 
     // 將<>標籤都拿掉
-    public static String replaceTag( String text ) {
+    public static String replaceTag( String text )
+    {
         return text.replaceAll( "<[^<>]+>", "" ); // 將所有標籤去除
     }
 
     // 處理錯誤訊息的步驟
-    public static void hadleErrorMessage( Exception ex, String tipString ) {
+    public static void hadleErrorMessage( Exception ex, String tipString )
+    {
         tipString += "！\n\n";
         System.err.println( tipString );
         ex.printStackTrace();
@@ -2295,21 +2724,24 @@ public class Common {
     }
 
     // 輸出錯誤訊息到檔案
-    public static void outputErrorMessage( Exception ex, String tipString ) {
+    public static void outputErrorMessage( Exception ex, String tipString )
+    {
         String timeString = new Date().toString(); // 取得當前時間的字串
         timeString = Common.getStringRemovedIllegalChar( timeString ); // 拿掉不合法字元
         String outputFileName = "error_report_" + timeString + ".txt";
         String outputPath = Common.getNowAbsolutePath() + "ErrorRecord" + Common.getSlash();
         String outputMessage = "錯誤提示：\n" + tipString;
 
-        if ( ex != null ) {
+        if ( ex != null )
+        {
             outputMessage += "錯誤原因：\n" + ex.getMessage() + "\n\n"
-                + "錯誤發生地點：\n";
+                    + "錯誤發生地點：\n";
 
             outputMessage = Common.getStringUsingDefaultLanguage( outputMessage, ex.getMessage() );
 
             StackTraceElement[] stack = ex.getStackTrace();
-            for ( int i = 0; i < stack.length; i++ ) {
+            for ( int i = 0; i < stack.length; i++ )
+            {
                 outputMessage += stack[i].toString() + "\n";
             }
         }
@@ -2318,16 +2750,20 @@ public class Common {
     }
 
     // 模擬javascript的涵式功能
-    public static String fromCharCode( int... codePoints ) {
+    public static String fromCharCode( int... codePoints )
+    {
         StringBuilder builder = new StringBuilder( codePoints.length );
-        for ( int codePoint : codePoints ) {
+        for ( int codePoint : codePoints )
+        {
             builder.append( Character.toChars( codePoint ) );
         }
         return builder.toString();
     }
 
-    public static void copyFile( String srFile, String dtFile ) {
-        try {
+    public static void copyFile( String srFile, String dtFile )
+    {
+        try
+        {
             File f1 = new File( srFile );
             File f2 = new File( dtFile );
             InputStream in = new FileInputStream( f1 );
@@ -2338,31 +2774,35 @@ public class Common {
             //For Overwrite the file.
             OutputStream out = new FileOutputStream( f2 );
 
-            byte[] buf = new byte[1024];
+            byte[] buf = new byte[ 1024 ];
             int len;
-            while ( ( len = in.read( buf ) ) > 0 ) {
+            while ( (len = in.read( buf )) > 0 )
+            {
                 out.write( buf, 0, len );
             }
             in.close();
             out.close();
             System.out.println( "File copied." );
         }
-        catch ( FileNotFoundException ex ) {
+        catch ( FileNotFoundException ex )
+        {
             String message = ex.getMessage() + " in the specified directory.";
             Common.errorReport( message );
             //System.exit( 0 );
         }
-        catch ( IOException e ) {
+        catch ( IOException e )
+        {
             Common.errorReport( e.getMessage() );
         }
     }
 
     // 重新開啟jar檔
-    public static void restartApplication() {
+    public static void restartApplication()
+    {
         final String javaBin = System.getProperty( "java.home" ) + File.separator + "bin" + File.separator + "java";
-        
-        String appPath = Common.getNowAbsolutePath() + 
-            ComicDownGUI.versionString.replaceAll( "  ", "_" ) + ".jar";
+
+        String appPath = Common.getNowAbsolutePath()
+                + ComicDownGUI.versionString.replaceAll( "  ", "_" ) + ".jar";
 
         /*
          Build command: java -jar application.jar
@@ -2371,25 +2811,27 @@ public class Common {
         command.add( javaBin );
         command.add( "-jar" );
         command.add( appPath );
-        
+
         Common.debugPrintln( javaBin + "-jar" + appPath );
 
         final ProcessBuilder builder = new ProcessBuilder( command );
-        try {
+        try
+        {
             builder.start();
         }
-        catch ( IOException ex ) {
+        catch ( IOException ex )
+        {
             Common.errorReport( "無法重新開啟程式" );
         }
         ComicDownGUI.exit(); // 結束程式
     }
-    
-    
 }
 
-class TimeoutTask extends TimerTask {
+class TimeoutTask extends TimerTask
+{
 
-    public void run() {
+    public void run()
+    {
         Common.debugPrintln( "超過下載時限，終止此次連線!" );
         Flag.timeoutFlag = true;
     }

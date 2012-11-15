@@ -9,29 +9,41 @@ import javax.swing.*;
 import javax.swing.filechooser.*;
 
 /* ImageFilter.java is used by FileChooserDemo2.java. */
-public class ScriptFileFilter extends javax.swing.filechooser.FileFilter {
+public class ScriptFileFilter extends javax.swing.filechooser.FileFilter
+{
 
-    public boolean accept( File file ) {
+    public boolean accept( File file )
+    {
         String fileString = file.getPath();
-        if ( file.isDirectory() ) {
+        if ( file.isDirectory() )
+        {
             return true;
-        } else if ( fileString.matches( "(?s).*\\.(?s).*" ) ) {
+        }
+        else if ( fileString.matches( "(?s).*\\.(?s).*" ) )
+        {
             String extension = fileString.split( "\\." )[1];
 
             if ( extension.equalsIgnoreCase( "bat" )
+                    || extension.equalsIgnoreCase( "exe" )
                     || extension.equalsIgnoreCase( "sh" )
-                    || extension.equalsIgnoreCase( "ps1" ) ) {
+                    || extension.equalsIgnoreCase( "ps1" ) )
+            {
                 return true;
-            } else {
+            }
+            else
+            {
                 return false;
             }
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
 
     //The description of this filter
-    public String getDescription() {
-        return "僅含支援的腳本檔案（bat, sh, ps1）";
+    public String getDescription()
+    {
+        return "僅含支援的腳本檔案（bat, sh, ps1, exe）";
     }
 }

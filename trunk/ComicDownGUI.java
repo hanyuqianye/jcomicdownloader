@@ -3,10 +3,13 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v5.06
- Last Modified : 2012/11/11
+ Version  : v5.07
+ Last Modified : 2012/11/15
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.07: 
+ 1. 修復iask解析錯誤的問題。
+ 2. 修復在windows系統下執行腳本若有錯誤輸出時會阻塞的問題。
  5.06:
  1. 修復8comic因網站改版而解析錯誤的問題。
  2. 修復改變紀錄順序後加入書籤錯亂的問題。
@@ -461,7 +464,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v5.06";
+    public static String versionString = "JComicDownloader  v5.07";
 
     public ComicDownGUI()
     {

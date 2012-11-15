@@ -246,7 +246,7 @@ public class ParseWebPage
         {
             siteID = Site.VERYIM;
         }
-        else if ( webSite.matches( "(?s).*wenku.com(?s).*" ) )
+        else if ( webSite.matches( "(?s).*\\.wenku.com(?s).*" ) )
         {
             siteID = Site.WENKU;
         }
