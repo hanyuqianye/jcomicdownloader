@@ -92,4 +92,5 @@ public class Site {
     public final static int WENKU8 = 74; 
     public final static int IFENG_BOOK = 75; 
     public final static int XUNLOOK = 76; 
+    public final static int WENKU7 = 77; 
 }

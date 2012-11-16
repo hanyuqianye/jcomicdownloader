@@ -504,6 +504,11 @@ public class Run extends Thread
                 ParseOnlineComicSite parse = new ParseXunlook();
                 runSingleParseModule( parse );
             }
+            else if ( pw.getSiteID() == Site.WENKU7 )
+            {
+                ParseOnlineComicSite parse = new Parse7Wenku();
+                runSingleParseModule( parse );
+            }
             else // Site.UNKNOWN
             {
                 Common.urlIsUnknown = true;

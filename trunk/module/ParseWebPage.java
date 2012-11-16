@@ -342,6 +342,10 @@ public class ParseWebPage
         {
             siteID = Site.XUNLOOK;
         }
+        else if ( webSite.matches( "(?s).*7wenku.com/(?s).*" ) )
+        {
+            siteID = Site.WENKU7;
+        }
         else
         {
             siteID = Site.UNKNOWN;

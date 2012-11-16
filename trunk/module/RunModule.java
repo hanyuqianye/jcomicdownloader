@@ -235,6 +235,7 @@ public class RunModule {
                 || siteID == Site.FIVEONE_CTO
                 || siteID == Site.UUS8
                 || siteID == Site.WENKU8
+                || siteID == Site.WENKU7
                 || siteID == Site.IFENG_BOOK
                 || siteID == Site.XUNLOOK ) {
             return true;

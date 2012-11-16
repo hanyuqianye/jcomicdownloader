@@ -4,13 +4,14 @@
  Program Name : JComicDownloader
  Authors  : surveyorK
  Version  : v5.07
- Last Modified : 2012/11/15
+ Last Modified : 2012/11/16
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.07: 
- 1. 修復iask解析錯誤的問題。
- 2. 修復veryim集數解析不全的問題。
- 3. 修復在windows系統下執行腳本若有錯誤輸出時會阻塞的問題。
+1. 新增對7wenku的支援。 
+2. 修復iask解析錯誤的問題。
+ 3. 修復veryim集數解析不全的問題。
+ 4. 修復在windows系統下執行腳本若有錯誤輸出時會阻塞的問題。
  
  5.06:
  1. 修復8comic因網站改版而解析錯誤的問題。
@@ -2369,6 +2370,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 || url.matches( "(?s).*51cto.com(?s).*" )
                 || url.matches( "(?s).*uus8.com(?s).*" )
                 || url.matches( "(?s).*wenku8.com(?s).*" )
+                || url.matches( "(?s).*7wenku.com(?s).*" )
                 || url.matches( "(?s).*book.ifeng.com(?s).*" )
                 || url.matches( "(?s).*xunlook.com(?s).*" ) )
         {
