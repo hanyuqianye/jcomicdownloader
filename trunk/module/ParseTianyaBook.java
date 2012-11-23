@@ -68,38 +68,6 @@ public class ParseTianyaBook extends ParseEightNovel
 
         allPageString = Common.getTraditionalChinese( allPageString );
 
-        /*
-         String tableFontTag = "<table";
-         String tableBackTag = "/table>";
-         String titleBackTag = "/title>";
-         String hrefString = " href=";
-
-         // 檢查是否為大寫tag或小寫tag
-         if ( allPageString.indexOf( tableFontTag ) < 0 )
-         {
-         tableFontTag = tableFontTag.toUpperCase();
-         tableBackTag = tableBackTag.toUpperCase();
-         titleBackTag = titleBackTag.toUpperCase();
-         hrefString = hrefString.toUpperCase();
-         }
-
-
-         int beginIndex = allPageString.indexOf( titleBackTag );
-         beginIndex = allPageString.indexOf( getTitle(), beginIndex );
-         beginIndex = allPageString.indexOf( tableFontTag, beginIndex );
-
-         int endIndex = beginIndex;
-         String tempString = "";
-         do
-         {
-         endIndex = allPageString.indexOf( tableBackTag, endIndex + 1 );
-         tempString = allPageString.substring( beginIndex, endIndex ).trim();
-         totalPage = tempString.split( hrefString ).length - 1;
-         Common.debugPrintln( "共 " + totalPage + " 頁" );
-         }
-         while ( totalPage < 1 );
-         */
-
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
@@ -129,14 +97,8 @@ public class ParseTianyaBook extends ParseEightNovel
             Common.debugPrintln( "找到的連結: " + tempString );
 
             // 代表有下層的目錄網址
-            if ( !tempString.matches( "(?s).*\\.\\./(?s).*" )
-                    && !tempString.matches( "(?s).*zip" )
-                    && !tempString.matches( "(?s).*@(?s).*" )
-                && !tempString.matches( baseURL ) )
+            if ( unRedundantURL( tempString ) )
             {
-
-
-                
 
                 // 檢查是否為完整網址
                 if ( tempString.matches( "http://(?s).*" ) )
@@ -167,7 +129,7 @@ public class ParseTianyaBook extends ParseEightNovel
                     volumeList.add( Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( volumeTitle ) ) );
 
                     Common.debugPrintln( " " + volumeURL + " " + volumeTitle );
-                    
+
                     amount++;
                 }
             }
@@ -195,7 +157,7 @@ public class ParseTianyaBook extends ParseEightNovel
             endIndex = allPageString.indexOf( "<", beginIndex );
             author = allPageString.substring( beginIndex, endIndex );
         }
-        if ( (beginIndex = allPageString.indexOf( "作者:" )) > 0 )
+        else if ( (beginIndex = allPageString.indexOf( "作者:" )) > 0 )
         {
             beginIndex += 3;
             endIndex = allPageString.indexOf( "<", beginIndex );
@@ -206,6 +168,9 @@ public class ParseTianyaBook extends ParseEightNovel
             Common.debugPrintln( "此站無法取得作者訊息" );
             author = getTitle();
         }
+        
+        author = Common.getStringRemovedIllegalChar( author );
+        
         Common.debugPrintln( "作者名稱: " + author );
 
         NumberFormat formatter = new DecimalFormat( Common.getZero() );
@@ -262,10 +227,34 @@ public class ParseTianyaBook extends ParseEightNovel
         //System.exit( 0 ); // debug
     }
 
+    public boolean unRedundantURL( String url )
+    {
+        if ( !url.matches( "(?s).*\\.\\./(?s).*" )
+                && !url.matches( "(?s).*zip" )
+                && !url.matches( "(?s).*@(?s).*" )
+                && !url.matches( "http://www.tianyabook.com/kehuan.htm" )
+                && !url.matches( "http://www.tianyabook.com/ztxs/zhentan.html" )
+                && !url.matches( "http:///" ) 
+                && !url.matches( "javascript:(?s).*" )
+                && !url.matches( "http://www.tianyabook.com/" )
+                && !url.matches( baseURL )
+                
+                
+                )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+
     // 處理小說網頁，將標籤去除
     public String getRegularNovel( String allPageString )
     {
-        
+
         String oneFloorText = ""; // 單一樓層（頁）的文字
 
         allPageString = Common.getTraditionalChinese( allPageString );
@@ -296,6 +285,7 @@ public class ParseTianyaBook extends ParseEightNovel
         text = text.replaceAll( "-網絡小說-現代文學-外國文學-學術論文-武俠小說-宗教-歷史-經濟-軍事-人物傳記-偵探小說-古典文學-哲學-", "" );
         text = text.replaceAll( "天涯在線書庫 整理", "" );
         text = text.replaceAll( "天涯在線書庫搜集整理", "" );
+        text = text.replaceAll( "本站由天涯搜集整理﹒技術維護", "" );
         text = text.replaceAll( "回目錄 回首頁", "" );
         text = text.replaceAll( "支持本書作者，請購買正式出版物", "" );
         text = text.replaceAll( "天涯在線書庫", "" );
@@ -303,6 +293,13 @@ public class ParseTianyaBook extends ParseEightNovel
         text = text.replaceAll( "前一頁\\s", "" );
         text = text.replaceAll( "回目錄\\s", "" );
         text = text.replaceAll( "背景色：", "" );
+        text = text.replaceAll( "科幻小說\\s+添入收藏夾\\s+暴笑網文", "" );
+        text = text.replaceAll( "古典文學\\s+現代文學\\s+外國文學\\s+武俠小說\\s+詩詞歌賦\\s+網絡小說\\s+言情小說\\s+偵探小說", "" );
+        
+        text = text.replaceAll( "\\s{10,}版權所有 &copy;\\s{10,}", "" );
+        text = text.replaceAll( "\\s{10,}>>\\s{10,}", "" );
+        text = text.replaceAll( "\\s{10,}返回\\s{10,}", "" );
+        text = text.replaceAll( "http://www.tianyabook.com/46080.js\"></td", "" );
 
         return text;
     }
