@@ -1,271 +1,434 @@
 /*
-----------------------------------------------------------------------------------------------------
-Program Name : JComicDownloader
-Authors  : surveyorK
-Last Modified : 2012/6/2
-----------------------------------------------------------------------------------------------------
-ChangeLog:
- * 4.06: 1. 修復非php頁面無法解析的問題。
-2. 修復編碼問題，將GB2312->UTF8改為GBK->UTF8。
- * 4.03: 1. 修改Wenku模組，使其可輸出單回文字檔與合併文字檔。
- *  4.01: 1. 新增對Wenku的支援。
-----------------------------------------------------------------------------------------------------
+ ----------------------------------------------------------------------------------------------------
+ Program Name : JComicDownloader
+ Authors  : surveyorK
+ Last Modified : 2012/11/23
+ ----------------------------------------------------------------------------------------------------
+ ChangeLog:
+ 5.08: 1. 新增對tianyabook的支援。
+ *  4.12: 1. 新增對uus8.com的支援。
+ ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
 
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import jcomicdownloader.tools.*;
-import jcomicdownloader.enums.*;
-import java.util.*;
-import jcomicdownloader.ComicDownGUI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Encoding;
+import jcomicdownloader.enums.FileFormatEnum;
+import jcomicdownloader.enums.Site;
+import jcomicdownloader.tools.Common;
 
-public class ParseTianyaBook extends ParseOnlineComicSite {
+public class ParseTianyaBook extends ParseEightNovel
+{
 
-    private int radixNumber; // use to figure out the name of pic
-    private String jsName;
+    protected int radixNumber; // use to figure out the name of pic
+    protected String jsName;
     protected String indexName;
     protected String indexEncodeName;
     protected String baseURL;
     protected int floorCountInOnePage; // 一頁有幾層樓
+    protected String nowTitle;
 
     /**
-    
-    @author user
-     */
-    public ParseTianyaBook() {
-        siteID = Site.TIANYA_BOOK;
-        siteName = "Tianya Book";
-        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tianyabook_parse_", "html" );
-        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tianyabook_encode_parse_", "html" );
 
-        jsName = "index_tianyabook.js";
-        radixNumber = 15129961; // default value, not always be useful!!
+     @author user
+     */
+    public ParseTianyaBook()
+    {
+        siteID = Site.UUS8;
+        siteName = "TianyaBook";
+        pageExtension = "html"; // 網頁副檔名
+        pageCode = Encoding.GB2312; // 網頁預設編碼
+
+        indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tianyaBook_parse_", pageExtension );
+        indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tianyaBook_encode_parse_", pageExtension );
+
+        jsName = "index_tianyaBook.js";
+        radixNumber = 15123451; // default value, not always be useful!!
 
         baseURL = "http://www.tianyabook.com";
-
-        floorCountInOnePage = 10; // 一頁有幾層樓
-    }
-
-    public ParseTianyaBook( String webSite, String titleName ) {
-        this();
-        this.webSite = webSite;
-        this.title = titleName;
     }
 
     @Override
-    public void setParameters() {
-        Common.debugPrintln( "開始解析各參數 :" );
+    public void parseComicURL()
+    { // parse URL and save all URLs in comicURL  //
 
-        Common.debugPrintln( "作品名稱(title) : " + getTitle() );
-        Common.debugPrintln( "章節名稱(wholeTitle) : " + getWholeTitle() );
-    }
-
-    @Override
-    public void parseComicURL() { // parse URL and save all URLs in comicURL  //
-        // 先取得前面的下載伺服器網址
-
-        webSite = getPhpURL( webSite );
+        webSite = getRegularURL( webSite ); // 將全集頁面轉為正規的全集頁面位址
 
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GBK );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, pageCode );
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        int beginIndex = 0, endIndex = 0;
+        allPageString = Common.getTraditionalChinese( allPageString );
 
-        beginIndex = allPageString.indexOf( "color='#000000'" );
-        beginIndex = allPageString.indexOf( "</table>", beginIndex ) + 1;
-        endIndex = allPageString.indexOf( "</table>", beginIndex );
-        String tempString = allPageString.substring( beginIndex, endIndex ).trim();
+        /*
+         String tableFontTag = "<table";
+         String tableBackTag = "/table>";
+         String titleBackTag = "/title>";
+         String hrefString = " href=";
 
-        totalPage = tempString.split( " href=" ).length - 1;
-        Common.debugPrintln( "共 " + totalPage + " 頁" );
-        comicURL = new String[totalPage];
+         // 檢查是否為大寫tag或小寫tag
+         if ( allPageString.indexOf( tableFontTag ) < 0 )
+         {
+         tableFontTag = tableFontTag.toUpperCase();
+         tableBackTag = tableBackTag.toUpperCase();
+         titleBackTag = titleBackTag.toUpperCase();
+         hrefString = hrefString.toUpperCase();
+         }
 
-        String[] titles = new String[totalPage];
+
+         int beginIndex = allPageString.indexOf( titleBackTag );
+         beginIndex = allPageString.indexOf( getTitle(), beginIndex );
+         beginIndex = allPageString.indexOf( tableFontTag, beginIndex );
+
+         int endIndex = beginIndex;
+         String tempString = "";
+         do
+         {
+         endIndex = allPageString.indexOf( tableBackTag, endIndex + 1 );
+         tempString = allPageString.substring( beginIndex, endIndex ).trim();
+         totalPage = tempString.split( hrefString ).length - 1;
+         Common.debugPrintln( "共 " + totalPage + " 頁" );
+         }
+         while ( totalPage < 1 );
+         */
+
+        List<String> urlList = new ArrayList<String>();
+        List<String> volumeList = new ArrayList<String>();
+
+        String hrefString = "href=";
+        String tempString = "";
+        String volumeURL = "";
+        String volumeTitle = "";
+        String baseTempURL = webSite.substring( 0, webSite.lastIndexOf( "/" ) + 1 );
+
+        int beginIndex = 0;
+        int endIndex = 0;
+        int amount = 0;
+
+        while ( true )
+        {
+            // 先找出每個超連結網址
+            beginIndex = Common.getSmallerIndexOfTwoKeyword( allPageString, beginIndex, hrefString, hrefString.toUpperCase() );
+            endIndex = Common.getSmallerIndexOfTwoKeyword( allPageString, beginIndex, ">", " " );
+
+            if ( beginIndex < 0 || endIndex < 0 )
+            {
+                break;
+            }
+
+            tempString = allPageString.substring( beginIndex + 5, endIndex ).replaceAll( "\"", "" ).trim();
+
+            Common.debugPrintln( "找到的連結: " + tempString );
+
+            // 代表有下層的目錄網址
+            if ( !tempString.matches( "(?s).*\\.\\./(?s).*" )
+                    && !tempString.matches( "(?s).*zip" )
+                    && !tempString.matches( "(?s).*@(?s).*" )
+                && !tempString.matches( baseURL ) )
+            {
+
+
+                
+
+                // 檢查是否為完整網址
+                if ( tempString.matches( "http://(?s).*" ) )
+                {
+                    volumeURL = tempString;
+                }
+                else
+                {
+                    volumeURL = baseTempURL + tempString;
+                }
+
+                // 位址不重複 才加入
+                if ( !urlList.contains( volumeURL ) )
+                {
+                    // 取得單集位址
+                    urlList.add( volumeURL );
+
+
+                    // 然後取單集名稱
+                    do
+                    {
+                        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+                        endIndex = allPageString.indexOf( "<", beginIndex );
+                        volumeTitle = allPageString.substring( beginIndex, endIndex ).trim();
+                    }
+                    while ( volumeTitle.matches( "" ) );
+
+                    volumeList.add( Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( volumeTitle ) ) );
+
+                    Common.debugPrintln( " " + volumeURL + " " + volumeTitle );
+                    
+                    amount++;
+                }
+            }
+            beginIndex = endIndex;
+        }
+        //System.exit( 0 );
+        totalPage = amount;
+
+        comicURL = new String[ totalPage ];
+        String[] titles = new String[ totalPage ];
+
+        for ( int i = 0; i < totalPage; i++ )
+        {
+            comicURL[i] = urlList.get( i );
+            titles[i] = volumeList.get( i ) + "." + Common.getDefaultTextExtension();
+        }
+
+
+        // 取得作者名稱
+        String author = "";
+
+        if ( (beginIndex = allPageString.indexOf( "作者：" )) > 0 )
+        {
+            beginIndex += 3;
+            endIndex = allPageString.indexOf( "<", beginIndex );
+            author = allPageString.substring( beginIndex, endIndex );
+        }
+        if ( (beginIndex = allPageString.indexOf( "作者:" )) > 0 )
+        {
+            beginIndex += 3;
+            endIndex = allPageString.indexOf( "<", beginIndex );
+            author = allPageString.substring( beginIndex, endIndex );
+        }
+        else
+        {
+            Common.debugPrintln( "此站無法取得作者訊息" );
+            author = getTitle();
+        }
+        Common.debugPrintln( "作者名稱: " + author );
 
         NumberFormat formatter = new DecimalFormat( Common.getZero() );
 
-        // 取得漫畫位址
+        // 取得小說網址
         beginIndex = endIndex = 0;
-        String pageURL = webSite;
-        for ( int i = 0 ; i < totalPage && Run.isAlive ; i++ ) {
-            beginIndex = tempString.indexOf( " href=", beginIndex );
-            beginIndex = tempString.indexOf( "/", beginIndex ) + 1;
-            endIndex = tempString.indexOf( ">", beginIndex );
-            comicURL[i] = baseURL + tempString.substring( beginIndex, endIndex ).trim();;
-            //Common.debugPrintln( i + " " + comicURL[i] ); // debug
-            beginIndex = endIndex + 1;
-            endIndex = tempString.indexOf( "</a>", beginIndex );
-            titles[i] = Common.getStringRemovedIllegalChar(
-                    Common.getTraditionalChinese(
-                    tempString.substring( beginIndex, endIndex ).trim() ) ) + "." + Common.getDefaultTextExtension();
-            // 每解析一個網址就下載一張圖
-            if ( !new File( getDownloadDirectory() + titles[i] ).exists() && Run.isAlive ) {
-                singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage, i + 1, 0 );
-                String fileName = formatter.format( i + 1 ) + ".htm";
-                hadleSingleNovel( fileName, titles[i] );  // 處理單一小說主函式
+        String tempTitle = "";
+        String tempURL = "";
+
+
+        try
+        {
+
+            for ( int i = 0; i < totalPage && Run.isAlive; i++ )
+            {
+                // 每解析一個網址就下載一張圖
+                if ( !new File( getDownloadDirectory() + titles[i] ).exists() && Run.isAlive )
+                {
+
+                    singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage, i + 1, 0 );
+                    pageExtension = comicURL[i].substring( comicURL[i].lastIndexOf( "." ) + 1, comicURL[i].length() );
+                    String fileName = formatter.format( i + 1 ) + "." + pageExtension;
+
+                    nowTitle = titles[i].substring( 0, titles[i].lastIndexOf( "." ) );
+                    handleSingleNovel( fileName, titles[i] );  // 處理單一小說主函式
+
+
+                }
+                else
+                {
+                    Common.debugPrintln( titles[i] + "已下載，跳過" );
+                }
+
+                //System.exit( 0 );
             }
-            else {
-                Common.debugPrintln( titles[i] + "已下載，跳過" );
-            }
+
+            handleWholeNovel( titles, webSite, author );
 
         }
+        catch ( Exception ex )
+        {
 
-        handleWholeNovel( titles, webSite );
+            Common.hadleErrorMessage( ex, "處理下載文字檔發生問題" );
+            try
+            {
+                throw new Exception();
+            }
+            catch ( Exception ex1 )
+            {
+                Logger.getLogger( ParseTianyaBook.class.getName() ).log( Level.SEVERE, null, ex1 );
+            }
+        }
 
         //System.exit( 0 ); // debug
     }
 
-    // 處理全部小說的主函式
-    public void handleWholeNovel( String[] titles, String url ) {
-        String allNovelText = getInformation( title, url ); // 全部頁面加起來小說文字
-
-        Common.debugPrintln( "開始執行合併程序：" );
-        Common.debugPrintln( "共有" + (titles.length) + "篇" );
-        for ( int i = 0 ; i < titles.length && Run.isAlive ; i++ ) {
-            Common.debugPrintln( "合併第" + (i + 1) + "篇: " + titles[i] );
-            allNovelText += Common.getFileString( getDownloadDirectory(), titles[i] );
-
-            if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITHOUT_PIC ||
-             SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITH_PIC ) {
-                allNovelText += "<br>" + (i + 1) + "<br><hr><br>"; // 每一樓的文字加總起來
-            }
-            else {
-                allNovelText += "\n\n---------------------------" + (i + 1) + "\n\n";
-            }
-            ComicDownGUI.stateBar.setText( getTitle()
-                    + "合併中: " + (i + 1) + " / " + titles.length );
-        }
-
-        String tempString = getDownloadDirectory();
-        tempString = tempString.substring( 0, tempString.length() - 1 );
-        int endIndex = tempString.lastIndexOf( Common.getSlash() ) + 1;
-
-        String textOutputDirectory = tempString.substring( 0, endIndex ); // 放在外面
-
-        Common.outputFile( allNovelText, textOutputDirectory, getWholeTitle() + "." + Common.getDefaultTextExtension() );
-
-        textFilePath = textOutputDirectory + getWholeTitle() + "." + Common.getDefaultTextExtension();
-    }
-
-    // 處理單一本小說主函式
-    public void hadleSingleNovel( String fileName, String title ) {
-        String allPageString = "";
-        String allNovelText = ""; // 全部頁面加起來小說文字
-
-        Common.newEncodeFile( getDownloadDirectory(),
-                fileName, "utf8_" + fileName, Encoding.GBK );
-
-        allPageString = Common.getFileString( getDownloadDirectory(), "utf8_" + fileName );
-
-        Common.deleteFile( getDownloadDirectory(), fileName ); // 刪掉utf8編碼的暫存檔
-        Common.deleteFile( getDownloadDirectory(), "utf8_" + fileName ); // 刪掉utf8編碼的暫存檔
-
-        if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITHOUT_PIC ||
-             SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITH_PIC ) {
-            allNovelText = getCharsetInformation();
-        }
-
-        allNovelText += getRegularNovel( allPageString ); // 每一頁處理過都加總起來 
-        Common.outputFile( allNovelText, getDownloadDirectory(), title );
-
-    }
-
     // 處理小說網頁，將標籤去除
-    public String getRegularNovel( String allPageString ) {
-        int beginIndex = 0;
-        int endIndex = 0;
-        int amountOfFloor = 10; // 一頁有幾樓
-        String oneFloorText = ""; // 單一樓層的文字
-        String allFloorText = ""; // 所有樓層的文字加總
-        beginIndex = endIndex;
-        beginIndex = allPageString.indexOf( "<span class='max'>", beginIndex );
-        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        endIndex = allPageString.indexOf( "<div align='center'>", beginIndex );
-        oneFloorText = allPageString.substring( beginIndex, endIndex );
+    public String getRegularNovel( String allPageString )
+    {
+        
+        String oneFloorText = ""; // 單一樓層（頁）的文字
 
-        if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITHOUT_PIC ||
-             SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITH_PIC ) {
-            oneFloorText = replaceProcessToHtml( oneFloorText );
-        }
-        else {
+        allPageString = Common.getTraditionalChinese( allPageString );
+
+        // 先取得章節名稱
+        oneFloorText = "    " + nowTitle + " <br><br>";
+
+        oneFloorText += allPageString;
+
+        //Common.debugPrintln( oneFloorText );
+
+        if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.TEXT )
+        {
             oneFloorText = replaceProcessToText( oneFloorText );
+        }
+        else
+        {
+            oneFloorText = replaceProcessToHtml( oneFloorText );
         }
         oneFloorText = Common.getTraditionalChinese( oneFloorText ); // 簡轉繁
 
-
-        return oneFloorText;
+        return replaceRedundant( oneFloorText );
     }
 
-    @Override // 因為原檔就是utf8了，所以無須轉碼
-    public String getAllPageString( String urlString ) {
-        urlString = getPhpURL( urlString ); // 若是一般htm網頁，轉為php網頁
+    // 拿掉多餘的字串
+    public String replaceRedundant( String text )
+    {
+        text = text.replaceAll( "-網絡小說-現代文學-外國文學-學術論文-武俠小說-宗教-歷史-經濟-軍事-人物傳記-偵探小說-古典文學-哲學-", "" );
+        text = text.replaceAll( "天涯在線書庫 整理", "" );
+        text = text.replaceAll( "天涯在線書庫搜集整理", "" );
+        text = text.replaceAll( "回目錄 回首頁", "" );
+        text = text.replaceAll( "支持本書作者，請購買正式出版物", "" );
+        text = text.replaceAll( "天涯在線書庫", "" );
+        text = text.replaceAll( "後一頁\\s", "" );
+        text = text.replaceAll( "前一頁\\s", "" );
+        text = text.replaceAll( "回目錄\\s", "" );
+        text = text.replaceAll( "背景色：", "" );
 
-        String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tianyabook_", "html" );
-        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_tianyabook_encode_", "html" );
-
-        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
-
-        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+        return text;
     }
 
-    // index.htm
-    public String getPhpURL( String url ) {
-        if ( url.matches( "(?s).*index.htm" ) ) {
-            int beginIndex = url.indexOf( "index.htm" );
-            int endIndex = url.lastIndexOf( "/", beginIndex );
-            beginIndex = url.lastIndexOf( "/", endIndex - 1 ) + 1;
-            String num = url.substring( beginIndex, endIndex );
-
-            url = "http://www.wenku.com/articleinfo.php?id=" + num;
-            Common.debugPrintln( "網址轉為：" + url );
-        }
-
+    // ex. http://www.uus8.com/book/display.asp?id=16282 轉為
+    //     http://www.uus8.com/a/72/195/
+    public String getRegularURL( String url )
+    {
         return url;
     }
 
     @Override
-    public boolean isSingleVolumePage( String urlString ) {
-        // ex. http://ck101.com/thread-2081113-1-1.html
-        // 都判斷為主頁，並直接下載。
-        return false;
-    }
+    public boolean isSingleVolumePage( String urlString )
+    {
+        // ex. http://www.tianyabook.com/renwu2005/js/t/tanghaoming/yf/001.htm
+        // ex. http://www.tianyabook.com/renwu2005/js/t/tanghaoming/index.html
+        // 凡沒有href="../index.html"的都不是主頁，就不能加入到任務中
 
-    public String getMainUrlFromSingleVolumeUrl( String volumeURL ) {
-        return volumeURL;
+        String allPageString = getAllPageString( urlString );
+
+        allPageString = replaceComment( allPageString );
+        allPageString = replaceStyle( allPageString );
+
+        String allText = allPageString.replaceAll( "<[^<>]+>", "" ).replaceAll( "\\s", "" );
+
+        Common.debugPrintln( "內文長度: " + allText.length() );
+
+        //Common.debugPrintln( allText );
+
+        if ( allText.length() > 2000 )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     @Override
-    public String getTitleOnSingleVolumePage( String urlString ) {
-        String mainUrlString = getMainUrlFromSingleVolumeUrl( urlString );
-
-        return getTitleOnMainPage( mainUrlString, getAllPageString( mainUrlString ) );
-    }
-
-    @Override
-    public String getTitleOnMainPage( String urlString, String allPageString ) {
+    public String getTitleOnMainPage( String urlString, String allPageString )
+    {
         int beginIndex, endIndex;
         String title = "";
-        
-        beginIndex = allPageString.indexOf( "<title>" );
-        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        endIndex = allPageString.indexOf( "</", beginIndex );
-        title = allPageString.substring( beginIndex, endIndex ).trim();
-        title = title.replaceAll( "---", "-" );
-        title = title.replaceAll( "天涯在线书库", "" );
 
-        return Common.getStringRemovedIllegalChar(
-                Common.getTraditionalChinese( title ) );
+        beginIndex = endIndex = 0;
+
+        String titleBackTag = "/title>";
+        if ( allPageString.indexOf( titleBackTag ) < 0 )
+        {
+            titleBackTag = titleBackTag.toUpperCase();
+        }
+
+        if ( (beginIndex = allPageString.indexOf( "<font face=" )) > 0 )
+        {
+            beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            while ( allPageString.substring( beginIndex, beginIndex + 1 ).equals( "<" ) )
+            {
+                beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            }
+
+
+            endIndex = allPageString.indexOf( "<", beginIndex );
+
+        }
+        else if ( (beginIndex = allPageString.indexOf( "<center><span style=" )) > 0 )
+        {
+            beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            while ( allPageString.substring( beginIndex, beginIndex + 1 ).equals( "<" ) )
+            {
+                beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            }
+
+
+            endIndex = allPageString.indexOf( "<", beginIndex );
+        }
+        else if ( (beginIndex = allPageString.indexOf( "<td align=\"center\" class=\"xt\">" )) > 0 )
+        {
+            beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            while ( allPageString.substring( beginIndex, beginIndex + 1 ).equals( "<" ) )
+            {
+                beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            }
+
+            endIndex = allPageString.indexOf( "<", beginIndex );
+        }
+        else if ( (beginIndex = allPageString.indexOf( "<FONT SIZE=" )) > 0 )
+        {
+            beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            while ( allPageString.substring( beginIndex, beginIndex + 1 ).equals( "<" ) )
+            {
+                beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+            }
+
+            endIndex = allPageString.indexOf( "<", beginIndex );
+        }
+        else if ( (endIndex = allPageString.indexOf( titleBackTag )) > 0 )
+        {
+            beginIndex = allPageString.lastIndexOf( ">", endIndex ) + 1;
+
+            // 站名放前面
+            if ( allPageString.substring( beginIndex, endIndex ).matches( "" ) )
+            {
+                beginIndex = allPageString.lastIndexOf( "-", endIndex ) + 1;
+            }
+            else
+            {
+                // 站名放後面      
+                endIndex = allPageString.indexOf( "-", beginIndex );
+            }
+
+        }
+        else
+        {
+            Common.debugPrintln( "找不到標題 !!" );
+        }
+
+        title = allPageString.substring( beginIndex, endIndex ).trim();
+
+        return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
     }
 
     @Override
-    public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString ) {
+    public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString )
+    {
         // combine volumeList and urlList into combinationList, return it.
 
         List<List<String>> combinationList = new ArrayList<List<String>>();
@@ -275,59 +438,81 @@ public class ParseTianyaBook extends ParseOnlineComicSite {
         String volumeTitle = "";
         String volumeURL = "";
 
-        if ( urlString.matches( "(?s).*bookroom.php(?s).*" ) ) { // 搜尋頁或分類頁面
-            int beginIndex = allPageString.lastIndexOf( "->" );
-            int endIndex = allPageString.indexOf( "name='frmjumppage'", beginIndex );
-            String tempString = allPageString.substring( beginIndex, endIndex );
+        String hrefString = "href=";
+        String tempString = "";
+        int beginIndex = 0;
+        int endIndex = 0;
+        int amount = 0;
 
-            int volumeCount = tempString.split( "href='articleinfo" ).length - 1;
+        while ( true )
+        {
+            // 先找出每個超連結網址
+            beginIndex = Common.getSmallerIndexOfTwoKeyword( allPageString, beginIndex, hrefString, hrefString.toUpperCase() );
+            endIndex = Common.getSmallerIndexOfTwoKeyword( allPageString, beginIndex, ">", " " );
 
-            beginIndex = endIndex = 0;
-            for ( int i = 0 ; i < volumeCount ; i++ ) {
-                // 取得單集位址
-                beginIndex = tempString.indexOf( "href='articleinfo", beginIndex );
-                beginIndex = tempString.indexOf( "'", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "'", beginIndex );
-                volumeURL = baseURL + tempString.substring( beginIndex, endIndex );
-                urlList.add( volumeURL );
-
-                // 取得單集名稱
-                beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "<", beginIndex );
-                volumeTitle = tempString.substring( beginIndex, endIndex ).trim();
-                volumeList.add( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( volumeTitle.trim() ) ) );
+            if ( beginIndex < 0 || endIndex < 0 )
+            {
+                break;
             }
 
-            totalVolume = volumeCount;
+            tempString = allPageString.substring( beginIndex + 5, endIndex ).replaceAll( "\"", "" ).trim();
+
+            Common.debugPrintln( tempString );
+
+            // 代表有下層的目錄網址
+            if ( tempString.matches( "(?s).*\\w/index.htm(?s).*" ) )
+            {
+                amount++;
+
+                // 檢查是否為完整網址
+                if ( tempString.matches( "http://(?s).*" ) )
+                {
+                    volumeURL = tempString;
+                }
+                else
+                {
+                    volumeURL = urlString.substring( 0, urlString.lastIndexOf( "/" ) + 1 ) + tempString;
+                }
+
+                // 取得單集位址
+                urlList.add( volumeURL );
+
+
+                // 然後取單集名稱
+                do
+                {
+                    beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+                    endIndex = allPageString.indexOf( "<", beginIndex );
+                    volumeTitle = allPageString.substring( beginIndex, endIndex ).trim();
+                }
+                while ( volumeTitle.matches( "" ) );
+
+                volumeList.add( Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( volumeTitle ) ) );
+            }
+            else
+            {
+                beginIndex = endIndex;
+            }
+
         }
-        else {
+
+        if ( amount == 0 )
+        {
+            amount++;
+
             // 取得單集名稱
             volumeTitle = getTitle();
-            volumeList.add( Common.getStringRemovedIllegalChar(
-                    Common.getTraditionalChinese( volumeTitle.trim() ) ) );
+            volumeList.add( volumeTitle.trim() );
 
             // 取得單集位址
             urlList.add( urlString );
-
-            totalVolume = 1;
         }
-        Common.debugPrintln( "共有" + totalVolume + "集" );
+
+        totalVolume = amount;
 
         combinationList.add( volumeList );
         combinationList.add( urlList );
 
         return combinationList;
-    }
-
-    @Override
-    public void outputVolumeAndUrlList( List<String> volumeList, List<String> urlList ) {
-        Common.outputFile( volumeList, SetUp.getTempDirectory(), Common.tempVolumeFileName );
-        Common.outputFile( urlList, SetUp.getTempDirectory(), Common.tempUrlFileName );
-    }
-
-    @Override
-    public String[] getTempFileNames() {
-        return new String[] { indexName, indexEncodeName, jsName };
     }
 }

@@ -294,7 +294,7 @@ public class ParseWebPage
         {
             siteID = Site.TWO_ECY;
         }
-        else if ( webSite.matches( "(?s).*tianyabook..com(?s).*" ) )
+        else if ( webSite.matches( "(?s).*tianyabook.com(?s).*" ) )
         {
             siteID = Site.TIANYA_BOOK;
         }

@@ -3,10 +3,13 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v5.07
- Last Modified : 2012/11/16
+ Version  : v5.08
+ Last Modified : 2012/11/21
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.08:
+1. 新增對tianyabook的支援。
+2. 修復冗餘設定檔檢查的問題。
  5.07: 
 1. 新增對7wenku的支援。 
 2. 修復iask解析錯誤的問題。
@@ -467,7 +470,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v5.07";
+    public static String versionString = "JComicDownloader  v5.08";
 
     public ComicDownGUI()
     {
@@ -2372,7 +2375,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 || url.matches( "(?s).*wenku8.com(?s).*" )
                 || url.matches( "(?s).*7wenku.com(?s).*" )
                 || url.matches( "(?s).*book.ifeng.com(?s).*" )
-                || url.matches( "(?s).*xunlook.com(?s).*" ) )
+                || url.matches( "(?s).*xunlook.com(?s).*" )
+                || url.matches( "(?s).*tianyabook.com(?s).*"))
         {
             return true;
         }

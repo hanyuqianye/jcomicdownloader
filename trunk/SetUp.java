@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/4/15
+ Last Modified : 2012/11/21
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.08: 修復冗餘設定檔檢查的問題。
  2.03: 增加下載失敗後重新嘗試次數(retryTimes)的選項
  1.12: 修復tempDirectory最後出現兩個斜線的bug。
  1.09: 加入是否保留書籤和記錄的選項
@@ -493,7 +494,7 @@ public class SetUp
         boolean existDefaultFontSize = false;
         boolean existEhMemberID = false;
         boolean existEhMemberPasswordHash = false;
-        boolean existSettingFileDirectory = false;
+        //boolean existSettingFileDirectory = false;
         boolean existTimeoutTimer = false;
         boolean existChoiceAllVolume = false;
         boolean existRetryTimes = false;
@@ -662,6 +663,7 @@ public class SetUp
                     }
                     else if ( split[0].equals( "keepDoneDownloadMission" ) )
                     {
+                     
                         if ( split[1].matches( "(?s).*true(?s).*" ) )
                         {
                             setKeepDoneDownloadMission( true );
@@ -1226,7 +1228,8 @@ public class SetUp
                 && existProxyServer && existProxyPort
                 && existDefaultFontName && existDefaultFontSize
                 && existEhMemberID && existEhMemberPasswordHash
-                && existSettingFileDirectory && existTimeoutTimer
+                //&& existSettingFileDirectory 
+                && existTimeoutTimer
                 && existChoiceAllVolume && existRetryTimes
                 && existOpenPicFileProgram && existOpenZipFileProgram && existOpenTextFileProgram
                 && existPlayAllDoneAudio

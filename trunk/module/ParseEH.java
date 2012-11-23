@@ -132,7 +132,7 @@ public class ParseEH extends ParseOnlineComicSite {
                 lines = Common.getFileStrings( SetUp.getTempDirectory(), indexName );
             }
 
-
+            
 
             int i = 0;
             for ( i = 0 ; i < lines.length ; i++ ) {
@@ -145,6 +145,7 @@ public class ParseEH extends ParseOnlineComicSite {
 
             System.out.println( "----------------" );
             for ( int count = 0 ; count < onePagePicCount && Run.isAlive ; count++ ) {
+                //Common.debugPrintln( "\n" + lines.length + " LINE " + i + " " + beginIndex + "\n " + lines[i] );
                 beginIndex = lines[i].indexOf( baseSiteURL, beginIndex );
                 endIndex = lines[i].indexOf( "\"><img alt=\"", beginIndex );
 

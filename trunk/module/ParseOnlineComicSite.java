@@ -456,10 +456,14 @@ abstract public class ParseOnlineComicSite {
         text = text.replaceAll( "</p><p>", "\r\n\r\n" );
         text = text.replaceAll( "<br />", "\r\n" );
         text = text.replaceAll( "<br>", "\r\n" );
+        text = text.replaceAll( "<BR>", "\r\n" );
         text = text.replaceAll( "<br[^<>]+>", "\r\n" );
         text = text.replaceAll( "</p>", "\r\n" );
+        text = text.replaceAll( "</P>", "\r\n" );
         text = text.replaceAll( "</h1>", "\r\n" );
+        text = text.replaceAll( "</H1>", "\r\n" );
         text = text.replaceAll( "<tr>", "\r\n\r\n" );
+        text = text.replaceAll( "<TR>", "\r\n\r\n" );
 
         return text;
     }
@@ -503,12 +507,25 @@ abstract public class ParseOnlineComicSite {
 
     // 拿掉<script 到 </script>之間的內容
     public String replaceJS( String text ) {
+        
+        String scriptFontTag = "<script>";
+        String scriptBackTag = "</script>";
+        
+        if ( text.indexOf( scriptFontTag ) < 0 ) {
+            scriptFontTag = scriptFontTag.toUpperCase();
+        }
+         if ( text.indexOf( scriptBackTag ) < 0 ) {
+            scriptBackTag = scriptBackTag.toUpperCase();
+        }
+         
+         Common.debugPrintln( "拿掉JS: " + scriptFontTag + " " + scriptBackTag );
+        
         int beginIndex = 0;
         int endIndex = 0;
         int times = 0;
-        while ( true && times < 20 ) {
-            beginIndex = text.indexOf( "<script", beginIndex );
-            endIndex = text.indexOf( "</script>", beginIndex );
+        while ( true && times < 10 ) {
+            beginIndex = text.indexOf( scriptFontTag, beginIndex );
+            endIndex = text.indexOf( scriptBackTag, beginIndex );
             endIndex = text.indexOf( ">", endIndex ) + 1;
 
             if ( beginIndex > 0 && endIndex > 0 ) { // 拿掉中間的部份
@@ -527,9 +544,20 @@ abstract public class ParseOnlineComicSite {
         int beginIndex = 0;
         int endIndex = 0;
         int times = 0;
+        
+        String styleFontTag = "<style";
+        String styleBackTag = "</style>";
+        
+        //  若找不到小寫sytle tag 就轉大寫
+        if ( text.indexOf( styleFontTag ) < 0 ) {
+            styleFontTag = styleFontTag.toUpperCase();
+            styleBackTag = styleBackTag.toUpperCase();
+        }
+        
+        
         while ( true && times < 10 ) {
-            beginIndex = text.indexOf( "<style", beginIndex );
-            endIndex = text.indexOf( "</style>", beginIndex );
+            beginIndex = text.indexOf( styleFontTag, beginIndex );
+            endIndex = text.indexOf( styleBackTag, beginIndex );
             endIndex = text.indexOf( ">", endIndex ) + 1;
 
             if ( beginIndex > 0 && endIndex > 0 ) { // 拿掉中間的部份
