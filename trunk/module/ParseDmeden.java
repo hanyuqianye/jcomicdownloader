@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2012/5/7
+Last Modified : 2012/11/24
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ 5.08: 修復dmeden.net解析位址錯誤的問題。
 3.17: 1. 修復dmeden標題名稱解析錯誤的問題。
 3.09: 1. 修復對dmeden.net的支援。
 3.04: 1. 修復dmeden標題名稱解析不全的bug。
@@ -38,7 +39,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
         indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dmeden_parse_", "html" );
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dmeden_encode_parse_", "html" );
 
-        baseURL1 = "http://dmeden.net";
+        baseURL1 = "http://www.dmeden.net";
         baseURL2 = "http://www.dmeden.com";
         jsName = "index_dmeden.js";
         radixNumber = 185271; // default value, not always be useful!!
@@ -157,7 +158,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
         
         
         // 1:繁體　2:簡體
-        String baseURL = urlString.matches( "http://dmeden.net/(?s).*" ) ? baseURL1 : baseURL2;
+        String baseURL = urlString.matches( baseURL1 + "(?s).*" ) ? baseURL1 : baseURL2;
         String mainUrlString = baseURL + allPageString.substring( beginIndex, endIndex );
         
         System.out.println( allPageString.substring( beginIndex, endIndex ) );
@@ -206,7 +207,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
         int volumeCount = 0;
         
         // 1:繁體　2:簡體
-        String baseURL = urlString.matches( "http://dmeden.net/(?s).*" ) ? baseURL1 : baseURL2;
+        String baseURL = urlString.matches( baseURL1 + "(?s).*" ) ? baseURL1 : baseURL2;
         String baseSingleURL = baseURL + "/comichtml/";
 
         for ( int i = 0 ; i < tokens.length ; i++ ) {

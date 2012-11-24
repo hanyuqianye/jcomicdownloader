@@ -172,6 +172,7 @@ public class RunModule {
             }
             catch ( Exception ex ) {
                 Common.hadleErrorMessage( ex, "在解析下載網址或下載過程中發生錯誤" );
+                Flag.downloadErrorFlag = true;
             }
 
 
@@ -237,7 +238,8 @@ public class RunModule {
                 || siteID == Site.WENKU8
                 || siteID == Site.WENKU7
                 || siteID == Site.IFENG_BOOK
-                || siteID == Site.XUNLOOK ) {
+                || siteID == Site.XUNLOOK
+                || siteID == Site.WOYOUXIAN ) {
             return true;
         }
         else {

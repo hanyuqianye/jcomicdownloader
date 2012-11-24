@@ -1239,11 +1239,14 @@ public class Common
                     || oldString.charAt( i ) == '"'
                     || oldString.charAt( i ) == '<'
                     || oldString.charAt( i ) == '>'
-                    || oldString.charAt( i ) == '|'
-                    || oldString.charAt( i ) == '.' )
+                    || oldString.charAt( i ) == '|' )
             {
 
                 newString += String.valueOf( '_' );
+            }
+            else if ( oldString.charAt( i ) == '.' )
+            {
+                newString += String.valueOf( '‧' );
             }
             else if ( oldString.charAt( i ) == '?'
                     || oldString.charAt( i ) == ':' )

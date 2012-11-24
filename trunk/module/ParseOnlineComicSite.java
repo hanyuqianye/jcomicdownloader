@@ -508,7 +508,10 @@ abstract public class ParseOnlineComicSite {
     // 拿掉<script 到 </script>之間的內容
     public String replaceJS( String text ) {
         
-        String scriptFontTag = "<script>";
+        String scriptFontTag = "<script";
+        if ( text.indexOf( "<SCRIPT>") > 0 ) {
+            scriptFontTag = "<script>";
+        }
         String scriptBackTag = "</script>";
         
         if ( text.indexOf( scriptFontTag ) < 0 ) {

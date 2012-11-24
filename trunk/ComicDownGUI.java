@@ -3,13 +3,17 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v5.08
- Last Modified : 2012/11/21
+ Version  : v5.09
+ Last Modified : 2012/11/24
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.09:
+1. 新增對woyouxian.com的支援。
  5.08:
 1. 新增對tianyabook的支援。
 2. 修復冗餘設定檔檢查的問題。
+3. 修復dmeden.net解析位址錯誤的問題。
+4. 修復下載發生錯誤時無法正確通知的問題。
  5.07: 
 1. 新增對7wenku的支援。 
 2. 修復iask解析錯誤的問題。
@@ -470,7 +474,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v5.08";
+    public static String versionString = "JComicDownloader  v5.09";
 
     public ComicDownGUI()
     {
@@ -2376,7 +2380,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 || url.matches( "(?s).*7wenku.com(?s).*" )
                 || url.matches( "(?s).*book.ifeng.com(?s).*" )
                 || url.matches( "(?s).*xunlook.com(?s).*" )
-                || url.matches( "(?s).*tianyabook.com(?s).*"))
+                || url.matches( "(?s).*tianyabook.com(?s).*")
+                || url.matches( "(?s).*woyouxian.com(?s).*"))
         {
             return true;
         }
@@ -3724,7 +3729,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 Run.isAlive = true;
 
                 String picURL = "http://www.dm5.com/m91660/";
-                String pageURL = "http://www.xindm.cn/type.asp?typeid=7002";
+                String pageURL = "http://www.dmeden.net/comichtml/115276/1.html?s=6";
                 //String testURL = "http://www.dm5.com/m61853-p2/chapterimagefun.ashx?cid=61853&page=8&language=1&key=wZUeSh3wcCQ%3D";
                 String testURL = "http://www.fumanhua.com/images/pic_loading.gif";
 
@@ -3740,7 +3745,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 //System.out.println( cookie );
 
-                Common.simpleDownloadFile( picURL, "", "test.html", cookie, referURL );
+                //Common.simpleDownloadFile( picURL, "", "test.html", cookie, referURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
                 //Common.downloadFile( testURL, "", "test.html", true, cookie, "" );
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
