@@ -4,11 +4,13 @@
  Program Name : JComicDownloader
  Authors  : surveyorK
  Version  : v5.09
- Last Modified : 2012/11/24
+ Last Modified : 2012/11/25
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.09:
 1. 新增對woyouxian.com的支援。
+2. 新增對shunong.com的支援。
+3. 修復文字檔的第一小節標題位置錯誤的問題。 
  5.08:
 1. 新增對tianyabook的支援。
 2. 修復冗餘設定檔檢查的問題。
@@ -2381,7 +2383,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 || url.matches( "(?s).*book.ifeng.com(?s).*" )
                 || url.matches( "(?s).*xunlook.com(?s).*" )
                 || url.matches( "(?s).*tianyabook.com(?s).*")
-                || url.matches( "(?s).*woyouxian.com(?s).*"))
+                || url.matches( "(?s).*woyouxian.com(?s).*")
+                || url.matches( "(?s).*shunong.com(?s).*"))
         {
             return true;
         }

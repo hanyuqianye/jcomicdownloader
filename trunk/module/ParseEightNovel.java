@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/10/29
+ Last Modified : 2012/11/25
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+     5.09: 修復第一小節標題位置錯誤的問題。
      5.04: 修復8novel少數下載不完全的問題。
  *  4.09: 1. 新增對8novel的支援。
  ----------------------------------------------------------------------------------------------------
@@ -140,7 +141,7 @@ public class ParseEightNovel extends ParseOnlineComicSite {
         for ( int i = 0; i < titles.length && Run.isAlive; i++ ) {
             Common.debugPrintln( "合併第" + ( i + 1 ) + "篇: " + titles[i] );
             String tempText = Common.getFileString( getDownloadDirectory(), titles[i] );
-            allNovelText += tempText;
+            
 
             if ( SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITHOUT_PIC ||
                  SetUp.getDefaultTextOutputFormat() == FileFormatEnum.HTML_WITH_PIC ) {
@@ -150,11 +151,15 @@ public class ParseEightNovel extends ParseOnlineComicSite {
                      allNovelText += "\n\n----------------------" + ( i + 1 ) + "\n\n";
                 }
                 else {
+                    
                     if ( i < ( titles.length - 1 ) ) {
                         allNovelText += "\n\n第" + ( i + 1 ) + "小節：";
                     }
+                    
                 }
             }
+            allNovelText += tempText;
+            
             ComicDownGUI.stateBar.setText( getTitle()
                     + "合併中: " + ( i + 1 ) + " / " + titles.length );
         }

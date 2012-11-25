@@ -350,6 +350,10 @@ public class ParseWebPage
         {
             siteID = Site.WOYOUXIAN;
         }
+        else if ( webSite.matches( "(?s).*shunong.com/(?s).*" ) )
+        {
+            siteID = Site.SHUNONG;
+        }
         else
         {
             siteID = Site.UNKNOWN;

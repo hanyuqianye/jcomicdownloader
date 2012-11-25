@@ -239,7 +239,8 @@ public class RunModule {
                 || siteID == Site.WENKU7
                 || siteID == Site.IFENG_BOOK
                 || siteID == Site.XUNLOOK
-                || siteID == Site.WOYOUXIAN ) {
+                || siteID == Site.WOYOUXIAN
+                || siteID == Site.SHUNONG ) {
             return true;
         }
         else {
