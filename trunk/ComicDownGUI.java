@@ -4,7 +4,7 @@
  Program Name : JComicDownloader
  Authors  : surveyorK
  Version  : v5.09
- Last Modified : 2012/11/25
+ Last Modified : 2012/11/26
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.09:
@@ -12,6 +12,7 @@
 2. 新增對shunong.com的支援。
 3. 修復文字檔的第一小節標題位置錯誤的問題。 
 4. 修復jmymh解析位址錯誤的問題。
+5. 修復dmeden.net解析位址錯誤的問題。
  5.08:
 1. 新增對tianyabook的支援。
 2. 修復冗餘設定檔檢查的問題。

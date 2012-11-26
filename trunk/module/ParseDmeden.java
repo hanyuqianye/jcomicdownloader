@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2012/11/24
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ 5.09: 修復dmeden.net解析位址錯誤的問題。
  5.08: 修復dmeden.net解析位址錯誤的問題。
 3.17: 1. 修復dmeden標題名稱解析錯誤的問題。
 3.09: 1. 修復對dmeden.net的支援。
@@ -40,7 +41,7 @@ public class ParseDmeden extends ParseOnlineComicSite {
         indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_dmeden_encode_parse_", "html" );
 
         baseURL1 = "http://www.dmeden.net";
-        baseURL2 = "http://www.dmeden.com";
+        baseURL2 = "http://dmeden.net";
         jsName = "index_dmeden.js";
         radixNumber = 185271; // default value, not always be useful!!
     }
