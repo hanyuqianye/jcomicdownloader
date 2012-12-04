@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/10/24
+ Last Modified : 2012/12/3
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.09:修復ck101網址不全的問題。
  5.04: 修復wenku8無法下載的問題。
  ----------------------------------------------------------------------------------------------------
  */
@@ -205,7 +206,9 @@ public class ParseWebPage
         {
             siteID = Site.DM5;
         }
-        else if ( webSite.matches( "(?s).*comic.ck101.com(?s).*" ) )
+        else if ( webSite.matches( "(?s).*comic.ck101.com(?s).*" ) || 
+                  webSite.matches( "(?s).*.com/vols/\\d+/\\d+(?s).*" ) // 應付全部ck101的位址....
+                   )
         {
             siteID = Site.CK;
         }
@@ -359,6 +362,7 @@ public class ParseWebPage
             siteID = Site.UNKNOWN;
             
             Common.debugPrintln( "有未知的位址:" + webSite);
+            Flag.downloadErrorFlag = true;
         }
     }
 

@@ -123,7 +123,14 @@ public class ParseHH extends ParseOnlineComicSite {
         for ( int i = 1; i <= totalPage && Run.isAlive; i++ ) {
             comicURL[p++] = serverURL + urlStrings[i-1]; // 存入每一頁的網頁網址
             //Common.debugPrintln( p + " " + comicURL[p - 1] ); // debug
-
+            /*
+            // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
+            if ( !Common.existPicFile( getDownloadDirectory(), p ) ||
+                 !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
+                // 每解析一個網址就下載一張圖
+                singlePageDownloadUsingRefer( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0, webSite );
+            }
+            */
         }
         //System.exit( 0 ); // debug
     }

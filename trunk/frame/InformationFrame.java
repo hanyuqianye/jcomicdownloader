@@ -3,9 +3,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2011/10/29
+ Last Modified : 2012/12/5
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.10: 換新的回報專區網址。
  5.04: 提供執行甫更新的新版本的選項。
  5.02: 修復Java 7下無法使用NapKin Look and Feel的問題。
  4.06: 1. 增添資訊視窗上的最新版本下載訊息。
@@ -161,7 +162,7 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         JButton searchNovelButton = getButton( " 小說搜尋引擎", "novel search", "information_novel_search.png",
             "http://www.google.com/cse/home?cx=002948535609514911011:_vv3hzthlt8&hl=zh-TW", KeyEvent.VK_N );
         JButton messageButton = getButton( " 疑難問題回報", "bug report", "information_report.png",
-            "http://jcomicdownloader.blogspot.tw/2012/10/bug-report-4.html", KeyEvent.VK_R );
+            "http://jcomicdownloader.blogspot.tw/2012/12/bug-report-5.html", KeyEvent.VK_R );
 
         JLabel authorLabel = getLabel( "作者：surveyorK （abc9070410@gmail.com）",
                                       "author: surveyorK (abc9070410@gmail.com)");
