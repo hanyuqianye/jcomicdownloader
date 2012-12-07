@@ -1762,6 +1762,8 @@ public class Common
         }
 
     }
+    
+    
 
     // direcotory裏面第p張圖片是否存在
     public static boolean existPicFile( String directory, int p )
@@ -1786,6 +1788,17 @@ public class Common
             return false;
         }
 
+    }
+    
+    // direcotory裏面第begin張到第end張圖片是否存在
+    public static boolean existPicFile( String directory, int begin, int end )
+    {
+        for ( int i = begin; i <= end; i ++ ) {
+            if ( !Common.existPicFile( directory, i ) ) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static void cleanDownTable()

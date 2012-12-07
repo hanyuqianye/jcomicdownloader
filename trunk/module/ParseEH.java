@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2012/12/7
+Last Modified : 2012/12/8
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ 5.10: 修改eh解析機制，使其無須全部頁面解析完畢才開始下載。
  5.10: 修復eh解析頁數錯誤的問題。
 4.10: 修復在Substance介面下若跳出輸入視窗必崩潰的問題。
 1.16: 新增對EX的支援
@@ -123,6 +124,7 @@ public class ParseEH extends ParseOnlineComicSite {
         int endIndex = 0;
 
         int pageUrlCount = 0; // for page url
+        int beginPage = 0; // the page which starts to download
         
         //System.exit( 0);
 
@@ -130,9 +132,17 @@ public class ParseEH extends ParseOnlineComicSite {
         for ( int pageNumber = 0 ;
                 pageNumber < pageCount && Run.isAlive && !getTitle().equals( "Gallery Not Available" ) ;
                 pageNumber++ ) {
+            
+            
+            if ( Common.existPicFile( getDownloadDirectory(), pageUrlCount + 1, pageUrlCount + 21 ) ) {
+                Common.debugPrintln( "第" + ( pageUrlCount + 1 ) + "到第" + ( pageUrlCount + 20 ) + "已下載，跳過此頁" );
+                beginPage = pageUrlCount;
+                pageUrlCount += 20;
+                continue;
+            }
 
             if ( pageNumber >= 1 ) {
-                Common.slowDownloadFile( webSite + "?p=" + pageNumber, SetUp.getTempDirectory(), indexName, 1000, true, cookieString );
+                Common.slowDownloadFile( webSite + "?p=" + pageNumber, SetUp.getTempDirectory(), indexName, 2000, true, cookieString );
                 lines = Common.getFileStrings( SetUp.getTempDirectory(), indexName );
             }
 
@@ -147,7 +157,10 @@ public class ParseEH extends ParseOnlineComicSite {
                 }
             }
 
-            System.out.println( "----------------" );
+            
+            Common.debugPrintln( "---------------- 從第" + ( pageUrlCount + 1 ) + "頁開始:" );
+            
+            
             for ( int count = 0 ; count < onePagePicCount && Run.isAlive ; count++ ) {
                 //Common.debugPrintln( "\n" + lines.length + " LINE " + i + " " + beginIndex );//"\n " + lines[i] );
                 beginIndex = lines[i].indexOf( baseSiteURL, beginIndex );
@@ -162,13 +175,13 @@ public class ParseEH extends ParseOnlineComicSite {
                 beginIndex = endIndex;
             }
 
-        }
+        
 
         // get URLs of real pic
-        for ( int i = 0 ; i < totalPage && Run.isAlive && !getTitle().equals( "Gallery Not Available" ) ; i++ ) {
+        for ( i = beginPage ; i < pageUrlCount && Run.isAlive && !getTitle().equals( "Gallery Not Available" ) ; i++ ) {
             if ( !Common.existPicFile( getDownloadDirectory(), i + 1 ) ||
                  !Common.existPicFile( getDownloadDirectory(), i + 2 ) ) {
-                Common.slowDownloadFile( comicPageURL[i], SetUp.getTempDirectory(), indexName, 1000, needCookie, cookieString );
+                Common.slowDownloadFile( comicPageURL[i], SetUp.getTempDirectory(), indexName, 2000, needCookie, cookieString );
                 String line = Common.getFileString( SetUp.getTempDirectory(), indexName );
 
                 lines = line.split( "\"" );
@@ -177,7 +190,7 @@ public class ParseEH extends ParseOnlineComicSite {
                     if ( lines[j].matches( "(?s).*http://\\d+.\\d+.\\d+.\\d+(?s).*" ) ) {
 
                         comicURL[i] = lines[j].replaceAll( "amp;", "" );
-                        Common.debugPrintln( comicURL[i] );
+                        //Common.debugPrintln( comicURL[i] );
                         
                         // 每解析一個網址就下載一張圖（隔兩秒連線一次）
                         singlePageDownload( getTitle(), null, comicURL[i], totalPage, i + 1, 2000 );
@@ -191,6 +204,8 @@ public class ParseEH extends ParseOnlineComicSite {
                 Common.debugPrint( i + " " );
             }
 
+        }
+        
         }
 
         if ( Flag.downloadingFlag && Common.withGUI() ) {
