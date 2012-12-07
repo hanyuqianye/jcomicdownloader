@@ -4,12 +4,13 @@
  Program Name : JComicDownloader
  Authors  : surveyorK
  Version  : v5.10
- Last Modified : 2012/12/5
+ Last Modified : 2012/12/7
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.10:
 1. 修復xxbh解析錯誤的問題。
 2. 換新的回報專區網址。
+3. 修復eh解析頁數錯誤的問題。
  5.09:
 1. 新增對woyouxian.com的支援。
 2. 新增對shunong.com的支援。

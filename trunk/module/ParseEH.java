@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/11/10
+Last Modified : 2012/12/7
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ 5.10: 修復eh解析頁數錯誤的問題。
 4.10: 修復在Substance介面下若跳出輸入視窗必崩潰的問題。
 1.16: 新增對EX的支援
 1.12: 將下載部分搬移到ParseOnlineComicSite，另作一個singlePageDownload()方法
@@ -106,6 +107,7 @@ public class ParseEH extends ParseOnlineComicSite {
         } else {
             pageCount = totalPage / onePagePicCount + 1;
         }
+        
         Common.debugPrintln( "共分幾個頁面 : " + pageCount );
 
         comicPageURL = new String[totalPage];
@@ -121,10 +123,12 @@ public class ParseEH extends ParseOnlineComicSite {
         int endIndex = 0;
 
         int pageUrlCount = 0; // for page url
+        
+        //System.exit( 0);
 
         // get URLs of pic page
         for ( int pageNumber = 0 ;
-                pageNumber <= pageCount && Run.isAlive && !getTitle().equals( "Gallery Not Available" ) ;
+                pageNumber < pageCount && Run.isAlive && !getTitle().equals( "Gallery Not Available" ) ;
                 pageNumber++ ) {
 
             if ( pageNumber >= 1 ) {
@@ -145,7 +149,7 @@ public class ParseEH extends ParseOnlineComicSite {
 
             System.out.println( "----------------" );
             for ( int count = 0 ; count < onePagePicCount && Run.isAlive ; count++ ) {
-                //Common.debugPrintln( "\n" + lines.length + " LINE " + i + " " + beginIndex + "\n " + lines[i] );
+                //Common.debugPrintln( "\n" + lines.length + " LINE " + i + " " + beginIndex );//"\n " + lines[i] );
                 beginIndex = lines[i].indexOf( baseSiteURL, beginIndex );
                 endIndex = lines[i].indexOf( "\"><img alt=\"", beginIndex );
 
