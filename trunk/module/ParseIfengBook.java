@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/6/11
+ Last Modified : 2012/12/9
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.11: 修復book.ifeng.com下載錯誤的問題。
  *  4.09: 1. 新增對book.ifeng.com的支援。
  ----------------------------------------------------------------------------------------------------
  */
@@ -60,8 +61,8 @@ public class ParseIfengBook extends ParseEightNovel {
 
         int beginIndex = 0, endIndex = 0;
 
-        beginIndex = allPageString.indexOf( "id=\"bookContent\"" );
-        endIndex = allPageString.lastIndexOf( "id=\"bookContent\"" );
+        beginIndex = allPageString.indexOf( "book_neirong_left\"" );
+        endIndex = allPageString.lastIndexOf( "book_neirong_left\"" );
         endIndex = allPageString.indexOf( "</div>", endIndex );
         String tempString = allPageString.substring( beginIndex, endIndex ).trim();
 
@@ -72,7 +73,7 @@ public class ParseIfengBook extends ParseEightNovel {
 
 
         // 取得作者名稱
-        beginIndex = allPageString.indexOf( "href=\"/read/book/search/result.htm?" );
+        beginIndex = allPageString.indexOf( "href=\"/read/search.htm?" );
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
         endIndex = allPageString.indexOf( "</a>", beginIndex );
         beginIndex = allPageString.lastIndexOf( ">", endIndex ) + 1;

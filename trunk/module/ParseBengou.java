@@ -132,10 +132,13 @@ public class ParseBengou extends ParseOnlineComicSite {
             */
             
             comicURL[p++] = basePicURL + picNames[i];
-            //Common.debugPrintln( p + " " + comicURL[p-1]  ); // debug
+            Common.debugPrintln( p + " 解析位址: " + comicURL[p-1]  ); // debug
+            //System.exit( 0 ); // debug
             
             // 每解析一個網址就下載一張圖
             singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0 );
+            
+            //System.exit( 0 ); // debug
         }
 
         //System.exit( 0 ); // debug

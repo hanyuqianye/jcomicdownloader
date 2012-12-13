@@ -78,8 +78,10 @@ public class RunModule {
 
             if ( allPageString == null || allPageString.equals( "" ) ) {
                 Common.errorReport( "網頁沒有內容（網頁下載錯誤）" );
+                Flag.downloadErrorFlag = true;
                 JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "解析網頁失敗（網頁無法下載？！）",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                
                 return;
             }
 
@@ -96,6 +98,7 @@ public class RunModule {
             }
             catch ( Exception ex ) {
                 Common.hadleErrorMessage( ex, "解析集數時發生錯誤" );
+                Flag.downloadErrorFlag = true;
                 JOptionPane.showMessageDialog( ComicDownGUI.mainFrame, "解析集數失敗！",
                     "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                 return;
@@ -260,6 +263,17 @@ public class RunModule {
             return false;
         }
     }
+    
+    // 此任務是否為音樂網站
+    public static boolean isMusicSite( int siteID ) {
+        if ( siteID == Site.SOGOU || 
+             siteID == Site.TING1 ) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     // 有些站在解析圖片網址的同時就在下載了，那就不用再進入到整本下載區
     public boolean isDownloadBefore( int siteID ) {
@@ -289,7 +303,7 @@ public class RunModule {
             || siteID == Site.FUMANHUA   ) {
             return true;
         }
-        else if ( isNovelSite( siteID ) || isBlogSite( siteID ) ) {
+        else if ( isNovelSite( siteID ) || isBlogSite( siteID ) || isMusicSite( siteID ) ) {
             return true;
         }
         else {
@@ -368,7 +382,7 @@ public class RunModule {
                 }
             }
 
-            if ( isNovelSite( parse.siteID ) || isBlogSite( parse.siteID ) ) {
+            if ( isNovelSite( parse.siteID ) || isBlogSite( parse.siteID ) || isMusicSite( parse.siteID ) ) {
                 Common.debugPrintln( "小說或部落格類型不產生壓縮檔！" );
             }
             else {

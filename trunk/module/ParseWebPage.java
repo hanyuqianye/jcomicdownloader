@@ -357,6 +357,14 @@ public class ParseWebPage
         {
             siteID = Site.SHUNONG;
         }
+        else if ( webSite.matches( "(?s).*music.sogou.com/(?s).*" ) )
+        {
+            siteID = Site.SOGOU;
+        }
+        else if ( webSite.matches( "(?s).*1ting.com/(?s).*" ) )
+        {
+            siteID = Site.TING1;
+        }
         else
         {
             siteID = Site.UNKNOWN;

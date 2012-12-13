@@ -3,29 +3,34 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v5.10
- Last Modified : 2012/12/8
+ Version  : v5.11
+ Last Modified : 2012/12/12
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.11:
+ 1. 新增對sogou的支援
+ 2. 新增對1ting的支援。
+ 3. 修復book.ifeng.com下載錯誤的問題。
+ 4. 修復任務置底錯誤的問題。
  5.10:
-1. 修復xxbh解析錯誤的問題。
-2. 換新的回報專區網址。
-3. 修復eh解析頁數錯誤的問題。
-4. 修改eh解析機制，使其無須全部頁面解析完畢才開始下載。
+ 1. 修復xxbh解析錯誤的問題。
+ 2. 換新的回報專區網址。
+ 3. 修復eh解析頁數錯誤的問題。
+ 4. 修改eh解析機制，使其無須全部頁面解析完畢才開始下載。
  5.09:
-1. 新增對woyouxian.com的支援。
-2. 新增對shunong.com的支援。
-3. 修復文字檔的第一小節標題位置錯誤的問題。 
-4. 修復jmymh解析位址錯誤的問題。
-5. 修復dmeden.net解析位址錯誤的問題。
+ 1. 新增對woyouxian.com的支援。
+ 2. 新增對shunong.com的支援。
+ 3. 修復文字檔的第一小節標題位置錯誤的問題。 
+ 4. 修復jmymh解析位址錯誤的問題。
+ 5. 修復dmeden.net解析位址錯誤的問題。
  5.08:
-1. 新增對tianyabook的支援。
-2. 修復冗餘設定檔檢查的問題。
-3. 修復dmeden.net解析位址錯誤的問題。
-4. 修復下載發生錯誤時無法正確通知的問題。
+ 1. 新增對tianyabook的支援。
+ 2. 修復冗餘設定檔檢查的問題。
+ 3. 修復dmeden.net解析位址錯誤的問題。
+ 4. 修復下載發生錯誤時無法正確通知的問題。
  5.07: 
-1. 新增對7wenku的支援。 
-2. 修復iask解析錯誤的問題。
+ 1. 新增對7wenku的支援。 
+ 2. 修復iask解析錯誤的問題。
  3. 修復veryim集數解析不全的問題。
  4. 修復在windows系統下執行腳本若有錯誤輸出時會阻塞的問題。
  
@@ -366,12 +371,9 @@
  */
 package jcomicdownloader;
 
-//import java.awt.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.IOException;
-import java.util.Locale;
 import java.util.Vector;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -382,6 +384,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import jcomicdownloader.enums.*;
 import jcomicdownloader.frame.ChoiceFrame;
@@ -397,6 +400,7 @@ import jcomicdownloader.tools.Common;
 import jcomicdownloader.tools.CommonGUI;
 import jcomicdownloader.tools.RunBrowser;
 import jcomicdownloader.tools.SystemClipBoard;
+
 
 /**
  @author surveyorK
@@ -483,7 +487,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v5.10";
+    public static String versionString = "JComicDownloader  v5.11";
 
     public ComicDownGUI()
     {
@@ -529,6 +533,14 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         logFrame = new LogFrame();
                         setSkin( SetUp.getSkinClassName() );
 
+                        // 解決部分Look and Feel在OS X下不支援command + c/v 的問題
+                        if ( Common.isMac() )
+                        {
+                            InputMap im = ( InputMap ) UIManager.get( "TextField.focusInputMap" );
+                            im.put( KeyStroke.getKeyStroke( KeyEvent.VK_C, KeyEvent.META_DOWN_MASK ), DefaultEditorKit.copyAction );
+                            im.put( KeyStroke.getKeyStroke( KeyEvent.VK_V, KeyEvent.META_DOWN_MASK ), DefaultEditorKit.pasteAction );
+                            im.put( KeyStroke.getKeyStroke( KeyEvent.VK_X, KeyEvent.META_DOWN_MASK ), DefaultEditorKit.cutAction );
+                        }
 
                         //setSkin(SetUp.getSkinClassName());
 
@@ -1981,15 +1993,15 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         int missionAmount = 0;
         if ( targetTable == downTable )
         {
-            downTableModel.getRowCount();
+            missionAmount = downTableModel.getRowCount();
         }
         else if ( targetTable == bookmarkTable )
         {
-            bookmarkTableModel.getRowCount();
+            missionAmount = bookmarkTableModel.getRowCount();
         }
         else if ( targetTable == recordTable )
         {
-            recordTableModel.getRowCount();
+            missionAmount = recordTableModel.getRowCount();
         }
 
         // 若不是下載中或位於正在下載該列的下方，則可以置換到最底處；反之，就只能置換到目前正在下載該列的上面。
@@ -2389,9 +2401,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 || url.matches( "(?s).*7wenku.com(?s).*" )
                 || url.matches( "(?s).*book.ifeng.com(?s).*" )
                 || url.matches( "(?s).*xunlook.com(?s).*" )
-                || url.matches( "(?s).*tianyabook.com(?s).*")
-                || url.matches( "(?s).*woyouxian.com(?s).*")
-                || url.matches( "(?s).*shunong.com(?s).*"))
+                || url.matches( "(?s).*tianyabook.com(?s).*" )
+                || url.matches( "(?s).*woyouxian.com(?s).*" )
+                || url.matches( "(?s).*shunong.com(?s).*" ) )
         {
             return true;
         }
@@ -3762,6 +3774,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 //Common.testConnection( testURL );
 
+                //setMp3Tag();
+
                 System.out.println( "OVER" );
 
 
@@ -3770,4 +3784,65 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         } );
         //downThread.start();
     }
+
+    /*
+    public void setMp3Tag()
+    {
+        AudioFile f;
+        
+        try
+        {
+            f = AudioFileIO.read( new File( "03.荷裡活.mp3" ) );
+            
+            Tag tag = f.getTag();
+            
+            if ( tag == null ) {
+                Common.debugPrintln( "原始音樂檔沒有標籤，需重新製作" );
+                tag = new ID3v23Tag();
+            }
+            
+            Artwork art = StandardArtwork.createArtworkFromFile( new File( "123.jpg" ));
+            //art.setFromFile( new File( "123.jpg" ) );
+            tag.createField( art );
+            //tag.setField( art );
+            tag.setField( FieldKey.ARTIST, "梁靜茹" );
+            tag.setField( FieldKey.ALBUM, "日久見人心專輯" );
+            tag.setField( FieldKey.TITLE, "日久見人心" );
+            f.setTag( tag );
+
+            try
+             {
+                f.commit();
+                Common.debugPrintln( "寫入完成 !");
+                //f.setTag( tag ); 
+            }
+            catch ( CannotWriteException ex )
+            {
+                Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+            }
+
+        }
+        catch ( CannotReadException ex )
+        {
+            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+        }
+        catch ( IOException ex )
+        {
+            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+        }
+        catch ( org.jaudiotagger.tag.TagException ex )
+        {
+            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+        }
+        catch ( ReadOnlyFileException ex )
+        {
+            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+        }
+        catch ( InvalidAudioFrameException ex )
+        {
+            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+        }
+
+    }
+    */
 }

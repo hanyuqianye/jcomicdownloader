@@ -27,6 +27,7 @@ import jcomicdownloader.module.*;
 import jcomicdownloader.*;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -680,6 +681,7 @@ public class Common
             catch ( Exception e )
             {
                 Common.hadleErrorMessage( e, "無法正確下載" + webSite );
+                Flag.downloadErrorFlag = true;
             }
 
             CommonGUI.stateBarDetailMessage = null;
@@ -777,6 +779,28 @@ public class Common
             }
         }
         return cookieStrings;
+    }
+    
+    public static int getDownloadFileLength( String fileURL )
+    {
+        URL url;
+        int length = 0;
+        
+        try
+        {
+            url = new URL( fileURL );
+            HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
+            
+            length = connection.getContentLength();
+            
+            Common.debugPrintln( fileURL + " 的長度: " + length );
+        }
+        catch ( Exception ex )
+        {
+            Logger.getLogger( Common.class.getName() ).log( Level.SEVERE, null, ex );
+        }
+        
+        return length;
     }
 
     public static boolean isLegalURL( String webSite )
@@ -2840,6 +2864,238 @@ public class Common
             Common.errorReport( "無法重新開啟程式" );
         }
         ComicDownGUI.exit(); // 結束程式
+    }
+    
+    
+    // 下載j單一個ar檔，下載完畢自動重啟
+    public static void downloadJarFile( final String fileURL, final String fileName )
+    {
+        Common.downloadJarFiles( new String[]
+                {
+                    fileURL
+                }, new String[]
+                {
+                    fileName
+                } );
+    }
+
+    // 下載多個jar檔，下載完畢自動重啟
+    public static void downloadJarFiles( final String[] fileURL, final String[] fileName )
+    {
+        boolean backupValue = Run.isAlive; // 備份原值
+        Run.isAlive = true;
+        for ( int i = 0; i < fileURL.length; i++ )
+        {
+            Common.downloadFile( fileURL[i], Common.getNowAbsolutePath(), fileName[i], false, "" );
+        }
+
+        Run.isAlive = backupValue; // 還原原值
+
+        Thread downThread = new Thread( new Runnable()
+        {
+
+            public void run()
+            {
+                CommonGUI.showMessageDialog( ComicDownGUI.mainFrame,
+                                             fileName + "下載完畢，請注意，程式即將重新啟動! ",
+                                             "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                Common.restartApplication(); // 重新開啟程式
+            }
+        } );
+        downThread.start();
+    }
+    
+    public static void setMp3Tag( String filePath, String fileName, String[] tags )
+    {
+        /*
+         */
+
+        //String jarFileName = "jaudiotagger-2.0.4-20111207.115108-15.jar";
+        String jarClassName = "jaudiotagger-2.0.4-20111207.115108-15.jar";
+
+        // 若jar檔不存在 就下載
+        if ( !new File( Common.getNowAbsolutePath() + jarClassName ).exists() )
+        {
+            String jarFileURL = "https://sites.google.com/site/jcomicdownloader/release/jaudiotagger-2.0.4-20111207.115108-15.jar?attredirects=0&d=1";
+
+            Common.downloadJarFile( jarFileURL, jarClassName );
+        }
+
+        Class AudioFile = CommonGUI.getOuterClass( "org.jaudiotagger.audio.AudioFile", jarClassName );
+        Class AudioFileIO = CommonGUI.getOuterClass( "org.jaudiotagger.audio.AudioFileIO", jarClassName );
+        Class Tag = CommonGUI.getOuterClass( "org.jaudiotagger.tag.Tag", jarClassName );
+        Class FieldKey = CommonGUI.getOuterClass( "org.jaudiotagger.tag.FieldKey", jarClassName );
+        Class ID3v23Tag = CommonGUI.getOuterClass( "org.jaudiotagger.tag.id3.ID3v23Tag", jarClassName );
+        Class Artwork = CommonGUI.getOuterClass( "org.jaudiotagger.tag.images.Artwork", jarClassName );
+        Class StandardArtwork = CommonGUI.getOuterClass( "org.jaudiotagger.tag.images.StandardArtwork", jarClassName );
+
+        //Object f = CommonGUI.getNewInstanceFromClass( AudioFile );
+
+        //f = AudioFileIO.read( new File( "日久見人心.mp3" ) );
+
+        try
+        {
+            Method read = AudioFileIO.getDeclaredMethod( "read", new Class[]
+                    {
+                        File.class
+                    } );
+
+            Object f = read.invoke( null, new Object[]
+                    {
+                        new File( filePath + fileName )
+                    } ); // static method可以將object指向null
+
+            if ( f == null )
+            {
+                Common.debugPrintln( fileName + " 無法讀取!" );
+                return;
+            }
+
+            Object tag;
+            if ( fileName.matches( "(?s).*\\.wma" ) ) // 若是wma就不能做ID3v23Tag
+            {
+                //Tag tag = f.getTag();
+                Method getTag = AudioFile.getDeclaredMethod( "getTag" );
+                tag = getTag.invoke( AudioFile.cast( f ) );
+            }
+            else
+            {
+                // 每次都重新製作標籤
+                Common.debugPrintln( fileName + " 標籤重新製作" );
+                //tag = new ID3v23Tag();
+                tag = CommonGUI.getNewInstanceFromClass( ID3v23Tag );
+            }
+
+
+            //Artwork art = StandardArtwork.createArtworkFromFile( new File( "123.jpg" ));
+            Method createArtworkFromFile = StandardArtwork.getDeclaredMethod( "createArtworkFromFile", new Class[]
+                    {
+                        File.class
+                    } );
+            Object art = createArtworkFromFile.invoke( null, new Object[]
+                    {
+                        new File( tags[TagEnum.COVER] )
+                    } );
+
+            //tag.setField( art );
+            Method setField = Tag.getDeclaredMethod( "setField", new Class[]
+                    {
+                        Artwork
+                    } );
+            setField.invoke( Tag.cast( tag ), new Object[]
+                    {
+                        Artwork.cast( art )
+                    } );
+
+            //tag.setField( FieldKey.valueof( ARTIST ), "梁靜茹" );
+            Method valueof = FieldKey.getDeclaredMethod( "valueOf", new Class[]
+                    {
+                        String.class
+                    } );
+            setField = Tag.getDeclaredMethod( "setField", new Class[]
+                    {
+                        FieldKey, String.class
+                    } );
+
+            Object ARTIST = valueof.invoke( null, new Object[]
+                    {
+                        "ARTIST"
+                    } );
+            setField.invoke( Tag.cast( tag ), new Object[]
+                    {
+                        FieldKey.cast( ARTIST ), tags[TagEnum.ARTIST]
+                    } );
+            Object ALBUM = valueof.invoke( null, new Object[]
+                    {
+                        "ALBUM"
+                    } );
+            setField.invoke( Tag.cast( tag ), new Object[]
+                    {
+                        FieldKey.cast( ALBUM ), tags[TagEnum.ALBUM]
+                    } );
+
+            Object GENRE = valueof.invoke( null, new Object[]
+                    {
+                        "GENRE"
+                    } );
+            setField.invoke( Tag.cast( tag ), new Object[]
+                    {
+                        FieldKey.cast( GENRE ), tags[TagEnum.GENRE]
+                    } );
+            Object LANGUAGE = valueof.invoke( null, new Object[]
+                    {
+                        "LANGUAGE"
+                    } );
+            setField.invoke( Tag.cast( tag ), new Object[]
+                    {
+                        FieldKey.cast( LANGUAGE ), tags[TagEnum.LANGUAGE]
+                    } );
+
+            //Object LYRICS = valueof.invoke(null, new Object[]{"LYRICS"});
+            //setField.invoke(Tag.cast(tag), new Object[]{ FieldKey.cast( LYRICS ), tags[TagEnum.LYRICS]});
+            /*
+            Object COMMENT = valueof.invoke( null, new Object[]
+                    {
+                        "COMMENT"
+                    } );
+            setField.invoke( Tag.cast( tag ), new Object[]
+                    {
+                        FieldKey.cast( COMMENT ), tags[TagEnum.COMMENT]
+                    } );
+            */
+            Object TITLE = valueof.invoke( null, new Object[]
+                    {
+                        "TITLE"
+                    } );
+            setField.invoke( Tag.cast( tag ), new Object[]
+                    {
+                        FieldKey.cast( TITLE ), tags[TagEnum.TITLE]
+                    } );
+            Object TRACK = valueof.invoke( null, new Object[]
+                    {
+                        "TRACK"
+                    } );
+            setField.invoke( Tag.cast( tag ), new Object[]
+                    {
+                        FieldKey.cast( TRACK ), tags[TagEnum.TRACK]
+                    } );
+            Object YEAR = valueof.invoke( null, new Object[]
+                    {
+                        "YEAR"
+                    } );
+            setField.invoke( Tag.cast( tag ), new Object[]
+                    {
+                        FieldKey.cast( YEAR ), tags[TagEnum.YEAR]
+                    } );
+
+            //f.setTag( tag );
+            Method setTag = AudioFile.getDeclaredMethod( "setTag", new Class[]
+                    {
+                        Tag
+                    } );
+            setTag.invoke( AudioFile.cast( f ), new Object[]
+                    {
+                        Tag.cast( tag )
+                    } );
+
+            // f.commit();
+            Method commit = AudioFile.getDeclaredMethod( "commit" );
+            commit.invoke( AudioFile.cast( f ) );
+            Common.debugPrintln( fileName + " 加入標籤成功 ! " );
+
+        }
+        catch ( Exception ex )
+        {
+
+            Logger.getLogger( CommonGUI.class.getName() ).log( Level.SEVERE, null, ex );
+            Common.debugPrintln( "出錯啦!" );
+        }
+
+
+        //tag.setField( FieldKey.ALBUM, "日久見人心專輯" );
+
+        //tag.setField( FieldKey.TITLE, "日久見人心" );
+
     }
 }
 

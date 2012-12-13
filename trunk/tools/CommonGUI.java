@@ -13,6 +13,7 @@ package jcomicdownloader.tools;
 import java.awt.*;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -27,7 +28,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import jcomicdownloader.ComicDownGUI;
 import jcomicdownloader.SetUp;
-import jcomicdownloader.frame.OptionFrame;
+import jcomicdownloader.enums.TagEnum;
 import jcomicdownloader.module.Run;
 
 /**
@@ -548,7 +549,7 @@ public class CommonGUI
                     "從搜尋到的前10張圖挑出封面", "從搜尋到的前15張圖挑出封面", "從搜尋到的前20張圖挑出封面"
                 };
     }
-    
+
     public String[] getCoverEnStrings()
     {
 
@@ -729,8 +730,8 @@ public class CommonGUI
         {
             if ( className.matches( ".*NapkinLookAndFeel.*" ) )
             {
-                Class napkinClass = getOuterClass( className, "napkinlaf-alpha001.jar" );
-                LookAndFeel laf = ( LookAndFeel ) getNewInstanceFromClass( napkinClass );
+                Class napkinClass = CommonGUI.getOuterClass( className, "napkinlaf-alpha001.jar" );
+                LookAndFeel laf = ( LookAndFeel ) CommonGUI.getNewInstanceFromClass( napkinClass );
                 if ( laf != null )
                 {
                     UIManager.setLookAndFeel( laf );
@@ -871,33 +872,7 @@ public class CommonGUI
 
         if ( choice == JOptionPane.YES_OPTION )
         {
-            Thread downThread = new Thread( new Runnable()
-            {
-
-                public void run()
-                {
-                    //SwingUtilities.invokeLater( new Runnable(){ public void run() {
-
-                    boolean backupValue = Run.isAlive; // 備份原值
-                    Run.isAlive = true;
-
-                    for ( int i = 0; i < themeURLs.length; i++ )
-                    {
-                        Common.downloadFile( themeURLs[i],
-                                             Common.getNowAbsolutePath(), themeFileNames[i], false, "" );
-                    }
-                    Run.isAlive = backupValue; // 還原原值
-
-                    CommonGUI.showMessageDialog( ComicDownGUI.mainFrame,
-                                                 themeFileNameString + "下載完畢，程式即將關閉，請您再次啟動",
-                                                 "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-
-                    Common.restartApplication(); // 重新開啟程式
-
-                    //} } );
-                }
-            } );
-            downThread.start();
+            Common.downloadJarFiles( themeURLs, themeFileNames );
         }
         else
         {
@@ -1301,4 +1276,6 @@ public class CommonGUI
          */
 
     }
+
+
 }

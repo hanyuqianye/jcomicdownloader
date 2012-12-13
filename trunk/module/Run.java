@@ -519,6 +519,16 @@ public class Run extends Thread
                 ParseOnlineComicSite parse = new ParseShunong();
                 runSingleParseModule( parse );
             }
+            else if ( pw.getSiteID() == Site.SOGOU )
+            {
+                ParseOnlineComicSite parse = new ParseSogou();
+                runSingleParseModule( parse );
+            }
+            else if ( pw.getSiteID() == Site.TING1 )
+            {
+                ParseOnlineComicSite parse = new Parse1Ting();
+                runSingleParseModule( parse );
+            }
             else // Site.UNKNOWN
             {
                 Common.urlIsUnknown = true;
