@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2011/11/1
+ Last Modified : 2012/12/15
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.12: 修復部分介面嚴重的崩潰問題。
  1.09: 加入書籤表格和紀錄表格相關的公用方法
  ----------------------------------------------------------------------------------------------------
  */
@@ -51,6 +52,15 @@ public class CommonGUI
     public static String showInputDialogValue = "IntialValue"; // OptionDialog視窗輸入的值
     public static boolean showMessageOK = false;
     public static String mainIcon = "main_icon.png";
+    private static String jtattooFileName = "Jtattoo.jar";
+    private static String nimrodFileName = "nimrodlf-1.2.jar";
+    private static String napkinFileName = "napkinlaf-alpha001.jar";
+    private static String substanceFileName = "substance-6.1.jar";
+    private static String tridentFileName = "trident.jar";
+    private static String jtattooClassName = "com.jtattoo.plaf.*";
+    private static String nimrodClassName = "com.nilo.plaf.nimrod.*";
+    public static String napkinClassName = ".*napkin\\..*";
+    private static String substanceClassName = ".*substance.api.skin.*";
 
     public CommonGUI()
     {
@@ -705,6 +715,22 @@ public class CommonGUI
         return object;
     }
 
+    // 是否為外部的L&F
+    public static boolean isOuterLookAndFeel( String className )
+    {
+        if ( className.matches( jtattooClassName )
+                || className.matches( nimrodClassName )
+                || className.matches( napkinClassName )
+                || className.matches( substanceClassName ) )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     public static void setLookAndFeelByClassName( String className )
     {
 
@@ -728,24 +754,69 @@ public class CommonGUI
 
         try
         {
-            if ( className.matches( ".*NapkinLookAndFeel.*" ) )
+
+            // 外部的L&F
+            if ( CommonGUI.isOuterLookAndFeel( className ) )
             {
-                Class napkinClass = CommonGUI.getOuterClass( className, "napkinlaf-alpha001.jar" );
-                LookAndFeel laf = ( LookAndFeel ) CommonGUI.getNewInstanceFromClass( napkinClass );
+                Class skinClass = null;
+
+                if ( className.matches( jtattooClassName ) )
+                {
+                    skinClass = CommonGUI.getOuterClass( className, jtattooFileName );
+
+                }
+                else if ( className.matches( nimrodClassName ) )
+                {
+                    skinClass = CommonGUI.getOuterClass( className, nimrodFileName );
+                }
+                else if ( className.matches( napkinClassName ) )
+                {
+                    skinClass = CommonGUI.getOuterClass( className, napkinFileName );
+                }
+                else if ( className.matches( substanceClassName ) )
+                {
+                    skinClass = CommonGUI.getOuterClass( className, substanceFileName );
+                }
+
+                LookAndFeel laf = ( LookAndFeel ) CommonGUI.getNewInstanceFromClass( skinClass );
                 if ( laf != null )
                 {
                     UIManager.setLookAndFeel( laf );
                 }
                 else
                 {
-                    Common.errorReport( "建立物件失敗！（null）" );
+                    Common.errorReport( "建立" + skinClass.getSimpleName() + "介面的物件失敗！（null）" );
                 }
-
             }
             else
             {
                 UIManager.setLookAndFeel( className );
             }
+
+            
+
+            /*
+             else if ( className.matches( ".*substance.api.skin.*" ) )
+             {
+             Class napkinClass = CommonGUI.getOuterClass( className, "substance-6.1.jar" );
+             LookAndFeel laf = ( LookAndFeel ) CommonGUI.getNewInstanceFromClass( napkinClass );
+             if ( laf != null )
+             {
+             UIManager.setLookAndFeel( laf );
+             }
+             else
+             {
+             Common.errorReport( "建立substance介面的物件失敗！（null）" );
+             }
+             }
+             */
+            /*
+             else
+             {
+             UIManager.setLookAndFeel( className );
+             }
+             */
+
             //UIManager.setLookAndFeel( new com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel());
         }
         catch ( Exception ex )
@@ -767,35 +838,30 @@ public class CommonGUI
     // 檢查skin是否由外部jar支援，若是外部skin且沒有此jar，則下載
     public static boolean checkSkin()
     {
-        String jtattooFileName = "Jtattoo.jar";
-        String nimrodFileName = "nimrodlf-1.2.jar";
-        String napkinFileName = "napkinlaf-alpha001.jar";
-        String substanceFileName = "substance-6.1.jar";
-        String tridentFileName = "trident.jar";
+
 
         boolean foundJAR = false; // 是否有設定值需要用到的JAR檔
 
-        if ( SetUp.getSkinClassName().matches( "com.jtattoo.plaf.*" )
-                && (!new File( Common.getNowAbsolutePath() + jtattooFileName ).exists()) )
+        if ( SetUp.getSkinClassName().matches( jtattooClassName )
+                && !Common.existJAR( jtattooFileName ) )
         {
             new CommonGUI().downloadNewTheme( "JTattoo", jtattooFileName,
                                               "http://jcomicdownloader.googlecode.com/files/JTattoo.jar" ); // 下載JTattoo.jar
         }
-        else if ( SetUp.getSkinClassName().matches( "com.nilo.plaf.nimrod.*" )
-                && (!new File( Common.getNowAbsolutePath() + nimrodFileName ).exists()) )
+        else if ( SetUp.getSkinClassName().matches( nimrodClassName )
+                && !Common.existJAR( nimrodFileName ) )
         {
             new CommonGUI().downloadNewTheme( "NimRod", nimrodFileName,
                                               "http://jcomicdownloader.googlecode.com/files/nimrodlf-1.2.jar" ); // 下載nimrodlf-1.2.jar
         }
-        else if ( SetUp.getSkinClassName().matches( ".*NapkinLookAndFeel.*" )
-                && (!new File( Common.getNowAbsolutePath() + napkinFileName ).exists()) )
+        else if ( SetUp.getSkinClassName().matches( napkinClassName )
+                && !Common.existJAR( napkinFileName ) )
         {
             new CommonGUI().downloadNewTheme( "Napkin", napkinFileName,
                                               "https://sites.google.com/site/jcomicdownloaderbackup/release/napkinlaf-alpha001.jar?attredirects=0&d=1" ); // 下載napkinlaf-alpha001.jar
         }
-        else if ( SetUp.getSkinClassName().matches( ".*substance.api.skin.*" )
-                && (!new File( Common.getNowAbsolutePath() + substanceFileName ).exists()
-                || !new File( Common.getNowAbsolutePath() + tridentFileName ).exists()) )
+        else if ( SetUp.getSkinClassName().matches( substanceClassName )
+                && (!Common.existJAR( substanceFileName ) || !Common.existJAR( tridentFileName )) )
         {
             String[] themeNames = new String[]
             {
@@ -868,7 +934,7 @@ public class CommonGUI
         int choice = CommonGUI.showConfirmDialog( null,
                                                   "資料夾內未發現"
                 + themeFileNameString + "，無法使用"
-                + skinName + "界面！\n\n請問是否要下載" + themeFileNameString + " ？",
+                + skinName + "界面！<br><br>請問是否要下載" + themeFileNameString + " ？",
                                                   "Download the " + themeFileNameString + " for new theme ?",
                                                   "提醒訊息", JOptionPane.YES_NO_OPTION );
 
@@ -1003,17 +1069,16 @@ public class CommonGUI
 
                     public void run()
                     {
-                        if ( SetUp.getSkinClassName().matches( ".*napkin\\..*" ) )
+                        CommonGUI.setLookAndFeelByClassName( SetUp.getSkinClassName() );
+                        if ( SetUp.getSkinClassName().matches( CommonGUI.napkinClassName ) )
                         {
-                            // 因為napkin不支援JFileChooser，所以瀏覽檔案之前先轉為nimbus介面
-                            String className = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-                            CommonGUI.setLookAndFeelByClassName( className );
-
+                            // 因為napkin不支援JFileChooser，所以瀏覽檔案之前先轉為預設介面
+                            CommonGUI.setLookAndFeelByClassName( ComicDownGUI.getDefaultSkinClassName() );
                         }
 
-
-
                         JFileChooser dirChooser = new JFileChooser( directoryString );
+                        //SwingUtilities.updateComponentTreeUI(dirChooser);
+                        
                         if ( thisComponent.getClass().getName().matches( ".*BackgroundSettingFrame.*" ) )
                         {
                             // 開啟圖片預覽功能
@@ -1035,6 +1100,10 @@ public class CommonGUI
 
                         try
                         {
+                            //CommonGUI.setLookAndFeelByClassName( ComicDownGUI.getDefaultSkinClassName() );
+                            //CommonGUI.updateUI( dirChooser );
+                    
+                            
                             int result = dirChooser.showDialog( thisComponent, "確定" );
 
                             if ( result == JFileChooser.APPROVE_OPTION )
@@ -1064,12 +1133,12 @@ public class CommonGUI
                             ex.printStackTrace();
                         }
 
-                        if ( SetUp.getSkinClassName().matches( ".*napkin\\..*" ) )
+                        if ( SetUp.getSkinClassName().matches( CommonGUI.napkinClassName ) )
                         {
                             // 再將laf改回來。
                             CommonGUI.setLookAndFeelByClassName( SetUp.getSkinClassName() );
-
                         }
+                        //CommonGUI.setLookAndFeelByClassName( SetUp.getSkinClassName() );
 
                     }
                 } );
@@ -1154,11 +1223,11 @@ public class CommonGUI
         message = Common.getStringUsingDefaultLanguage( message, enMessage ); // 使用預設語言 
         title = Common.getStringUsingDefaultLanguage( title, title ); // 使用預設語言 
         return JOptionPane.showConfirmDialog( parentComponent,
-                                              "<HTML><FONT size="
+                                              "<html><font size="
                 + CommonGUI.geteMessageFontSize()
                 + ">"
                 + message
-                + "</FONT></HTML>", title, optionType );
+                + "</font></html>", title, optionType );
     }
 
     public static int showOptionDialog( Component parentComponent,
@@ -1184,11 +1253,11 @@ public class CommonGUI
             {
                 try
                 {
-                    CommonGUI.optionDialogChoice = JOptionPane.showOptionDialog( parentComponent, "<HTML><FONT size="
+                    CommonGUI.optionDialogChoice = JOptionPane.showOptionDialog( parentComponent, "<html><font size="
                             + CommonGUI.geteMessageFontSize()
                             + ">"
                             + message
-                            + "</FONT></HTML>",
+                            + "</font></html>",
                                                                                  title, optionType, messageType, icon, options, options[0] );
 
                     //notifyAll();
@@ -1229,11 +1298,11 @@ public class CommonGUI
                 try
                 {
                     CommonGUI.showInputDialogValue = JOptionPane.showInputDialog(
-                            parentComponent, "<HTML><FONT size="
+                            parentComponent, "<html><font size="
                             + CommonGUI.geteMessageFontSize()
                             + ">"
                             + message
-                            + "</FONT></HTML>", title, messageType );
+                            + "</font</html>", title, messageType );
 
                     //notifyAll();
                 }

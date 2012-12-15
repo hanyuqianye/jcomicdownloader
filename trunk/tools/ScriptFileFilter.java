@@ -5,8 +5,6 @@
 package jcomicdownloader.tools;
 
 import java.io.File;
-import javax.swing.*;
-import javax.swing.filechooser.*;
 
 /* ImageFilter.java is used by FileChooserDemo2.java. */
 public class ScriptFileFilter extends javax.swing.filechooser.FileFilter

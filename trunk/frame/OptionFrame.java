@@ -128,6 +128,7 @@ public class OptionFrame extends JFrame implements MouseListener
     private JRadioButton zipRadioButtion, cbzRadioButtion;
     private JRadioButton txtRadioButtion, htmlWithoutPicRadioButtion, htmlWithPicRadioButtion;
     private boolean haveSetMainFrameBackgroundPic; //  這次是否有設定過主介面的背景圖片和相關顏色
+    private boolean needRestart; // 是否需要在選項是窗關閉同時也重新啟動程式
 
     /**
 
@@ -140,6 +141,8 @@ public class OptionFrame extends JFrame implements MouseListener
         OptionFrame.thisFrame = this; // for close the frame
 
         haveSetMainFrameBackgroundPic = false; //  這次是否有設定過背景圖片和相關顏色
+        
+        needRestart = false; // 預設不用重新啟動程式
 
         setUpUIComponent();
 
@@ -939,13 +942,29 @@ public class OptionFrame extends JFrame implements MouseListener
         boolean continueChange = true;
         String className = skinClassNames[index];
 
-        // 檢查是否有設定背景圖片，若有則發出提醒通知，且不繼續改變介面
+        // 首先檢查是否有設定背景圖片，若有則發出提醒通知，且不繼續改變介面
         if ( checkSettingOfBackgroundPic( index ) )
         {
             int napkinIndex = new CommonGUI().getSkinOrderBySkinClassName( "napkin.NapkinLookAndFeel" );
             skinBox.setSelectedIndex( napkinIndex ); // 回到Napkin介面
 
             return;
+        }
+
+        // 以下情形：
+        // 1. 從napkin介面要轉換到別的介面
+        // 2. 從別種介面要轉換到substance介面
+        // 都需要重新啟動，以策安全。 
+        if ( (SetUp.getSkinClassName().matches( ".*napkin\\..*" )
+                && !className.matches( ".*napkin\\..*" ))
+                || (!SetUp.getSkinClassName().matches( ".*substance.api.skin.*" )
+                && className.matches( ".*substance.api.skin.*" )) )
+        {
+            CommonGUI.showMessageDialog( OptionFrame.thisFrame,
+                                                                 "選擇的介面為<font color=blue>"
+                                            + className
+                                            + "</font><br><font color=\"red\">程式將在關閉選項視窗後重新啟動!</font>" );
+            needRestart = true;
         }
 
         SetUp.setSkinClassName( className ); // 紀錄到設定值
@@ -957,39 +976,7 @@ public class OptionFrame extends JFrame implements MouseListener
 
         try
         {
-            //className = "com.pagosoft.plaf.PgsLookAndFeel";
-
-            /*
-             * // oyoaha介面 com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel laf =
-             new com.oyoaha.swing.plaf.oyoaha.OyoahaLookAndFeel(); File
-             themeFile = new File(
-             "/home/surveyork/文件/程式/JAVA/NetBeansProjects/" + "" +
-             "JComicDownloader/lib/oyoahalnf/metal/green1.theme" );
-             laf.setOyoahaTheme( themeFile );
-             */
-
-            /*
-             * // Tiny介面 de.muntjak.tinylookandfeel.TinyLookAndFeel laf = new
-             de.muntjak.tinylookandfeel.TinyLookAndFeel();
-
-
-             * // TINY_STYLE = 0;int W99_STYLE = 1;YQ_STYLE = 2; File themeFile
-             = new File("/home/surveyork/文件/程式/JAVA/" + "" +
-             "NetBeansProjects/JComicDownloader/" + "" +
-             "lib/tinylaf-1_4_0/tiny_theme/99 Lego.theme" );
-
-             * //de.muntjak.tinylookandfeel.Theme.loadTheme( themeFile );
-             laf.setCurrentTheme( null ); //laf.setCurrentTheme(
-             com.pagosoft.plaf.ThemeFactory.getThemeByName( "silver" ) );
-             UIManager.setLookAndFeel( laf );
-             */
-
-            // substance介面
-            // org.jvnet.substance.skin.SubstanceBusinessLookAndFeel laf = 
-            //    org.jvnet.substance.skin.SubstanceBusinessLookAndFeel();
-
             CommonGUI.setLookAndFeelByClassName( className );
-
         }
         catch ( Exception ex )
         {
@@ -1031,11 +1018,13 @@ public class OptionFrame extends JFrame implements MouseListener
         Common.debugPrintln( "改為" + className + "面板" );
 
         Common.debugPrintln( "目前面板名稱: " + UIManager.getLookAndFeel().getName() );
+
     }
 
     // 檢查是否有設定背景圖片，若有則發出提醒通知
     private boolean checkSettingOfBackgroundPic( int index )
     {
+        // 如果有設定背景圖片，且要從Napkin介面換為其他介面時，才回傳true
         if ( !skinClassNames[index].matches( ".*Napkin.*" )
                 && (usingBackgroundPicOfMainFrameCheckBox.isSelected()
                 || usingBackgroundPicOfOptionFrameCheckBox.isSelected()
@@ -1143,7 +1132,7 @@ public class OptionFrame extends JFrame implements MouseListener
 
                             public void run()
                             {
-
+                                CommonGUI.setLookAndFeelByClassName( SetUp.getSkinClassName() );
                                 JFontChooser fontChooser = new JFontChooser();
                                 Font font = fontChooser.showDialog( OptionFrame.thisFrame, "選擇字型" );
 
@@ -1157,13 +1146,14 @@ public class OptionFrame extends JFrame implements MouseListener
                                 if ( font != null )
                                 {
                                     CommonGUI.showMessageDialog( OptionFrame.thisFrame,
-                                                                 "選擇的字型為<FONT color=blue>"
+                                                                 "選擇的字型為<font color=blue>"
                                             + font.getName()
-                                            + "</FONT><BR>選擇的大小為<FONT color=\"blue\">"
+                                            + "</font><br>選擇的大小為<font color=\"blue\">"
                                             + font.getSize()
-                                            + "</FONT><BR><FONT color=\"red\">程式即將重新啟動!</FONT>" );
+                                            + "</font><br><font color=\"red\">程式將在關閉選項視窗後重新啟動!</font>" );
 
-                                    Common.startJARandExit( Common.getThisFileName() ); // 重新開啟程式
+                                    needRestart = true;
+                                    //Common.restart(); // 重新開啟程式
                                 }
 
                             }
@@ -1224,7 +1214,7 @@ public class OptionFrame extends JFrame implements MouseListener
                                       SetUp.getAllDoneScriptFile(), new ScriptFileFilter() );
             }
 
-            CommonGUI.setLookAndFeelByClassName( ComicDownGUI.defaultSkinClassName );
+            //CommonGUI.setLookAndFeelByClassName( ComicDownGUI.defaultSkinClassName );
 
             // 詳細設定背景圖片和字體顏色搭配
             if ( event.getSource() == setBackgroundPicOfMainFrameButton )
@@ -1326,13 +1316,12 @@ public class OptionFrame extends JFrame implements MouseListener
                     SetUp.setDefaultTextOutputFormat( FileFormatEnum.TEXT ); // 紀錄到設定值
                 }
 
-                boolean needRestart = false;
                 Boolean tempBool = new Boolean( usingBackgroundPicOfMainFrameCheckBox.isSelected() );
                 if ( !tempBool.equals( SetUp.getUsingBackgroundPicOfMainFrame() )
                         || haveSetMainFrameBackgroundPic )
                 {
                     CommonGUI.showMessageDialog( OptionFrame.thisFrame,
-                                                 "<HTML>主視窗背景設定已改變，<FONT color=\"red\">程式即將重新啟動!</FONT></HTML>",
+                                                 "主視窗背景設定已改變，<font color=\"red\">程式即將重新啟動!</font>",
                                                  "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
 
                     needRestart = true;
@@ -1369,7 +1358,7 @@ public class OptionFrame extends JFrame implements MouseListener
 
                 if ( needRestart )
                 {
-                    Common.startJARandExit( Common.getThisFileName() ); // 重新執行程式
+                    Common.restart(); // 重新執行程式
                 }
 
 

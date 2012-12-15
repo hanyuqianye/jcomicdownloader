@@ -2856,6 +2856,12 @@ public class Common
             Common.errorReport( e.getMessage() );
         }
     }
+    
+    // 重新啟動程式
+    public static void restart()
+    {
+        Common.startJARandExit( Common.getThisFileName() );
+    }
 
     // 執行指定jar檔並結束目前程式
     public static void startJARandExit( String jarFileName )
@@ -2878,34 +2884,7 @@ public class Common
         return ComicDownGUI.versionString.replaceAll( "  ", "_" ) + ".jar";
     }
 
-    // 重新開啟jar檔 (暫時廢棄)
-    public static void restartApplicationXXX()
-    {
-        final String javaBin = System.getProperty( "java.home" ) + File.separator + "bin" + File.separator + "java";
-
-        String appPath = Common.getNowAbsolutePath() + Common.getThisFileName();
-
-        /*
-         Build command: java -jar application.jar
-         */
-        final ArrayList<String> command = new ArrayList<String>();
-        command.add( javaBin );
-        command.add( "-jar" );
-        command.add( appPath );
-
-        Common.debugPrintln( javaBin + "-jar" + appPath );
-
-        final ProcessBuilder builder = new ProcessBuilder( command );
-        try
-        {
-            builder.start();
-        }
-        catch ( IOException ex )
-        {
-            Common.errorReport( "無法重新開啟程式" );
-        }
-        ComicDownGUI.exit(); // 結束程式
-    }
+    
 
     // 下載j單一個ar檔，下載完畢自動重啟
     public static void downloadJarFile( final String fileURL, final String fileName )
@@ -2923,10 +2902,12 @@ public class Common
     public static void downloadJarFiles( final String[] fileURL, final String[] fileName )
     {
         boolean backupValue = Run.isAlive; // 備份原值
+        String fileDir = Common.getNowAbsolutePath() + "lib" + Common.getSlash(); // 存於lib資料夾內
+        
         Run.isAlive = true;
         for ( int i = 0; i < fileURL.length; i++ )
         {
-            Common.downloadFile( fileURL[i], Common.getNowAbsolutePath(), fileName[i], false, "" );
+            Common.downloadFile( fileURL[i], fileDir, fileName[i], false, "" );
         }
 
         Run.isAlive = backupValue; // 還原原值
@@ -2940,7 +2921,7 @@ public class Common
                                              fileName + "下載完畢，請注意，程式即將重新啟動! ",
                                              "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
                 //Common.restartApplication(); // 重新開啟程式
-                Common.startJARandExit( Common.getThisFileName() );
+                Common.restart();
             }
         } );
         downThread.start();
@@ -3137,6 +3118,20 @@ public class Common
 
         //tag.setField( FieldKey.TITLE, "日久見人心" );
 
+    }
+    
+    // 檢查是否存在可直接掛載的jar檔
+    public static boolean existJAR( String jarFileName )
+    {
+        if ( new File( Common.getNowAbsolutePath() + jarFileName ).exists() || 
+             new File( Common.getNowAbsolutePath() + "lib" + Common.getSlash() + jarFileName ).exists() ) 
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public static String unescape( String src )

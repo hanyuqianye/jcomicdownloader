@@ -15,6 +15,7 @@
  5. 增加暫停時倒數秒數的文字顯示。
  6. 修復資訊視窗在沒有網路時無窮等待的問題。
  7. 修復設置背景圖片後無法正常運行的問題。
+ 8. 修復部分介面嚴重的崩潰問題。
  5.11:
  1. 新增對sogou的支援
  2. 新增對1ting的支援。
@@ -404,10 +405,7 @@ import jcomicdownloader.table.BookmarkTableModel;
 import jcomicdownloader.table.DownTableRender;
 import jcomicdownloader.table.DownloadTableModel;
 import jcomicdownloader.table.RecordTableModel;
-import jcomicdownloader.tools.Common;
-import jcomicdownloader.tools.CommonGUI;
-import jcomicdownloader.tools.RunBrowser;
-import jcomicdownloader.tools.SystemClipBoard;
+import jcomicdownloader.tools.*;
 
 /**
  @author surveyorK
@@ -537,7 +535,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     public void run()
                     {
                         // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
-                        setSkin( onlyDefaultSkinClassName );
+                        setSkin( ComicDownGUI.getDefaultSkinClassName()  );
                         logFrame = new LogFrame();
                         setSkin( SetUp.getSkinClassName() );
 
@@ -2953,8 +2951,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     {
 
                         // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
-                        setSkin( onlyDefaultSkinClassName );
-                        Common.debugPrintln( "XXXXXXXXXX: " + onlyDefaultSkinClassName );
+                        setSkin( ComicDownGUI.getDefaultSkinClassName() );
 
                         ChoiceFrame choiceFrame;
                         if ( modifySelected )
@@ -3511,8 +3508,16 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         {
 
                             // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
-                            setSkin( onlyDefaultSkinClassName );
+                            if ( SetUp.getSkinClassName().matches( CommonGUI.napkinClassName ) ) 
+                            {
+                                setSkin( ComicDownGUI.getDefaultSkinClassName()  );
+                            }
+                            else
+                            {
+                                setSkin( SetUp.getSkinClassName()  );
+                            }
                             new OptionFrame();
+                            Common.debugPrintln( "------------" );
                             setSkin( SetUp.getSkinClassName() );
 
                         }
@@ -3537,7 +3542,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         public void run()
                         {
                             // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
-                            setSkin( onlyDefaultSkinClassName );
+                            setSkin( ComicDownGUI.getDefaultSkinClassName()  );
                             new InformationFrame();
                             setSkin( SetUp.getSkinClassName() );
                         }

@@ -134,7 +134,7 @@ public class JFontChooser extends JComponent {
         dialog.addComponentListener( new FontChooserDialog.DisposeOnClose() );
 
         dialog.setVisible( true ); // blocks until user brings dialog down...
-
+        dialog.setSize( 300, 400 );
         return ok.getFont();
     }
 
