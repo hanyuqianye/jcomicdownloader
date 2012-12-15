@@ -129,6 +129,7 @@ public class JFontChooser extends JComponent {
 
         FontTracker ok = new FontTracker( this );
         JDialog dialog = createDialog( component, title, true, ok, null );
+        dialog.setSize( 300, 400 );
         dialog.addWindowListener( new FontChooserDialog.Closer() );
         dialog.addComponentListener( new FontChooserDialog.DisposeOnClose() );
 

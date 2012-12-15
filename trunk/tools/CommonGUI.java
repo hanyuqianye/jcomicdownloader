@@ -865,10 +865,12 @@ public class CommonGUI
         themeNameString =
                 themeNameString.substring( 0, themeNameString.length() - 2 );
 
-        int choice = JOptionPane.showConfirmDialog( null, "資料夾內未發現"
+        int choice = CommonGUI.showConfirmDialog( null,
+                                                  "資料夾內未發現"
                 + themeFileNameString + "，無法使用"
                 + skinName + "界面！\n\n請問是否要下載" + themeFileNameString + " ？",
-                                                    "提醒訊息", JOptionPane.YES_NO_OPTION );
+                                                  "Download the " + themeFileNameString + " for new theme ?",
+                                                  "提醒訊息", JOptionPane.YES_NO_OPTION );
 
         if ( choice == JOptionPane.YES_OPTION )
         {
@@ -1123,25 +1125,40 @@ public class CommonGUI
         CommonGUI.showMessageDialogRun( parentComponent, message, title, messageType );
     }
 
+    // 取得訊息中的字型大小
+    public static int geteMessageFontSize()
+    {
+        return SetUp.getDefaultFontSize() / 4;
+    }
+
     public static void showMessageDialog( Component parentComponent, String message )
     {
         message = Common.getStringUsingDefaultLanguage( message, message ); // 使用預設語言 
-
-        JOptionPane.showMessageDialog( parentComponent, message );
+        JOptionPane.showMessageDialog( parentComponent,
+                                       "<html><font size="
+                + CommonGUI.geteMessageFontSize()
+                + ">" + message
+                + "</font></html>" );
     }
 
     public static String showInputDialog( Component parentComponent, String message, String title, int messageType )
     {
         message = Common.getStringUsingDefaultLanguage( message, message ); // 使用預設語言 
         title = Common.getStringUsingDefaultLanguage( title, title ); // 使用預設語言 
-        return CommonGUI.showInputDialogRun( parentComponent, message, title, messageType );
+        return CommonGUI.showInputDialogRun( parentComponent,
+                                             message, title, messageType );
     }
 
     public static int showConfirmDialog( Component parentComponent, String message, String enMessage, String title, int optionType )
     {
         message = Common.getStringUsingDefaultLanguage( message, enMessage ); // 使用預設語言 
         title = Common.getStringUsingDefaultLanguage( title, title ); // 使用預設語言 
-        return JOptionPane.showConfirmDialog( parentComponent, message, title, optionType );
+        return JOptionPane.showConfirmDialog( parentComponent,
+                                              "<HTML><FONT size="
+                + CommonGUI.geteMessageFontSize()
+                + ">"
+                + message
+                + "</FONT></HTML>", title, optionType );
     }
 
     public static int showOptionDialog( Component parentComponent,
@@ -1167,7 +1184,11 @@ public class CommonGUI
             {
                 try
                 {
-                    CommonGUI.optionDialogChoice = JOptionPane.showOptionDialog( parentComponent, message,
+                    CommonGUI.optionDialogChoice = JOptionPane.showOptionDialog( parentComponent, "<HTML><FONT size="
+                            + CommonGUI.geteMessageFontSize()
+                            + ">"
+                            + message
+                            + "</FONT></HTML>",
                                                                                  title, optionType, messageType, icon, options, options[0] );
 
                     //notifyAll();
@@ -1208,7 +1229,11 @@ public class CommonGUI
                 try
                 {
                     CommonGUI.showInputDialogValue = JOptionPane.showInputDialog(
-                            parentComponent, message, title, messageType );
+                            parentComponent, "<HTML><FONT size="
+                            + CommonGUI.geteMessageFontSize()
+                            + ">"
+                            + message
+                            + "</FONT></HTML>", title, messageType );
 
                     //notifyAll();
                 }
@@ -1243,7 +1268,11 @@ public class CommonGUI
 
 
         JOptionPane.showMessageDialog(
-                parentComponent, message, title, messageType );
+                parentComponent, "<html><font size="
+                + CommonGUI.geteMessageFontSize()
+                + ">"
+                + message
+                + "</font></html>", title, messageType );
 
         /*
          SwingUtilities.invokeLater( new Runnable() {
@@ -1276,6 +1305,4 @@ public class CommonGUI
          */
 
     }
-
-
 }

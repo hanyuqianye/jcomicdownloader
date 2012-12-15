@@ -253,8 +253,8 @@ public class BackgroundSettingFrame extends JFrame
         else if ( event.getSource() == confirmButton ) {
             setBackgroundPicPath( backgroundPicTextField.getText() );
 
-            JOptionPane.showMessageDialog( this, "設定成功，請重新開啟以便檢視設定成果",
-                "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+           // JOptionPane.showMessageDialog( this, "設定成功，請重新開啟以便檢視設定成果",
+            //    "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
 
              dispose();
         }

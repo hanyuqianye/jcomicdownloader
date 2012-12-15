@@ -2,9 +2,13 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2011/11/15
+ Last Modified : 2012/12/14
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.12: 
+ 1. 修正連線錯誤時stateBar的文字顯示。
+ 2. 修正下載機制，若連線錯誤則至少重試一次。
+ 3. 增加暫停時倒數秒數的文字顯示。
  5.07: 修復在windows系統下執行腳本若有錯誤輸出時會阻塞的問題。
  2.11: 1. 修改下載機制，增加讀取GZIPInputStreamCommon.getStringUsingDefaultLanguage( 串流的選項（178.com專用）
  *   2. 修復重試後無法下載中間漏頁的問題。（ex. 5.jpg 7.jpg 8.jpg，中間遺漏6.jpg）
@@ -259,17 +263,33 @@ public class Common
         }
     }
 
-    public static void slowDownloadFile( String webSite, String outputDirectory, String outputFileName,
-                                         int delayMillisecond, boolean needCookie, String cookieString )
+    public static void sleep( int delayMillisecond, String message )
     {
+        int delaySecond = delayMillisecond / 1000;
+        String realMessage = " " + message + " " + delaySecond + " 秒";
+
         try
         {
-            Thread.currentThread().sleep( delayMillisecond );
+            Common.debugPrintln( realMessage );
+            ComicDownGUI.stateBar.setText( realMessage );
+            Thread.currentThread().sleep( 1000 );
+
         }
         catch ( InterruptedException ex )
         {
-            Common.hadleErrorMessage( ex, "下載過程中無法等待預定秒數" );
+            Common.hadleErrorMessage( ex, "進行「" + message + "」時發生錯誤" );
         }
+
+        if ( --delaySecond > 0 ) // 以遞迴方式處理暫停
+        {
+            Common.sleep( delayMillisecond - 1000, message );
+        }
+    }
+
+    public static void slowDownloadFile( String webSite, String outputDirectory, String outputFileName,
+                                         int delayMillisecond, boolean needCookie, String cookieString )
+    {
+        Common.sleep( delayMillisecond, "下載倒數:" );
 
         downloadFile( webSite, outputDirectory, outputFileName, needCookie, cookieString, "", false, SetUp.getRetryTimes(), false, false );
 
@@ -482,7 +502,8 @@ public class Common
                 HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
 
                 // 偽裝成瀏覽器
-                connection.setRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)" );
+                //connection.setRequestProperty( "User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows 2000)" );
+                connection.setRequestProperty( "User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11" );
                 //connection.setRequestProperty( "User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-TW; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8" );
 
                 // connection.setRequestMethod( "GET" ); // 默认是GET 
@@ -544,14 +565,9 @@ public class Common
                         && (fileSize == 21 || fileSize == 22) )
                 { // 連到99系列的盜連圖
                     Common.debugPrintln( "似乎連到盜連圖，停一秒後重新連線......" );
-                    try
-                    {
-                        Thread.sleep( 1000 ); // 每次暫停一秒再重新連線
-                    }
-                    catch ( InterruptedException iex )
-                    {
-                        Common.hadleErrorMessage( iex, "無法等待既定秒數" );
-                    }
+
+                    Common.sleep( 1000, "重新下載倒數:" ); // 每次暫停一秒再重新連線
+
                     tryConnect( connection );
                 }
                 // 內部伺服器發生錯誤，讀取getErrorStream() 
@@ -561,8 +577,9 @@ public class Common
                 else if ( connection.getResponseCode() != 200 )
                 {
                     //Common.debugPrintln( "第二次失敗，不再重試!" );
-                    Common.errorReport( "錯誤回傳碼(responseCode): "
-                            + connection.getResponseCode() + " : " + webSite );
+                    String errorMessage = "錯誤回傳碼(responseCode): " + connection.getResponseCode();
+                    Common.errorReport( errorMessage + " : " + webSite );
+                    ComicDownGUI.stateBar.setText( errorMessage + " ----> 無法下載" + webSite );
                     return;
                 }
 
@@ -650,14 +667,13 @@ public class Common
                 if ( realFileGotSize + 1 < fileGotSize && retryTimes > 0 )
                 {
                     String messageString = realFileGotSize + " < " + fileGotSize
-                            + " -> 等待兩秒後重新嘗試下載" + outputFileName + "（" + retryTimes
-                            + "/" + SetUp.getRetryTimes() + "）";
-                    Common.debugPrintln( messageString );
-                    ComicDownGUI.stateBar.setText( messageString );
-                    Thread.sleep( 2000 ); // 每次暫停一秒再重新連線
+                            + " -> 新下載" + outputFileName + "（" + retryTimes
+                            + "/" + SetUp.getRetryTimes() + "） 倒數:";
+
+                    Common.sleep( 2000, messageString ); // 每次暫停兩秒再重新連線
 
                     downloadFile( webSite, outputDirectory, outputFileName,
-                                  needCookie, cookieString, referURL, fastMode, retryTimes - 1, gzipEncode, false );
+                                  needCookie, cookieString, referURL, fastMode, retryTimes - 1, gzipEncode, forceDownload );
 
 
                 }
@@ -681,6 +697,13 @@ public class Common
             catch ( Exception e )
             {
                 Common.hadleErrorMessage( e, "無法正確下載" + webSite );
+
+                if ( ++retryTimes > 0 )
+                { // 即使retryTimes設零，也會重傳一次
+                    Flag.downloadErrorFlag = false;
+                    downloadFile( webSite, outputDirectory, outputFileName,
+                                  needCookie, cookieString, referURL, fastMode, retryTimes - 1, gzipEncode, forceDownload );
+                }
                 Flag.downloadErrorFlag = true;
             }
 
@@ -758,14 +781,8 @@ public class Common
             {
                 if ( connection.getResponseCode() != 200 && !Flag.timeoutFlag )
                 {
-                    try
-                    {
-                        Thread.sleep( 1000 ); // 每次暫停一秒再重新連線
-                    }
-                    catch ( InterruptedException iex )
-                    {
-                    }
-                    Common.debugPrintln( "重新嘗試連線......" );
+                    Common.sleep( 1000, "重新嘗試連線倒數:" ); // 每次暫停一秒再重新連線
+
                     if ( Common.withGUI() )
                     {
                         ComicDownGUI.stateBar.setText( "重新嘗試連線......" );
@@ -780,26 +797,26 @@ public class Common
         }
         return cookieStrings;
     }
-    
+
     public static int getDownloadFileLength( String fileURL )
     {
         URL url;
         int length = 0;
-        
+
         try
         {
             url = new URL( fileURL );
             HttpURLConnection connection = ( HttpURLConnection ) url.openConnection();
-            
+
             length = connection.getContentLength();
-            
+
             Common.debugPrintln( fileURL + " 的長度: " + length );
         }
         catch ( Exception ex )
         {
             Logger.getLogger( Common.class.getName() ).log( Level.SEVERE, null, ex );
         }
-        
+
         return length;
     }
 
@@ -1786,8 +1803,6 @@ public class Common
         }
 
     }
-    
-    
 
     // direcotory裏面第p張圖片是否存在
     public static boolean existPicFile( String directory, int p )
@@ -1813,12 +1828,14 @@ public class Common
         }
 
     }
-    
+
     // direcotory裏面第begin張到第end張圖片是否存在
     public static boolean existPicFile( String directory, int begin, int end )
     {
-        for ( int i = begin; i <= end; i ++ ) {
-            if ( !Common.existPicFile( directory, i ) ) {
+        for ( int i = begin; i <= end; i++ )
+        {
+            if ( !Common.existPicFile( directory, i ) )
+            {
                 return false;
             }
         }
@@ -1989,6 +2006,8 @@ public class Common
 
     static public String getRegularURL( String url )
     {
+
+
         try
         {
             url = URLEncoder.encode( url, "UTF-8" );
@@ -1997,13 +2016,7 @@ public class Common
         {
             Common.errorReport( "無法轉換網址：" + url );
         }
-
-        url = url.replaceAll( "%3A", ":" );
-        url = url.replaceAll( "%2F", "/" );
-        url = url.replaceAll( "%3F", "?" );
-        url = url.replaceAll( "26", "&" );
-
-        return url;
+        return Common.unescape( url );
     }
 
     static public String getFixedChineseURL( String url )
@@ -2303,8 +2316,8 @@ public class Common
                 colorString = "yellow"; // 暗色風格界面用黃色比較看得清楚
             }
 
-            CommonGUI.showMessageDialog( ComicDownGUI.mainFrame, "<html><font color=" + colorString + ">"
-                    + file + "</font>" + "不存在，無法開啟</html>",
+            CommonGUI.showMessageDialog( ComicDownGUI.mainFrame, "<FONT color=" + colorString + ">"
+                    + file + "</FONT>" + "不存在，無法開啟",
                                          "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             return;
         }
@@ -2502,11 +2515,9 @@ public class Common
                 if ( realFileGotSize + 1 < fileGotSize && retryTimes > 0 )
                 {
                     String messageString = realFileGotSize + " < " + fileGotSize
-                            + " -> 等待兩秒後重新嘗試下載" + outputFileName + "（" + retryTimes
-                            + "/" + SetUp.getRetryTimes() + "）";
-                    Common.debugPrintln( messageString );
-                    ComicDownGUI.stateBar.setText( messageString );
-                    Thread.sleep( 2000 ); // 每次暫停一秒再重新連線
+                            + " -> 重新嘗試下載" + outputFileName + "（" + retryTimes
+                            + "/" + SetUp.getRetryTimes() + "） 倒數:";
+                    Common.sleep( 2000, messageString ); // 每次暫停兩秒再重新連線
 
                     downloadFile( webSite, outputDirectory, outputFileName,
                                   needCookie, cookieString, referURL, fastMode, retryTimes - 1, gzipEncode, false );
@@ -2596,6 +2607,16 @@ public class Common
 
             connection.setRequestProperty( "If-None-Match", "\"c4d553cc945cd1:0\"" );
             connection.setRequestProperty( "Host", "pic.fumanhua.com" );
+
+            //connection.setRequestProperty( "Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" );
+            //connection.setRequestProperty( "Accept-Charset", "Big5,utf-8;q=0.7,*;q=0.3" );
+            //connection.setRequestProperty( "Accept-Encoding", "gzip,deflate,sdch" );
+            //connection.setRequestProperty( "Accept-Language", "zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4" );
+            //connection.setRequestProperty( "Cache-Control", "max-age=0" );
+            //connection.setRequestProperty( "Connection", "keep-alive" );
+            //connection.setRequestProperty( "Host", "f1.xiami.net" );
+            connection.setRequestProperty( "User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11" );
+            
 
             if ( referString != null && !"".equals( referString ) )
             { // 設置refer
@@ -2836,13 +2857,33 @@ public class Common
         }
     }
 
-    // 重新開啟jar檔
-    public static void restartApplication()
+    // 執行指定jar檔並結束目前程式
+    public static void startJARandExit( String jarFileName )
+    {
+        if ( Common.isWindows() )
+        {
+            Common.runUnansiCmd( "java -jar ", Common.getNowAbsolutePath() + jarFileName );
+        }
+        else
+        {
+            Common.runCmd( "java -jar", Common.getNowAbsolutePath() + jarFileName, false );
+        }
+
+        ComicDownGUI.exit();
+    }
+
+    // 取得目前程式檔名
+    public static String getThisFileName()
+    {
+        return ComicDownGUI.versionString.replaceAll( "  ", "_" ) + ".jar";
+    }
+
+    // 重新開啟jar檔 (暫時廢棄)
+    public static void restartApplicationXXX()
     {
         final String javaBin = System.getProperty( "java.home" ) + File.separator + "bin" + File.separator + "java";
 
-        String appPath = Common.getNowAbsolutePath()
-                + ComicDownGUI.versionString.replaceAll( "  ", "_" ) + ".jar";
+        String appPath = Common.getNowAbsolutePath() + Common.getThisFileName();
 
         /*
          Build command: java -jar application.jar
@@ -2865,8 +2906,7 @@ public class Common
         }
         ComicDownGUI.exit(); // 結束程式
     }
-    
-    
+
     // 下載j單一個ar檔，下載完畢自動重啟
     public static void downloadJarFile( final String fileURL, final String fileName )
     {
@@ -2899,12 +2939,13 @@ public class Common
                 CommonGUI.showMessageDialog( ComicDownGUI.mainFrame,
                                              fileName + "下載完畢，請注意，程式即將重新啟動! ",
                                              "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
-                Common.restartApplication(); // 重新開啟程式
+                //Common.restartApplication(); // 重新開啟程式
+                Common.startJARandExit( Common.getThisFileName() );
             }
         } );
         downThread.start();
     }
-    
+
     public static void setMp3Tag( String filePath, String fileName, String[] tags )
     {
         /*
@@ -3034,15 +3075,15 @@ public class Common
             //Object LYRICS = valueof.invoke(null, new Object[]{"LYRICS"});
             //setField.invoke(Tag.cast(tag), new Object[]{ FieldKey.cast( LYRICS ), tags[TagEnum.LYRICS]});
             /*
-            Object COMMENT = valueof.invoke( null, new Object[]
-                    {
-                        "COMMENT"
-                    } );
-            setField.invoke( Tag.cast( tag ), new Object[]
-                    {
-                        FieldKey.cast( COMMENT ), tags[TagEnum.COMMENT]
-                    } );
-            */
+             Object COMMENT = valueof.invoke( null, new Object[]
+             {
+             "COMMENT"
+             } );
+             setField.invoke( Tag.cast( tag ), new Object[]
+             {
+             FieldKey.cast( COMMENT ), tags[TagEnum.COMMENT]
+             } );
+             */
             Object TITLE = valueof.invoke( null, new Object[]
                     {
                         "TITLE"
@@ -3096,6 +3137,47 @@ public class Common
 
         //tag.setField( FieldKey.TITLE, "日久見人心" );
 
+    }
+
+    public static String unescape( String src )
+    {
+        StringBuffer tmp = new StringBuffer();
+        tmp.ensureCapacity( src.length() );
+        int lastPos = 0, pos = 0;
+        char ch;
+        while ( lastPos < src.length() )
+        {
+            pos = src.indexOf( "%", lastPos );
+            if ( pos == lastPos )
+            {
+                if ( src.charAt( pos + 1 ) == 'u' )
+                {
+                    ch = ( char ) Integer.parseInt( src.substring( pos + 2, pos + 6 ), 16 );
+                    tmp.append( ch );
+                    lastPos = pos + 6;
+                }
+                else
+                {
+                    ch = ( char ) Integer.parseInt( src.substring( pos + 1, pos + 3 ), 16 );
+                    tmp.append( ch );
+                    lastPos = pos + 3;
+                }
+            }
+            else
+            {
+                if ( pos == -1 )
+                {
+                    tmp.append( src.substring( lastPos ) );
+                    lastPos = src.length();
+                }
+                else
+                {
+                    tmp.append( src.substring( lastPos, pos ) );
+                    lastPos = pos;
+                }
+            }
+        }
+        return tmp.toString();
     }
 }
 

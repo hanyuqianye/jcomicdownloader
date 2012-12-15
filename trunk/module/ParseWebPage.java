@@ -365,6 +365,10 @@ public class ParseWebPage
         {
             siteID = Site.TING1;
         }
+        else if ( webSite.matches( "(?s).*xiami.com/(?s).*" ) )
+        {
+            siteID = Site.XIAMI;
+        }
         else
         {
             siteID = Site.UNKNOWN;

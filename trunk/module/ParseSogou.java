@@ -5,7 +5,7 @@
  Last Modified : 2012/12/12
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
- 5.11 : 新增對1ting的支援。
+ 5.11 : 新增對sogou的支援。
  ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -175,7 +175,8 @@ public class ParseSogou extends ParseOnlineComicSite
             return;
         }
         else if ( !file.exists()
-                || (Common.getDownloadFileLength( songURL ) - file.length() > 100000) )
+                || (file.length() > Common.getDownloadFileLength( songURL ))
+                || (Common.getDownloadFileLength( songURL ) - file.length() > 10000) )
         {
             CommonGUI.stateBarMainMessage = wholeTitle + " : ";
             CommonGUI.stateBarDetailMessage = "共" + totalPage + "首，第" + i
@@ -276,7 +277,8 @@ public class ParseSogou extends ParseOnlineComicSite
     public boolean isSingleVolumePage( String urlString )
     {
 
-        if ( urlString.matches( "(?s).*/singer/(?s).*" ) )
+        if ( urlString.matches( "(?s).*/singer/(?s).*" )
+                || urlString.matches( "(?s).*/all_album(?s).*" ) )
         {
             return false;
         }
@@ -307,6 +309,7 @@ public class ParseSogou extends ParseOnlineComicSite
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString )
     {
+        String tempString = "";
         int beginIndex = allPageString.indexOf( "<h3>" );
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
         int endIndex = allPageString.indexOf( "</h3>", beginIndex );
@@ -314,7 +317,17 @@ public class ParseSogou extends ParseOnlineComicSite
 
         beginIndex = endIndex;
         endIndex = allPageString.indexOf( "</tr>", beginIndex );
-        String tempString = allPageString.substring( beginIndex, endIndex );
+        if ( endIndex < 0 ) // 歌手全專輯頁面
+        { 
+            beginIndex = allPageString.indexOf( "listenAlbum(", beginIndex );
+            beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "'", beginIndex );
+            title = allPageString.substring( beginIndex, endIndex ).trim();
+        }
+        else
+        {
+            tempString = allPageString.substring( beginIndex, endIndex );
+        }
 
         // 代表是專輯頁面
         if ( tempString.indexOf( "href=\"/singer/" ) > 0 )
@@ -399,10 +412,18 @@ public class ParseSogou extends ParseOnlineComicSite
             tempString = allPageString.substring( beginIndex, endIndex ).trim();
             urlList.add( baseURL + tempString );
 
+            // 取得專輯名稱
             beginIndex = allPageString.indexOf( "title=", beginIndex );
             beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
             endIndex = allPageString.indexOf( "\"", beginIndex );
             volumeTitle = allPageString.substring( beginIndex, endIndex ).trim();
+
+            // 取得發行日期
+            beginIndex = allPageString.indexOf( "时间：", beginIndex );
+            beginIndex = allPageString.indexOf( "：", beginIndex ) + 1;
+            endIndex = allPageString.indexOf( "</p>", beginIndex );
+            volumeTitle = allPageString.substring( beginIndex, endIndex ).trim() + " " + volumeTitle;
+
             volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                     Common.getTraditionalChinese( volumeTitle ) ) ) );
 

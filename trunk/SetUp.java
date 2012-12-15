@@ -618,7 +618,7 @@ public class SetUp
                          }
                          */
 
-                        ComicDownGUI.setDefaultSkinClassName( skinClassName );
+                        //ComicDownGUI.setDefaultSkinClassName( skinClassName );
                     }
                     else if ( split[0].equals( "outputUrlFile" ) )
                     {

@@ -3,10 +3,18 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v5.11
- Last Modified : 2012/12/12
+ Version  : v5.12
+ Last Modified : 2012/12/15
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.12:
+ 1. 新增對xiami的支援。
+ 2. 新增簡易檔案下載模式。
+ 3. 修正連線錯誤時stateBar的文字顯示。
+ 4. 修改選擇集數機制，當只有唯一集數時自動選取。
+ 5. 增加暫停時倒數秒數的文字顯示。
+ 6. 修復資訊視窗在沒有網路時無窮等待的問題。
+ 7. 修復設置背景圖片後無法正常運行的問題。
  5.11:
  1. 新增對sogou的支援
  2. 新增對1ting的支援。
@@ -401,7 +409,6 @@ import jcomicdownloader.tools.CommonGUI;
 import jcomicdownloader.tools.RunBrowser;
 import jcomicdownloader.tools.SystemClipBoard;
 
-
 /**
  @author surveyorK
  @version 1.14 user 主介面，同時監聽window、mouse、button和textField。
@@ -480,6 +487,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     public static String[] nowSelectedCheckStrings;
     public static int[][] downTableRealChoiceOrder;
     public static String defaultSkinClassName;
+    private String onlyDefaultSkinClassName; // 不會被偷改的skin預設值
     // non-GUI component
     private String[] args;
     private static String resourceFolder;
@@ -487,7 +495,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v5.11";
+    public static String versionString = "JComicDownloader  v5.12";
 
     public ComicDownGUI()
     {
@@ -502,11 +510,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         if ( Common.isUnix() )
         {
-            defaultSkinClassName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
+            onlyDefaultSkinClassName = defaultSkinClassName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
         }
         else
         {
-            defaultSkinClassName = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+            onlyDefaultSkinClassName = defaultSkinClassName = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
         }
 
         resourceFolder = "resource" + Common.getSlash();
@@ -529,7 +537,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     public void run()
                     {
                         // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
-                        setSkin( ComicDownGUI.defaultSkinClassName );
+                        setSkin( onlyDefaultSkinClassName );
                         logFrame = new LogFrame();
                         setSkin( SetUp.getSkinClassName() );
 
@@ -575,6 +583,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         // 檢查skin是否由外部jar支援，若是外部skin且沒有此jar，則下載
         CommonGUI.checkSkin();
 
+        buildPreprocess(); // 開發階段的預先處理(目的是讓輸出的jar檔與版本一致)
     }
 
     private void setUpUIComponent()
@@ -651,7 +660,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         if ( SetUp.getUsingBackgroundPicOfMainFrame() )
         {
-            int width = ( int ) frameDimension.getWidth();
+            int width = ( int ) frameDimension.getWidth() - 10;
             int height = ( int ) frameDimension.getHeight() * 5 / 100;
             stateBar.setPreferredSize( new Dimension( width, height ) );
             stateBar.setForeground( SetUp.getMainFrameOtherDefaultColor() );
@@ -672,7 +681,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         return defaultSkinClassName;
     }
 
-    public static void setDefaultSkinClassName( String className )
+    public static void setDefaultSkinClassName1( String className )
     {
         defaultSkinClassName = className;
     }
@@ -2944,7 +2953,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                     {
 
                         // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
-                        setSkin( ComicDownGUI.defaultSkinClassName );
+                        setSkin( onlyDefaultSkinClassName );
+                        Common.debugPrintln( "XXXXXXXXXX: " + onlyDefaultSkinClassName );
 
                         ChoiceFrame choiceFrame;
                         if ( modifySelected )
@@ -2954,8 +2964,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         }
                         else
                         {
+
                             choiceFrame = new ChoiceFrame( title, urlString );
+
+
                         }
+
+                        setSkin( SetUp.getSkinClassName() );
 
                     }
                 } );
@@ -3106,7 +3121,20 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         Common.debugPrintln( "選擇集數前解析得到的title：" + title );
                         if ( Common.urlIsUnknown )
                         {
-                            stateBar.setText( "  無法解析此網址 !!" );
+                            if ( allowDownload )
+                            {
+
+                                // 當複製位址為非支援網址，按下載後，會直接下載檔案到預定資料夾 (v5.12版新增)
+                                directDownloadFile( newArgs[0] );
+
+                                Flag.parseUrlFlag = false; // 分析結束
+                                startDownloadList( false ); // 直接下載串列
+
+                            }
+                            else
+                            {
+                                stateBar.setText( "  無法解析此網址 !!" );
+                            }
                         }
                         else if ( title == null )
                         {
@@ -3483,9 +3511,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         {
 
                             // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
-                            setSkin( ComicDownGUI.defaultSkinClassName );
+                            setSkin( onlyDefaultSkinClassName );
                             new OptionFrame();
-                            //setSkin(SetUp.getSkinClassName());
+                            setSkin( SetUp.getSkinClassName() );
 
                         }
                     } );
@@ -3509,9 +3537,9 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         public void run()
                         {
                             // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
-                            setSkin( ComicDownGUI.defaultSkinClassName );
+                            setSkin( onlyDefaultSkinClassName );
                             new InformationFrame();
-                            //setSkin(SetUp.getSkinClassName());
+                            setSkin( SetUp.getSkinClassName() );
                         }
                     } );
                 }
@@ -3740,6 +3768,38 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
     }
 
+    // 當複製位址為非支援網址，按下載後，會直接下載檔案到預定資料夾 (v5.12版新增)
+    public void directDownloadFile( String url )
+    {
+
+        Common.sleep( 3000, "無法解析此網址! 簡易檔案下載模式啟動倒數: " );
+
+        int beginIndex = url.lastIndexOf( "/" ) + 1;
+        int endIndex = url.length();
+        String fileName = url.substring( beginIndex, endIndex ).split( "\\?" )[0];
+        fileName = Common.getReomvedUnnecessaryWord( fileName );
+
+        Common.downloadFile( url, SetUp.getDownloadDirectory(), fileName, false, "" );
+    }
+
+    // 編譯為jar檔的前置作業(主要是修改設定檔，使輸出檔名與版本一致)
+    private void buildPreprocess()
+    {
+        String filePath = Common.getNowAbsolutePath() + "nbproject" + Common.getSlash();
+        String fileName = "project.properties";
+        File projectXmlFile = new File( filePath + fileName );
+
+        // 若此檔存在，代表在開發階段開啟，可預先設定未來要輸出的jar檔名
+        if ( projectXmlFile.exists() )
+        {
+            Common.debugPrintln( "此為開發階段，設定" + fileName + "裡的檔名" );
+            String allPageString = Common.getFileString( filePath, fileName );
+            allPageString = allPageString.replaceAll( "JComicDownloader.*\\.jar", Common.getThisFileName() );
+            //Common.debugPrintln( allPageString );
+            Common.outputFile( allPageString, filePath, fileName );
+        }
+    }
+
     public void testDownload()
     {
         Thread downThread = new Thread( new Runnable()
@@ -3776,73 +3836,81 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 //setMp3Tag();
 
+                String location = "8h2xt2%141tFi%F2741t%a25F7_.p2mF5%13m%Fi26549p3f.15E573A1n61181%.e%4_11";
+                //location = "8h2xt622265tFi%%6%5_Et%a22%2643p2mFF252%5%Fi32F225.3f.51%%%EmA1n575552p%.e41EEE%3";
+                //testURL = getMusicURL( location );
+                //Common.debugPrintln( "解析的URL = " + testURL );
+
+                //Common.simpleDownloadFile( testURL, "", "test.mp3", cookie, referURL );
+
                 System.out.println( "OVER" );
 
 
 
             }
         } );
-        //downThread.start();
+        downThread.start();
     }
 
     /*
-    public void setMp3Tag()
-    {
-        AudioFile f;
-        
-        try
-        {
-            f = AudioFileIO.read( new File( "03.荷裡活.mp3" ) );
-            
-            Tag tag = f.getTag();
-            
-            if ( tag == null ) {
-                Common.debugPrintln( "原始音樂檔沒有標籤，需重新製作" );
-                tag = new ID3v23Tag();
-            }
-            
-            Artwork art = StandardArtwork.createArtworkFromFile( new File( "123.jpg" ));
-            //art.setFromFile( new File( "123.jpg" ) );
-            tag.createField( art );
-            //tag.setField( art );
-            tag.setField( FieldKey.ARTIST, "梁靜茹" );
-            tag.setField( FieldKey.ALBUM, "日久見人心專輯" );
-            tag.setField( FieldKey.TITLE, "日久見人心" );
-            f.setTag( tag );
+     public void setMp3Tag()
+     {
+     AudioFile f;
 
-            try
-             {
-                f.commit();
-                Common.debugPrintln( "寫入完成 !");
-                //f.setTag( tag ); 
-            }
-            catch ( CannotWriteException ex )
-            {
-                Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
-            }
+     try
+     {
+     f = AudioFileIO.read( new File( "03.荷裡活.mp3" ) );
 
-        }
-        catch ( CannotReadException ex )
-        {
-            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
-        }
-        catch ( IOException ex )
-        {
-            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
-        }
-        catch ( org.jaudiotagger.tag.TagException ex )
-        {
-            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
-        }
-        catch ( ReadOnlyFileException ex )
-        {
-            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
-        }
-        catch ( InvalidAudioFrameException ex )
-        {
-            Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
-        }
+     Tag tag = f.getTag();
 
-    }
-    */
+     if ( tag == null ) {
+     Common.debugPrintln( "原始音樂檔沒有標籤，需重新製作" );
+     tag = new ID3v23Tag();
+     }
+
+     Artwork art = StandardArtwork.createArtworkFromFile( new File( "123.jpg" ));
+     //art.setFromFile( new File( "123.jpg" ) );
+     tag.createField( art );
+     //tag.setField( art );
+     tag.setField( FieldKey.ARTIST, "梁靜茹" );
+     tag.setField( FieldKey.ALBUM, "日久見人心專輯" );
+     tag.setField( FieldKey.TITLE, "日久見人心" );
+     f.setTag( tag );
+
+     try
+     {
+     f.commit();
+     Common.debugPrintln( "寫入完成 !");
+     //f.setTag( tag );
+     }
+     catch ( CannotWriteException ex )
+     {
+     Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+     }
+
+     }
+     catch ( CannotReadException ex )
+     {
+     Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+     }
+     catch ( IOException ex )
+     {
+     Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+     }
+     catch ( org.jaudiotagger.tag.TagException ex )
+     {
+     Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+     }
+     catch ( ReadOnlyFileException ex )
+     {
+     Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+     }
+     catch ( InvalidAudioFrameException ex )
+     {
+     Logger.getLogger( ComicDownGUI.class.getName() ).log( Level.SEVERE, null, ex );
+     }
+
+     }
+     */
+    
 }

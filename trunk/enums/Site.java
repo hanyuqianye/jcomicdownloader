@@ -97,4 +97,5 @@ public class Site {
     public final static int SHUNONG = 79;
     public final static int SOGOU = 80;
     public final static int TING1 = 81;
+    public final static int XIAMI = 82;
 }
