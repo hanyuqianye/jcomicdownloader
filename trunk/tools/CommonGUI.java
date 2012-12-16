@@ -29,8 +29,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import jcomicdownloader.ComicDownGUI;
 import jcomicdownloader.SetUp;
-import jcomicdownloader.enums.TagEnum;
-import jcomicdownloader.module.Run;
 
 /**
 

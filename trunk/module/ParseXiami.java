@@ -445,6 +445,7 @@ public class ParseXiami extends ParseSogou
                 beginIndex = allPageString.lastIndexOf( "\"", beginIndex ) + 1;
                 endIndex = allPageString.indexOf( "\"", beginIndex );
                 tempString = allPageString.substring( beginIndex, endIndex );
+                beginIndex = endIndex;
                 pageURLs[i] = baseURL + tempString;
             }
         }
@@ -454,6 +455,11 @@ public class ParseXiami extends ParseSogou
             pageCount = 1;
             pageURLs = new String[ 1 ];
             pageURLs[0] = urlString;
+        }
+        
+        for ( int i = 0; i < pageURLs.length; i ++ ) 
+        {
+            Common.debugPrintln( "專輯第" + i + "頁: " + pageURLs[i] );
         }
 
         for ( int j = 0; j < pageCount; j++ )
@@ -488,7 +494,8 @@ public class ParseXiami extends ParseSogou
 
             if ( j + 1 < pageCount )
             {
-                allPageString = getAllPageString( pageURLs[j] );
+                Common.debugPrintln( "接著分析下一頁: " );
+                allPageString = getAllPageString( pageURLs[j + 1] );
             }
 
         }

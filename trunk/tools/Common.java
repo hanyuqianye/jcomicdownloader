@@ -2936,7 +2936,7 @@ public class Common
         String jarClassName = "jaudiotagger-2.0.4-20111207.115108-15.jar";
 
         // 若jar檔不存在 就下載
-        if ( !new File( Common.getNowAbsolutePath() + jarClassName ).exists() )
+        if ( !Common.existJAR( jarClassName ) )
         {
             String jarFileURL = "https://sites.google.com/site/jcomicdownloader/release/jaudiotagger-2.0.4-20111207.115108-15.jar?attredirects=0&d=1";
 

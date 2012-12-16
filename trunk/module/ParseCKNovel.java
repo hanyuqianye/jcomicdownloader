@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2012/5/10
+Last Modified : 2012/12/16
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+5/12: 修復ck101動態加載部分未收錄的問題。
 5.02: 1. 修復ck101小說部分合併卡住的問題。
 4.16: 1. 修復ck101小說無法批次下載的問題。
 4.10: 1. 修復ck101動態頁面只下載第一頁的問題。
@@ -127,6 +128,7 @@ public class ParseCKNovel extends ParseOnlineComicSite {
         for ( int i = 0 ; i < totalPage && Run.isAlive ; i++ ) {
             if ( pageURL.matches( "(?s).*/thread-(?s).*" ) ) { // 靜態頁面
                 pageURL = pageURL.replaceAll( "-" + i + "-", "-" + p + "-" );
+                
             }
             else { // 動態產生的頁面
                 pageURL = pageURL.replace( "&page=" + (i), "&page=" + (i + 1) );
@@ -134,9 +136,25 @@ public class ParseCKNovel extends ParseOnlineComicSite {
 
             comicURL[i] = pageURL;
             Common.debugPrintln( i + " " + comicURL[i] ); // debug
-
+            
             // 每解析一個網址就下載一張圖
-            singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage, p, 0 );
+            // 因應ck的第一頁會有動態讀取，所以需要將動態讀取的部分插入到第二頁，之後往後挪
+            if ( i == 0 ) {
+                singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage + 1, p, 0 );
+                
+                beginIndex = comicURL[i].indexOf( "thread-" );
+                beginIndex = comicURL[i].indexOf( "-", beginIndex ) + 1;
+                endIndex = comicURL[i].indexOf( "-", beginIndex );
+                String tempString = comicURL[i].substring( beginIndex, endIndex );
+                String extraURL = "http://ck101.com/forum.php?mod=threadlazydata&tid=" + tempString;
+                singlePageDownload( getTitle(), getWholeTitle(), extraURL, totalPage + 1, p + 1, 0 );
+            }
+            else 
+            {
+                singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage + 1, p + 1, 0 );
+            }
+            
+            
             p++;
             //Common.downloadFile( comicURL[p - 1], "", p + ".jpg", false, "" );
 
@@ -144,13 +162,13 @@ public class ParseCKNovel extends ParseOnlineComicSite {
 
         // 檢查有無封面圖
         String coverURL = null;
-        beginIndex = allPageString.indexOf( "onload=\"thumbImg(this)\"" );
+        beginIndex = allPageString.indexOf( "/attachments/" );
         if ( beginIndex > 0 ) {
-            endIndex = allPageString.lastIndexOf( "\"", beginIndex );
+            endIndex = allPageString.indexOf( "\"", beginIndex );
             beginIndex = allPageString.lastIndexOf( "\"", endIndex - 1 ) + 1;
             String tempString = allPageString.substring( beginIndex, endIndex ).trim();
             
-            if ( tempString.matches( "(?s).*imgs.ck101.com(?s).*") ) {
+            if ( tempString.matches( "http://(?s).*") ) {
                 coverURL = tempString;
             }
         }
@@ -186,16 +204,7 @@ public class ParseCKNovel extends ParseOnlineComicSite {
             
             ComicDownGUI.stateBar.setText( getTitle()
                     + "合併中: " + (i + 1) + " / " + fileList.length );
-            
-            /*
-            if ( i != 0 && i % 100 == 0 )
-            {
-                hundredCount ++;
-                Common.outputFile( allNovelText, getParentPath( getDownloadDirectory() ), 
-                                             getWholeTitle() + hundredCount + "." + Common.getDefaultTextExtension() );
-                allNovelText = "";
-            }
-            */
+      
         }
 
         // 取得上一層的目錄

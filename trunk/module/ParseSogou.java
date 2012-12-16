@@ -175,7 +175,7 @@ public class ParseSogou extends ParseOnlineComicSite
             return;
         }
         else if ( !file.exists()
-                || (file.length() > Common.getDownloadFileLength( songURL ))
+                // || (file.length() > Common.getDownloadFileLength( songURL ))
                 || (Common.getDownloadFileLength( songURL ) - file.length() > 10000) )
         {
             CommonGUI.stateBarMainMessage = wholeTitle + " : ";
