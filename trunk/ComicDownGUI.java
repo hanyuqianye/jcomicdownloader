@@ -17,6 +17,7 @@
  7. 修復設置背景圖片後無法正常運行的問題。
  8. 修復部分介面嚴重的崩潰問題。
  9. 修復ck101動態加載部分未收錄的問題。
+10. 修復napkin介面使用時無法開啟選擇背景視窗的問題。
  5.11:
  1. 新增對sogou的支援
  2. 新增對1ting的支援。
@@ -593,7 +594,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 && !new File( picFileString ).exists() )
         {
             CommonGUI.showMessageDialog( this, picFileString
-                    + "\n背景圖片不存在，重新設定為原始佈景",
+                    + "<BR>背景圖片不存在，重新設定為原始佈景",
                                          "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
             SetUp.setUsingBackgroundPicOfMainFrame( false );
         }

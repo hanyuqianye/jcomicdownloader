@@ -46,6 +46,8 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
     private JButton versionButton;
     public static JButton downloadButton;
     private String officialName;
+    //private String downloadPageName;
+    //private String downloadPageURL;
     private String officialURL;
     public static JFrame thisFrame; // for change look and feel
     private static boolean downloadLock = false; // 用來檢查是否已取得最新版本資訊，之後才可以下載最新版本
@@ -62,6 +64,8 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
         thisFrame = this; // for change look and feel
         resourceFolder = "resource/";
         officialName = "official.html";
+        //downloadPageName = "downloadPage.html";
+        //downloadPageURL = "https://sites.google.com/site/jcomicdownloader/release";
         officialURL = "https://sites.google.com/site/jcomicdownloader/";
 
         setUpUIComponent();
@@ -217,16 +221,26 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
     {
         Run.isAlive = true;
         Common.downloadFile( officialURL, SetUp.getTempDirectory(), officialName, false, "" );
+        //Common.downloadFile( downloadPageURL, SetUp.getTempDirectory(), downloadPageName, false, "" );
     }
 
     // 刪除官方網頁
     private void deleteOfficialHtml()
     {
-        File file = new File( SetUp.getTempDirectory() + officialName );
+        String officialFile = SetUp.getTempDirectory() + officialName;
+        Common.debugPrintln( "刪除" + officialFile );
+        File file = new File( officialFile );
+        //File file2 = new File( SetUp.getTempDirectory() + downloadPageName );
         if ( file.exists() )
         {
             file.delete();
         }
+        /*
+         if ( file2.exists() )
+         {
+         file2.delete();
+         }
+         */
     }
 
     // 回傳最新版本的字串
@@ -245,13 +259,30 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
     // 回傳更新日期的字串
     private String getUpdateDateString()
     {
+        //String url = "https://sites.google.com/site/jcomicdownloader/release";
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), officialName );
+        /*
+         String year = "2012/";
+         if ( allPageString.indexOf( "2013/" ) > 0 )
+         {
+         year = "2013/";
+         }
+
+         int endIndex = allPageString.lastIndexOf( "class=\"td-user\"" );
+         int beginIndex = allPageString.lastIndexOf( year, endIndex );
+         Common.debugPrintln( beginIndex + " ___________ " + endIndex );
+         endIndex = allPageString.indexOf( "<", beginIndex );
+         String tempString = allPageString.substring( beginIndex, endIndex );
+         String dateString = " (" + tempString + " )";
+         String dateEnString = " (" + tempString + " )";
+         */
 
         // 再找出發佈最新版本的日期
         int tempIndex = allPageString.indexOf( "countdown-fromdateutc" );
         String[] tokens = allPageString.substring( tempIndex, allPageString.length() ).split( "-|\"" );
         String dateString = "（" + tokens[2] + "年" + tokens[3] + "月" + tokens[4] + "日發佈）";
         String dateEnString = "（" + tokens[2] + "." + tokens[3] + "." + tokens[4] + " update）";
+
         return Common.getStringUsingDefaultLanguage( dateString, dateEnString ); // 使用預設語言 dateString;
     }
 
@@ -444,56 +475,65 @@ public class InformationFrame extends JFrame implements ActionListener, MouseLis
                             }
                             Common.debugPrintln( "OK" );
                         }
+                        
+                        deleteOfficialHtml(); // 刪除官方網頁檔案
 
                         String fileName = "JComicDownloader_" + versionLabel.getText() + ".jar";
 
-
+                        /*
+                         if ( ComicDownGUI.versionString.matches( ".*" + versionLabel.getText() + ".*" ) )
+                         {
+                         CommonGUI.showMessageDialog( InformationFrame.thisFrame, "目前程式已是最新版本！",
+                         "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                         }
+                         else
+                         */
                         if ( ComicDownGUI.versionString.matches( ".*" + versionLabel.getText() + ".*" ) )
                         {
-                            CommonGUI.showMessageDialog( InformationFrame.thisFrame, "目前程式已是最新版本！",
-                                                         "提醒訊息", JOptionPane.INFORMATION_MESSAGE );
+                            Common.debugPrintln( "開始更新最新版本" );
+                            InformationFrame.downloadButton.setText( "更新最新版本" );
                         }
                         else
                         {
-                            if ( !new File( Common.getNowAbsolutePath() + fileName ).exists() )
-                            {
-
-                                Common.debugPrintln( "開始下載最新版本" );
-                                InformationFrame.downloadButton.setText( "開始下載最新版本" );
-
-                                String frontURL = "https://sites.google.com/site/jcomicdownloader/release/";
-                                String backURL = "?attredirects=0&amp;d=1";
-                                String lastestVersionURL = frontURL + fileName + backURL;
-                                Common.downloadFile( lastestVersionURL, Common.getNowAbsolutePath(), fileName, false, null );
-                                
-                            }
-                            InformationFrame.downloadButton.setText( "最新版本下載完成" );
-
-                            // 在Unix-Like系統下開啟執行權限
-                            if ( Common.isUnix() )
-                            {
-                                Common.runCmd( "chmod 775", Common.getNowAbsolutePath() + fileName, false );
-                            }
-
-
-                            Object[] options =
-                            {
-                                "確定", "執行新版本程式", "開啟存放資料夾"
-                            };
-                            int choice = JOptionPane.showOptionDialog( thisFrame, "<html>最新版本 <font color=red>" + fileName + "</font> 已下載完畢！</html>",
-                                                                       "告知視窗",
-                                                                       JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
-                                                                       null, options, options[0] );
-
-                            if ( choice == 1 )
-                            {
-                                Common.startJARandExit( fileName );
-                            }
-                            else if ( choice == 2 )
-                            {
-                                openNowDirectory( fileName );
-                            }
+                            Common.debugPrintln( "開始下載最新版本" );
+                            InformationFrame.downloadButton.setText( "開始下載最新版本" );
                         }
+
+
+
+                        String frontURL = "https://sites.google.com/site/jcomicdownloader/release/";
+                        String backURL = "?attredirects=0&amp;d=1";
+                        String lastestVersionURL = frontURL + fileName + backURL;
+                        Common.downloadFile( lastestVersionURL, Common.getNowAbsolutePath(), fileName, false, null );
+
+
+                        InformationFrame.downloadButton.setText( "最新版本下載完成" );
+
+                        // 在Unix-Like系統下開啟執行權限
+                        if ( Common.isUnix() )
+                        {
+                            Common.runCmd( "chmod 775", Common.getNowAbsolutePath() + fileName, false );
+                        }
+
+
+                        Object[] options =
+                        {
+                            "確定", "執行新版本程式", "開啟存放資料夾"
+                        };
+                        int choice = JOptionPane.showOptionDialog( thisFrame, "<html>最新版本 <font color=red>" + fileName + "</font> 已下載完畢！</html>",
+                                                                   "告知視窗",
+                                                                   JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                                                                   null, options, options[0] );
+
+                        if ( choice == 1 )
+                        {
+                            Common.startJARandExit( fileName );
+                        }
+                        else if ( choice == 2 )
+                        {
+                            openNowDirectory( fileName );
+                        }
+
 
                         InformationFrame.downloadButton.setText( "最新版本下載" );
                     }

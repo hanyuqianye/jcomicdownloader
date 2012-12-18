@@ -2,9 +2,11 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2011/12/25
+ Last Modified : 2012/12/16
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.12: 1. 修復介面崩潰問題。
+2. 修復napkin介面使用時無法開啟選擇背景視窗的問題。
  5.04: 增加英文介面。
  5.02: 修復Java 7下無法使用NapKin Look and Feel的問題。
  2.11: 1. 增加取消勾選『分析後下載圖檔』時的提醒視窗。
@@ -141,7 +143,7 @@ public class OptionFrame extends JFrame implements MouseListener
         OptionFrame.thisFrame = this; // for close the frame
 
         haveSetMainFrameBackgroundPic = false; //  這次是否有設定過背景圖片和相關顏色
-        
+
         needRestart = false; // 預設不用重新啟動程式
 
         setUpUIComponent();
@@ -939,11 +941,15 @@ public class OptionFrame extends JFrame implements MouseListener
 
     private void setSkin( int index )
     {
+        setSkin( skinClassNames[index] );
+    }
+
+    private void setSkin( String className )
+    {
         boolean continueChange = true;
-        String className = skinClassNames[index];
 
         // 首先檢查是否有設定背景圖片，若有則發出提醒通知，且不繼續改變介面
-        if ( checkSettingOfBackgroundPic( index ) )
+        if ( checkSettingOfBackgroundPic( className ) )
         {
             int napkinIndex = new CommonGUI().getSkinOrderBySkinClassName( "napkin.NapkinLookAndFeel" );
             skinBox.setSelectedIndex( napkinIndex ); // 回到Napkin介面
@@ -961,9 +967,9 @@ public class OptionFrame extends JFrame implements MouseListener
                 && className.matches( ".*substance.api.skin.*" )) )
         {
             CommonGUI.showMessageDialog( OptionFrame.thisFrame,
-                                                                 "選擇的介面為<font color=blue>"
-                                            + className
-                                            + "</font><br><font color=\"red\">程式將在關閉選項視窗後重新啟動!</font>" );
+                                         "選擇的介面為<font color=blue>"
+                    + className
+                    + "</font><br><font color=\"red\">程式將在關閉選項視窗後重新啟動!</font>" );
             needRestart = true;
         }
 
@@ -1022,10 +1028,10 @@ public class OptionFrame extends JFrame implements MouseListener
     }
 
     // 檢查是否有設定背景圖片，若有則發出提醒通知
-    private boolean checkSettingOfBackgroundPic( int index )
+    private boolean checkSettingOfBackgroundPic( String skinClassName )
     {
         // 如果有設定背景圖片，且要從Napkin介面換為其他介面時，才回傳true
-        if ( !skinClassNames[index].matches( ".*Napkin.*" )
+        if ( !skinClassName.matches( ".*Napkin.*" )
                 && (usingBackgroundPicOfMainFrameCheckBox.isSelected()
                 || usingBackgroundPicOfOptionFrameCheckBox.isSelected()
                 || usingBackgroundPicOfChoiceFrameCheckBox.isSelected())
@@ -1117,6 +1123,16 @@ public class OptionFrame extends JFrame implements MouseListener
     private class ActionHandler implements ActionListener
     {
 
+        private void createBackgroundSettingFrame( int frameEnum )
+        {
+            // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
+            if ( SetUp.getSkinClassName().matches( CommonGUI.napkinClassName ) )
+            {
+                CommonGUI.setLookAndFeelByClassName( ComicDownGUI.getDefaultSkinClassName() );
+            }
+            new BackgroundSettingFrame( frameEnum );
+        }
+
         public void actionPerformed( ActionEvent event )
         {
             if ( event.getSource() == chooseFontButton )
@@ -1132,7 +1148,11 @@ public class OptionFrame extends JFrame implements MouseListener
 
                             public void run()
                             {
-                                CommonGUI.setLookAndFeelByClassName( SetUp.getSkinClassName() );
+                                // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
+                                if ( SetUp.getSkinClassName().matches( CommonGUI.napkinClassName ) )
+                                {
+                                    CommonGUI.setLookAndFeelByClassName( ComicDownGUI.getDefaultSkinClassName() );
+                                }
                                 JFontChooser fontChooser = new JFontChooser();
                                 Font font = fontChooser.showDialog( OptionFrame.thisFrame, "選擇字型" );
 
@@ -1219,20 +1239,21 @@ public class OptionFrame extends JFrame implements MouseListener
             // 詳細設定背景圖片和字體顏色搭配
             if ( event.getSource() == setBackgroundPicOfMainFrameButton )
             {
-                new BackgroundSettingFrame( FrameEnum.MAIN_FRAME );
+
+                createBackgroundSettingFrame( FrameEnum.MAIN_FRAME );
                 haveSetMainFrameBackgroundPic = true; //  設定過背景圖片和相關設定
             }
             else if ( event.getSource() == setBackgroundPicOfInformationFrameButton )
             {
-                new BackgroundSettingFrame( FrameEnum.INFORMATION_FRAME );
+                createBackgroundSettingFrame( FrameEnum.INFORMATION_FRAME );
             }
             else if ( event.getSource() == setBackgroundPicOfOptionFrameButton )
             {
-                new BackgroundSettingFrame( FrameEnum.OPTION_FRAME );
+                createBackgroundSettingFrame( FrameEnum.OPTION_FRAME );
             }
             else if ( event.getSource() == setBackgroundPicOfChoiceFrameButton )
             {
-                new BackgroundSettingFrame( FrameEnum.CHOICE_FRAME );
+                createBackgroundSettingFrame( FrameEnum.CHOICE_FRAME );
             }
 
 

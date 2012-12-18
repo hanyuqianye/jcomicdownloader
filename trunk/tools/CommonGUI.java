@@ -754,27 +754,31 @@ public class CommonGUI
         {
 
             // 外部的L&F
-            if ( CommonGUI.isOuterLookAndFeel( className ) )
+            if ( className.matches( napkinClassName ) ) //CommonGUI.isOuterLookAndFeel( className ) ) // 
             {
                 Class skinClass = null;
-
-                if ( className.matches( jtattooClassName ) )
+                skinClass = CommonGUI.getOuterClass( className, napkinFileName );
+                
+                /*
+                if ( className.matches( napkinClassName ) )
                 {
-                    skinClass = CommonGUI.getOuterClass( className, jtattooFileName );
-
+                    skinClass = CommonGUI.getOuterClass( className, napkinFileName );
                 }
+                
                 else if ( className.matches( nimrodClassName ) )
                 {
                     skinClass = CommonGUI.getOuterClass( className, nimrodFileName );
                 }
-                else if ( className.matches( napkinClassName ) )
+                else if ( className.matches( jtattooClassName ) )
                 {
-                    skinClass = CommonGUI.getOuterClass( className, napkinFileName );
+                    skinClass = CommonGUI.getOuterClass( className, jtattooFileName );
+
                 }
                 else if ( className.matches( substanceClassName ) )
                 {
                     skinClass = CommonGUI.getOuterClass( className, substanceFileName );
                 }
+                */
 
                 LookAndFeel laf = ( LookAndFeel ) CommonGUI.getNewInstanceFromClass( skinClass );
                 if ( laf != null )
@@ -791,7 +795,7 @@ public class CommonGUI
                 UIManager.setLookAndFeel( className );
             }
 
-            
+
 
             /*
              else if ( className.matches( ".*substance.api.skin.*" ) )
@@ -1046,17 +1050,6 @@ public class CommonGUI
                                    final String title, final JTextField textField, final String directoryString,
                                    final javax.swing.filechooser.FileFilter fileFilter )
     {
-
-        /*
-         if ( SetUp.getSkinClassName().matches( ".*napkin\\..*" ) ) {
-         CommonGUI.showMessageDialog( thisFrame,
-         "使用Napkin介面時無法開啟目錄視窗，\n\n請置換為其他介面後再選擇檔案或目錄",
-         "提醒視窗", JOptionPane.INFORMATION_MESSAGE );
-
-         return;
-         }
-         */
-
         new Thread( new Runnable()
         {
 
@@ -1067,7 +1060,12 @@ public class CommonGUI
 
                     public void run()
                     {
-                        CommonGUI.setLookAndFeelByClassName( SetUp.getSkinClassName() );
+                        // 避免在NapKin Look and Feel下發生錯誤( JRE 7的問題)
+                        if ( SetUp.getSkinClassName().matches( CommonGUI.napkinClassName ) )
+                        {
+                            CommonGUI.setLookAndFeelByClassName( ComicDownGUI.getDefaultSkinClassName() );
+                        }
+
                         if ( SetUp.getSkinClassName().matches( CommonGUI.napkinClassName ) )
                         {
                             // 因為napkin不支援JFileChooser，所以瀏覽檔案之前先轉為預設介面
@@ -1076,7 +1074,7 @@ public class CommonGUI
 
                         JFileChooser dirChooser = new JFileChooser( directoryString );
                         //SwingUtilities.updateComponentTreeUI(dirChooser);
-                        
+
                         if ( thisComponent.getClass().getName().matches( ".*BackgroundSettingFrame.*" ) )
                         {
                             // 開啟圖片預覽功能
@@ -1100,8 +1098,8 @@ public class CommonGUI
                         {
                             //CommonGUI.setLookAndFeelByClassName( ComicDownGUI.getDefaultSkinClassName() );
                             //CommonGUI.updateUI( dirChooser );
-                    
-                            
+
+
                             int result = dirChooser.showDialog( thisComponent, "確定" );
 
                             if ( result == JFileChooser.APPROVE_OPTION )

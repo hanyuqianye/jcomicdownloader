@@ -14,6 +14,7 @@ import java.io.File;
 import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
+import jcomicdownloader.ComicDownGUI;
 import jcomicdownloader.SetUp;
 import jcomicdownloader.encode.Encoding;
 
@@ -182,6 +183,12 @@ public class ParseSogou extends ParseOnlineComicSite
             CommonGUI.stateBarDetailMessage = "共" + totalPage + "首，第" + i
                     + "首下載中 : " + fileName;
 
+            if ( SetUp.getShowDoneMessageAtSystemTray() && Common.withGUI() )
+            {
+                ComicDownGUI.trayIcon.setToolTip( CommonGUI.stateBarMainMessage
+                        + CommonGUI.stateBarDetailMessage );
+            }
+
             // 下載音樂
             if ( cookie == null )
             {
@@ -318,7 +325,7 @@ public class ParseSogou extends ParseOnlineComicSite
         beginIndex = endIndex;
         endIndex = allPageString.indexOf( "</tr>", beginIndex );
         if ( endIndex < 0 ) // 歌手全專輯頁面
-        { 
+        {
             beginIndex = allPageString.indexOf( "listenAlbum(", beginIndex );
             beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
             endIndex = allPageString.indexOf( "'", beginIndex );
