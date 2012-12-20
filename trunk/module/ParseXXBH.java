@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/12/5
+ Last Modified : 2012/12/20
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.12: 修復xxbh解析錯誤的問題。
  5.10: 1. 修復xxbh解析錯誤的問題。
  5.01: 1. 修復xxbh因網站改版而無法解析的問題。
  4.14: 1. 修復xxbh因網站改版而無法解析的問題。
@@ -132,8 +133,8 @@ public class ParseXXBH extends ParseOnlineComicSite
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
         // 首先要下載js檔
-        beginIndex = Common.getIndexOfOrderKeyword( allPageString, " src=", 4 );
-        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        beginIndex = allPageString.indexOf( "/coojs/" );
+        beginIndex = allPageString.lastIndexOf( "\"", beginIndex ) + 1;
         endIndex = allPageString.indexOf( "\"", beginIndex );
         String jsURL = allPageString.substring( beginIndex, endIndex );
 
