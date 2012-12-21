@@ -392,7 +392,7 @@ public class CommonGUI
         }
         catch ( Exception e )
         {
-            e.printStackTrace();
+            Common.errorReport( "無法取得預設的Look and Feel !!" );
         }
 
         return classNames.split( "###" );
@@ -497,7 +497,7 @@ public class CommonGUI
         }
         catch ( Exception e )
         {
-            e.printStackTrace();
+            Common.errorReport( "無法取得預設的Look and Feel !!" );
         }
 
         return skinString.split( "###" );
@@ -658,7 +658,7 @@ public class CommonGUI
         }
         catch ( Exception ex )
         {
-            ex.printStackTrace();
+            Common.errorReport( "無法設置預設的Lood And Feel" );
         }
     }
 
@@ -830,9 +830,9 @@ public class CommonGUI
             }
             catch ( Exception exx )
             {
-                exx.printStackTrace();
+                
+                Common.errorReport( "無法設置預設的Lood And Feel: " + ComicDownGUI.getDefaultSkinClassName() );
             }
-            ex.printStackTrace();
         }
 
     }
@@ -972,7 +972,6 @@ public class CommonGUI
                 catch ( Exception ex )
                 {
                     Common.errorReport( "更新界面時發生錯誤" );
-                    ex.printStackTrace();
                 }
             }
         } );
@@ -1126,7 +1125,7 @@ public class CommonGUI
                         }
                         catch ( HeadlessException ex )
                         {
-                            ex.printStackTrace();
+                            Common.errorReport( "選擇視窗發生錯誤 !!" );
                         }
 
                         if ( SetUp.getSkinClassName().matches( CommonGUI.napkinClassName ) )
@@ -1261,7 +1260,6 @@ public class CommonGUI
                 catch ( Exception ex )
                 {
                     Common.errorReport( "更新界面時發生錯誤" );
-                    ex.printStackTrace();
                 }
             }
         } );
@@ -1305,7 +1303,6 @@ public class CommonGUI
                 catch ( Exception ex )
                 {
                     Common.errorReport( "更新界面時發生錯誤" );
-                    ex.printStackTrace();
                 }
             }
         } );
@@ -1348,7 +1345,6 @@ public class CommonGUI
          }
          catch ( Exception ex ) {
          Common.errorReport( "更新界面時發生錯誤" );
-         ex.printStackTrace();
          }
          CommonGUI.showMessageOK = true;
          }

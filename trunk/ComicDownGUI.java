@@ -19,6 +19,7 @@
  9. 修復ck101動態加載部分未收錄的問題。
 10. 修復napkin介面使用時無法開啟選擇背景視窗的問題。
 11. 修復xxbh解析錯誤的問題。
+12. 修復Mac OS X下無法開啟資料夾的問題。
  5.11:
  1. 新增對sogou的支援
  2. 新增對1ting的支援。
@@ -1359,7 +1360,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
          componentResized(ComponentEvent e) { Dimension nowSize = getSize();
          panelWidth = getWidth(); panelHeight = getHeight();
 
-         System.out.println( panelWidth + ", " + panelHeight ); repaint(); } });
+         Common.debugPrintln( panelWidth + ", " + panelHeight ); repaint(); } });
          */
         //setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
     }
@@ -1829,7 +1830,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private void rechoiceVolume( int row )
     { // 重新選擇集數
         row = downTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
-        System.out.println( downTableModel.getRealValueAt( row, DownTableEnum.CHECKS ).toString() );
+        Common.debugPrintln( downTableModel.getRealValueAt( row, DownTableEnum.CHECKS ).toString() );
         ComicDownGUI.nowSelectedCheckStrings = Common.getSeparateStrings(
                 String.valueOf( downTableModel.getRealValueAt( row, DownTableEnum.CHECKS ) ) );
         Common.debugPrintln( "重新解析位址（為了重選集數）：" + downTableUrlStrings[row] );
@@ -2636,7 +2637,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
 
         Common.debugPrintln( "開啟" + title + "的下載資料夾" );
-        System.out.println( "符合條件: " + url );
+        Common.debugPrintln( "符合條件: " + url );
 
         if ( url.matches( "(?s).*e-hentai(?s).*" ) || url.matches( "(?s).*exhentai(?s).*" ) /*
                  // 因為這個url取的是所有集數的位址串連... || ( url.matches(
@@ -2682,7 +2683,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
             else if ( Common.isMac() )
             {
-                Common.runCmd( "Finder", SetUp.getOriginalDownloadDirectory(), true );
+                Common.runCmd( "open", SetUp.getOriginalDownloadDirectory(), true );
             }
             else
             {
@@ -2698,11 +2699,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             }
             else if ( Common.isMac() )
             {
-                Common.runCmd( "Finder", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash(), true );
+                Common.runCmd( "open", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash(), true );
             }
             else
             {
-                //System.out.println( "--->" + SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
+                //Common.debugPrintln( "--->" + SetUp.getOriginalDownloadDirectory() + title + Common.getSlash() );
                 Common.runCmd( "nautilus", SetUp.getOriginalDownloadDirectory() + title + Common.getSlash(), true );
             }
         }
@@ -2748,7 +2749,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     {
         //if ( event.isPopupTrigger() ) {
         System.out.print( "|" );
-        System.out.println( event.getX() + "," + event.getY() );
+        Common.debugPrintln( event.getX() + "," + event.getY() );
         urlFieldPopup.show( event.getComponent(), event.getX() + 15, event.getY() );
         //}
     }
@@ -3375,8 +3376,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             //int rgb = new Color( 155 ).getRed();
 
-            //System.out.println( Color.PINK.toString()  );
-            //System.out.println( Common.getColor(Color.PINK.toString() ).toString());
+            //Common.debugPrintln( Color.PINK.toString()  );
+            //Common.debugPrintln( Common.getColor(Color.PINK.toString() ).toString());
 
             String urlString = urlField.getText();
             parseURL( args, false, false, 0 );
@@ -3656,10 +3657,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
              int row = downTable.getSelectionModel().getLeadSelectionIndex();
              int col =
              downTable.getColumnModel().getSelectionModel().getLeadSelectionIndex();
-             //System.out.println( col );
+             //Common.debugPrintln( col );
 
              if ( row > 0 && col != 0 && col != 1 && col != 6 ) {
-             //System.out.println( row + " : " + downTableUrlStrings[row] );
+             //Common.debugPrintln( row + " : " + downTableUrlStrings[row] );
 
              ComicDownGUI.nowSelectedCheckStrings = Common.getSeparateStrings(
              String.valueOf( downTableModel.getRealValueAt( row,
@@ -3833,7 +3834,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 //Common.downloadFile( picURL, "", "test.jpg", false, "", referURL );
                 //Common.downloadFile( pageURL, "", "test1.html", false, "", "" );
 
-                //System.out.println( cookie );
+                //Common.debugPrintln( cookie );
 
                 //Common.simpleDownloadFile( picURL, "", "test.jpg", cookie, referURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
@@ -3851,7 +3852,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 //Common.simpleDownloadFile( testURL, "", "test.mp3", cookie, referURL );
 
-                System.out.println( "OVER" );
+                Common.debugPrintln( "OVER" );
 
 
 

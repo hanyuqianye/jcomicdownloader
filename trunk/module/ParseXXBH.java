@@ -276,7 +276,7 @@ public class ParseXXBH extends ParseOnlineComicSite
             endIndex = tempString.indexOf( "\"", beginIndex );
             volumeURL = tempString.substring( beginIndex, endIndex );
 
-            if ( !volumeURL.matches( ".*/s/.*" ) )
+            if ( !volumeURL.matches( ".*/s/.*" ) && volumeURL.matches( "/(?s).*" ) )
             { // 代表有非集數的網址在亂入
                 urlList.add( baseURL + volumeURL );
                 // 取得單集名稱

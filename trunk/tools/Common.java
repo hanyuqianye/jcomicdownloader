@@ -110,7 +110,7 @@ public class Common
 
     public static void errorReport( String errorString )
     {
-        System.out.println( "ERROR: " + errorString );
+        Common.debugPrintln( "ERROR: " + errorString );
         Run.isLegal = false;
         try
         {
@@ -118,6 +118,7 @@ public class Common
         }
         catch ( Exception ex )
         {
+            ex.printStackTrace();
             outputErrorMessage( ex, "ERROR: " + errorString + "\n" );
         }
     }
@@ -144,12 +145,12 @@ public class Common
 
     public static void processPrintln( String print )
     { // for debug
-        System.out.println( print );
+        Common.debugPrintln( print );
     }
 
     public static void processPrint( String print )
     { // for debug
-        System.out.print( print );
+        Common.debugPrint( print );
     }
 
     public static void checkDirectory( String dir )
@@ -203,7 +204,7 @@ public class Common
                     Common.downloadFile( webSite[i], outputDirectory, tempName, false, "", "", false, SetUp.getRetryTimes(), false, false );
 
                 }
-                System.out.print( (i + 1) + " " );
+                Common.debugPrint( (i + 1) + " " );
             }
             else
             {
@@ -258,7 +259,7 @@ public class Common
                     Common.downloadFile( webSite[i - 1], outputDirectory, fileName, false, "", "", false, SetUp.getRetryTimes(), false, false );
 
                 }
-                System.out.print( i + " " );
+                Common.debugPrint( i + " " );
             }
         }
     }
@@ -311,7 +312,7 @@ public class Common
             connection.getOutputStream().flush();
             connection.getOutputStream().close();
             int code = connection.getResponseCode();
-            System.out.println( "code   " + code );
+            Common.debugPrintln( "code   " + code );
 
             tempCookieStrings = tryConnect( connection );
         }
@@ -329,7 +330,7 @@ public class Common
                 if ( tempCookieStrings[i] != null )
                 {
                     cookieStrings[cookieCount++] = tempCookieStrings[i]; // 把cookie都集中到前面
-                    System.out.println( cookieCount + " " + tempCookieStrings[i] );
+                    Common.debugPrintln( cookieCount + " " + tempCookieStrings[i] );
                 }
             }
         }
@@ -388,7 +389,7 @@ public class Common
                 if ( tempCookieStrings[i] != null )
                 {
                     cookieStrings[cookieCount] = tempCookieStrings[i]; // 把cookie都集中到前面
-                    System.out.println( cookieCount + ": " + tempCookieStrings[i] );
+                    Common.debugPrintln( cookieCount + ": " + tempCookieStrings[i] );
                     cookieCount++;
                 }
             }
@@ -439,11 +440,11 @@ public class Common
         try
         {
             URLConnection con = new URL( url ).openConnection();
-            System.out.println( "orignal url: " + con.getURL() );
+            Common.debugPrintln( "orignal url: " + con.getURL() );
             con.connect();
-            System.out.println( "connected url: " + con.getURL() );
+            Common.debugPrintln( "connected url: " + con.getURL() );
             InputStream is = con.getInputStream();
-            System.out.println( "redirected url: " + con.getURL() );
+            Common.debugPrintln( "redirected url: " + con.getURL() );
             is.close();
         }
         catch ( Exception ex )
@@ -458,9 +459,9 @@ public class Common
             con.setInstanceFollowRedirects( false );
             con.connect();
             int responseCode = con.getResponseCode();
-            System.out.println( responseCode );
+            Common.debugPrintln( "" + responseCode );
             String location = con.getHeaderField( "Location" );
-            System.out.println( location );
+            Common.debugPrintln( location );
         }
         catch ( Exception ex )
         {
@@ -763,15 +764,15 @@ public class Common
                 {
 
                     cookieStrings[i - 1] = new String( connection.getHeaderField( i ) );
-                    //System.out.println( i + " " + cookieStrings[i-1] );
+                    //Common.debugPrintln( i + " " + cookieStrings[i-1] );
                 }
                 else
                 {
                     if ( headerName.matches( "Content-Length" ) )
                     {
-                        System.out.println( headerName + " = " + connection.getHeaderField( i ) );
+                        Common.debugPrintln( headerName + " = " + connection.getHeaderField( i ) );
                     }
-                    //System.out.println( headerName + " = " + connection.getHeaderField( i ) );
+                    //Common.debugPrintln( headerName + " = " + connection.getHeaderField( i ) );
                 }
             }
         }
@@ -1884,7 +1885,7 @@ public class Common
             }
         }
 
-        //System.out.println( bString + "符合次數: " + conformTimes );
+        //Common.debugPrintln( bString + "符合次數: " + conformTimes );
 
         return conformTimes;
     }
@@ -2096,13 +2097,13 @@ public class Common
         }
 
         String[] fileList = new File( file ).list();
-        System.out.println( file );
+        Common.debugPrintln( file );
 
         String firstCompressFileName = "";
         boolean existCompressFile = false;
         for ( int i = 0; i < fileList.length; i++ )
         {
-            //System.out.println( "FILE: " + fileList[i] );
+            //Common.debugPrintln( "FILE: " + fileList[i] );
             if ( fileList[i].matches( "(?s).*\\.zip" )
                     || fileList[i].matches( "(?s).*\\.cbz" ) )
             {
@@ -2567,7 +2568,7 @@ public class Common
 
             while ( (inputLine = in.readLine()) != null )
             {
-                System.out.println( inputLine );
+                Common.debugPrintln( inputLine );
             }
             in.close();
 
@@ -2843,7 +2844,7 @@ public class Common
             }
             in.close();
             out.close();
-            System.out.println( "File copied." );
+            Common.debugPrintln( "File copied." );
         }
         catch ( FileNotFoundException ex )
         {
