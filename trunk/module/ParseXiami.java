@@ -76,7 +76,7 @@ public class ParseXiami extends ParseSogou
         Common.debugPrint( "開始解析這一集有幾頁 : " );
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
 
-        beginIndex = allPageString.indexOf( "class=\"trackname\"" );
+        beginIndex = allPageString.indexOf( "class=\"track_list\"" );
         endIndex = allPageString.indexOf( "class=\"ctrl_play\"", beginIndex );
         tempString = allPageString.substring( beginIndex, endIndex );
 
@@ -434,6 +434,8 @@ public class ParseXiami extends ParseSogou
 
         int pageCount = allPageString.split( "/page/" ).length - 1;
         String[] pageURLs;
+        
+        String artistPageURL = urlString.replaceAll( "album/id/", "" );
 
         if ( pageCount > 0 )
         {
@@ -461,6 +463,11 @@ public class ParseXiami extends ParseSogou
         {
             Common.debugPrintln( "專輯第" + i + "頁: " + pageURLs[i] );
         }
+        
+        
+                urlList.add( artistPageURL );
+                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                        Common.getTraditionalChinese( getTitle() + "的熱門歌曲" ) ) ) );
 
         for ( int j = 0; j < pageCount; j++ )
         {

@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/12/27
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ 5.13: 修復bengou因網頁編碼改變而無法下載的問題。
     5.02: 修復bengou因網頁改版而解析失敗的問題。 
     5.0: 1. 修復bengou因網頁改版而解析失敗的問題。
  * 2.12: 1. 新增對www.bengou.com的支援。
@@ -12,10 +13,11 @@ ChangeLog:
  */
 package jcomicdownloader.module;
 
-import jcomicdownloader.tools.*;
-import jcomicdownloader.enums.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import jcomicdownloader.SetUp;
+import jcomicdownloader.enums.Site;
+import jcomicdownloader.tools.Common;
 
 public class ParseBengou extends ParseOnlineComicSite {
 
@@ -53,7 +55,8 @@ public class ParseBengou extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
-        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+         Common.downloadGZIPInputStreamFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        //Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
 
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );

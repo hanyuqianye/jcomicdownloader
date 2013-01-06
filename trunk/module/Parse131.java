@@ -5,6 +5,7 @@
  Last Modified : 2012/5/24
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.13: 修復comic131無效章節的問題。
      5.02: 1. 修復comic131因改版而解析錯誤的問題。
  *  4.17: 1. 修復comic.131.com因改版而解析錯誤的問題。
  *  4.02: 1. 新增對comic.131.com的支援。
@@ -225,7 +226,7 @@ public class Parse131 extends ParseOnlineComicSite {
         int beginIndex, endIndex;
 
         beginIndex = allPageString.indexOf( "class=\"mh_fj\"" );
-        endIndex = allPageString.indexOf( "id=\"iframe_comment\"", beginIndex );
+        endIndex = allPageString.indexOf( "class=\"cinnerlink\"", beginIndex );
 
         // 存放集數頁面資訊的字串
         tempString = allPageString.substring( beginIndex, endIndex );

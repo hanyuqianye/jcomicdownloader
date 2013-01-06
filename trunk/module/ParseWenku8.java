@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/6/18
+ Last Modified : 2012/12/30
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.13: 修復wenku8部份章節無法下載的問題。
   5.02: 1. 修復wenku8部分章節下載錯誤的問題。
  4.14: 1. 修復wenku8繁體頁面下載錯誤的問題。
  4.13: 1. 修正wenku8的封面與插圖下載。
@@ -71,17 +72,25 @@ public class ParseWenku8 extends ParseEightNovel {
         allPageString = Common.getTraditionalChinese( allPageString );
         
         String titleString = getWholeTitle();
-        if ( getWholeTitle().matches( ".*_.*" ) )
+        if ( titleString.matches( ".*_.*" ) )
         {
             // 避免改變字元後無法找出位置
-            titleString = getWholeTitle().split( "_" )[1]; 
+            titleString = titleString.split( "_" )[1];
+        }
+        
+        if ( getWholeTitle().matches( ".*‧.*" ) ) {
+            titleString = titleString.split( "‧" )[1]; 
+        }
+        
+        if ( getWholeTitle().matches( ".*＆.*" ) ) {
+            titleString = titleString.split( "＆" )[0]; 
         }
 
         beginIndex = allPageString.indexOf( titleString );
         endIndex = Common.getSmallerIndexOfTwoKeyword(
                 allPageString, beginIndex, "class=\"vcss\"", "</table>" );
         
-        Common.debugPrintln( "____" + beginIndex + "__" + endIndex );
+        Common.debugPrintln( "____" + beginIndex + "__" + endIndex + " " + titleString );
         String tempString = allPageString.substring( beginIndex, endIndex ).trim();
 
         totalPage = tempString.split( " href=" ).length - 1;

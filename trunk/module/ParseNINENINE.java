@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2012/6/16
+Last Modified : 2012/12/30
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ 5.13: 修復99manga下載錯誤的問題。
  5.01: 1. 修復dm.99manga.com因改版而解析錯誤的問題。
  4.18: 1. 修復cococomic解析錯誤的問題。
  4.15: 1. 修復cococomic部份位址解析錯誤的問題。
@@ -101,6 +102,8 @@ public class ParseNINENINE extends ParseOnlineComicSite {
 
         totalPage = getHowManyKeyWordInString( allString, "|" ) + 1;
         comicURL = new String[totalPage]; // totalPage = amount of comic pic
+        refers = new String[totalPage];
+        
         SetUp.setWholeTitle( wholeTitle );
     }
 
@@ -139,9 +142,9 @@ public class ParseNINENINE extends ParseOnlineComicSite {
 
         for ( int i = 0 ; i < comicURL.length && Run.isAlive ; i++ ) {
             comicURL[i] = baseDownloadURL + specificDownloadURL[i];
-            //Common.debugPrintln( i + " : " + comicURL[i] ) ;
+            Common.debugPrintln( i + " : " + comicURL[i] ) ;
+            refers[i] = webSite;
         }
-        //System.exit(0);
     }
 
     @Override // 下載網址指向的網頁，全部存入String後回傳
@@ -336,6 +339,7 @@ class Parse99MangaTC extends Parse99ComicTC {
 
         // 取得頁數
         comicURL = new String[urlTokens.length];
+        refers = new String[urlTokens.length];
 
         // 再取得下載伺服器編號
         beginIndex = webSite.indexOf( "s=", beginIndex );
@@ -365,6 +369,8 @@ class Parse99MangaTC extends Parse99ComicTC {
         for ( int i = 0 ; i < comicURL.length ; i++ ) {
             comicURL[i] = baseURL + Common.getFixedChineseURL( urlTokens[i] );
             //Common.debugPrintln( i + " : " + comicURL[i] ) ;
+            
+            refers[i] = webSite;
         }
         //System.exit(0);
     }

@@ -2,12 +2,13 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/2/13
+ Last Modified : 2012/12/30
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
-     5.02: 1. 修復hhcomic因網址改變而下載錯誤的問題。
+ 5.13: 修復hhcomic無法下載的問題。
+ 5.02: 1. 修復hhcomic因網址改變而下載錯誤的問題。
  *  4.16: 1. 修復hhcomic因變更伺服器而下載錯誤的問題。
-    3.18: 1. 修復hhcomic因網站改版而下載錯誤的問題。
+ 3.18: 1. 修復hhcomic因網站改版而下載錯誤的問題。
  *  3.06: 1. 新增對hhcomic.com的支援。
  *  4.15: 1. 修復hhcomic因網站改版而無法下載的問題。
  ----------------------------------------------------------------------------------------------------
@@ -79,11 +80,11 @@ public class ParseHH extends ParseOnlineComicSite {
 
     @Override
     public void parseComicURL() { // parse URL and save all URLs in comicURL  //
-        
+
 
         // 先取得所有的下載伺服器網址
         int beginIndex = 0, endIndex = 0;
-        String jsURL = baseURL + "/hh/h.js";
+        String jsURL = baseURL + "/hh/hhh.js";
         String allPageString = getAllPageString( jsURL );
 
         int amountOfServer = allPageString.split( "]=\"" ).length - 1;
@@ -96,41 +97,47 @@ public class ParseHH extends ParseOnlineComicSite {
             //Common.debugPrintln( "server " + i + ": " + serverStrings[i] );
             beginIndex = endIndex + 1;
         }
-        
+
         // 取得此集數的伺服器編號
         int serverNo = Integer.parseInt( webSite.split( "=" )[1].replace( "/", "" ) );
 
         // 取得此集數的伺服器位址
-        String serverURL = serverStrings[serverNo-1];
-        
+        String serverURL = serverStrings[serverNo - 1];
+
 
         Common.debugPrint( "開始解析這一集有幾頁 : " );
         allPageString = getAllPageString( webSite );
-        
+
         beginIndex = allPageString.indexOf( "PicListUrl" );
         beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
         endIndex = allPageString.indexOf( "\"", beginIndex );
-        
+
         String tempString = allPageString.substring( beginIndex, endIndex );
         String[] urlStrings = tempString.split( "\\|" );
         totalPage = urlStrings.length;
 
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
+        refers = new String[totalPage];
 
 
         int p = 0; // 目前頁數
         for ( int i = 1; i <= totalPage && Run.isAlive; i++ ) {
-            comicURL[p++] = serverURL + urlStrings[i-1]; // 存入每一頁的網頁網址
+            comicURL[p] = serverURL + urlStrings[i - 1]; // 存入每一頁的網頁網址
+            
+            refers[p] = webSite;
+
+            p++;
             //Common.debugPrintln( p + " " + comicURL[p - 1] ); // debug
             /*
-            // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
-            if ( !Common.existPicFile( getDownloadDirectory(), p ) ||
-                 !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
-                // 每解析一個網址就下載一張圖
-                singlePageDownloadUsingRefer( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0, webSite );
-            }
-            */
+             // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張
+             if ( !Common.existPicFile( getDownloadDirectory(), p ) ||
+             !Common.existPicFile( getDownloadDirectory(), p + 1 ) ) {
+             // 每解析一個網址就下載一張圖
+             singlePageDownloadUsingRefer( getTitle(), getWholeTitle(),
+             comicURL[p - 1], totalPage, p, 0, webSite );
+             }
+             */
         }
         //System.exit( 0 ); // debug
     }
@@ -169,7 +176,7 @@ public class ParseHH extends ParseOnlineComicSite {
 
         return mainPageURL;
     }
-    
+
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         int beginIndex = allPageString.indexOf( "img src=\"http://" );
@@ -205,7 +212,7 @@ public class ParseHH extends ParseOnlineComicSite {
             beginIndex = tempString.indexOf( "=", beginIndex ) + 1;
             endIndex = tempString.indexOf( " ", beginIndex );
             String tempURL = tempString.substring( beginIndex, endIndex );
-            
+
             if ( !tempURL.matches( "http://.*" ) ) {
                 tempURL = baseURL + tempURL;
             }

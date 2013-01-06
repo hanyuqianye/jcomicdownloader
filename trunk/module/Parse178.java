@@ -2,9 +2,11 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/5/13
+ Last Modified : 2013/1/6
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.13: 1. 修復178因改版而無法下載的問題。
+  2. 調整178的圖片伺服器位址。
      5.03: 修復178部分無法下載的問題。
     4.19: 修復178因網址改變而無法下載的問題。
     4.0 : 1. 翻新178的解析方式，直接轉碼而非參照字典檔。
@@ -94,18 +96,36 @@ public class Parse178 extends ParseOnlineComicSite {
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        // 取得所有位址編碼
+        // 取得所有位址編碼代號
         int beginIndex = allPageString.indexOf( "'[" ) + 2;
-        int endIndex = allPageString.indexOf( "';", beginIndex ) - 1;
+        int endIndex = allPageString.indexOf( "\"]", beginIndex ) + 1;
 
         String allCodeString = allPageString.substring( beginIndex, endIndex );
 
         totalPage = allCodeString.split( "\",\"" ).length;
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
+        
+        
+        // 取得位址編碼代號的替換字元
+        beginIndex = allPageString.indexOf( ",'", endIndex ) + 2;
+        endIndex = allPageString.indexOf( "'.", beginIndex );
+        String allVarString = allPageString.substring( beginIndex, endIndex );
+        
+        String[] varTokens = allVarString.split( "\\|" );
+        
+        for ( int i = 0; i < varTokens.length; i ++ ) {
+            Common.debugPrintln( i + " " + varTokens[i] ); // test
+        }
+        //System.exit( 0 );
 
         String basePicURL = "http://imgfast.manhua.178.com/";
         String[] codeTokens = allCodeString.split( "\",\"" );
+        
+        
+        
+        codeTokens = getRealCodeTokens( codeTokens, varTokens );
+
         String firstCode = codeTokens[0].replaceAll( "\"", "" );
 
         String firstPicURL = "";
@@ -115,8 +135,8 @@ public class Parse178 extends ParseOnlineComicSite {
         
         Common.debugPrintln( "第一張圖片網址：" + firstPicURL );
         
-        
         //System.exit( 0 );
+        
 
         String[] picNames = new String[totalPage];
         for ( int i = 0; i < picNames.length; i++ ) {
@@ -140,6 +160,67 @@ public class Parse178 extends ParseOnlineComicSite {
         }
 
         //System.exit( 0 ); // debug
+    }
+    
+    private int getVarIndex( char code ) {
+        int index = -1;
+        
+        if ( code >= '0' && code <= '9' ) {
+            index = Integer.valueOf( String.valueOf( code ) );
+        }
+        else if ( code >= 'a' && code <= 'z' ) {
+            index = 10 + (code - 'a');
+        }
+        else if ( code >= 'A' && code <= 'Z' ) {
+            index = 10 + 26 + (code - 'A');
+        }
+        
+        return index;
+    }
+    
+    // 將代號轉為實際字串
+    private String[] getRealCodeTokens( String[] codeTokens, String[] varTokens )
+    {
+        String[] realCodeTokens = new String[codeTokens.length];
+        
+        for ( int i = 0; i < codeTokens.length; i ++ ) {
+            realCodeTokens[i] = "";
+            Common.debugPrintln( "這次要分解的code : " + codeTokens[i] );
+            
+            for ( int j = codeTokens[i].length() - 1; j >= 0; j -- ) {
+                int index = -1;
+                // 兩個數字字元組合在一起
+                
+                index = getVarIndex( codeTokens[i].charAt( j ) );
+                
+                if ( j > 0 && index >= 0 ) {
+                    if ( codeTokens[i].charAt( j - 1 ) == '1' ) {
+                        index += ( 26 + 26 + 10 );
+                        j --;
+                    }
+                    else if ( codeTokens[i].charAt( j - 1 ) == '2' ) {
+                        index += ( ( 26 + 26 + 10 ) * 2 );
+                        j --;
+                    }
+                }
+                
+                
+                if ( index >= 0 && index < varTokens.length && !varTokens[index].equals( "" ) ) {
+                    realCodeTokens[i] = varTokens[index] + realCodeTokens[i];
+                }
+                else {
+                    realCodeTokens[i] = "" + codeTokens[i].charAt( j ) + realCodeTokens[i];
+                }
+                //Common.debugPrintln( realCodeTokens[i] );
+                
+            }
+            Common.debugPrintln( "分解結果: " + realCodeTokens[i] );
+
+            
+        }
+        //System.exit( 0 );
+        
+        return realCodeTokens;
     }
     
     // 回傳utf8編碼的十進位數字

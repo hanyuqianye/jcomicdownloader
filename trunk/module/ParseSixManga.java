@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/5/17
+ Last Modified : 2012/12/30
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.13: 修復6manga無法下載的問題。
  *  4.01: 1. 新增對6manga.com的支援。
  ----------------------------------------------------------------------------------------------------
  */
@@ -79,7 +80,7 @@ Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Enco
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        int beginIndex = allPageString.indexOf( "initpage(parseInt(" );
+        int beginIndex = allPageString.indexOf( "initpage" );
         beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
         int endIndex = allPageString.indexOf( "\"", beginIndex );
         String tempString = allPageString.substring( beginIndex, endIndex );
@@ -130,7 +131,7 @@ Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Enco
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_6manga_", "html" );
         String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_6manga_encode_", "html" );
 
-        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.simpleDownloadFile( urlString, SetUp.getTempDirectory(), indexName, "" );
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.BIG5 );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
@@ -209,7 +210,7 @@ Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Enco
             beginIndex = tempString.indexOf( " href=", beginIndex );
             beginIndex = tempString.indexOf( "'", beginIndex ) + 1;
             endIndex = tempString.indexOf( "'", beginIndex );
-            urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
+            urlList.add( Common.getFixedChineseURL( baseURL + tempString.substring( beginIndex, endIndex ) ) );
 
             // 取得單集名稱
             beginIndex = tempString.indexOf( ">", beginIndex ) + 1;

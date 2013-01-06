@@ -3,10 +3,20 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v5.12
- Last Modified : 2012/12/20
+ Version  : v5.13
+ Last Modified : 2013/1/6
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.13:
+ 1. 修復178因改版而無法下載的問題。
+ 2. 修復99manga下載錯誤的問題。
+ 3. 修復wenku8部份章節無法下載的問題。
+ 4. 修復hhcomic無法下載的問題。
+ 5. 修復6manga無法下載的問題。
+ 6. 調整178的圖片伺服器位址。
+ 7. 修復bengou因網頁編碼改變而無法下載的問題。
+ 8. 修復comic131無效章節的問題。
+
  5.12:
  1. 新增對xiami的支援。
  2. 新增簡易檔案下載模式。
@@ -497,7 +507,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v5.12";
+    public static String versionString = "JComicDownloader  v5.13";
 
     public ComicDownGUI()
     {
@@ -3838,7 +3848,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 //Common.simpleDownloadFile( picURL, "", "test.jpg", cookie, referURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
-                //Common.downloadFile( picURL, "", "test.jpg", false, cookie, referURL );
+                
+                picURL = "http://6manga.com/page/comics/7/2/243/_s%C2%B7yuwangdeyinji.html";
+                picURL = "http://6manga.com/page/comics/7/2/243/_s·yuwangdeyinji.html";
+                referURL = "http://dm.99manga.com/page/8361/117644.htm?s=10";
+                //Common.simpleDownloadFile( picURL, "", "test.html", referURL );
+                
+                
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
 
                 //Common.testConnection( testURL );
@@ -3852,13 +3868,16 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 //Common.simpleDownloadFile( testURL, "", "test.mp3", cookie, referURL );
 
+                int n = 'z' - 'a';
+                //Common.debugPrintln( "ANS: " + n );
+                
                 Common.debugPrintln( "OVER" );
 
 
 
             }
         } );
-        downThread.start();
+        //downThread.start();
     }
 
     /*

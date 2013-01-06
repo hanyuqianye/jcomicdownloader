@@ -39,6 +39,7 @@ abstract public class ParseOnlineComicSite {
     protected String wholeTitle;
     protected String webSite; // web page
     protected String[] comicURL; // all comic pic url
+    protected String[] refers;
     //protected String[] novelURLs; // 存放小說的每一頁章節位址
     //protected String[] novelTitles; // 存放小說的每一頁章節名稱
     protected int totalPage; // how many pages
@@ -92,6 +93,10 @@ abstract public class ParseOnlineComicSite {
     // 取得暫存檔名稱
     public String[] getTempFileNames() {
         return new String[]{indexName, indexEncodeName};
+    }
+    
+    public String[] getRefers() {
+        return refers;
     }
 
     public void setURL( String url ) {
