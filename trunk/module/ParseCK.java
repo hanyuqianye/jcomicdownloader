@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/12/3
+ Last Modified : 2013/1/6
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.13: 修復ck101解析錯誤的問題。
  5.09: 修復ck101解析錯誤的問題。
  5.03: 修復ck101下載頁數不全的問題。
  5.02: 修復ck101因網站改版而解析錯誤的問題。
@@ -113,7 +114,7 @@ public class ParseCK extends ParseOnlineComicSite
                 beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
                 endIndex = allPageString.indexOf( "\"", beginIndex );
 
-                String nextPageURL = "http://88manga.com" + allPageString.substring( beginIndex, endIndex );
+                String nextPageURL = "http://comic101.com" + allPageString.substring( beginIndex, endIndex );
 
                 Common.downloadFile( nextPageURL, SetUp.getTempDirectory(), indexName, false, "" );
                 allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
@@ -248,9 +249,8 @@ public class ParseCK extends ParseOnlineComicSite
         int p = 2;
         while ( true )
         {
-            beginIndex = allPageString.indexOf( "<ul>" ) + 1;
-            beginIndex = allPageString.indexOf( "<ul>", beginIndex ) + 1;
-            endIndex = allPageString.indexOf( "</ul>", beginIndex );
+            beginIndex = allPageString.indexOf( "class=\"case\"" ) + 1;
+            endIndex = allPageString.indexOf( "</div>", beginIndex );
 
             // 存放集數頁面資訊的字串
             tempString = allPageString.substring( beginIndex, endIndex );
