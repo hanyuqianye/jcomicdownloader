@@ -2,13 +2,15 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/5/24
+ Last Modified : 2013/1/11
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.13: 修復comic131無效章節的問題。
+修復comic131漫畫名稱解析錯誤的問題。
      5.02: 1. 修復comic131因改版而解析錯誤的問題。
  *  4.17: 1. 修復comic.131.com因改版而解析錯誤的問題。
  *  4.02: 1. 新增對comic.131.com的支援。
+
  ----------------------------------------------------------------------------------------------------
  */
 package jcomicdownloader.module;
@@ -208,7 +210,11 @@ public class Parse131 extends ParseOnlineComicSite {
 
         beginIndex = allPageString.indexOf( "<h1" );
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        endIndex = allPageString.indexOf( "</h1>", beginIndex );
+        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( "</", beginIndex );
+        //String tempString = allPageString.substring( beginIndex, endIndex );
+        
+        
         String title = allPageString.substring( beginIndex, endIndex ).trim();
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
