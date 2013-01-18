@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2012/12/16
+Last Modified : 2013/1/11
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+ 5.13: 修復ck101小說下載錯誤的問題。
 5/12: 修復ck101動態加載部分未收錄的問題。
 5.02: 1. 修復ck101小說部分合併卡住的問題。
 4.16: 1. 修復ck101小說無法批次下載的問題。
@@ -140,18 +141,28 @@ public class ParseCKNovel extends ParseOnlineComicSite {
             // 每解析一個網址就下載一張圖
             // 因應ck的第一頁會有動態讀取，所以需要將動態讀取的部分插入到第二頁，之後往後挪
             if ( i == 0 ) {
-                singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage + 1, p, 0 );
+                //singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage + 1, p, 0 );
                 
-                beginIndex = comicURL[i].indexOf( "thread-" );
-                beginIndex = comicURL[i].indexOf( "-", beginIndex ) + 1;
-                endIndex = comicURL[i].indexOf( "-", beginIndex );
+                if ( comicURL[i].indexOf( "thread-" ) > 0 )
+                {
+                    beginIndex = comicURL[i].indexOf( "thread-" );
+                    beginIndex = comicURL[i].indexOf( "-", beginIndex ) + 1;
+                    endIndex = comicURL[i].indexOf( "-", beginIndex );
+                }
+                else
+                {
+                    beginIndex = comicURL[i].lastIndexOf( "tid=" ) + 4;
+                    endIndex = comicURL[i].length();
+                }
                 String tempString = comicURL[i].substring( beginIndex, endIndex );
                 String extraURL = "http://ck101.com/forum.php?mod=threadlazydata&tid=" + tempString;
-                singlePageDownload( getTitle(), getWholeTitle(), extraURL, totalPage + 1, p + 1, 0 );
+                
+                Common.debugPrintln( "第一頁: " + extraURL );
+                singlePageDownload( getTitle(), getWholeTitle(), extraURL, totalPage + 1, p, 0 );
             }
             else 
             {
-                singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage + 1, p + 1, 0 );
+                singlePageDownload( getTitle(), getWholeTitle(), comicURL[i], totalPage + 1, p, 0 );
             }
             
             
