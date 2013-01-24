@@ -4,7 +4,7 @@
  Program Name : JComicDownloader
  Authors  : surveyorK
  Version  : v5.13
- Last Modified : 2013/1/18
+ Last Modified : 2013/1/24
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.13:
@@ -3852,11 +3852,10 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 //Common.simpleDownloadFile( picURL, "", "test.jpg", cookie, referURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
                 
-                picURL = "http://6manga.com/page/comics/7/2/243/_s%C2%B7yuwangdeyinji.html";
-                picURL = "http://6manga.com/page/comics/7/2/243/_s·yuwangdeyinji.html";
-                referURL = "http://dm.99manga.com/page/8361/117644.htm?s=10";
-                //Common.simpleDownloadFile( picURL, "", "test.html", referURL );
-                
+                picURL = "http://imgfast.manhua.178.com/j/%E5%90%9B%E4%B9%8B%E5%8C%95%E9%A6%96/vol4/P094.JPG";
+                referURL = "";
+                //Common.simpleDownloadFile( picURL, "", "test.jpg", referURL );
+                Common.downloadFile( picURL, "", "test.jpg", false, "", referURL );
                 
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
 
@@ -3880,7 +3879,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
             }
         } );
-        //downThread.start();
+        downThread.start();
     }
 
     /*

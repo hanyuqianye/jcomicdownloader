@@ -2,7 +2,7 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/1/6
+ Last Modified : 2013/1/24
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.13: 1. 修復178因改版而無法下載的問題。
@@ -212,18 +212,13 @@ public class Parse178 extends ParseOnlineComicSite
 
                 if ( j > 0 && index >= 0 )
                 {
-                    if ( codeTokens[i].charAt( j - 1 ) == '1' )
-                    {
-                        index += (26 + 26 + 10);
+                    char c = codeTokens[i].charAt( j - 1 );
 
-                        // 若之後找不到此index對應的token , 可直接用此數字字串
-                        tempChar = "" + codeTokens[i].charAt( j ); 
-
-                        j--;
-                    }
-                    else if ( codeTokens[i].charAt( j - 1 ) == '2' )
+                    if ( c >= '1' && c <= '9' )
                     {
-                        index += ((26 + 26 + 10) * 2);
+                        int num = Integer.parseInt( String.valueOf( c ) );
+                        
+                        index += ((26 + 26 + 10) * num);
                         
                         // 若之後找不到此index對應的token , 可直接用此數字字串
                         tempChar = "" + codeTokens[i].charAt( j );
