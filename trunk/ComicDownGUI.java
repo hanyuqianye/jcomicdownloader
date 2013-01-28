@@ -3,10 +3,13 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v5.13
- Last Modified : 2013/1/24
+ Version  : v5.14
+ Last Modified : 2013/1/28
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.14:
+ 1. 修復comic131解析位址錯誤的問題。
+ 2. 修復99mh無法下載的問題。
  5.13:
  1. 修復178因改版而無法下載的問題。
  2. 修復99manga下載錯誤的問題。
@@ -510,7 +513,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v5.13";
+    public static String versionString = "JComicDownloader  v5.14";
 
     public ComicDownGUI()
     {
