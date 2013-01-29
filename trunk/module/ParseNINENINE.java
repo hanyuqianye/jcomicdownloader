@@ -2,7 +2,7 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/1/28
+ Last Modified : 2013/1/29
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.14: 修復99mh無法下載的問題。
@@ -991,7 +991,7 @@ class Parse99Mh extends ParseNINENINE
         int endIndex = 0;
         String volumeString = "";
 
-        beginIndex = allPageString.indexOf( "subBookListAct" );
+        beginIndex = allPageString.indexOf( "subBookList" );
         endIndex = allPageString.indexOf( "cCRHtm", beginIndex );
 
         String tempString = allPageString.substring( beginIndex, endIndex );
