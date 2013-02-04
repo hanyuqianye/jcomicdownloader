@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/1/18
+ Last Modified : 2013/2/4
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.14: 修復xxbh伺服器位址失效的問題。
  5.13: 修復xxbh無法下載的問題。
 修復xxbh圖片伺服器位址解析錯誤的問題。
  5.12: 修復xxbh解析錯誤的問題。
@@ -111,7 +112,7 @@ public class ParseXXBH extends ParseOnlineComicSite
          String jsURL2 = allPageString.substring( beginIndex, endIndex );
          */
 
-        String jsURL2 = "http://img_v1.dm08.com/img_v1/cn_130117.js";
+        String jsURL2 = "http://img_v1.dm08.com/img_v1/fdc_130126.js";
 
 
         // 開始解析js檔案
