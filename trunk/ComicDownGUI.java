@@ -4,7 +4,7 @@
  Program Name : JComicDownloader
  Authors  : surveyorK
  Version  : v5.14
- Last Modified : 2013/2/4
+ Last Modified : 2013/2/14
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.14:
@@ -12,6 +12,7 @@
  2. 修復99mh無法下載的問題。
  3. 修復kuku解析集數錯誤的問題。
  4. 修復xxbh伺服器位址失效的問題。
+ 5. 修復comic131名稱解析錯誤的問題。
  5.13:
  1. 修復178因改版而無法下載的問題。
  2. 修復99manga下載錯誤的問題。
@@ -3159,6 +3160,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                         {
                             // 避免沒有讀入集數資訊卻仍開啟集數選擇視窗。
                             stateBar.setText( "  解析失敗，無法讀入集數資訊 !!" );
+                            
+                            if ( !Common.isMainPage )
+                            {
+                                stateBar.setText( "  單集位址無法加入任務 !!" );
+                            }
                         }
                         else if ( Common.isMainPage )
                         { // args is main page

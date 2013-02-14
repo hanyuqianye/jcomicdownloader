@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/1/28
+ Last Modified : 2013/2/14
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.14: 修復comic131名稱解析錯誤的問題。
  5.13: 修復comic131解析位址錯誤的問題。
  5.13: 修復comic131無效章節的問題。
 修復comic131漫畫名稱解析錯誤的問題。
@@ -209,10 +210,17 @@ public class Parse131 extends ParseOnlineComicSite {
     public String getTitleOnMainPage( String urlString, String allPageString ) {
         int beginIndex, endIndex;
 
-        beginIndex = allPageString.indexOf( "<h1" );
-        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        endIndex = allPageString.indexOf( "</", beginIndex );
+        endIndex = allPageString.lastIndexOf( "</h1>" );
+        beginIndex = allPageString.lastIndexOf( ">", endIndex ) + 1;
+        
+        while ( allPageString.substring( beginIndex, endIndex ).trim().equals( "" ) )
+        {
+            endIndex = allPageString.lastIndexOf( "<", endIndex - 1 );
+            beginIndex = allPageString.lastIndexOf( ">", endIndex ) + 1;
+        }
+            
+            
+        
         //String tempString = allPageString.substring( beginIndex, endIndex );
         
         
