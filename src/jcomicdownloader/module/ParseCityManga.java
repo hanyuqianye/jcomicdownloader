@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/12/3
+Last Modified : 2013/4/14
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+* 5.16: 修復citymanga最後一頁無解析的問題。
  *  2.02: 1. 新增對www.citymanga.com的支援。
 ----------------------------------------------------------------------------------------------------
  */
@@ -93,9 +94,19 @@ public class ParseCityManga extends ParseOnlineComicSite {
         for ( int i = 0 ; i < pageTokens.length ; i++ ) {
             if ( pageTokens[i].matches( "\\d+" ) ) {
                 pageURL[count++] = webSite + pageTokens[i] + "/"; // 存入每一頁的網頁網址
-                //Common.debugPrintln( count + " " + pageURL[count - 1]  ); // debug
+                //Common.debugPrintln( count + " " + pageURL[count-1]  ); // debug
             }
+            else if ( pageTokens[i].matches( "credits" ) )
+            {
+                pageURL[count++] = webSite + "credits/";
+                //Common.debugPrintln( count + " " + pageURL[count-1]  ); // debug
+            }
+            
+            
         }
+        
+        //System.exit( 0 );
+        
 
         for ( int p = 1 ; p <= totalPage && Run.isAlive; p++ ) {
             // 檢查下一張圖是否存在同個資料夾，若存在就跳下一張

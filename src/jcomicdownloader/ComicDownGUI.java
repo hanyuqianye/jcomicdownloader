@@ -4,7 +4,7 @@
  Program Name : JComicDownloader
  Authors  : surveyorK
  Version  : v5.16
- Last Modified : 2013/4/4
+ Last Modified : 2013/4/14
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.16:
@@ -13,6 +13,13 @@
 3. 修復99mh無法下載的問題。
 4. 修復jumpcn.com.cn解析錯誤的問題。
 5. 修復blog.yam.com圖片無法下載的問題。
+6. 修復8comic解析失敗的問題。
+7. 修復kangdm.com改變網址的問題。
+8. 修復citymanga最後一頁無解析的問題。
+9. 取消MAC系統下的剪貼簿捕捉功能。
+10. 修復ck101改變位址的問題。
+11. 修復xxbh位址解析錯誤的問題。
+12. 修復dm5沒有標題名稱時解析錯誤的問題。
 * 
  5.15:
  1. 修復178下載錯誤的問題。
@@ -800,8 +807,17 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     // 設置主介面上的網址輸入框
     private void setTextLayout( Container contentPane )
     {
-        urlField = new JTextField(
+        if ( Common.isMac() )
+        {
+            urlField = new JTextField(
+                Common.getStringUsingDefaultLanguage( "請貼上欲下載的漫畫頁面網址，而後點擊『加入』按鈕", "paste the URL" ) );
+        
+        }
+        else
+        {
+            urlField = new JTextField(
                 Common.getStringUsingDefaultLanguage( "請複製欲下載的漫畫頁面網址，此輸入欄會自動捕捉", "copy the URL" ) );
+        }
         urlField.setFont( SetUp.getDefaultFont( 3 ) );
 
         if ( SetUp.getUsingBackgroundPicOfMainFrame() )
@@ -1427,32 +1443,37 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     // --------- window event --------------
     public void windowGainedFocus( WindowEvent e )
     {
-        SystemClipBoard clip = new SystemClipBoard();
-        String clipString = clip.getClipString();
-
-        if ( !clipString.equals( Common.prevClipString ) )
+        // mac os x系統下的捕捉剪貼簿有問題，暫時不提供
+        if ( !Common.isMac() )
         {
-            //Common.debugPrint( "取得系統剪貼簿內容: " + clipString + "  " );
+            SystemClipBoard clip = new SystemClipBoard();
+            String clipString = clip.getClipString();
 
-            if ( Common.isLegalURL( clipString ) )
+            if ( !clipString.equals( Common.prevClipString ) )
             {
-                urlField.setText( clipString ); // 當取得焦點時自動貼網址到輸入框中
-                Common.prevClipString = clipString;
+                //Common.debugPrint( "取得系統剪貼簿內容: " + clipString + "  " );
 
-                if ( SetUp.getAutoAddMission() )
+                if ( Common.isLegalURL( clipString ) )
                 {
-                    String[] tempArgs =
+                    urlField.setText( clipString ); // 當取得焦點時自動貼網址到輸入框中
+                    Common.prevClipString = clipString;
+
+                    if ( SetUp.getAutoAddMission() )
                     {
-                        clipString
-                    };
-                    parseURL( tempArgs, false, false, 0 );
+                        String[] tempArgs =
+                        {
+                            clipString
+                        };
+                        parseURL( tempArgs, false, false, 0 );
+                    }
                 }
             }
+            else
+            {
+                urlField.setText( "" ); // 之前貼過的就不要再顯示了
+            }
         }
-        else
-        {
-            urlField.setText( "" ); // 之前貼過的就不要再顯示了
-        }
+        
     }
 
     public void windowLostFocus( WindowEvent e )
