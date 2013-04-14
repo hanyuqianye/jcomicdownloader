@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/11/7
+Last Modified : 2013/4/14
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+5.16: 修復8comic解析失敗的問題。
 5.06: 修復8comic因網站改版而解析錯誤的問題。
 5.02: 修復8comic因網站改版而解析錯誤的問題。
 2.09: 新增對6comic.com的支援。
@@ -66,8 +67,8 @@ public class ParseEC extends ParseOnlineComicSite {
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "", "" );
-        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
-        
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Zhcode.BIG5 );
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         
         // ex. http://www.8comic.com/love/drawing-8170.html?ch=3
         volumeNoString = webSite.split( "/|=" )[webSite.split( "/|=" ).length - 1];
@@ -82,76 +83,128 @@ public class ParseEC extends ParseOnlineComicSite {
 
     @Override
     public void parseComicURL() { // parse URL and save all URLs in comicURL
-        // 先取得前面的下載伺服器網址
-        String[] lines = Common.getFileStrings( SetUp.getTempDirectory(), indexName );
-
-        int itemidIndex = 0;
-        int index = 0;
-        for ( int i = 0 ; i < lines.length ; i++ ) {
-            if ( lines[i].matches( "(?s).*var itemid=(?s).*" ) ) {
-                itemidIndex = i;
-            } else if ( lines[i].matches( "(?s).*var codes=(?s).*" ) ) {
-                index = i;
-            }
-        }
-        itemid = lines[itemidIndex].split( ";|=" )[1];
-
-        String[] parses = lines[index].split( "\"|\\|" ); // 除了第一個和最後一個外都是解析碼
-
-        //for ( int i = 0; i < parses.length; i ++ )
-        //    System.out.println( i + "_" + parses[i] );
-
-        System.out.println( "lines[index]: " + lines[index] );
-        System.out.println( "volumeNoString: " + volumeNoString );
         
-        int order = 0;
-        for ( int i = 0 ; i < parses.length ; i++ ) {
-            if ( parses[i].split( " " )[0].equals( volumeNoString ) ) {
-                order = i;
+        //取得ch
+        int beginIndex = 0;
+        int endIndex = 0;
+        
+        String ch = "1";
+        if ( webSite.indexOf( "=" ) > 0 )
+        {
+            beginIndex = webSite.indexOf( "=" ) + 1;
+            endIndex = webSite.length();
+            ch = webSite.substring( beginIndex, endIndex );
+        }
+        Common.debugPrintln( "ch: " + ch );
+        
+
+        String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+        
+        // 取得chs
+        beginIndex = allPageString.indexOf( "var chs" );
+        beginIndex = allPageString.indexOf( "=", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( ";", beginIndex );
+        String chs = allPageString.substring( beginIndex, endIndex );
+        Common.debugPrintln( "chs: " + chs );
+        
+        // 取得itemid
+        beginIndex = allPageString.indexOf( "var itemid" );
+        beginIndex = allPageString.indexOf( "=", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( ";", beginIndex );
+        String itemid = allPageString.substring( beginIndex, endIndex );
+        Common.debugPrintln( "itemid: " + itemid );
+        
+        // 取得圖片編碼
+        beginIndex = allPageString.indexOf( "var allcodes", beginIndex );
+        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( "\"", beginIndex );
+        String allcodes = allPageString.substring( beginIndex, endIndex );
+        
+        
+        showpic( itemid, allcodes, chs, ch );
+        
+        //System.exit( 0 );
+        
+    }
+    
+    // 轉譯原始碼中的showpic function , 解析並保存圖片位址
+    void showpic( String itemid, String allcodes, String chs, String chString ) 
+    {
+        int ch = Integer.parseInt( chString.split( "-" )[0] );
+        
+        String[] codes = allcodes.split( "\\|" );
+        String code = "";
+        int cid = 0;
+        for ( int i = 0; i < codes.length; i++) {
+            if (codes[i].indexOf(ch + " ") == 0) {
+                cid = i;
+                code = codes[i];
                 break;
+            };
+        }
+        if ( ch == 0 ) 
+        {
+            for ( int i = 0; i < codes.length; i++) 
+            {
+                if ( Integer.parseInt( codes[i].split( " " )[0] ) > ch ) 
+                {
+                    cid = i;
+                    code = codes[i];
+                    ch = Integer.parseInt( codes[i].split( " " )[0] );
+                    break;
+                }
             }
         }
+        if ( "".equals( code ) ) 
+        {
+            cid = codes.length - 1;
+            code = codes[cid];
+            ch = Integer.parseInt( chs );
+        }
         
-        System.out.println( "parses[" + order + "]: " + parses[order] );
-
-        String[] codes = parses[order].split( " " );
-
-        // ex. http://img3.8comic.com/4/8323/24/001_88n.jpg
-        // ex. http://img"+sid+".8comic.com/"+did+"/"+itemid+"/"+num+"/"+img+".jpg"
-        // 找出網址
-        String num = codes[0];
-        String sid = codes[1];
-        String did = codes[2];
-        String page = codes[3];
-        String code = codes[4];
-
+        String num = code.split( " " )[0];
+        String sid = code.split( " " )[1];
+        String did = code.split( " " )[2];
+        String page = code.split( " " )[3];
+        code = code.split( " " )[4];
+        
         Common.debugPrint( "開始解析這一集有幾頁 :" );
         totalPage = Integer.valueOf( page );
         comicURL = new String[totalPage];
         Common.debugPrint( "共" + totalPage + "頁" );
-
-        // 完全引用網頁上的javascript碼
-        String img = "";
-        for ( int p = 1 ; p <= totalPage && Run.isAlive; p++ ) {
-            if ( p < 10 ) {
+        
+        Common.debugPrintln( "解析出的位址: " );
+        
+        for ( int p = 1; p <= totalPage; p ++ )
+        {        
+            String img = "";
+            if (p < 10)
+            {
                 img = "00" + p;
-            } else if ( p < 100 ) {
+            }
+            else if (p < 100) 
+            {
                 img = "0" + p;
-            } else {
+            }
+            else 
+            {
                 img = "" + p;
             }
+            int m = ( (int)((p - 1) / 10) % 10) + (((p - 1) % 10) * 3);
+            img += "_" + code.substring(m, m + 3);
 
-            int m = ((p - 1) / 10) % 10 + (((p - 1) % 10) * 3);
-            img += "_" + code.substring( m, m + 3 );
 
-            comicURL[p - 1] = "http://img" + sid + ".8comic.com/" + did + "/"
-                    + itemid + "/" + num + "/" + img + ".jpg";
-            //Common.debugPrintln( p + " " + comicURL[p-1] );
+            comicURL[p - 1] =  "http://img" + sid + ".8comic.com/" + did + 
+                    "/" + itemid + "/" + num + "/" + img + ".jpg";
+            
+            Common.debugPrintln( p + ": " +  comicURL[p - 1] );
+            
         }
-        //System.exit(0);
+        
     }
+        
 
-    @Override // 因為原檔就是utf8了，所以無須轉碼
+    @Override
     public String getAllPageString( String urlString ) {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_", "html" );
         String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_8comic_encode_", "html" );

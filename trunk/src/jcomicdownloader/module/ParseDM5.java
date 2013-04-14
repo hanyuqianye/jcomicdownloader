@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/11/4
+ Last Modified : 2013/4/14
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.16: 修復dm5沒有標題名稱時解析錯誤的問題。
  5.05: 修復dm5部分解析網址錯誤的問題。
  5.03: 修復dm5下載錯誤的問題。
  5.02: 修復dm5無法下載的問題。
@@ -656,6 +657,8 @@ public class ParseDM5 extends ParseOnlineComicSite
 
         // 存放集數頁面資訊的字串
         tempString = allPageString.substring( beginIndex, endIndex );
+        
+        Common.debugPrintln( tempString );
 
         int volumeCount = tempString.split( "href=" ).length - 1;
 
@@ -685,6 +688,13 @@ public class ParseDM5 extends ParseOnlineComicSite
                 beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
                 endIndex = tempString.indexOf( "\"", beginIndex );
                 volumeTitle = tempString.substring( beginIndex, endIndex );
+                
+                // 當沒有標題名稱時，拿位址來充數
+                if ( "".matches( volumeTitle ) )
+                {
+                    volumeTitle = "title_" + tempURL.replace( baseURL, "" );
+                    Common.debugPrintln( "新的名稱: " + volumeTitle );
+                }
 
                 volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                         Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );

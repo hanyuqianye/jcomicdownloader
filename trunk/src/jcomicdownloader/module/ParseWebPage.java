@@ -2,9 +2,11 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/12/3
+ Last Modified : 2013/4/14
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.16:修復ck101改變位址的問題。
+ 5.16:修復kangdm.com改變網址的問題。
  5.09:修復ck101網址不全的問題。
  5.04: 修復wenku8無法下載的問題。
  ----------------------------------------------------------------------------------------------------
@@ -187,7 +189,8 @@ public class ParseWebPage
         {
             siteID = Site.MANHUA_178;
         }
-        else if ( webSite.matches( "(?s).*kangdm.com(?s).*" ) )
+        else if ( webSite.matches( "(?s).*kangdm.com(?s).*" ) || 
+                  webSite.matches( "(?s).*kyo.cn(?s).*" ) )
         {
             siteID = Site.KANGDM;
         }
@@ -209,6 +212,7 @@ public class ParseWebPage
         }
         else if ( webSite.matches( "(?s).*comic101.com(?s).*" ) || 
                   webSite.matches( "(?s).*comic.101.com(?s).*" ) || 
+                  webSite.matches( "(?s).*mh.ck101.com(?s).*" ) ||
                   webSite.matches( "(?s).*.com/vols/\\d+/\\d+(?s).*" ) // 應付全部ck101的位址....
                    )
         {

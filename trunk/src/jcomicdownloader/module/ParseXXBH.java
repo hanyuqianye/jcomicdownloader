@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/2/4
+ Last Modified : 2013/4/14
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.16: 修復xxbh位址解析錯誤的問題。
  5.14: 修復xxbh伺服器位址失效的問題。
  5.13: 修復xxbh無法下載的問題。
 修復xxbh圖片伺服器位址解析錯誤的問題。
@@ -111,8 +112,24 @@ public class ParseXXBH extends ParseOnlineComicSite
          endIndex = allPageString.indexOf( "\"", beginIndex );
          String jsURL2 = allPageString.substring( beginIndex, endIndex );
          */
-
-        String jsURL2 = "http://img_v1.dm08.com/img_v1/fdc_130126.js";
+        
+        // 取得v3_cont_v130404.js
+        beginIndex = allPageString.indexOf( "_cont_" );
+        beginIndex = allPageString.lastIndexOf( "http:", beginIndex );
+        endIndex = allPageString.indexOf( "\"", beginIndex );
+        String tempURL = allPageString.substring( beginIndex, endIndex );
+        
+        Common.debugPrintln( "第1個js位址: " + tempURL );
+        
+        allJSPageString = getAllPageString( tempURL );
+        
+        // 從v3_cont_v130404.js中取得記載伺服器位址的js, ex. http://img_v1.dm08.com/img_v1/fdc_130404.js
+        beginIndex = allJSPageString.indexOf( "/fdc_" );
+        beginIndex = allJSPageString.lastIndexOf( "http:", beginIndex );
+        endIndex = allJSPageString.indexOf( "'", beginIndex );
+        String jsURL2 = allJSPageString.substring( beginIndex, endIndex );
+        
+        Common.debugPrintln( "第2個js位址: " + jsURL2 );
 
 
         // 開始解析js檔案

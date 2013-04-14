@@ -268,7 +268,7 @@ public class ParseCK extends ParseOnlineComicSite
                 beginIndex = tempString.indexOf( "href=", beginIndex );
                 beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
                 endIndex = tempString.indexOf( "\"", beginIndex );
-                urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
+                urlList.add( tempString.substring( beginIndex, endIndex ) );
 
                 // 取得單集名稱
                 beginIndex = tempString.indexOf( "title=", beginIndex );
