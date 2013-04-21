@@ -2,10 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2013/4/14
+Last Modified : 2013/4/21
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
-* 5.16: 修復citymanga最後一頁無解析的問題。
+* 5.16: 修復citymanga後面幾頁無法解析的問題。
  *  2.02: 1. 新增對www.citymanga.com的支援。
 ----------------------------------------------------------------------------------------------------
  */
@@ -87,22 +87,21 @@ public class ParseCityManga extends ParseOnlineComicSite {
         // 開始取得每一頁的網址
         beginIndex = allPageString.lastIndexOf( "pageselector" );
         endIndex = allPageString.indexOf( "</select>", beginIndex );
-        String[] pageTokens = allPageString.substring( beginIndex, endIndex ).split( "\"" );
-
-        String[] pageURL = new String[totalPage + 1];
+        tempString = allPageString.substring( beginIndex, endIndex );
+        
+        beginIndex = endIndex = 0;
+        int pageCount = tempString.split( "value=" ).length - 1;
         int count = 0;
-        for ( int i = 0 ; i < pageTokens.length ; i++ ) {
-            if ( pageTokens[i].matches( "\\d+" ) ) {
-                pageURL[count++] = webSite + pageTokens[i] + "/"; // 存入每一頁的網頁網址
-                //Common.debugPrintln( count + " " + pageURL[count-1]  ); // debug
-            }
-            else if ( pageTokens[i].matches( "credits" ) )
-            {
-                pageURL[count++] = webSite + "credits/";
-                //Common.debugPrintln( count + " " + pageURL[count-1]  ); // debug
-            }
-            
-            
+        String[] pageURL = new String[totalPage + 1];
+        for ( int i = 0; i < pageCount; i ++ )
+        {
+            beginIndex = tempString.indexOf( "value=", beginIndex );
+            beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "\"", beginIndex );
+            String numString = tempString.substring( beginIndex, endIndex );
+            pageURL[count++] = webSite + numString + "/";
+            //Common.debugPrintln( count + " " + pageURL[count - 1]  ); // debug
+            beginIndex = endIndex;
         }
         
         //System.exit( 0 );
