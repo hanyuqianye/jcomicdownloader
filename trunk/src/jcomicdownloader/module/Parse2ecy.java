@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2013/3/3
+Last Modified : 2013/6/26
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+*5.17: 修復2ecy解析錯誤的問題。
  5.15: 修復2ecy解析頁數錯誤的問題。
  *  4.07: 1. 新增對2ecy的支援。
 ----------------------------------------------------------------------------------------------------
@@ -175,7 +176,7 @@ public class Parse2ecy extends ParseOnlineComicSite {
         List<String> volumeList = new ArrayList<String>();
 
         int beginIndex = allPageString.indexOf( "class=\"tab-content\"" );
-        int endIndex = allPageString.indexOf( "class=\"comic\"", beginIndex );
+        int endIndex = allPageString.indexOf( "class=\"comic", beginIndex );
         String tempString = allPageString.substring( beginIndex, endIndex );
 
         int volumeCount = tempString.split( " href=" ).length - 1;
