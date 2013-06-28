@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/3/5
+ Last Modified : 2013/6/26
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.17: 修復178圖片伺服器位址錯誤的問題。
  5.15: 1. 修復178下載錯誤的問題。
           2. 修復178位址改變的問題。
  5.14: 1. 修復178因改版而無法下載的問題。
@@ -128,7 +129,7 @@ public class Parse178 extends ParseOnlineComicSite
         }
         //System.exit( 0 );
 
-        String basePicURL = "http://imgfast.manhua.178.com/";
+        String basePicURL = "http://imgfast.dmzj.com/";//"http://imgfast.manhua.178.com/";
         String[] codeTokens = allCodeString.split( "\",\"" );
 
 

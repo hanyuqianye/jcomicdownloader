@@ -299,7 +299,7 @@ public class ParseWebPage
         {
             siteID = Site.ZUIWANJU;
         }
-        else if ( webSite.matches( "(?s).*manhua.2ecy.com(?s).*" ) )
+        else if ( webSite.matches( "(?s).*www.2ecy.com(?s).*" ) )
         {
             siteID = Site.TWO_ECY;
         }

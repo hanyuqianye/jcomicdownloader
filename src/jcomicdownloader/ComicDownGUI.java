@@ -4,9 +4,14 @@
  Program Name : JComicDownloader
  Authors  : surveyorK
  Version  : v5.16
- Last Modified : 2013/4/21
+ Last Modified : 2013/6/26
  ----------------------------------------------------------------------------------------------------
- ChangeLog:
+ xxbh.net : 位址加密
+ * 
+ * ChangeLog:
+ 5.17:
+ 1. 修復178圖片伺服器位址錯誤的問題。
+ 2. 修復2ecy解析錯誤的問題。
  5.16:
  1. 修復comic131無法下載的問題。
  2. 修復ck101無法下載的問題。
