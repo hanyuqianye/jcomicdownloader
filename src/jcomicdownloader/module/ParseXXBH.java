@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/4/14
+ Last Modified : 2013/7/1
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.17: 修復xxbh解析錯誤的問題。
  5.16: 修復xxbh位址解析錯誤的問題。
  5.14: 修復xxbh伺服器位址失效的問題。
  5.13: 修復xxbh無法下載的問題。
@@ -150,7 +151,7 @@ public class ParseXXBH extends ParseOnlineComicSite
 
         //System.exit( 0 );
 
-        Common.debugPrint( "開始解析這一集有幾頁 : " );
+        //Common.debugPrint( "開始解析這一集有幾頁 : " );
 
         // 首先要下載js檔
         beginIndex = allPageString.indexOf( "/coojs/" );
@@ -163,11 +164,19 @@ public class ParseXXBH extends ParseOnlineComicSite
         String referURL = webSite + "?page=1";
         Common.simpleDownloadFile( jsURL, SetUp.getTempDirectory(), indexName, referURL );
         allJSPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
-
-        beginIndex = allJSPageString.indexOf( " msg" );
-        beginIndex = allJSPageString.indexOf( "'", beginIndex ) + 1;
-        endIndex = allJSPageString.indexOf( "'", beginIndex );
-        tempString = allJSPageString.substring( beginIndex, endIndex );
+        
+        //String[] picNames = getPicNames( allJSPageString );
+        
+        String decodeJS = getDecodeJS( allJSPageString );
+        Common.debugPrintln( "DECODE: " + decodeJS );
+        
+        //System.exit( 0 );
+        
+        beginIndex = decodeJS.indexOf( " msg" );
+        beginIndex = decodeJS.indexOf( "'", beginIndex ) + 1;
+        endIndex = decodeJS.indexOf( "'", beginIndex );
+        tempString = decodeJS.substring( beginIndex, endIndex );
+        
 
         // 取得每張圖片網址的後面部份
         String[] backPicURLs = tempString.split( "\\|" );
@@ -178,10 +187,10 @@ public class ParseXXBH extends ParseOnlineComicSite
         comicURL = new String[ totalPage ];
 
         Common.debugPrintln( "開始解析前面部份的位址" );
-        beginIndex = allJSPageString.indexOf( " img_s" );
-        beginIndex = allJSPageString.indexOf( "=", beginIndex ) + 1;
-        endIndex = allJSPageString.indexOf( ";", beginIndex );
-        tempString = allJSPageString.substring( beginIndex, endIndex ).trim();
+        beginIndex = decodeJS.indexOf( " img_s" );
+        beginIndex = decodeJS.indexOf( "=", beginIndex ) + 1;
+        endIndex = decodeJS.indexOf( ";", beginIndex );
+        tempString = decodeJS.substring( beginIndex, endIndex ).trim();
         int serverId = Integer.parseInt( tempString.trim() );
 
         Common.debugPrintln( "第一張圖片位址：" + frontPicURLs[serverId - 1] + backPicURLs[0] );
@@ -198,12 +207,123 @@ public class ParseXXBH extends ParseOnlineComicSite
             if ( !Common.existPicFile( getDownloadDirectory(), p )
                     || !Common.existPicFile( getDownloadDirectory(), p + 1 ) )
             {
-                singlePageDownloadUsingRefer( getTitle(), getWholeTitle(), comicURL[p], totalPage, p + 1, 0, referURL );
+                //singlePageDownloadUsingRefer( getTitle(), getWholeTitle(), comicURL[p], totalPage, p + 1, 0, referURL );
+                singlePageDownloadUsingSimple( getTitle(), getWholeTitle(), comicURL[p], totalPage, p + 1, referURL );
             }
             //Common.debugPrintln( ( p + 1 ) + " " + comicURL[p] + " " + referURL ); // debug
         }
         //System.exit( 0 ); // debug
     }
+    
+    
+    // char's ascii code -> String .
+public String fromCharCode(int... codePoints) {
+    return new String(codePoints, 0, codePoints.length);
+}
+ 
+// ex. 10 -> a .
+public String e( int c, int radix )
+{
+    int a = 62; //radix;
+    return (c < a ? "" : e( ( c / a ), a ) ) + ((c = c % a) > 35 ? fromCharCode(c + 29) : Long.toString( (long) c, 36));
+}
+ 
+// ex. a -> 10 .
+public int getIndexOfE( String eStr, int radix )
+{
+    for ( int i = 0; i < radix; i ++ )
+    {
+        String s = e( i, radix );
+        //Common.debugPrintln( "-> " + s )
+        if ( eStr.equals( s ) )
+        {
+            return i;
+        }
+        else
+        {
+            //Common.debugPrintln( " " + eStr + " : " + e( i ) );
+        }
+    }
+    //Common.debugPrintln( "not found: " + eStr );
+    return -1;
+}
+ 
+// ex. 0/i.1 ... -> 201306/220131103le3senmlyq.jpg ...
+public String getDecode( String[] codes, String encode )
+{
+    String decode = "";
+ 
+    //for ( int i = 0; i < encode.length(); i ++ )
+    
+    int i = 0;
+    while ( i < encode.length() )
+    {   
+        String a = encode.substring( i, i + 1 );
+        String b = "";
+        if ( i + 2 < encode.length() )
+            b = encode.substring( i + 1, i + 2 );
+        else
+            b = "++++++++++++";
+        boolean decodeA = false;
+        boolean decodeB = false;
+        
+        i++;
+        
+        if ( ( a.charAt( 0 ) >= '0' && a.charAt( 0 ) <= '9' ) ||
+             ( a.charAt( 0 ) >= 'a' && a.charAt( 0 ) <= 'z' ) ||
+             ( a.charAt( 0 ) >= 'A' && a.charAt( 0 ) <= 'Z' ) )
+        {
+            decodeA = true;
+        }
+        if ( ( b.charAt( 0 ) >= '0' && b.charAt( 0 ) <= '9' ) ||
+             ( b.charAt( 0 ) >= 'a' && b.charAt( 0 ) <= 'z' ) ||
+             ( b.charAt( 0 ) >= 'A' && b.charAt( 0 ) <= 'Z' ) )
+        {
+            decodeB = true;
+        }
+        
+        if ( decodeA && decodeB )
+        {
+            decode += codes[getIndexOfE( a + b, codes.length )];   
+            i++;
+        }
+        else if ( decodeA )
+        {
+            decode += codes[getIndexOfE( a, codes.length )];    
+        }
+        else
+        {
+            decode += a;
+        }
+    }
+    
+    return decode;
+}
+
+public String getDecodeJS( String data )
+{
+    int beginIndex, endIndex;
+    
+    Common.debugPrintln( "DATA: " + data );
+     
+    beginIndex = data.indexOf( "}(" );
+    beginIndex = data.indexOf( "'", beginIndex ) + 1;
+    endIndex = data.indexOf( ",", beginIndex );
+    endIndex = data.lastIndexOf( "'", endIndex );
+    String encodePic = data.substring( beginIndex, endIndex );
+    Common.debugPrintln( "ENCODE: " + encodePic );
+    
+    endIndex = data.indexOf( "split", beginIndex );
+    endIndex = data.lastIndexOf( "'", endIndex );
+    beginIndex = data.lastIndexOf( "'", endIndex - 1 ) + 1;
+    String[] codes = data.substring( beginIndex, endIndex ).split( "\\|" );
+    for ( int i = 0; i < codes.length; i ++ )
+    {
+        //Common.debugPrintln( "" + i+ " " + codes[i] );
+    }
+    return getDecode( codes, encodePic );    
+}
+
 
     @Override
     public String getAllPageString( String urlString )
