@@ -3,8 +3,8 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v5.16
- Last Modified : 2013/7/1
+ Version  : v5.17
+ Last Modified : 2013/7/22
  ----------------------------------------------------------------------------------------------------
  xxbh.net : 位址加密
  * 
@@ -13,6 +13,8 @@
  1. 修復178圖片伺服器位址錯誤的問題。
  2. 修復2ecy解析錯誤的問題。
  3. 修復xxbh解析錯誤的問題。
+ 4. 修復8comic改變位址的問題。
+ 5. 加入按鈕可重新選擇或加入反白任務。
  5.16:
  1. 修復comic131無法下載的問題。
  2. 修復ck101無法下載的問題。
@@ -543,7 +545,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v5.16";
+    public static String versionString = "JComicDownloader  v5.17";
 
     public ComicDownGUI()
     {
@@ -1881,9 +1883,14 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             row = recordTable.convertRowIndexToModel( row ); // 顯示的列 -> 實際的列
             tempArgs[0] = recordTableModel.getValueAt( row, RecordTableEnum.URL ).toString();
         }
+        else if ( tabbedPane.getSelectedIndex() == TabbedPaneEnum.MISSION )
+        {
+            rechoiceVolume( row );
+            return;
+        }
         else
         {
-            Common.errorReport( "不可能從書籤和記錄以外的地方加入任務！" );
+             Common.errorReport( "不可能從書籤和記錄以外的地方加入任務！" );
         }
 
         urlField.setText( tempArgs[0] );
@@ -3114,6 +3121,22 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         stateBar.setText( "全部記錄清空" );
         trayIcon.setToolTip( "JComicDownloader" );
     }
+    
+    // 若當前有反白任務，重新選擇集數，並回傳true, 否則回傳false
+    public boolean volumeRechoiceNow()
+    {
+        JTable targetTable = getSelectedTable();
+        for ( int i = targetTable.getRowCount() - 1; i >= 0; i-- )
+        {
+            if ( targetTable.isRowSelected( i ) )
+            {
+                //rechoiceVolume( i );
+                addMission( i );
+                return true;
+            }
+        }
+        return false;
+    }
 
     // 分析位址，分析完後開始下載。
     public void parseURL( final String[] newArgs,
@@ -3442,17 +3465,25 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
         if ( event.getSource() == button[ButtonEnum.ADD] )
         { // button of add
+            String urlString = urlField.getText();
+            Common.debugPrintln( "urlString = " + urlString );
+
             logFrame.redirectSystemStreams(); // start to log message
-            testDownload(); // 測試此網站的下載是否正常
+            testDownload(); // 測試下載是否正常
 
             //int rgb = new Color( 155 ).getRed();
 
             //Common.debugPrintln( Color.PINK.toString()  );
             //Common.debugPrintln( Common.getColor(Color.PINK.toString() ).toString());
 
-            String urlString = urlField.getText();
+
             parseURL( args, false, false, 0 );
             args = null;
+            
+            if ( urlString.equals( "" ) )
+            {
+                volumeRechoiceNow();
+            }
 
             // 每加一個任務就紀錄一次。
             Common.outputRecordTableFile( recordTableModel );
@@ -3891,11 +3922,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 Run.isAlive = true;
 
                 String picURL = "http://pics16.yamedia.tw/27/userfile/j/jojo945/album/14c6533d8cd82b.jpg";
-                String pageURL = "http://www.dmeden.net/comichtml/115276/1.html?s=6";
+                String pageURL = "http://new.comicvip.com/show/cool-1151.html?ch=71";
                 //String testURL = "http://www.dm5.com/m61853-p2/chapterimagefun.ashx?cid=61853&page=8&language=1&key=wZUeSh3wcCQ%3D";
                 String testURL = "http://www.fumanhua.com/images/pic_loading.gif";
 
-                String referURL = "http://blog.yam.com/jojo945/article/30675131";
+                String referURL = "http://comic.ck101.com/comic/19159";
                 String cookie = "";
                 //cookie = Common.getCookieString( pageURL );
                 String postString = "";
@@ -3910,7 +3941,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 //Common.simpleDownloadFile( picURL, "", "test.jpg", cookie, referURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
 
-                //Common.simpleDownloadFile( picURL, "", "test.jpg", referURL );
+                Common.simpleDownloadFile( pageURL, "", "test.html", referURL );
                 //Common.downloadFile( picURL, "", "test.jpg", false, "", referURL );
                 
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
