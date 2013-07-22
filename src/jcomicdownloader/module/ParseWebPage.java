@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/4/14
+ Last Modified : 2013/7/22
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.17:修復8comic改變位址的問題。
  5.16:修復ck101改變位址的問題。
  5.16:修復kangdm.com改變網址的問題。
  5.09:修復ck101網址不全的問題。
@@ -115,7 +116,8 @@ public class ParseWebPage
         }
         //else if ( webSite.matches( "(?s).*\\.178.com(?s).*" ) )
         //    siteID = Site.ONE_SEVEN_EIGHT;
-        else if ( webSite.matches( "(?s).*\\.8comic.com(?s).*" ) )
+        else if ( webSite.matches( "(?s).*\\.8comic.com(?s).*" ) ||
+                  webSite.matches( "(?s).*\\.comicvip.com(?s).*") )
         {
             if ( webSite.matches( "(?s).*photo(?s).*" )
                     || webSite.matches( "(?s).*PHOTO(?s).*" )
@@ -213,6 +215,7 @@ public class ParseWebPage
         else if ( webSite.matches( "(?s).*comic101.com(?s).*" ) || 
                   webSite.matches( "(?s).*comic.101.com(?s).*" ) || 
                   webSite.matches( "(?s).*mh.ck101.com(?s).*" ) ||
+                  webSite.matches( "(?s).*comic.ck101.com(?s).*" ) ||
                   webSite.matches( "(?s).*.com/vols/\\d+/\\d+(?s).*" ) // 應付全部ck101的位址....
                    )
         {

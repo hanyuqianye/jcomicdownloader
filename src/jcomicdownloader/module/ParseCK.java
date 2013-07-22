@@ -19,7 +19,6 @@ import jcomicdownloader.tools.*;
 import jcomicdownloader.enums.*;
 import java.util.*;
 import jcomicdownloader.SetUp;
-import jcomicdownloader.encode.Encoding;
 
 public class ParseCK extends ParseOnlineComicSite
 {
@@ -137,7 +136,8 @@ public class ParseCK extends ParseOnlineComicSite
     public String getAllPageString( String urlString )
     {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_ck_", "html" );
-        Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        //Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.simpleDownloadFile( urlString, SetUp.getTempDirectory(), indexName, urlString );
 
         return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
@@ -187,10 +187,18 @@ public class ParseCK extends ParseOnlineComicSite
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString )
     {
-        int beginIndex = allPageString.indexOf( "<strong>" );
+         int beginIndex = allPageString.indexOf( "<title>" );
+         Common.debugPrintln( allPageString.substring( beginIndex, beginIndex + 20 ) );
+        //allPageString = getAllPageString( urlString );
+          Common.simpleDownloadFile( urlString, "", "test.html", "" );
+        
+       beginIndex = allPageString.indexOf( "<title>" );
+        
+        Common.debugPrintln( allPageString.substring( beginIndex, beginIndex + 20 ) );
+        
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "</strong>", beginIndex );
-        String title = allPageString.substring( beginIndex, endIndex ).split( "/" )[0].trim();
+        int endIndex = allPageString.indexOf( "</title", beginIndex );
+        String title = allPageString.substring( beginIndex, endIndex ).split( "-" )[0].trim();
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
     }
@@ -199,15 +207,95 @@ public class ParseCK extends ParseOnlineComicSite
     public List<List<String>> getVolumeTitleAndUrlOnMainPage( String urlString, String allPageString )
     {
         // combine volumeList and urlList into combinationList, return it.
+        
+        System.exit( 0 );
 
         List<List<String>> combinationList = new ArrayList<List<String>>();
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
         String tempString = "";
+        int lastPage = 1;
         int beginIndex, endIndex;
+        
+        beginIndex = allPageString.indexOf( "class=\"pagination" );
+        
+        // 存在好幾頁
+        if ( beginIndex > 0 )
+        {
+            endIndex = allPageString.indexOf( "</a></div>", beginIndex );
+            tempString = allPageString.substring( beginIndex, endIndex );
+            
+            // 首先取得最後一頁編號
+            
+            int tempPage = 0;
+            int count = tempString.split( "href=" ).length;
+            
+            beginIndex = endIndex = 0;
+            for ( int i = 0; i < count; i ++ )
+            {
+                beginIndex = tempString.indexOf( "href=", beginIndex );
+                beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+                endIndex = tempString.indexOf( "</a", beginIndex );
+                tempPage = Integer.parseInt( tempString.substring( beginIndex, endIndex ).trim() );
+                
+                if ( tempPage > lastPage )
+                {
+                    lastPage = tempPage;
+                }
+            }
+        }
+        
+        Common.debugPrintln( "   共有 " + lastPage + " 張目錄頁" );
+        
+        // 接著在迴圈內下載每一頁, 取得每一集資訊
+        int totalVolumeCount = 0;
+        String pageURL = urlString;
+        for ( int i = 0; i < lastPage ; i ++ )
+        {
+            if ( i > 0 )
+            {
+                pageURL = urlString + "0/0/" + i;
+            }
+            
+            allPageString = getAllPageString( pageURL );
+            
+            // 取得存放一整頁面集數資訊
+            beginIndex = allPageString.indexOf( "class=\"list\"" );
+            beginIndex = allPageString.indexOf( "class=\"relativeRec", beginIndex );
+            endIndex = allPageString.indexOf( "</div>", beginIndex );
+            tempString = allPageString.substring( beginIndex, endIndex ); 
 
-        beginIndex = allPageString.indexOf( "class=\"page\"" ) + 1;
+            int volumeCount = tempString.split( "<h3>" ).length - 1; // 單一頁面的集數
+            totalVolumeCount += volumeCount;
+
+            String volumeTitle = "";
+            beginIndex = endIndex = 0;
+            for ( int j = 0; j < volumeCount; j++ )
+            {
+                // 取得單集位址
+                beginIndex = tempString.indexOf( "<h3>", beginIndex );
+                beginIndex = tempString.indexOf( "href=", beginIndex );
+                beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
+                endIndex = tempString.indexOf( "\"", beginIndex );
+                urlList.add( tempString.substring( beginIndex, endIndex ) );
+
+                // 取得單集名稱
+                beginIndex = tempString.indexOf( "title=", beginIndex );
+                beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
+                endIndex = tempString.indexOf( "\"", beginIndex );
+                volumeTitle = tempString.substring( beginIndex, endIndex );
+
+                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
+                        Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
+
+            }
+        }
+
+        /*
+        beginIndex = allPageString.indexOf( "class=\"list\"" );
+        beginIndex = allPageString.indexOf( "class=\"relativeRec", beginIndex );
+        
         endIndex = allPageString.indexOf( "</div>", beginIndex );
         // 存放一整頁面集數資訊的字串
         tempString = allPageString.substring( beginIndex, endIndex );
@@ -291,7 +379,8 @@ public class ParseCK extends ParseOnlineComicSite
                 break;
             }
         }
-
+        */
+        
         totalVolume = totalVolumeCount;
         Common.debugPrintln( "共有" + totalVolume + "集" );
 

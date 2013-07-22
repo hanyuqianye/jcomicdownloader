@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2013/4/14
+Last Modified : 2013/7/22
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+5.17: 修復8comic改變位址的問題。
 5.16: 修復8comic解析失敗的問題。
 5.06: 修復8comic因網站改版而解析錯誤的問題。
 5.02: 修復8comic因網站改版而解析錯誤的問題。
@@ -67,6 +68,7 @@ public class ParseEC extends ParseOnlineComicSite {
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "", "" );
+        Common.simpleDownloadFile( webSite, SetUp.getTempDirectory(), indexName, webSite );
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Zhcode.BIG5 );
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         
@@ -300,7 +302,7 @@ public class ParseEC extends ParseOnlineComicSite {
             volumeList.add( getVolumeWithFormatNumber( volumeTitle ) );
             
             
-            Common.debugPrintln( tempURL + " " + volumeTitle );
+            //Common.debugPrintln( tempURL + " " + volumeTitle );
 
         }
 
@@ -319,15 +321,15 @@ public class ParseEC extends ParseOnlineComicSite {
         int catid = Integer.parseInt( catidString );
         
         if(catid==4 || catid==6 || catid==12 ||catid==22 ) 
-            baseurl="http://www.8comic.com/show/cool-";
+            baseurl="http://new.comicvip.com/show/cool-";
         if(catid==1 || catid==17 || catid==19 || catid==21) 
-            baseurl="http://www.8comic.com/show/cool-";
+            baseurl="http://new.comicvip.com/show/cool-";
         if(catid==2 || catid==5 || catid==7 || catid==9)  
-            baseurl="http://www.8comic.com/show/cool-";
+            baseurl="http://new.comicvip.com/show/cool-";
         if(catid==10 || catid==11 || catid==13 || catid==14) 
-            baseurl="http://www.8comic.com/show/best-manga-";
+            baseurl="http://new.comicvip.com/show/best-manga-";
         if(catid==3 || catid==8 || catid==15 || catid==16 ||catid==18 ||catid==20)
-            baseurl="http://www.8comic.com/show/best-manga-";
+            baseurl="http://new.comicvip.com/show/best-manga-";
         
         
         return baseurl + idString + ".html" + volumeString;
