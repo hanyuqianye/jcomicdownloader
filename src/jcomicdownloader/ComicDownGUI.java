@@ -15,6 +15,7 @@
  3. 修復xxbh解析錯誤的問題。
  4. 修復8comic改變位址的問題。
  5. 加入按鈕可重新選擇或加入反白任務。
+ 6. 資訊按鈕可開啟反白任務的下載物。
  5.16:
  1. 修復comic131無法下載的問題。
  2. 修復ck101無法下載的問題。
@@ -3122,6 +3123,8 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         trayIcon.setToolTip( "JComicDownloader" );
     }
     
+    
+    
     // 若當前有反白任務，重新選擇集數，並回傳true, 否則回傳false
     public boolean volumeRechoiceNow()
     {
@@ -3132,6 +3135,23 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             {
                 //rechoiceVolume( i );
                 addMission( i );
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    // 若當前有反白任務，以預設程式開啟此任務下載物
+    public boolean viewMission()
+    {
+        JTable targetTable = getSelectedTable();
+        for ( int i = targetTable.getRowCount() - 1; i >= 0; i-- )
+        {
+            if ( targetTable.isRowSelected( i ) )
+            {
+                //rechoiceVolume( i );
+                openDownloadFile( i );
                 return true;
             }
         }
@@ -3480,7 +3500,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
             parseURL( args, false, false, 0 );
             args = null;
             
-            if ( urlString.equals( "" ) )
+            if ( urlString.equals( "" ) || urlString.matches( "請(?).*" ) )
             {
                 volumeRechoiceNow();
             }
@@ -3636,7 +3656,13 @@ public class ComicDownGUI extends JFrame implements ActionListener,
         }
         if ( event.getSource() == button[ButtonEnum.INFORMATION] )
         { // button of Information
-
+            
+            // 若有反白任務，則嘗試開啟此任務的漫畫，若成功，就不再開啟資訊視窗。
+            if ( viewMission() )
+            {
+                return;
+            }
+            
             new Thread( new Runnable()
             {
 
