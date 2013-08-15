@@ -44,7 +44,7 @@ public class ParseFumanhua extends ParseOnlineComicSite {
         jsName = "index_fumanhua.js";
         radixNumber = 1591371; // default value, not always be useful!!
 
-        baseURL = "http://www.fumanhua.com";
+        baseURL = "http://mh.fumanhua.com";
     }
 
     public ParseFumanhua( String webSite, String titleName ) {
@@ -58,7 +58,8 @@ public class ParseFumanhua extends ParseOnlineComicSite {
         Common.debugPrintln( "開始解析各參數 :" );
         Common.debugPrintln( "開始解析title和wholeTitle :" );
 
-        Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        //Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
+        Common.simpleDownloadFile( webSite, SetUp.getTempDirectory(), indexName, webSite );
         Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName );
 
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
