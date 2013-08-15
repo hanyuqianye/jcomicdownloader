@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/4/3
+ Last Modified : 2013/8/14
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.18: 修復ck101解析失敗的問題。
  5.16: 修復ck101無法下載的問題。
  5.13: 修復ck101解析錯誤的問題。
  5.09: 修復ck101解析錯誤的問題。
@@ -43,7 +44,7 @@ public class ParseCK extends ParseOnlineComicSite
         jsName = "index_ck.js";
         radixNumber = 151261471; // default value, not always be useful!!
 
-        baseURL = "http://comic101.com";
+        baseURL = "http://comic.ck101.com";//"http://comic101.com";
     }
 
     public ParseCK( String webSite, String titleName )
@@ -87,7 +88,7 @@ public class ParseCK extends ParseOnlineComicSite
 
         int beginIndex = 0, endIndex = 0;
 
-        totalPage = allPageString.split( "<option " ).length - 1;
+        totalPage = allPageString.split( "<option " ).length;
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[ totalPage ];
 
@@ -98,13 +99,19 @@ public class ParseCK extends ParseOnlineComicSite
             beginIndex = allPageString.indexOf( "<img id" );
             beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
             endIndex = allPageString.indexOf( "\"", beginIndex );
-
-            comicURL[p++] = allPageString.substring( beginIndex, endIndex );
-            Common.debugPrintln( p + " " + comicURL[p - 1] ); // debug
-
-            // 每解析一個網址就下載一張圖
-            singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0 );
-
+            String tempURL = allPageString.substring( beginIndex, endIndex );
+            
+            if ( Common.isLegalURL( tempURL ) )
+            {
+                comicURL[p++] = tempURL;
+                Common.debugPrintln( p + " " + comicURL[p - 1] ); // debug
+                // 每解析一個網址就下載一張圖
+                singlePageDownload( getTitle(), getWholeTitle(), comicURL[p - 1], totalPage, p, 0 );
+            }
+            else
+            {
+                totalPage--;
+            }
             //Common.downloadFile( comicURL[p - 1], "", p + ".jpg", false, "" );
 
 
@@ -113,8 +120,14 @@ public class ParseCK extends ParseOnlineComicSite
                 beginIndex = allPageString.indexOf( "</select>" );
                 beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
                 endIndex = allPageString.indexOf( "\"", beginIndex );
-
-                String nextPageURL = "http://comic101.com" + allPageString.substring( beginIndex, endIndex );
+                tempURL = allPageString.substring( beginIndex, endIndex );
+                if ( "#".equals( tempURL ) )
+                {
+                    Common.debugPrintln( "THE LAST PAGE !!" );
+                    break;
+                }
+                
+                String nextPageURL = "http://comic101.com" + tempURL;
 
                 Common.downloadFile( nextPageURL, SetUp.getTempDirectory(), indexName, false, "" );
                 allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
@@ -135,10 +148,15 @@ public class ParseCK extends ParseOnlineComicSite
     @Override // 因為原檔就是utf8了，所以無須轉碼
     public String getAllPageString( String urlString )
     {
+        if ( urlString.matches( ".*/") )
+        {
+            urlString = urlString.substring( 0, urlString.length() - 1 );
+        }
+        
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_ck_", "html" );
         //Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
         Common.simpleDownloadFile( urlString, SetUp.getTempDirectory(), indexName, urlString );
-
+        
         return Common.getFileString( SetUp.getTempDirectory(), indexName );
     }
 
@@ -146,7 +164,7 @@ public class ParseCK extends ParseOnlineComicSite
     public boolean isSingleVolumePage( String urlString )
     {
         // ex. http://comic.ck101.com/page/1749372
-        String allPageString = getAllPageString( urlString );
+        //String allPageString = getAllPageString( urlString );
 
         if ( urlString.matches( ".*/vols/.*" ) )
         {
@@ -187,19 +205,11 @@ public class ParseCK extends ParseOnlineComicSite
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString )
     {
-         int beginIndex = allPageString.indexOf( "<title>" );
-         Common.debugPrintln( allPageString.substring( beginIndex, beginIndex + 20 ) );
-        //allPageString = getAllPageString( urlString );
-          Common.simpleDownloadFile( urlString, "", "test.html", "" );
-        
-       beginIndex = allPageString.indexOf( "<title>" );
-        
-        Common.debugPrintln( allPageString.substring( beginIndex, beginIndex + 20 ) );
-        
+        int beginIndex = allPageString.indexOf( "<title>" );
         beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
         int endIndex = allPageString.indexOf( "</title", beginIndex );
         String title = allPageString.substring( beginIndex, endIndex ).split( "-" )[0].trim();
-
+        
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
     }
 
@@ -208,8 +218,6 @@ public class ParseCK extends ParseOnlineComicSite
     {
         // combine volumeList and urlList into combinationList, return it.
         
-        System.exit( 0 );
-
         List<List<String>> combinationList = new ArrayList<List<String>>();
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
@@ -229,7 +237,9 @@ public class ParseCK extends ParseOnlineComicSite
             // 首先取得最後一頁編號
             
             int tempPage = 0;
-            int count = tempString.split( "href=" ).length;
+            int count = tempString.split( "href=" ).length - 2;
+            
+            //Common.debugPrintln( count + " : "+ tempString );
             
             beginIndex = endIndex = 0;
             for ( int i = 0; i < count; i ++ )
@@ -238,7 +248,7 @@ public class ParseCK extends ParseOnlineComicSite
                 beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
                 endIndex = tempString.indexOf( "</a", beginIndex );
                 tempPage = Integer.parseInt( tempString.substring( beginIndex, endIndex ).trim() );
-                
+                Common.debugPrintln( tempPage + "_" );
                 if ( tempPage > lastPage )
                 {
                     lastPage = tempPage;
@@ -266,7 +276,7 @@ public class ParseCK extends ParseOnlineComicSite
             endIndex = allPageString.indexOf( "</div>", beginIndex );
             tempString = allPageString.substring( beginIndex, endIndex ); 
 
-            int volumeCount = tempString.split( "<h3>" ).length - 1; // 單一頁面的集數
+            int volumeCount = tempString.split( "<h3" ).length; // 單一頁面的集數
             totalVolumeCount += volumeCount;
 
             String volumeTitle = "";
@@ -274,11 +284,11 @@ public class ParseCK extends ParseOnlineComicSite
             for ( int j = 0; j < volumeCount; j++ )
             {
                 // 取得單集位址
-                beginIndex = tempString.indexOf( "<h3>", beginIndex );
+                beginIndex = tempString.indexOf( "<h3", beginIndex );
                 beginIndex = tempString.indexOf( "href=", beginIndex );
                 beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
                 endIndex = tempString.indexOf( "\"", beginIndex );
-                urlList.add( tempString.substring( beginIndex, endIndex ) );
+                urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
 
                 // 取得單集名稱
                 beginIndex = tempString.indexOf( "title=", beginIndex );

@@ -3,12 +3,13 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v5.17
- Last Modified : 2013/7/22
+ Version  : v5.18
+ Last Modified : 2013/8/14
  ----------------------------------------------------------------------------------------------------
- xxbh.net : 位址加密
  * 
  * ChangeLog:
+ 5.18:
+ 1. 修復ck101解析失敗的問題。
  5.17:
  1. 修復178圖片伺服器位址錯誤的問題。
  2. 修復2ecy解析錯誤的問題。
@@ -3948,11 +3949,11 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 Run.isAlive = true;
 
                 String picURL = "http://pics16.yamedia.tw/27/userfile/j/jojo945/album/14c6533d8cd82b.jpg";
-                String pageURL = "http://new.comicvip.com/show/cool-1151.html?ch=71";
+                String pageURL = "http://comic.ck101.com/comic/6643";
                 //String testURL = "http://www.dm5.com/m61853-p2/chapterimagefun.ashx?cid=61853&page=8&language=1&key=wZUeSh3wcCQ%3D";
                 String testURL = "http://www.fumanhua.com/images/pic_loading.gif";
 
-                String referURL = "http://comic.ck101.com/comic/19159";
+                String referURL = "http://comic.ck101.com/comic/6643/";
                 String cookie = "";
                 //cookie = Common.getCookieString( pageURL );
                 String postString = "";
@@ -3967,7 +3968,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 //Common.simpleDownloadFile( picURL, "", "test.jpg", cookie, referURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
 
-                Common.simpleDownloadFile( pageURL, "", "test.html", referURL );
+                Common.simpleDownloadFile( pageURL, "", "test1.html", referURL );
                 //Common.downloadFile( picURL, "", "test.jpg", false, "", referURL );
                 
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );

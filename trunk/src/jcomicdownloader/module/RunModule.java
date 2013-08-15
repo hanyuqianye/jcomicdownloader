@@ -321,7 +321,8 @@ public class RunModule {
             || siteID == Site.XXBH
             || siteID == Site.TWO_ECY
             || siteID == Site.ONESEVEN_KK
-            || siteID == Site.FUMANHUA ) {
+            || siteID == Site.FUMANHUA
+            || siteID == Site.CK ) {
             return true;
         }
         else if ( isNovelSite( siteID ) || isBlogSite( siteID ) || isMusicSite( siteID ) ) {
