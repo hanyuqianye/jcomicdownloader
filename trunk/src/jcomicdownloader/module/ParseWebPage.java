@@ -66,6 +66,7 @@ public class ParseWebPage
         {
             siteID = Site.EX;
         }
+        /*
         else if ( webSite.matches( "(?s).*dm.99manga.com(?s).*" ) )
         {
             siteID = Site.NINENINE_MANGA_TC;
@@ -82,7 +83,7 @@ public class ParseWebPage
         {
             siteID = Site.NINENINE_COMIC_TC;
         }
-        else if ( webSite.matches( "(?s).*/99comic.com(?s).*" ) )
+        else if ( webSite.matches( "(?s).*99comic.com(?s).*" ) )
         {
             siteID = Site.NINENINE_COMIC;
         }
@@ -114,6 +115,7 @@ public class ParseWebPage
         {
             siteID = Site.NINENINE_3G;
         }
+        */
         //else if ( webSite.matches( "(?s).*\\.178.com(?s).*" ) )
         //    siteID = Site.ONE_SEVEN_EIGHT;
         else if ( webSite.matches( "(?s).*\\.8comic.com(?s).*" ) ||
@@ -225,10 +227,12 @@ public class ParseWebPage
         {
             siteID = Site.TUKU;
         }
+        /*
         else if ( webSite.matches( "(?s).*hhcomic.com(?s).*" ) || webSite.matches( "(?s).*3348.net(?s).*" ) )
         {
             siteID = Site.HH;
         }
+        */
         else if ( webSite.matches( "(?s).*iask.sina.com(?s).*" ) )
         {
             siteID = Site.IASK;
@@ -262,10 +266,12 @@ public class ParseWebPage
         {
             siteID = Site.WENKU;
         }
+        /*
         else if ( webSite.matches( "(?s).*fumanhua.com(?s).*" ) )
         {
             siteID = Site.FUMANHUA;
         }
+        */
         else if ( webSite.matches( "(?s).*6manga.com(?s).*" ) )
         {
             siteID = Site.SIX_MANGA;

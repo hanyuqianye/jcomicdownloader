@@ -414,21 +414,21 @@ class Parse99MangaTC extends Parse99ComicTC
     public String getAllPageString( String urlString )
     {
         String indexName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_", "html" );
-        String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_encode_", "html" );
+        //String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_99_encode_", "html" );
 
         System.out.println( "URL: " + urlString );
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
 
-        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Zhcode.GBK );
-        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
+        //Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Zhcode.GBK );
+        return Common.getFileString( SetUp.getTempDirectory(), indexName );
 
     }
 
     @Override // 從網址判斷是否為單集頁面(true) 還是主頁面(false)
     public boolean isSingleVolumePage( String urlString )
     {
-        // ex. http://dm.99manga.com/page/11843m98671/
-        if ( urlString.matches( "(?s).*/page/(?s).*" ) )
+        // ex. http://dm.99manga.com/comic/19866/139139/
+        if ( urlString.matches( "(?s).*/comic/\\d+/\\d+/" ) )
         {
             return true;
         }
@@ -443,10 +443,9 @@ class Parse99MangaTC extends Parse99ComicTC
     {
         Common.debugPrintln( "開始由主頁面位址取得title：" );
 
-        int beginIndex = allPageString.indexOf( "<img src=\"http" );
-        beginIndex = allPageString.indexOf( "alt=", beginIndex );
-        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "\"", beginIndex );
+        int beginIndex = allPageString.indexOf( "wumiiTitle" );
+        beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "'", beginIndex );
 
         String tempString = allPageString.substring( beginIndex, endIndex );
 
@@ -461,21 +460,21 @@ class Parse99MangaTC extends Parse99ComicTC
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
-        int beginIndex = allPageString.indexOf( "class=\"vol" );
-        int endIndex = allPageString.indexOf( "class=\"replo", beginIndex );
+        int beginIndex = allPageString.indexOf( "class=\"cVol" );
+        int endIndex = allPageString.indexOf( "class=\"cBadge", beginIndex );
 
-        String tempString = allPageString.substring( beginIndex, endIndex );
+         String tempString = allPageString.substring( beginIndex, endIndex );
 
-        totalVolume = tempString.split( "href=/page/" ).length - 1;
+        totalVolume = tempString.split( "href='http:" ).length - 1;
 
         beginIndex = endIndex = 0;
         for ( int count = 0; count < totalVolume; count++ )
         {
 
-            beginIndex = tempString.indexOf( "href=/page/", beginIndex );
-            beginIndex = tempString.indexOf( "=", beginIndex ) + 1;
-            endIndex = tempString.indexOf( " ", beginIndex );
-            urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
+            beginIndex = tempString.indexOf( "href='http:", beginIndex );
+            beginIndex = tempString.indexOf( "'", beginIndex ) + 1;
+            endIndex = tempString.indexOf( "'", beginIndex );
+            urlList.add( tempString.substring( beginIndex, endIndex ) );
 
             beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
             endIndex = tempString.indexOf( "<", beginIndex );

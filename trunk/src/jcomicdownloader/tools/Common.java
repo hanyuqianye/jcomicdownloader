@@ -1111,7 +1111,7 @@ public class Common
         }
         else
         {
-            Common.errorReport( "沒有找到" + filePath + fileName + "此一檔案" );
+            Common.debugPrintln( "沒有找到" + filePath + fileName + "此一檔案" );
         }
 
         return sb.toString();

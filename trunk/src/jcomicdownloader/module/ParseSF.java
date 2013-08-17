@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2011/12/3
+Last Modified : 2013/8/17
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+* 5.18: 修復SFacg最新集數無法解析的問題。
  *  2.02: 1. 新增對www.sky-fire.com的支援。
 ----------------------------------------------------------------------------------------------------
  */
@@ -179,6 +180,12 @@ public class ParseSF extends ParseOnlineComicSite {
             // 取得單集名稱
             beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
             endIndex = tempString.indexOf( "<", beginIndex );
+            if ( beginIndex == endIndex )
+            {
+                beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
+                endIndex = tempString.indexOf( "<", beginIndex );
+            }
+            
             volumeTitle = tempString.substring( beginIndex, endIndex );
 
             volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
