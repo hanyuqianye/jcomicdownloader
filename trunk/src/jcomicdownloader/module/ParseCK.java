@@ -2,7 +2,7 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/8/14
+ Last Modified : 2013/8/19
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
  5.18: 修復ck101解析失敗的問題。
@@ -223,52 +223,27 @@ public class ParseCK extends ParseOnlineComicSite
         List<String> volumeList = new ArrayList<String>();
 
         String tempString = "";
-        int lastPage = 1;
+        int lastPage = 0;
         int beginIndex, endIndex;
         
-        beginIndex = allPageString.indexOf( "class=\"pagination" );
         
-        // 存在好幾頁
-        if ( beginIndex > 0 )
-        {
-            endIndex = allPageString.indexOf( "</a></div>", beginIndex );
-            tempString = allPageString.substring( beginIndex, endIndex );
-            
-            // 首先取得最後一頁編號
-            
-            int tempPage = 0;
-            int count = tempString.split( "href=" ).length - 2;
-            
-            //Common.debugPrintln( count + " : "+ tempString );
-            
-            beginIndex = endIndex = 0;
-            for ( int i = 0; i < count; i ++ )
-            {
-                beginIndex = tempString.indexOf( "href=", beginIndex );
-                beginIndex = tempString.indexOf( ">", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "</a", beginIndex );
-                tempPage = Integer.parseInt( tempString.substring( beginIndex, endIndex ).trim() );
-                Common.debugPrintln( tempPage + "_" );
-                if ( tempPage > lastPage )
-                {
-                    lastPage = tempPage;
-                }
-            }
-        }
-        
-        Common.debugPrintln( "   共有 " + lastPage + " 張目錄頁" );
         
         // 接著在迴圈內下載每一頁, 取得每一集資訊
         int totalVolumeCount = 0;
         String pageURL = urlString;
-        for ( int i = 0; i < lastPage ; i ++ )
+        
+        while ( true )
         {
-            if ( i > 0 )
+            if ( lastPage++ > 0 )
             {
-                pageURL = urlString + "0/0/" + i;
+                pageURL = urlString + "0/0/" + lastPage;
             }
             
             allPageString = getAllPageString( pageURL );
+            
+            // 代表此頁已經沒有集數了。
+            if ( allPageString.indexOf( "title=\"\"><img src=\"\"" ) > 0 )
+                break;
             
             // 取得存放一整頁面集數資訊
             beginIndex = allPageString.indexOf( "class=\"list\"" );
@@ -301,95 +276,8 @@ public class ParseCK extends ParseOnlineComicSite
 
             }
         }
-
-        /*
-        beginIndex = allPageString.indexOf( "class=\"list\"" );
-        beginIndex = allPageString.indexOf( "class=\"relativeRec", beginIndex );
         
-        endIndex = allPageString.indexOf( "</div>", beginIndex );
-        // 存放一整頁面集數資訊的字串
-        tempString = allPageString.substring( beginIndex, endIndex );
-
-        String[] pageStrings = tempString.split( "\"" );
-
-        String lastPageURL = "";
-
-        for ( int i = 0; i < pageStrings.length - 2; i++ )
-        {
-            if ( pageStrings[i].matches( ".* href=.*" )
-                    && !pageStrings[i + 2].matches( "(?s).*title=(?s).*" ) )
-            {
-                lastPageURL = baseURL + pageStrings[i + 1];
-            }
-        }
-
-        beginIndex = lastPageURL.lastIndexOf( "/" ) + 1;
-        endIndex = lastPageURL.length();
-        // ex. http://comic.ck101.com/comic/170/0/0/14 -> 14
-        int lastPage;
-
-        if ( tempString.matches( "(?s).*href=(?s).*" ) )
-        {
-            lastPage = Integer.parseInt( lastPageURL.substring( beginIndex, endIndex ) );
-        }
-        else
-        {
-            lastPage = 1;
-        }
-
-        // ex. http://comic.ck101.com/comic/170/0/0/2
-        String basePageURL = lastPageURL.substring( 0, beginIndex );
-
-        Common.debugPrint( "基本頁數位址: " + basePageURL );
-        Common.debugPrintln( "   共有 " + lastPage + " 頁" );
-
-        int totalVolumeCount = 0; // 每一頁加總起來的集數總量
-
-        int p = 2;
-        while ( true )
-        {
-            beginIndex = allPageString.indexOf( "class=\"case\"" ) + 1;
-            endIndex = allPageString.indexOf( "</div>", beginIndex );
-
-            // 存放集數頁面資訊的字串
-            tempString = allPageString.substring( beginIndex, endIndex );
-
-            int volumeCount = tempString.split( "<h3>" ).length - 1; // 單一頁面的集數
-            totalVolumeCount += volumeCount;
-
-            String volumeTitle = "";
-            beginIndex = endIndex = 0;
-            for ( int i = 0; i < volumeCount; i++ )
-            {
-                // 取得單集位址
-                beginIndex = tempString.indexOf( "<h3>", beginIndex );
-                beginIndex = tempString.indexOf( "href=", beginIndex );
-                beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "\"", beginIndex );
-                urlList.add( tempString.substring( beginIndex, endIndex ) );
-
-                // 取得單集名稱
-                beginIndex = tempString.indexOf( "title=", beginIndex );
-                beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
-                endIndex = tempString.indexOf( "\"", beginIndex );
-                volumeTitle = tempString.substring( beginIndex, endIndex );
-
-                volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
-                        Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
-
-            }
-
-            if ( p <= lastPage )
-            {
-                allPageString = getAllPageString( basePageURL + p );
-                p++;
-            }
-            else
-            {
-                break;
-            }
-        }
-        */
+        Common.debugPrintln( "   共有 " + ( lastPage - 1 ) + " 張目錄頁" );
         
         totalVolume = totalVolumeCount;
         Common.debugPrintln( "共有" + totalVolume + "集" );

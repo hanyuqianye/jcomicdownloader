@@ -4,7 +4,7 @@
  Program Name : JComicDownloader
  Authors  : surveyorK
  Version  : v5.18
- Last Modified : 2013/8/17
+ Last Modified : 2013/8/19
  ----------------------------------------------------------------------------------------------------
  * 
  * ChangeLog:
