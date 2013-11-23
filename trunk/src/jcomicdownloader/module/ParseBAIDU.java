@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/12/11
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+5.19: 修復baidu無法下載原始圖片的問題。
       5.02: 修復baidu下載錯誤的問題。
      5.01: 修復baidu因改版而解析錯誤的問題。
 *   4.16: 1. 修復baidu因網站改版而下載不完全的問題。
@@ -148,6 +149,19 @@ public class ParseBAIDU extends ParseOnlineComicSite {
             }
 
             String[] comicURL = tempComicURL.split( "####" );
+            
+            
+            // get the orginial image
+            String originalBaseURL = "http://imgsrc.baidu.com/forum/pic/item/";
+            for ( int k = 0; k < comicURL.length; k ++ )
+            {
+                String fileName = comicURL[k].split( "/" )[comicURL[k].split( "/" ).length - 1];
+                comicURL[k] = originalBaseURL + fileName;
+                //Common.debugPrintln( k + ": " + comicURL[k] );
+            }
+            
+            //System.exit( 0 );
+            
             Common.debugPrintln( "此頁面解析得" + comicURL.length + "張圖" );
             int tempTotalPage = comicURL.length + pageCount;
             for ( int j = 0 ; j < comicURL.length && Run.isAlive; j++ ) {
@@ -162,7 +176,7 @@ public class ParseBAIDU extends ParseOnlineComicSite {
             Common.debugPrintln( "目前共下載" + pageCount + "頁" );
             tempComicURL = ""; // 歸零，讓下一頁使用
 
-            //System.out.println( "TEMP_URL: " + tempComicURL ); // debug
+            System.out.println( "TEMP_URL: " + tempComicURL ); // debug
         }
 
         comicURL = tempComicURL.split( "####" );

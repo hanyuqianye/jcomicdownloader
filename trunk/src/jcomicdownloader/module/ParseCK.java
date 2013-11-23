@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2013/8/19
+ Last Modified : 2013/11/23
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+ 5.19: 修復ck101解析失敗的問題。
  5.18: 修復ck101解析失敗的問題。
  5.16: 修復ck101無法下載的問題。
  5.13: 修復ck101解析錯誤的問題。
@@ -226,7 +227,7 @@ public class ParseCK extends ParseOnlineComicSite
         int lastPage = 0;
         int beginIndex, endIndex;
         
-        
+        urlString = urlString.split( "0/0/" )[0];
         
         // 接著在迴圈內下載每一頁, 取得每一集資訊
         int totalVolumeCount = 0;
@@ -241,19 +242,24 @@ public class ParseCK extends ParseOnlineComicSite
             
             allPageString = getAllPageString( pageURL );
             
+            beginIndex = allPageString.indexOf( "class=\"comicBox\"" );
+            endIndex = allPageString.indexOf( "class=\"fbComment\"", beginIndex );
+            tempString = allPageString.substring( beginIndex, endIndex ); 
+            
             // 代表此頁已經沒有集數了。
-            if ( allPageString.indexOf( "title=\"\"><img src=\"\"" ) > 0 )
+            if ( tempString.indexOf( "class=\"recTitle\"" ) < 0 )
                 break;
             
             // 取得存放一整頁面集數資訊
-            beginIndex = allPageString.indexOf( "class=\"list\"" );
+            beginIndex = allPageString.indexOf( "class=\"comicBox\"" );
             beginIndex = allPageString.indexOf( "class=\"relativeRec", beginIndex );
             endIndex = allPageString.indexOf( "</div>", beginIndex );
             tempString = allPageString.substring( beginIndex, endIndex ); 
 
-            int volumeCount = tempString.split( "<h3" ).length; // 單一頁面的集數
+            int volumeCount = tempString.split( "<h3" ).length - 1; // 單一頁面的集數
             totalVolumeCount += volumeCount;
 
+            String volumeURL = "";
             String volumeTitle = "";
             beginIndex = endIndex = 0;
             for ( int j = 0; j < volumeCount; j++ )
@@ -263,6 +269,7 @@ public class ParseCK extends ParseOnlineComicSite
                 beginIndex = tempString.indexOf( "href=", beginIndex );
                 beginIndex = tempString.indexOf( "\"", beginIndex ) + 1;
                 endIndex = tempString.indexOf( "\"", beginIndex );
+                volumeURL = baseURL + tempString.substring( beginIndex, endIndex );
                 urlList.add( baseURL + tempString.substring( beginIndex, endIndex ) );
 
                 // 取得單集名稱
@@ -273,6 +280,8 @@ public class ParseCK extends ParseOnlineComicSite
 
                 volumeList.add( getVolumeWithFormatNumber( Common.getStringRemovedIllegalChar(
                         Common.getTraditionalChinese( volumeTitle.trim() ) ) ) );
+                
+                Common.debugPrintln( volumeURL + " : " + volumeTitle );
 
             }
         }

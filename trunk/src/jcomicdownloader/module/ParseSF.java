@@ -2,9 +2,10 @@
 ----------------------------------------------------------------------------------------------------
 Program Name : JComicDownloader
 Authors  : surveyorK
-Last Modified : 2013/8/17
+Last Modified : 2013/11/23
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+5.19: 修復SFacg無法解析的問題。
 * 5.18: 修復SFacg最新集數無法解析的問題。
  *  2.02: 1. 新增對www.sky-fire.com的支援。
 ----------------------------------------------------------------------------------------------------
@@ -23,6 +24,8 @@ public class ParseSF extends ParseOnlineComicSite {
     protected String indexName;
     protected String indexEncodeName;
     protected String baseURL;
+    
+    private String pageBaseURL;
 
     /**
      *
@@ -38,6 +41,8 @@ public class ParseSF extends ParseOnlineComicSite {
         radixNumber = 159371; // default value, not always be useful!!
 
         baseURL = "http://coldpic.sfacg.com";
+        
+        pageBaseURL = "http://comic.sfacg.com/";
     }
 
     public ParseSF( String webSite, String titleName ) {
@@ -76,33 +81,33 @@ public class ParseSF extends ParseOnlineComicSite {
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        // 取得js位址
+        // 取得js位址 (the 2nd script url)
         int beginIndex = allPageString.indexOf( "src=\"" ) + 1;
         beginIndex = allPageString.indexOf( "src=\"", beginIndex ) + 5;
         int endIndex = allPageString.indexOf( "\"", beginIndex );
         
-        String jsBaseURL = webSite.substring( 0, webSite.indexOf( "/AllComic/" ) );
+        String jsBaseURL = pageBaseURL;
         String jsURL = jsBaseURL + allPageString.substring( beginIndex, endIndex );
         Common.debugPrintln( "JS檔位址：" + jsURL );
         
         // 取得js檔內容
         allPageString = getAllPageString( jsURL );
         
-        beginIndex = allPageString.indexOf( "Array()" );
+        beginIndex = 0;
         String tempString = allPageString.substring( beginIndex, allPageString.length() );
+        
+        String[] tokens = tempString.split( ";picAy" );
 
-        totalPage = tempString.split( "http://" ).length - 1;
+        totalPage = tokens.length - 1;
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
-
-        String[] urlTokens = tempString.split( "\"" );
         
         int p = 0; // 目前頁數
-        for ( int i = 0 ; i < urlTokens.length && Run.isAlive; i++ ) {
-            if ( urlTokens[i].matches( "http://(?s).*" ) ) {
-                comicURL[p++] = urlTokens[i]; // 存入每一頁的網頁網址
-                //Common.debugPrintln( p + " " + comicURL[p-1]  ); // debug
-            }
+        for ( int i = 0 ; i < totalPage && Run.isAlive; i++ ) {
+            beginIndex = tokens[i+1].indexOf( "\"" ) + 1;
+            endIndex = tokens[i+1].indexOf( "\"", beginIndex );
+            comicURL[p++] = baseURL + tokens[i+1].substring( beginIndex, endIndex );
+            //Common.debugPrintln( p + " " + comicURL[p-1]  ); // debug
         }
 
         //System.exit( 0 ); // debug
@@ -120,7 +125,7 @@ public class ParseSF extends ParseOnlineComicSite {
     @Override
     public boolean isSingleVolumePage( String urlString ) {
         // ex. http://coldpic.sfacg.com/AllComic/554/030/
-        if ( urlString.matches( "(?).*/AllComic/(?).*" ) ) {
+        if ( Common.getAmountOfString( urlString, "/" ) > 5 ) {
             return true;
         } else {
             return false;
@@ -133,8 +138,8 @@ public class ParseSF extends ParseOnlineComicSite {
 
         String allPageString = getAllPageString( volumeURL );
 
-        int beginIndex = allPageString.indexOf( "http://comic.sfacg.com/" ) + 1;
-        beginIndex = allPageString.indexOf( "http://comic.sfacg.com/", beginIndex );
+        int beginIndex = allPageString.indexOf( pageBaseURL ) + 1;
+        beginIndex = allPageString.indexOf( pageBaseURL, beginIndex );
         int endIndex = allPageString.indexOf( "\"", beginIndex );
         String mainPageURL = allPageString.substring( beginIndex, endIndex );
 
@@ -175,7 +180,7 @@ public class ParseSF extends ParseOnlineComicSite {
             // 取得單集位址
             beginIndex = tempString.indexOf( "href=\"", beginIndex ) + 6;
             endIndex = tempString.indexOf( "\"", beginIndex );
-            urlList.add( tempString.substring( beginIndex, endIndex ) );
+            urlList.add( pageBaseURL + tempString.substring( beginIndex, endIndex ) );
 
             // 取得單集名稱
             beginIndex = tempString.indexOf( ">", beginIndex ) + 1;

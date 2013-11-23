@@ -3,11 +3,18 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Version  : v5.18
- Last Modified : 2013/8/19
+ Version  : v5.19
+ Last Modified : 2013/11/23
  ----------------------------------------------------------------------------------------------------
  * 
  * ChangeLog:
+ 5.19:
+ 1. 修復baidu無法下載原始圖片的問題。
+ 2. 修復SFacg解析失敗的問題。
+ 3. 修復nanadm解析失敗的問題。
+ 4. 修復6manga解析失敗的問題。
+ 5. 修復ck101解析失敗的問題。
+
  5.18:
  1. 修復ck101解析失敗的問題。
  2. 修復sfacg最新集數無法解析的問題。
@@ -549,7 +556,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
     private Run mainRun;
     private int nowDownloadMissionRow; // 目前正在進行下載的任務列的順序
     Dimension frameDimension;
-    public static String versionString = "JComicDownloader  v5.18";
+    public static String versionString = "JComicDownloader  v5.19";
 
     public ComicDownGUI()
     {
@@ -3950,13 +3957,12 @@ public class ComicDownGUI extends JFrame implements ActionListener,
 
                 Run.isAlive = true;
 
-                String picURL = "http://pics16.yamedia.tw/27/userfile/j/jojo945/album/14c6533d8cd82b.jpg";
-                String pageURL = "http://www.dm5.com/m112455/";
+                String picURL = "http://6manga.com/comics/11/08/30/16/42344001.jpg";
+                String pageURL = "http://6manga.com/comics/11/08/30/16/42344001.jpg";
                 String testURL = "http://www.fumanhua.com/images/pic_loading.gif";
 
-                String referURL = "ComicHistoryitem_zh=;";
-                String cookie = "ComicHistoryitem_zh=; Hm_lvt_fa0ea664baca46780244c3019bbfa951=1376689828; DM5_MACHINEKEY=8f79d496-a9fa-4889-8561-2f1928a04f13; __utma=1.1943509593.1376689828.1376689828.1376689828.1; __utmb=1.3.10.1376689828; __utmc=1; __utmz=1.1376689828.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); Hm_lpvt_fa0ea664baca46780244c3019bbfa951=1376690074; CNZZDATA30080616=cnzz_eid%3D647303098-1376689828-http%253A%252F%252Fwww.dm5.com%26ntime%3D1376689828%26cnzz_a%3D2%26retime%3D1376690074103%26sin%3D%26ltime%3D1376690074103%26rtime%3D0; CNZZDATA30080054=cnzz_eid%3D1219553196-1376689828-http%253A%252F%252Fwww.dm5.com%26ntime%3D1376689828%26cnzz_a%3D2%26retime%3D1376690074110%26sin%3D%26ltime%3D1376690074110%26rtime%3D0; bdshare_firstime=1376689828842; ftcpvrich_fidx=1; cs_idx=2; dm5popwin=1";
-                //cookie = Common.getCookieString( pageURL );
+                String referURL = "http://6manga.com/page/comics/7/0/418_ibitsu.html";
+                String cookie = "";
                 String postString = "";
                 //pageURL = Common.getFixedChineseURL( pageURL );
 
@@ -3968,7 +3974,7 @@ public class ComicDownGUI extends JFrame implements ActionListener,
                 //Common.simpleDownloadFile( picURL, "", "test.jpg", cookie, referURL );
                 //Common.downloadGZIPInputStreamFile( testURL, SetUp.getTempDirectory(), "test.ext", false, "" );
 
-                Common.simpleDownloadFile( pageURL, "", "test2.html", cookie, pageURL );
+                Common.simpleDownloadFile( picURL, "", "test2.jpg", cookie, referURL );
                 //Common.downloadFile( picURL, "", "test.jpg", false, "", referURL );
                 
                 //Common.downloadPost( testURL, "", "test.jpg", true, cookie, "", "" );
