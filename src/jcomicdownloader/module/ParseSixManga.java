@@ -2,9 +2,10 @@
  ----------------------------------------------------------------------------------------------------
  Program Name : JComicDownloader
  Authors  : surveyorK
- Last Modified : 2012/12/30
+ Last Modified : 2013/11/23
  ----------------------------------------------------------------------------------------------------
  ChangeLog:
+5.19:  修復6manga無法下載的問題。
  5.13: 修復6manga無法下載的問題。
  *  4.01: 1. 新增對6manga.com的支援。
  ----------------------------------------------------------------------------------------------------
@@ -56,7 +57,7 @@ public class ParseSixManga extends ParseOnlineComicSite {
 
         Common.debugPrintln( "開始解析title和wholeTitle :" );
         Common.downloadFile( webSite, SetUp.getTempDirectory(), indexName, false, "" );
-Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.BIG5 );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.BIG5 );
         
         if ( getWholeTitle() == null || getWholeTitle().equals( "" ) ) {
             String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
@@ -80,49 +81,43 @@ Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Enco
         String allPageString = Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
         Common.debugPrint( "開始解析這一集有幾頁 : " );
 
-        int beginIndex = allPageString.indexOf( "initpage" );
-        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "\"", beginIndex );
+        int beginIndex = allPageString.indexOf( "var pic=" );
+        beginIndex = allPageString.indexOf( "'", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "/", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( "/", beginIndex ) + 1;
+        endIndex = allPageString.indexOf( "/", beginIndex ) + 1;
+        String path = allPageString.substring( beginIndex, endIndex );
+        
+        endIndex = allPageString.indexOf( "'", beginIndex );
         String tempString = allPageString.substring( beginIndex, endIndex );
+        
+        String[] tokens = tempString.split( path );
 
-        totalPage = Integer.parseInt( tempString );
+        totalPage = tokens.length - 1;
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
+        
+        //http://6manga.com/comics/13/03/21/02/05452001.jpg
+        //http://img4.6manga.com/13/03/21/02/05452001.jpg
 
-        // 開始解析第一張圖片網址
-        beginIndex = allPageString.indexOf( "id=\"TheImg\"" );
-        beginIndex = allPageString.indexOf( "src=", beginIndex );
-        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
-        endIndex = allPageString.indexOf( "\"", beginIndex );
-        String firstPicURL = baseURL + allPageString.substring( beginIndex, endIndex );
-        Common.debugPrintln( "第一張圖片位址：" + firstPicURL );
-        
-        // 取得圖片副檔名
-        beginIndex = firstPicURL.lastIndexOf( "." ) + 1;
-        String extension = firstPicURL.substring( beginIndex, firstPicURL.length() );
-        Common.debugPrintln( "圖片副檔名：" + extension );
-        
-        NumberFormat formatter = new DecimalFormat( Common.getZero() );
-        
-        
-        beginIndex = endIndex = 0;
-        String picURL = firstPicURL;
-        for ( int p = 0; p < totalPage && Run.isAlive; p++ ) {
-            String nowFileName = formatter.format( p + 1 ) + "." + extension;
-            String nextFileName = formatter.format( p + 2 ) + "." + extension;
+        // 開始解析圖片網址
+        String picBaseURL = "http://6manga.com/comics/";
+        for ( int p = 0; p < totalPage && Run.isAlive; p ++ )
+        {
+            comicURL[p] = Common.getFixedChineseURL( picBaseURL + path + tokens[p+1] + ".jpg" );
             
             if ( !Common.existPicFile( getDownloadDirectory(), p + 1 ) || 
                  !Common.existPicFile( getDownloadDirectory(), p + 2 ) ) {
                 
-                comicURL[p] = Common.getFixedChineseURL( picURL );
                 //Common.debugPrintln( ( p + 1 ) + " " + comicURL[p] ); // debug
 
                 // 每解析一個網址就下載一張圖
-                singlePageDownload( getTitle(), getWholeTitle(), comicURL[p], totalPage, p + 1, 0 );
+                //singlePageDownload( getTitle(), getWholeTitle(), comicURL[p], totalPage, p + 1, 0 );
+                singlePageDownloadUsingSimple( getTitle(), getWholeTitle(), comicURL[p], totalPage, p + 1, "", webSite );
             }
-            picURL = picURL.replaceAll( nowFileName, nextFileName ); // 換下一張
+            //System.exit( 0 );
         }
-
+        
         //System.exit( 0 ); // debug
     }
 
@@ -139,8 +134,8 @@ Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Enco
 
    @Override
     public boolean isSingleVolumePage( String urlString ) {
-        // ex. http://6manga.com/page/comics/5/9/646/_lovely_supergirls_league.html
-        if ( Common.getAmountOfString( urlString, "/" ) > 7 ) {
+        // ex.  http://6manga.com/page/comics/7/0/418_ibitsu.html
+        if ( Common.getAmountOfString( urlString, "/" ) > 6 ) {
             return true;
         }
         else {

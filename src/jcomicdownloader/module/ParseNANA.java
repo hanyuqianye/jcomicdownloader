@@ -5,6 +5,7 @@ Authors  : surveyorK
 Last Modified : 2011/11/2
 ----------------------------------------------------------------------------------------------------
 ChangeLog:
+5.19: 修復nanadm無法下載的問題。
     3.03: 1. 修復nanadm無法下載的問題。
     2.01: 1. 修復無法解析粗體字集數名稱的bug。
     2.0 : 1. 新增新增對www.nanadm.com的支援。
@@ -82,26 +83,15 @@ public class ParseNANA extends ParseOnlineComicSite {
 
         int beginIndex, endIndex;
 
-        if ( webSite.matches( "(?s).*\\.html(?s).*" ) ) {
-            beginIndex = allPageString.indexOf( "class=\"pagelist\"" );
-            beginIndex = allPageString.indexOf( "|", beginIndex );
-            beginIndex = allPageString.indexOf( ": ", beginIndex ) + 1;
-            endIndex = allPageString.indexOf( "页", beginIndex );
-            String tempString = allPageString.substring( beginIndex, endIndex ).trim();
-            totalPage = Integer.parseInt( tempString ) - 1; // 因為網頁騙人，少一頁....
-        }
-        else {
-            // 這種情形會把每一頁的位址都存在頁面中
-            totalPage = allPageString.split( "view.php" ).length - 1;
-        }
+        totalPage = allPageString.split( "</option>" ).length - 1;
 
         Common.debugPrintln( "共 " + totalPage + " 頁" );
         comicURL = new String[totalPage];
 
         // 開始取得第一頁網址 
         
-        beginIndex = allPageString.indexOf( "<li " );
-        beginIndex = allPageString.indexOf( "src=\"", beginIndex ) + 5;
+        beginIndex = allPageString.indexOf( "<img src=\"http" );
+        beginIndex = allPageString.indexOf( "http", beginIndex );
         endIndex = allPageString.indexOf( "\"", beginIndex );
         String firstPageURL = Common.getFixedChineseURL( allPageString.substring( beginIndex, endIndex ) );
 

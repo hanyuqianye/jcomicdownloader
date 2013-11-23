@@ -51,7 +51,7 @@ public class ParseXXBH extends ParseOnlineComicSite
         jsName = "index_xxbh.js";
         radixNumber = 1591371; // default value, not always be useful!!
 
-        baseURL = "http://comic.xxbh.net";
+        baseURL = "http://xxbh.net";
     }
 
     public ParseXXBH( String webSite, String titleName )
@@ -332,16 +332,16 @@ public String getDecodeJS( String data )
         //String indexEncodeName = Common.getStoredFileName( SetUp.getTempDirectory(), "index_xxbh_encode_", "html" );
 
         Common.downloadFile( urlString, SetUp.getTempDirectory(), indexName, false, "" );
-        //Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
+        Common.newEncodeFile( SetUp.getTempDirectory(), indexName, indexEncodeName, Encoding.GB2312 );
 
-        return Common.getFileString( SetUp.getTempDirectory(), indexName );
+        return Common.getFileString( SetUp.getTempDirectory(), indexEncodeName );
     }
 
     @Override
     public boolean isSingleVolumePage( String urlString )
     {
         // ex. http://comic.xxbh.net/201205/223578.html
-        if ( Common.getAmountOfString( urlString, "/" ) > 3 )
+        if ( Common.getAmountOfString( urlString, "/" ) > 4 )
         {
             return true;
         }
@@ -379,9 +379,10 @@ public String getDecodeJS( String data )
     @Override
     public String getTitleOnMainPage( String urlString, String allPageString )
     {
-        int beginIndex = allPageString.indexOf( "<h1>" );
-        beginIndex = allPageString.indexOf( ">", beginIndex ) + 1;
-        int endIndex = allPageString.indexOf( "</h1>", beginIndex );
+        int beginIndex = allPageString.indexOf( "class=\"l21\"" );
+        beginIndex = allPageString.indexOf( "alt=", beginIndex );
+        beginIndex = allPageString.indexOf( "\"", beginIndex ) + 1;
+        int endIndex = allPageString.indexOf( "\"", beginIndex );
         String title = allPageString.substring( beginIndex, endIndex ).trim();
 
         return Common.getStringRemovedIllegalChar( Common.getTraditionalChinese( title ) );
@@ -396,8 +397,8 @@ public String getDecodeJS( String data )
         List<String> urlList = new ArrayList<String>();
         List<String> volumeList = new ArrayList<String>();
 
-        int beginIndex = allPageString.indexOf( "class=\"ar_list_col\"" );
-        int endIndex = allPageString.indexOf( "class=\"ass_list\"", beginIndex );
+        int beginIndex = allPageString.indexOf( "class=\"b-d-div\"" );
+        int endIndex = allPageString.indexOf( "</div>", beginIndex );
 
         String tempString = allPageString.substring( beginIndex, endIndex );
 
